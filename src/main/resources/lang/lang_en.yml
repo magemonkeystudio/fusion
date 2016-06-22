@@ -1,0 +1,27 @@
+gui:
+  learned:
+    'true': "&3Learned: &ayes"
+    'false': "&3Learned: &cno"
+  ingredient:
+    'true': "&a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.customItem.displayName>"
+    'false': "&c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.customItem.displayName>"
+  money:
+    'true': "&3Cost: &a$<player.money>&8/&7$<recipe.price>"
+    'false': "&3Cost: &c$<player.money>&8/&7$<recipe.price>"
+  canCraft:
+    'true': "&aYou can craft this item."
+    'false': "&cYou can't craft this item."
+# noMoney: "&cYou don't have needed amount of money/toknes/items."
+noPermissions: "&cYou don't have permissions!"
+notAPlayer:  "&cCan't find player named: $<name>!"
+notANumber: "&c\"$<text>\" it's not a number!"
+notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"
+useConfirm: false
+useConfirmOther: "&7You opened Crafting Inventory &8\"&3$<craftingInventory.name>&8\"&7 for player: &3$<player:target.name>&7."
+reload: "&7Reloaded settings!"
+help: |2-
+  You typed: &7$<text>&r
+    Valid syntax:
+      &8/&7craft &ruse &8<&7crafting&8>
+      &8/&7craft &ruse &8<&7crafting&8> <&7nickname&8>
+      &8/&7craft &rreload
