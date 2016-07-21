@@ -1,13 +1,13 @@
-package com.gotofinal.darkrise.gui;
+package com.gotofinal.darkrise.crafting.gui;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.gotofinal.darkrise.DarkRiseCrafting;
-import com.gotofinal.darkrise.InventoryPattern;
-import com.gotofinal.darkrise.gui.slot.Slot;
+import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.InventoryPattern;
+import com.gotofinal.darkrise.crafting.gui.slot.Slot;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

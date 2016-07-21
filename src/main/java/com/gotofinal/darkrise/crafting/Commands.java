@@ -1,8 +1,8 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
 
-import com.gotofinal.darkrise.cfg.Cfg;
-import com.gotofinal.darkrise.gui.CustomGUI;
+import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.messages.api.messages.Message.MessageData;
 
 import org.bukkit.Bukkit;
@@ -30,7 +30,7 @@ public class Commands implements CommandExecutor
                 final CustomGUI eq = Cfg.getGuiMap().get(args[1]);
                 if (eq == null)
                 {
-                    return instance.sendMessage("notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
+                    return instance.sendMessage("crafting.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
                 }
                 if (args.length == 3)
                 {
@@ -44,7 +44,7 @@ public class Commands implements CommandExecutor
                         return instance.sendMessage("notAPlayer", sender, new MessageData("name", args[2]), new MessageData("sender", sender));
                     }
                     eq.open(target);
-                    return instance.sendMessage("useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender), new MessageData("target", target));
+                    return instance.sendMessage("crafting.useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender), new MessageData("target", target));
                 }
                 else
                 {
@@ -55,11 +55,11 @@ public class Commands implements CommandExecutor
                             return true;
                         }
                         eq.open(Bukkit.getPlayer(((Player) sender).getUniqueId()));
-                        return instance.sendMessage("useConfirm", sender, new MessageData("craftingInventory", eq), new MessageData("player", sender));
+                        return instance.sendMessage("crafting.useConfirm", sender, new MessageData("craftingInventory", eq), new MessageData("player", sender));
                     }
                     else
                     {
-                        instance.sendMessage("help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                        instance.sendMessage("crafting.help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
             }
@@ -75,6 +75,6 @@ public class Commands implements CommandExecutor
             instance.reloadMessages();
             return instance.sendMessage("reload", sender, new MessageData("sender", sender));
         }
-        return instance.sendMessage("help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+        return instance.sendMessage("crafting.help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
     }
 }

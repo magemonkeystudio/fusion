@@ -1,13 +1,12 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
-import com.caversia.plugins.economy.model.CustomItem;
-import com.caversia.plugins.economy.persistence.ItemsRepository;
-
-import org.bukkit.inventory.ItemStack;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.economy.DarkRiseItem;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bukkit.inventory.ItemStack;
 
 public class RecipeItem
 {
@@ -30,21 +29,21 @@ public class RecipeItem
         return this.amount;
     }
 
-    public CustomItem asCustomItem()
+    public DarkRiseItem asRiseItem()
     {
-        return ItemsRepository.INSTANCE.getItem(this.itemName).orElse(null);
+        return DarkRiseEconomy.getInstance().getItems().getItemById(this.itemName);
     }
 
     public ItemStack getItemStack()
     {
-        final CustomItem customItem = this.asCustomItem();
+        final DarkRiseItem customItem = this.asRiseItem();
         if (customItem == null)
         {
             DarkRiseCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
             DarkRiseCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
             throw new NullPointerException("Can't find CustomItem named: " + this.itemName);
         }
-        return customItem.asItemStack(this.amount);
+        return customItem.getItem(this.amount);
     }
 
     public String toConfigString()
@@ -58,7 +57,8 @@ public class RecipeItem
         {
             final String[] srrs = StringUtils.split(str, ':');
             return new RecipeItem(srrs[0], Integer.parseInt(srrs[1]));
-        } catch (final Exception e)
+        }
+        catch (final Exception e)
         {
             DarkRiseCrafting.getInstance().error("Error on loading configuration of RecipeItem: " + str + ", exception: " + e.getMessage() + ", more in console.");
             throw new RuntimeException(e);

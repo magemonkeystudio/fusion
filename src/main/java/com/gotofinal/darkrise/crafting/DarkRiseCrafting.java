@@ -1,11 +1,11 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.cfg.Cfg;
-import com.gotofinal.darkrise.core.DarkRiseCore;
-import com.gotofinal.darkrise.core.DarkRisePlugin;
-import com.gotofinal.darkrise.gui.CustomGUI;
+import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.gui.CustomGUI;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.spigot.core.DarkRisePlugin;
+import com.gotofinal.messages.Init;
 import com.gotofinal.messages.api.chat.placeholder.PlaceholderType;
-import com.gotofinal.messages.main.bukkit.MessagesAPI;
 
 public class DarkRiseCrafting extends DarkRisePlugin
 {
@@ -26,11 +26,11 @@ public class DarkRiseCrafting extends DarkRisePlugin
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        RECIPE_ITEM.registerChild("customItem", DarkRiseCore.CUSTOM_ITEM, RecipeItem::asCustomItem);
-        RECIPE_ITEM.registerChild("item", MessagesAPI.ITEM, RecipeItem::getItemStack);
+        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.CUSTOM_ITEM, RecipeItem::asRiseItem);
+        RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
-        CALCULATED_RECIPE.registerChild("icon", MessagesAPI.ITEM, CalculatedRecipe::getIcon);
+        CALCULATED_RECIPE.registerChild("icon", Init.ITEM, CalculatedRecipe::getIcon);
     }
 
     private static DarkRiseCrafting instance;

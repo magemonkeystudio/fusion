@@ -17,6 +17,10 @@
             <groupId>com.gotofinal.darkrise</groupId>
             <artifactId>spigot-core-build</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.gotofinal.darkrise</groupId>
+            <artifactId>economy</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

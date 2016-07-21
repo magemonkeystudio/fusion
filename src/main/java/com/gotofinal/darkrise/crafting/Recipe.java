@@ -1,4 +1,4 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -8,18 +8,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.caversia.plugins.economy.model.CustomItem;
-import com.caversia.plugins.economy.persistence.ItemsRepository;
-import com.gotofinal.darkrise.core.Vault;
-import com.gotofinal.darkrise.core.utils.DeserializationWorker;
-import com.gotofinal.darkrise.core.utils.SerializationBuilder;
-
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import com.gotofinal.darkrise.spigot.core.Vault;
+import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
+import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.economy.DarkRiseItem;
+import com.gotofinal.darkrise.economy.DarkRiseItems;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import org.diorite.utils.collections.maps.CaseInsensitiveMap;
 
@@ -61,23 +61,23 @@ public class Recipe implements ConfigurationSerializable
         {
             return false;
         }
-        final ItemsRepository ir = ItemsRepository.INSTANCE;
-        final Map<String, Entry<CustomItem, Integer>> eqItems = new CaseInsensitiveMap<>(20);
+        DarkRiseItems ir = DarkRiseEconomy.getInstance().getItems();
+        final Map<String, Entry<DarkRiseItem, Integer>> eqItems = new CaseInsensitiveMap<>(20);
         for (final ItemStack item : items)
         {
-            final CustomItem customItem = ir.getItem(item).get();
-            eqItems.put(customItem.getName(), new SimpleEntry<>(customItem, item.getAmount()));
+            DarkRiseItem riseItem = ir.getItemByStack(item);
+            eqItems.put(riseItem.getId(), new SimpleEntry<>(riseItem, item.getAmount()));
         }
-        final Map<String, Entry<CustomItem, Integer>> localPattern = new CaseInsensitiveMap<>(20);
+        final Map<String, Entry<DarkRiseItem, Integer>> localPattern = new CaseInsensitiveMap<>(20);
         for (final RecipeItem recipeItem : this.pattern)
         {
-            localPattern.put(recipeItem.getItemName(), new SimpleEntry<>(recipeItem.asCustomItem(), recipeItem.getAmount()));
+            localPattern.put(recipeItem.getItemName(), new SimpleEntry<>(recipeItem.asRiseItem(), recipeItem.getAmount()));
         }
-        for (final Iterator<Entry<String, Entry<CustomItem, Integer>>> it = localPattern.entrySet().iterator(); it.hasNext(); )
+        for (final Iterator<Entry<String, Entry<DarkRiseItem, Integer>>> it = localPattern.entrySet().iterator(); it.hasNext(); )
         {
-            final Entry<String, Entry<CustomItem, Integer>> patternEntry = it.next();
-            final Entry<CustomItem, Integer> patternEntryData = patternEntry.getValue();
-            final Entry<CustomItem, Integer> eqEntry = eqItems.get(patternEntry.getKey());
+            final Entry<String, Entry<DarkRiseItem, Integer>> patternEntry = it.next();
+            final Entry<DarkRiseItem, Integer> patternEntryData = patternEntry.getValue();
+            final Entry<DarkRiseItem, Integer> eqEntry = eqItems.get(patternEntry.getKey());
             if (eqEntry == null)
             {
                 return false;

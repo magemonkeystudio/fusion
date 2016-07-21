@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package com.gotofinal.darkrise.gui.slot;
+package com.gotofinal.darkrise.crafting.gui.slot;
 
-import com.caversia.plugins.economy.persistence.ItemsRepository;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
@@ -72,8 +72,7 @@ public abstract class Slot
             {
                 return null;
             }
-            final ItemsRepository ir = ItemsRepository.INSTANCE;
-            return ir.getItem(item).isPresent() ? item : null;
+            return (DarkRiseEconomy.getItemsRegistry().getItemByStack(item) == null) ? null : item;
         }
     };
     public static final Slot BASE_RESULT_SLOT      = new Slot(SlotType.RESULT)

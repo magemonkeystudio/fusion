@@ -1,4 +1,4 @@
-package com.gotofinal.darkrise.gui;
+package com.gotofinal.darkrise.crafting.gui;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-import com.caversia.plugins.economy.model.CustomItem;
-import com.caversia.plugins.economy.persistence.ItemsRepository;
-import com.gotofinal.darkrise.CalculatedRecipe;
-import com.gotofinal.darkrise.CraftingTable;
-import com.gotofinal.darkrise.DarkRiseCrafting;
-import com.gotofinal.darkrise.Recipe;
-import com.gotofinal.darkrise.RecipeItem;
-import com.gotofinal.darkrise.cfg.Cfg;
-import com.gotofinal.darkrise.core.Vault;
-import com.gotofinal.darkrise.core.utils.ItemUtils;
-import com.gotofinal.darkrise.gui.slot.Slot;
+import com.gotofinal.darkrise.crafting.CalculatedRecipe;
+import com.gotofinal.darkrise.crafting.CraftingTable;
+import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.Recipe;
+import com.gotofinal.darkrise.crafting.RecipeItem;
+import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.spigot.core.Vault;
+import com.gotofinal.darkrise.spigot.core.utils.ItemUtils;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.economy.DarkRiseItem;
+import com.gotofinal.darkrise.economy.DarkRiseItems;
+import com.gotofinal.darkrise.crafting.gui.slot.Slot;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -98,7 +98,8 @@ public class PlayerCustomGUI implements Listener
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                 this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             this.inventory.clear();
             this.player.closeInventory();
@@ -108,7 +109,7 @@ public class PlayerCustomGUI implements Listener
 
     public static Collection<ItemStack> getPlayerItems(InventoryHolder player)
     {
-        final ItemsRepository ir = ItemsRepository.INSTANCE;
+        DarkRiseItems itemsRegistry = DarkRiseEconomy.getItemsRegistry();
         final ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
         final List<ItemStack> result = new ArrayList<>(contents.length);
         for (final ItemStack content : contents)
@@ -117,8 +118,8 @@ public class PlayerCustomGUI implements Listener
             {
                 continue;
             }
-            final Optional<CustomItem> item = ir.getItem(content);
-            if (! item.isPresent())
+            DarkRiseItem item = itemsRegistry.getItemByStack(content);
+            if (item == null)
             {
                 continue;
             }
@@ -151,7 +152,8 @@ public class PlayerCustomGUI implements Listener
             final PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv);
             playerCustomGUI.reloadRecipesTask();
             return playerCustomGUI;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             if (inv != null)
             {

@@ -1,4 +1,4 @@
-package com.gotofinal.darkrise.cfg;
+package com.gotofinal.darkrise.crafting.cfg;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.gotofinal.darkrise.CraftingTable;
-import com.gotofinal.darkrise.DarkRiseCrafting;
-import com.gotofinal.darkrise.InventoryPattern;
-import com.gotofinal.darkrise.Recipe;
-import com.gotofinal.darkrise.RecipeItem;
-import com.gotofinal.darkrise.core.utils.item.ItemBuilder;
-import com.gotofinal.darkrise.core.utils.item.ItemColors;
-import com.gotofinal.darkrise.gui.CustomGUI;
+import com.gotofinal.darkrise.crafting.CraftingTable;
+import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.InventoryPattern;
+import com.gotofinal.darkrise.crafting.Recipe;
+import com.gotofinal.darkrise.crafting.RecipeItem;
+import com.gotofinal.darkrise.spigot.core.utils.item.ItemBuilder;
+import com.gotofinal.darkrise.spigot.core.utils.item.ItemColors;
+import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;

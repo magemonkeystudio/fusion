@@ -1,4 +1,4 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.gotofinal.darkrise.core.utils.DeserializationWorker;
-import com.gotofinal.darkrise.core.utils.SerializationBuilder;
+import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
+import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;

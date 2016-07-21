@@ -1,15 +1,14 @@
-package com.gotofinal.darkrise;
+package com.gotofinal.darkrise.crafting;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.gotofinal.darkrise.core.utils.DeserializationWorker;
-import com.gotofinal.darkrise.core.utils.SerializationBuilder;
-import com.gotofinal.darkrise.core.utils.item.ItemBuilder;
+import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
+import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
+import com.gotofinal.darkrise.spigot.core.utils.item.ItemBuilder;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
@@ -64,6 +63,7 @@ public class InventoryPattern implements ConfigurationSerializable
     @Override
     public Map<String, Object> serialize()
     {
-        return SerializationBuilder.start(2).append("pattern", this.pattern).append("items", this.items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey().toString(), ItemBuilder.newItem(e.getValue()).serialize())).collect(Collectors.toMap(Entry::getKey, Entry::getValue))).build();
+        //noinspection Convert2MethodRef,RedundantCast eclipse...,
+        return SerializationBuilder.start(2).append("pattern", this.pattern).append("items", this.items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey().toString(), ItemBuilder.newItem(e.getValue()).serialize())).collect(Collectors.toMap((stringMapSimpleEntry) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry).getKey(), (stringMapSimpleEntry1) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry1).getValue()))).build();
     }
 }
