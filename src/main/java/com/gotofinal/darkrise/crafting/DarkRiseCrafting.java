@@ -15,24 +15,6 @@ public class DarkRiseCrafting extends DarkRisePlugin
     public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  = PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
     public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY = PlaceholderType.create("craftingInventory", CustomGUI.class);
 
-    static
-    {
-        RECIPE_ITEM.registerItem("amount", RecipeItem::getAmount);
-        RECIPE_ITEM.registerItem("itemName", RecipeItem::getItemName);
-        RECIPE.registerItem("name", Recipe::getName);
-        RECIPE.registerItem("price", Recipe::getPrice);
-        CRAFTING_TABLE.registerItem("name", CraftingTable::getName);
-        CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
-        CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
-        CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
-
-        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.CUSTOM_ITEM, RecipeItem::asRiseItem);
-        RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
-        RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
-        CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
-        CALCULATED_RECIPE.registerChild("icon", Init.ITEM, CalculatedRecipe::getIcon);
-    }
-
     private static DarkRiseCrafting instance;
 
     {
@@ -52,9 +34,23 @@ public class DarkRiseCrafting extends DarkRisePlugin
     }
 
     @Override
-    public void reloadMessages()
+    public void onLoad()
     {
-        super.reloadMessages();
+        RECIPE_ITEM.registerItem("amount", RecipeItem::getAmount);
+        RECIPE_ITEM.registerItem("itemName", RecipeItem::getItemName);
+        RECIPE.registerItem("name", Recipe::getName);
+        RECIPE.registerItem("price", Recipe::getPrice);
+        CRAFTING_TABLE.registerItem("name", CraftingTable::getName);
+        CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
+        CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
+        CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
+
+        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.RISE_ITEM, RecipeItem::asRiseItem);
+        RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
+        RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
+        CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
+        CALCULATED_RECIPE.registerChild("icon", Init.ITEM, CalculatedRecipe::getIcon);
+        super.onLoad();
     }
 
     @Override
