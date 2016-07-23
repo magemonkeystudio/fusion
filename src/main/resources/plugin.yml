@@ -2,6 +2,6 @@ name: Crafting
 main: com.gotofinal.darkrise.crafting.DarkRiseCrafting
 author: GotoFinal
 version: ${rise.version}
-softdepend: [SpigotCore, Economy]
+depend: [Economy]
 commands:
   craft:
