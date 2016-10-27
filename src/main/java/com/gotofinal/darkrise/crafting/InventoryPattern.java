@@ -24,21 +24,21 @@ public class InventoryPattern implements ConfigurationSerializable
     private final String[]                  pattern; // _ for ingredients, = for result.
     private final Char2ObjectMap<ItemStack> items;
 
-    public InventoryPattern(final String[] pattern, final Char2ObjectMap<ItemStack> items)
+    public InventoryPattern(String[] pattern, Char2ObjectMap<ItemStack> items)
     {
         this.pattern = pattern;
         this.items = items;
     }
 
     @SuppressWarnings("unchecked")
-    public InventoryPattern(final Map<String, Object> map)
+    public InventoryPattern(Map<String, Object> map)
     {
-        final DeserializationWorker dw = DeserializationWorker.start(map);
-        final List<String> temp = dw.getStringList("pattern");
+        DeserializationWorker dw = DeserializationWorker.start(map);
+        List<String> temp = dw.getStringList("pattern");
         this.pattern = temp.toArray(new String[temp.size()]);
         this.items = new Char2ObjectOpenHashMap<>();
-        final DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
-        for (final String entry : itemsTemp.getMap().keySet())
+        DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
+        for (String entry : itemsTemp.getMap().keySet())
         {
             this.items.put(entry.charAt(0), new ItemBuilder(itemsTemp.getSection(entry)).build());
         }

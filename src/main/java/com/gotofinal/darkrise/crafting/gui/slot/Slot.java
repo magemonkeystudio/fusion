@@ -42,7 +42,7 @@ public abstract class Slot
     public static final Slot BASE_CONTAINER_SLOT   = new Slot(SlotType.CONTAINER)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return item;
         }
@@ -50,7 +50,7 @@ public abstract class Slot
     public static final Slot BASE_HOTBAR_SLOT      = new Slot(SlotType.QUICKBAR)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return item;
         }
@@ -58,7 +58,7 @@ public abstract class Slot
     public static final Slot BASE_CRAFTING_SLOT    = new Slot(SlotType.CRAFTING)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return item;
         }
@@ -66,7 +66,7 @@ public abstract class Slot
     public static final Slot SPECIAL_CRAFTING_SLOT = new Slot(SlotType.CRAFTING)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             if ((item == null) || (item.getTypeId() == 0))
             {
@@ -78,7 +78,7 @@ public abstract class Slot
     public static final Slot BASE_RESULT_SLOT      = new Slot(SlotType.RESULT)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return null;
         }
@@ -86,7 +86,7 @@ public abstract class Slot
     public static final Slot BLOCKED_SLOT          = new Slot(SlotType.CONTAINER)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return null;
         }
@@ -94,7 +94,7 @@ public abstract class Slot
     public static final Slot BASE_OUTSIDE_SLOT     = new Slot(SlotType.OUTSIDE)
     {
         @Override
-        public ItemStack canHoldItem(final ItemStack item)
+        public ItemStack canHoldItem(ItemStack item)
         {
             return item;
         }
@@ -102,7 +102,7 @@ public abstract class Slot
 
     protected final SlotType slotType;
 
-    public Slot(final SlotType slotType)
+    public Slot(SlotType slotType)
     {
         this.slotType = slotType;
     }

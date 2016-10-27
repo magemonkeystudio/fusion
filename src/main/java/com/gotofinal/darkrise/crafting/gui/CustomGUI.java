@@ -44,16 +44,16 @@ public class CustomGUI implements Listener
 
     protected final Map<Player, PlayerCustomGUI> map = new ConcurrentHashMap<>(20);
 
-    public CustomGUI(final String name, final String inventoryName, final InventoryPattern pattern)
+    public CustomGUI(String name, String inventoryName, InventoryPattern pattern)
     {
         this.name = name;
         this.inventoryName = inventoryName;
         this.pattern = pattern;
         int k = - 1;
         int prevPage = - 1, nextPage = - 1;
-        for (final String row : this.pattern.getPattern())
+        for (String row : this.pattern.getPattern())
         {
-            for (final char c : row.toCharArray())
+            for (char c : row.toCharArray())
             {
                 k++;
                 if (c == '=')
@@ -93,25 +93,25 @@ public class CustomGUI implements Listener
         return this.inventoryName;
     }
 
-    public void setSlot(final int i, final Slot slot)
+    public void setSlot(int i, Slot slot)
     {
         this.slots[i] = slot;
     }
 
-    public Slot getSlot(final int i)
+    public Slot getSlot(int i)
     {
         return this.slots[i];
     }
 
-    public PlayerCustomGUI open(final Player p)
+    public PlayerCustomGUI open(Player p)
     {
-        final InventoryView iv = p.getOpenInventory();
+        InventoryView iv = p.getOpenInventory();
         if ((iv != null) && (iv.getTopInventory() != null))
         {
             this.map.remove(p);
             p.closeInventory();
         }
-        final PlayerCustomGUI gui = PlayerCustomGUI.open(this, p);
+        PlayerCustomGUI gui = PlayerCustomGUI.open(this, p);
         if (gui != null)
         {
             this.map.put(p, gui);
@@ -119,15 +119,15 @@ public class CustomGUI implements Listener
         return gui;
     }
 
-    private boolean isThis(final Inventory inv)
+    private boolean isThis(Inventory inv)
     {
         return inv.getTitle().equals(ChatColor.translateAlternateColorCodes('&', this.inventoryName));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onClick(final InventoryClickEvent e)
+    public void onClick(InventoryClickEvent e)
     {
-        final Inventory inv = e.getView().getTopInventory();
+        Inventory inv = e.getView().getTopInventory();
         if (e.getRawSlot() < 0)
         {
             return;
@@ -138,8 +138,8 @@ public class CustomGUI implements Listener
 //            System.out.println("Ugh, fail!");
             return;
         }
-        final Player p = (Player) e.getWhoClicked();
-        final PlayerCustomGUI playerCustomGUI = this.map.get(p);
+        Player p = (Player) e.getWhoClicked();
+        PlayerCustomGUI playerCustomGUI = this.map.get(p);
         if (playerCustomGUI == null)
         {
             return;
@@ -147,14 +147,14 @@ public class CustomGUI implements Listener
         playerCustomGUI.onClick(e);
     }
 
-    private void reloadRecipeTask(final Player p)
+    private void reloadRecipeTask(Player p)
     {
         DarkRiseCrafting.getInstance().runSync(() -> this.reloadRecipe(p));
     }
 
-    private void reloadRecipe(final Player p)
+    private void reloadRecipe(Player p)
     {
-        final PlayerCustomGUI playerCustomGUI = this.map.get(p);
+        PlayerCustomGUI playerCustomGUI = this.map.get(p);
         if (playerCustomGUI == null)
         {
             return;
@@ -163,9 +163,9 @@ public class CustomGUI implements Listener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onDrag(final InventoryDragEvent e)
+    public void onDrag(InventoryDragEvent e)
     {
-        final Inventory inv = e.getView().getTopInventory();
+        Inventory inv = e.getView().getTopInventory();
         if ((inv == null) || ! (e.getWhoClicked() instanceof Player))
         {
             return;
@@ -186,22 +186,22 @@ public class CustomGUI implements Listener
         }
     }
 
-    private void onClose(final Player p)
+    private void onClose(Player p)
     {
-        final InventoryView v = p.getOpenInventory();
+        InventoryView v = p.getOpenInventory();
         if (v != null)
         {
             this.onClose(p, v.getTopInventory());
         }
     }
 
-    private void onClose(final Player p, final Inventory inv)
+    private void onClose(Player p, Inventory inv)
     {
         if (inv == null)
         {
             return;
         }
-        final Inventory pinv = p.getInventory();
+        Inventory pinv = p.getInventory();
         if (this.isThis(inv))
         {
             for (int i = 0; i < this.slots.length; i++)
@@ -210,7 +210,7 @@ public class CustomGUI implements Listener
                 {
                     continue;
                 }
-                final ItemStack it = inv.getItem(i);
+                ItemStack it = inv.getItem(i);
                 if (it != null)
                 {
                     pinv.addItem(it).values().stream().filter(itemStack -> itemStack != null).forEach(itemStack -> p.getWorld().dropItem(p.getLocation(), itemStack));
@@ -222,9 +222,9 @@ public class CustomGUI implements Listener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onClose(final PlayerPickupItemEvent e)
+    public void onClose(PlayerPickupItemEvent e)
     {
-        final PlayerCustomGUI customGUI = this.map.get(e.getPlayer());
+        PlayerCustomGUI customGUI = this.map.get(e.getPlayer());
         if (customGUI == null)
         {
             return;
@@ -233,7 +233,7 @@ public class CustomGUI implements Listener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onClose(final InventoryCloseEvent e)
+    public void onClose(InventoryCloseEvent e)
     {
         if (e.getPlayer() instanceof Player)
         {
@@ -242,7 +242,7 @@ public class CustomGUI implements Listener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onExit(final PlayerQuitEvent e)
+    public void onExit(PlayerQuitEvent e)
     {
         this.onClose(e.getPlayer());
     }

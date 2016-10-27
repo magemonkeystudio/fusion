@@ -3,7 +3,7 @@ package com.gotofinal.darkrise.crafting.cfg;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,10 +12,11 @@ import com.gotofinal.darkrise.crafting.CraftingTable;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.Recipe;
-import com.gotofinal.darkrise.crafting.RecipeItem;
+import com.gotofinal.darkrise.crafting.RecipeCustomItem;
+import com.gotofinal.darkrise.crafting.RecipeEconomyItem;
+import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.spigot.core.utils.item.ItemBuilder;
 import com.gotofinal.darkrise.spigot.core.utils.item.ItemColors;
-import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -36,12 +37,12 @@ public final class Cfg
     {
     }
 
-    public static CraftingTable getTable(final String str)
+    public static CraftingTable getTable(String str)
     {
         return map.get(str);
     }
 
-    public static CustomGUI getGUI(final String str)
+    public static CustomGUI getGUI(String str)
     {
         return guiMap.get(str);
     }
@@ -56,18 +57,19 @@ public final class Cfg
         return guiMap;
     }
 
-    private static void addDefs(final FileConfiguration cfg)
+    private static void addDefs(FileConfiguration cfg)
     {
-        final Char2ObjectMap<ItemStack> items = new Char2ObjectOpenHashMap<>();
+        Char2ObjectMap<ItemStack> items = new Char2ObjectOpenHashMap<>();
         items.put('0', ItemBuilder.newItem(Material.STAINED_GLASS_PANE).durability(ItemColors.BLACK).build());
         items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
         items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-        final InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
-        final CraftingTable a = new CraftingTable("forge", "Forge inventory name", ip);
+        InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
+        CraftingTable a = new CraftingTable("forge", "Forge inventory name", ip);
 
-        a.addRecipe(new Recipe("test", Collections.singletonList(new RecipeItem("testItem", 5)), new RecipeItem("resultItem", 4), 0));
-        final CraftingTable b = new CraftingTable("craft", "Craft inventory name", ip);
-        final List<Map<String, Object>> list = new ArrayList<>(3);
+        a.addRecipe(new Recipe("test", Arrays.asList(new RecipeEconomyItem("testItem", 5), new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
+                               new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
+        CraftingTable b = new CraftingTable("craft", "Craft inventory name", ip);
+        List<Map<String, Object>> list = new ArrayList<>(3);
         list.add(a.serialize());
         list.add(b.serialize());
         cfg.addDefault("types", list);
@@ -77,8 +79,8 @@ public final class Cfg
     {
         map.clear();
         guiMap.clear();
-        final File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
-        final FileConfiguration cfg;
+        File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration cfg;
         if (! file.exists())
         {
             cfg = new YamlConfiguration();
@@ -87,7 +89,8 @@ public final class Cfg
             try
             {
                 file.createNewFile();
-            } catch (final IOException e)
+            }
+            catch (IOException e)
             {
                 DarkRiseCrafting.getInstance().getLogger().warning("Can't create config file: " + file);
                 e.printStackTrace();
@@ -96,7 +99,8 @@ public final class Cfg
             try
             {
                 cfg.save(file);
-            } catch (final IOException e)
+            }
+            catch (IOException e)
             {
                 DarkRiseCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
                 e.printStackTrace();
@@ -104,30 +108,41 @@ public final class Cfg
         }
         else
         {
-            cfg = YamlConfiguration.loadConfiguration(file);
+            cfg = new YamlConfiguration();
+            try
+            {
+                cfg.load(file);
+            }
+            catch (Exception e)
+            {
+                DarkRiseCrafting.getInstance().getLogger().warning("Can't load config file: " + file);
+                e.printStackTrace();
+                return;
+            }
             addDefs(cfg);
         }
 
-        final List<Map<?, ?>> typesSection = cfg.getMapList("types");
-        for (final Map<?, ?> typeData : typesSection)
+        List<Map<?, ?>> typesSection = cfg.getMapList("types");
+        for (Map<?, ?> typeData : typesSection)
         {
-            final CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
+            CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
             map.put(ct.getName(), ct);
         }
         cfg.options().copyDefaults(true);
         try
         {
             cfg.save(file);
-        } catch (final IOException e)
+        }
+        catch (IOException e)
         {
             DarkRiseCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
             e.printStackTrace();
         }
 
-        for (final Entry<String, CraftingTable> entry : map.entrySet())
+        for (Entry<String, CraftingTable> entry : map.entrySet())
         {
-            final String key = entry.getKey();
-            final CraftingTable value = entry.getValue();
+            String key = entry.getKey();
+            CraftingTable value = entry.getValue();
             guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
         }
     }

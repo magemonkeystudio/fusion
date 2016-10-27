@@ -13,12 +13,12 @@ import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.Recipe;
 import com.gotofinal.darkrise.crafting.RecipeItem;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
-import com.gotofinal.darkrise.spigot.core.Vault;
-import com.gotofinal.darkrise.spigot.core.utils.ItemUtils;
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import com.gotofinal.darkrise.economy.DarkRiseItem;
-import com.gotofinal.darkrise.economy.DarkRiseItems;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.economy.DarkRiseItems;
+import com.gotofinal.darkrise.spigot.core.Vault;
+import com.gotofinal.darkrise.spigot.core.utils.ExperienceManager;
+import com.gotofinal.darkrise.spigot.core.utils.ItemUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -47,7 +47,7 @@ public class PlayerCustomGUI implements Listener
     private final int maxPage = 0;
     private final Int2ObjectMap<CalculatedRecipe> recipes;
 
-    private PlayerCustomGUI(final CustomGUI gui, final Player player, final Inventory inventory)
+    private PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory)
     {
         this.gui = gui;
         this.player = player;
@@ -64,10 +64,10 @@ public class PlayerCustomGUI implements Listener
     {
         try
         {
-            final CraftingTable table = Cfg.getTable(this.gui.name);
-            final Collection<Recipe> allRecipes = table.getRecipes().values();
-            final int pageSize = this.gui.resultSlots.size();
-            final int allRecipeCount = allRecipes.size();
+            CraftingTable table = Cfg.getTable(this.gui.name);
+            Collection<Recipe> allRecipes = table.getRecipes().values();
+            int pageSize = this.gui.resultSlots.size();
+            int allRecipeCount = allRecipes.size();
             int i = 0;
             int page = this.page;
 
@@ -81,20 +81,20 @@ public class PlayerCustomGUI implements Listener
                 return;
             }
 
-            final Collection<ItemStack> playerItems = getPlayerItems(this.player);
-            final CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
-            final Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
+            Collection<ItemStack> playerItems = getPlayerItems(this.player);
+            CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
+            Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
 
-            final int[] slots = this.gui.resultSlots.toIntArray();
-            for (final int slot : slots)
+            int[] slots = this.gui.resultSlots.toIntArray();
+            for (int slot : slots)
             {
                 this.inventory.setItem(slot, null);
             }
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++)
             {
                 Recipe recipe = allRecipesArray[k];
-                final int slot = slots[i];
-                final CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player);
+                int slot = slots[i];
+                CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player);
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                 this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
             }
@@ -110,38 +110,38 @@ public class PlayerCustomGUI implements Listener
     public static Collection<ItemStack> getPlayerItems(InventoryHolder player)
     {
         DarkRiseItems itemsRegistry = DarkRiseEconomy.getItemsRegistry();
-        final ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
-        final List<ItemStack> result = new ArrayList<>(contents.length);
-        for (final ItemStack content : contents)
+        ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
+        List<ItemStack> result = new ArrayList<>(contents.length);
+        for (ItemStack content : contents)
         {
             if (content == null)
             {
                 continue;
             }
-            DarkRiseItem item = itemsRegistry.getItemByStack(content);
-            if (item == null)
-            {
-                continue;
-            }
+//            DarkRiseItem item = itemsRegistry.getItemByStack(content);
+//            if (item == null)
+//            {
+//                continue;
+//            }
             result.add(content);
         }
         return result;
     }
 
-    public static PlayerCustomGUI open(final CustomGUI gui, final Player player)
+    public static PlayerCustomGUI open(CustomGUI gui, Player player)
     {
         Inventory inv = null;
         try
         {
             inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
             int k = - 1;
-            final Char2ObjectMap<ItemStack> items = gui.pattern.getItems();
-            for (final String row : gui.pattern.getPattern())
+            Char2ObjectMap<ItemStack> items = gui.pattern.getItems();
+            for (String row : gui.pattern.getPattern())
             {
-                for (final char c : row.toCharArray())
+                for (char c : row.toCharArray())
                 {
                     k++;
-                    final ItemStack item = items.get(c);
+                    ItemStack item = items.get(c);
                     if (item != null)
                     {
                         inv.setItem(k, item.clone());
@@ -149,7 +149,7 @@ public class PlayerCustomGUI implements Listener
                 }
             }
             player.openInventory(inv);
-            final PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv);
+            PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv);
             playerCustomGUI.reloadRecipesTask();
             return playerCustomGUI;
         }
@@ -164,7 +164,7 @@ public class PlayerCustomGUI implements Listener
         }
     }
 
-    public void onClick(final InventoryClickEvent e)
+    public void onClick(InventoryClickEvent e)
     {
         if ((e.getRawSlot() >= this.gui.slots.length))
         {
@@ -175,7 +175,8 @@ public class PlayerCustomGUI implements Listener
             e.setResult(Result.DENY);
             return;
         }
-//        System.out.println("CLICK(" + e.getRawSlot() + ")..." + this.slots[e.getRawSlot()] + ", " + e.getAction() + ", Crafts: " + Arrays.toString(this.craftingSlots.toArray()) + ", Results: " + Arrays.toString(this.resultSlots.toArray()) + ", Blockeds: " + Arrays.toString(this.blockedSlots.toArray()));
+//        System.out.println("CLICK(" + e.getRawSlot() + ")..." + this.slots[e.getRawSlot()] + ", " + e.getAction() + ", Crafts: " + Arrays.toString(this
+// .craftingSlots.toArray()) + ", Results: " + Arrays.toString(this.resultSlots.toArray()) + ", Blockeds: " + Arrays.toString(this.blockedSlots.toArray()));
         if (this.gui.slots[e.getRawSlot()].equals(Slot.BLOCKED_SLOT))
         {
 //            System.out.println("CLICK_DENY-(" + e.getRawSlot() + "): " + this.slots[e.getRawSlot()]);
@@ -228,7 +229,12 @@ public class PlayerCustomGUI implements Listener
 //            }
             e.setCancelled(true);
             e.setResult(Result.DENY);
-            DarkRiseCrafting.getInstance().runSync(() -> this.craft(e.getRawSlot(), true));
+            DarkRiseCrafting.getInstance().runSync(() ->
+                                                   {
+                                                       this.reloadRecipes();
+                                                       this.craft(e.getRawSlot(), true);
+                                                       this.reloadRecipesTask();
+                                                   });
             return;
         }
         if (e.getCursor().getType() != Material.AIR)
@@ -252,10 +258,10 @@ public class PlayerCustomGUI implements Listener
             this.reloadRecipesTask();
             return false;
         }
-        final CraftingTable table = Cfg.getTable(this.gui.name);
-        final Collection<Recipe> allRecipes = table.getRecipes().values();
-        final int pageSize = this.gui.resultSlots.size();
-        final int allRecipeCount = allRecipes.size();
+        CraftingTable table = Cfg.getTable(this.gui.name);
+        Collection<Recipe> allRecipes = table.getRecipes().values();
+        int pageSize = this.gui.resultSlots.size();
+        int allRecipeCount = allRecipes.size();
         int i = 0;
         int page = this.page;
 
@@ -293,27 +299,35 @@ public class PlayerCustomGUI implements Listener
         }
     }
 
-    private boolean craft(final int slot, final boolean addToCursor)
+    private boolean craft(int slot, boolean addToCursor)
     {
-        final CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
+        CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
         if ((calculatedRecipe == null) || ! calculatedRecipe.isCanCraft())
         {
             return false;
         }
-        this.reloadRecipes();
+//        this.reloadRecipes();
         if (! Objects.equals(this.recipes.get(slot), calculatedRecipe))
         {
             return false;
         }
-        final Recipe recipe = calculatedRecipe.getRecipe();
+        Recipe recipe = calculatedRecipe.getRecipe();
+        if (this.player.getLevel() < recipe.getNeededLevels())
+        {
+            return false;
+        }
+        if (ExperienceManager.getTotalExperience(this.player) < recipe.getNeededXp())
+        {
+            return false;
+        }
         if (! Vault.canPay(this.player, recipe.getPrice()))
         {
             return false;
         }
 
-        final RecipeItem recipeResult = recipe.getResult();
-        final ItemStack resultItem = recipeResult.getItemStack();
-        final ItemStack cursor = this.player.getItemOnCursor();
+        RecipeItem recipeResult = recipe.getResult();
+        ItemStack resultItem = recipeResult.getItemStack();
+        ItemStack cursor = this.player.getItemOnCursor();
         if (addToCursor)
         {
             if (resultItem.isSimilar(cursor))
@@ -329,28 +343,28 @@ public class PlayerCustomGUI implements Listener
             }
         }
 
-        final Collection<ItemStack> itemsToTake = recipe.getItemsToTake();
-        final Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
-        final PlayerInventory inventory = this.player.getInventory();
+        Collection<ItemStack> itemsToTake = recipe.getItemsToTake();
+        Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
+        PlayerInventory inventory = this.player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); )
         {
-            final ItemStack toTake = iterator.next();
-            final HashMap<Integer, ItemStack> notRemoved = inventory.removeItem(toTake);
+            ItemStack toTake = iterator.next();
+            HashMap<Integer, ItemStack> notRemoved = inventory.removeItem(toTake);
             if (notRemoved.isEmpty())
             {
                 taken.add(toTake);
                 iterator.remove();
                 continue;
             }
-            for (final ItemStack itemStack : taken)
+            for (ItemStack itemStack : taken)
             {
-                final HashMap<Integer, ItemStack> notAdded = inventory.addItem(itemStack);
+                HashMap<Integer, ItemStack> notAdded = inventory.addItem(itemStack);
                 if (notAdded.isEmpty())
                 {
                     break;
                 }
-                for (final ItemStack stack : notAdded.values())
+                for (ItemStack stack : notAdded.values())
                 {
                     this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
                 }
@@ -363,6 +377,14 @@ public class PlayerCustomGUI implements Listener
         }
 
         Vault.pay(this.player, recipe.getPrice());
+        if (recipe.getNeededLevels() != 0)
+        {
+            this.player.setLevel(this.player.getLevel() - recipe.getNeededLevels());
+        }
+        if (recipe.getNeededXp() != 0)
+        {
+            ExperienceManager.setTotalExperience(this.player, ExperienceManager.getTotalExperience(this.player) - recipe.getNeededXp());
+        }
         if (addToCursor)
         {
             if ((cursor != null) && (cursor.getType() != Material.AIR))
@@ -377,12 +399,12 @@ public class PlayerCustomGUI implements Listener
         }
         else
         {
-            final HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
+            HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
             if (notAdded.isEmpty())
             {
                 return true;
             }
-            for (final ItemStack stack : notAdded.values())
+            for (ItemStack stack : notAdded.values())
             {
                 this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
             }

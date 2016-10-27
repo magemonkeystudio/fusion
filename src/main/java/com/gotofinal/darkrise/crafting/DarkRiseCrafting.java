@@ -37,15 +37,17 @@ public class DarkRiseCrafting extends DarkRisePlugin
     public void onLoad()
     {
         RECIPE_ITEM.registerItem("amount", RecipeItem::getAmount);
-        RECIPE_ITEM.registerItem("itemName", RecipeItem::getItemName);
+        RECIPE_ITEM.registerItem("itemName", i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).getItemName() : null);
         RECIPE.registerItem("name", Recipe::getName);
         RECIPE.registerItem("price", Recipe::getPrice);
+        RECIPE.registerItem("neededLevels", Recipe::getNeededLevels);
+        RECIPE.registerItem("neededXp", Recipe::getNeededXp);
         CRAFTING_TABLE.registerItem("name", CraftingTable::getName);
         CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.RISE_ITEM, RecipeItem::asRiseItem);
+        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.RISE_ITEM, i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).asRiseItem() : null);
         RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
@@ -58,7 +60,6 @@ public class DarkRiseCrafting extends DarkRisePlugin
     {
         super.onEnable();
         this.reloadConfigs();
-        Cfg.init();
         this.getCommand("craft").setExecutor(new Commands());
     }
 

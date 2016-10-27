@@ -5,7 +5,7 @@
     <parent>
         <artifactId>spigot-parent</artifactId>
         <groupId>com.gotofinal.darkrise</groupId>
-        <version>1.1</version>
+        <version>1.3</version>
         <relativePath>../spigot-parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

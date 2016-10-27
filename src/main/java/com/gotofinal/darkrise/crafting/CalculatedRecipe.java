@@ -1,18 +1,15 @@
 package com.gotofinal.darkrise.crafting;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import com.gotofinal.darkrise.spigot.core.Vault;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import com.gotofinal.darkrise.economy.DarkRiseItem;
 import com.gotofinal.darkrise.economy.DarkRiseItems;
+import com.gotofinal.darkrise.spigot.core.Vault;
 import com.gotofinal.messages.api.messages.Message.MessageData;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +26,7 @@ public class CalculatedRecipe
 
     private final boolean canCraft;
 
-    CalculatedRecipe(final Recipe recipe, final ItemStack icon, final boolean canCraft)
+    CalculatedRecipe(Recipe recipe, ItemStack icon, boolean canCraft)
     {
         this.recipe = recipe;
         this.icon = icon;
@@ -53,12 +50,12 @@ public class CalculatedRecipe
 
     public static CalculatedRecipe create(Recipe recipe, Collection<ItemStack> items, Player player)
     {
-        final DarkRiseItems ir = DarkRiseEconomy.getInstance().getItems();
-        final DarkRiseCrafting pl = DarkRiseCrafting.getInstance();
+        DarkRiseItems ir = DarkRiseEconomy.getInstance().getItems();
+        DarkRiseCrafting pl = DarkRiseCrafting.getInstance();
 
-        final StringBuilder lore = new StringBuilder(512);
-        final ItemStack result = recipe.getResult().getItemStack();
-        final List<String> resultLore = result.getItemMeta().getLore();
+        StringBuilder lore = new StringBuilder(512);
+        ItemStack result = recipe.getResult().getItemStack();
+        List<String> resultLore = result.getItemMeta().getLore();
         if ((resultLore != null) && ! resultLore.isEmpty())
         {
             resultLore.forEach((str) -> lore.append(str).append('\n'));
@@ -66,74 +63,139 @@ public class CalculatedRecipe
         }
         boolean canCraft = true;
 
-        final String permissionLine;
-        if (! player.hasPermission("crafting.recipe." + recipe.name) && ! player.hasPermission("crafting.recipes"))
+        String permissionLine;
+        if (! Utils.hasCraftingPermission(player, recipe.name))
         {
             canCraft = false;
-            permissionLine = pl.getMessageAsString("crafting.gui.learned.false", "crafting.gui.learned.false", new MessageData("recipe", recipe), new MessageData("player", player));
+            permissionLine = pl.getMessageAsString("crafting.gui.learned.false", "crafting.gui.learned.false", new MessageData("recipe", recipe),
+                                                   new MessageData("player", player));
         }
         else
         {
-            permissionLine = pl.getMessageAsString("crafting.gui.learned.true", "crafting.gui.learned.true", new MessageData("recipe", recipe), new MessageData("player", player));
+            permissionLine = pl.getMessageAsString("crafting.gui.learned.true", "crafting.gui.learned.true", new MessageData("recipe", recipe),
+                                                   new MessageData("player", player));
         }
-        final String moneyLine;
-        if (! Vault.canPay(player, recipe.price))
+        String moneyLine;
+        if (recipe.price != 0)
         {
-            canCraft = false;
-            moneyLine = pl.getMessageAsString("crafting.gui.money.false", "crafting.gui.money.false", new MessageData("recipe", recipe), new MessageData("player", player));
-        }
-        else
-        {
-            moneyLine = pl.getMessageAsString("crafting.gui.money.true", "crafting.gui.money.true", new MessageData("recipe", recipe), new MessageData("player", player));
-        }
-
-
-        final Map<String, Entry<DarkRiseItem, Integer>> eqItems = new LinkedHashMap<>(20);
-        for (final ItemStack item : items)
-        {
-            DarkRiseItem riseItem = ir.getItemByStack(item);
-            if (riseItem == null)
-            {
-                continue;
-            }
-            eqItems.put(riseItem.getId().toLowerCase(), new SimpleEntry<>(riseItem, item.getAmount()));
-        }
-        final Map<String, RecipeItem> localPattern = new LinkedHashMap<>(20);
-        for (final RecipeItem recipeItem : recipe.pattern)
-        {
-            localPattern.put(recipeItem.getItemName().toLowerCase(), recipeItem);
-        }
-        for (final Iterator<Entry<String, RecipeItem>> it = localPattern.entrySet().iterator(); it.hasNext(); )
-        {
-            final Entry<String, RecipeItem> patternEntry = it.next();
-            final RecipeItem recipeItem = patternEntry.getValue();
-            final ItemStack recipeItemStack = recipeItem.getItemStack();
-            final Entry<DarkRiseItem, Integer> eqEntry = eqItems.get(patternEntry.getKey().toLowerCase());
-            if (eqEntry == null)
+            if (! Vault.canPay(player, recipe.price))
             {
                 canCraft = false;
-                lore.append(pl.getMessageAsString("crafting.gui.ingredient.false", "crafting.gui.ingredient.false", new MessageData("amount", 0), new MessageData("recipeItem", recipeItem), new MessageData("player", player), new MessageData("recipe", recipe), new MessageData("item", recipeItemStack))).append('\n');
+                moneyLine = pl.getMessageAsString("crafting.gui.money.false", "crafting.gui.money.false", new MessageData("recipe", recipe),
+                                                  new MessageData("player", player));
+            }
+            else
+            {
+                moneyLine = pl.getMessageAsString("crafting.gui.money.true", "crafting.gui.money.true", new MessageData("recipe", recipe),
+                                                  new MessageData("player", player));
+            }
+        }
+        else
+        {
+            moneyLine = null;
+        }
+
+        String levelsLine;
+        if (recipe.neededLevels != 0)
+        {
+            if (player.getLevel() < recipe.neededLevels)
+            {
+                canCraft = false;
+                levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.false", "crafting.gui.xpLevels.false", new MessageData("recipe", recipe),
+                                                   new MessageData("player", player));
+            }
+            else
+            {
+                levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.true", "crafting.gui.xpLevels.true", new MessageData("recipe", recipe),
+                                                   new MessageData("player", player));
+            }
+        }
+        else
+        {
+            levelsLine = null;
+        }
+        String xpLine;
+        if (recipe.neededXp != 0)
+        {
+            if (ExperienceManager.getTotalExperience(player) < recipe.neededXp)
+            {
+                canCraft = false;
+                xpLine = pl.getMessageAsString("crafting.gui.xp.false", "crafting.gui.xp.false", new MessageData("recipe", recipe),
+                                               new MessageData("player", player));
+            }
+            else
+            {
+                xpLine = pl.getMessageAsString("crafting.gui.xp.true", "crafting.gui.xp.true", new MessageData("recipe", recipe),
+                                               new MessageData("player", player));
+            }
+        }
+        else
+        {
+            xpLine = null;
+        }
+
+
+        Map<ItemStack, Integer> eqItems = Recipe.getItems(items);
+
+
+
+
+//        Map<String, Entry<DarkRiseItem, Integer>> eqItems = new LinkedHashMap<>(20);
+//        for (ItemStack item : items)
+//        {
+//            DarkRiseItem riseItem = ir.getItemByStack(item);
+//            if (riseItem == null)
+//            {
+//                continue;
+//            }
+//            eqItems.put(riseItem.getId().toLowerCase(), new SimpleEntry<>(riseItem, item.getAmount()));
+//        }
+        Collection<RecipeItem> localPattern = new HashSet<>(recipe.pattern);
+        for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); )
+        {
+            RecipeItem recipeItem = it.next();
+            ItemStack recipeItemStack = recipeItem.getItemStack();
+            ItemStack recipeItemStackOne = recipeItemStack.clone();
+            recipeItemStackOne.setAmount(1);
+            int eqAmount = eqItems.getOrDefault(recipeItemStackOne, - 1);
+            if (eqAmount == -1)
+            {
+                canCraft = false;
+                lore.append(pl.getMessageAsString(
+                        (recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.false" : "crafting.gui.ingredientSimple.false",
+                        (recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.false" : "crafting.gui.ingredientSimple.false",
+                        new MessageData("amount", 0),
+                        new MessageData("recipeItem", recipeItem), new MessageData("player", player),
+                        new MessageData("recipe", recipe), new MessageData("item", recipeItemStack))).append('\n');
                 continue;
             }
-            final int eqAmount = eqEntry.getValue();
-            final int patternAmount = recipeItem.getAmount();
+            int patternAmount = recipeItem.getAmount();
             if (eqAmount < patternAmount)
             {
                 canCraft = false;
-                lore.append(pl.getMessageAsString("crafting.gui.ingredient.false", "crafting.gui.ingredient.false", new MessageData("amount", eqAmount), new MessageData("recipeItem", recipeItem), new MessageData("player", player), new MessageData("recipe", recipe), new MessageData("item", recipeItemStack))).append('\n');
+                lore.append(pl.getMessageAsString(
+                        (recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.false" : "crafting.gui.ingredientSimple.false",
+                        (recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.false" : "crafting.gui.ingredientSimple.false",
+                        new MessageData("amount", eqAmount),
+                        new MessageData("recipeItem", recipeItem), new MessageData("player", player),
+                        new MessageData("recipe", recipe), new MessageData("item", recipeItemStack))).append('\n');
                 continue;
             }
             if (eqAmount == patternAmount)
             {
-                eqItems.remove(patternEntry.getKey().toLowerCase());
+                eqItems.remove(recipeItem.getItemStack());
             }
-            final int rest = eqAmount - patternAmount;
-            eqEntry.setValue(rest);
+            int rest = eqAmount - patternAmount;
+            eqItems.put(recipeItemStackOne, rest);
             it.remove();
 
-            lore.append(pl.getMessageAsString("crafting.gui.ingredient.true", "crafting.gui.ingredient.true", new MessageData("amount", eqAmount), new MessageData("recipeItem", recipeItem), new MessageData("player", player), new MessageData("recipe", recipe), new MessageData("item", recipeItemStack))).append('\n');
+            lore.append(pl.getMessageAsString((recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.true" : "crafting.gui.ingredientSimple.true",
+                                              (recipeItem instanceof RecipeEconomyItem) ? "crafting.gui.ingredient.true" : "crafting.gui.ingredientSimple.true",
+                                              new MessageData("amount", eqAmount),
+                                              new MessageData("recipeItem", recipeItem), new MessageData("player", player), new MessageData("recipe", recipe),
+                                              new MessageData("item", recipeItemStack))).append('\n');
         }
-        final String canCraftLine;
+        String canCraftLine;
         if (canCraft)
         {
             canCraftLine = pl.getMessageAsString("crafting.gui.canCraft.true", null, new MessageData("recipe", recipe), new MessageData("player", player));
@@ -144,15 +206,26 @@ public class CalculatedRecipe
         }
 
         lore.append('\n');
-        lore.append(moneyLine).append('\n');
+        if (moneyLine != null)
+        {
+            lore.append(moneyLine).append('\n');
+        }
+        if (levelsLine != null)
+        {
+            lore.append(levelsLine).append('\n');
+        }
+        if (xpLine != null)
+        {
+            lore.append(xpLine).append('\n');
+        }
         lore.append(permissionLine);
         if (canCraftLine != null)
         {
             lore.append('\n').append(canCraftLine);
         }
 
-        final ItemStack icon = result.clone();
-        final ItemMeta itemMeta = icon.getItemMeta();
+        ItemStack icon = result.clone();
+        ItemMeta itemMeta = icon.getItemMeta();
         itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
         icon.setItemMeta(itemMeta);
 
@@ -160,7 +233,7 @@ public class CalculatedRecipe
     }
 
     @Override
-    public boolean equals(final Object o)
+    public boolean equals(Object o)
     {
         if (this == o)
         {
@@ -172,7 +245,7 @@ public class CalculatedRecipe
             return false;
         }
 
-        final CalculatedRecipe that = (CalculatedRecipe) o;
+        CalculatedRecipe that = (CalculatedRecipe) o;
         return new EqualsBuilder().append(this.recipe, that.recipe).append(this.icon, that.icon).isEquals();
     }
 

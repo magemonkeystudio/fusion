@@ -21,7 +21,7 @@ public class CraftingTable implements ConfigurationSerializable
     private final InventoryPattern    pattern;
     private final Map<String, Recipe> recipes;
 
-    public CraftingTable(final String name, final String inventoryName, final InventoryPattern pattern, final Map<String, Recipe> recipes)
+    public CraftingTable(String name, String inventoryName, InventoryPattern pattern, Map<String, Recipe> recipes)
     {
         this.name = name;
         this.inventoryName = inventoryName;
@@ -29,7 +29,7 @@ public class CraftingTable implements ConfigurationSerializable
         this.recipes = recipes;
     }
 
-    public CraftingTable(final String name, final String inventoryName, final InventoryPattern pattern)
+    public CraftingTable(String name, String inventoryName, InventoryPattern pattern)
     {
         this.name = name;
         this.inventoryName = inventoryName;
@@ -38,21 +38,21 @@ public class CraftingTable implements ConfigurationSerializable
     }
 
     @SuppressWarnings("unchecked")
-    public CraftingTable(final Map<String, Object> map)
+    public CraftingTable(Map<String, Object> map)
     {
         this.recipes = new LinkedHashMap<>(5);
-        final DeserializationWorker dw = DeserializationWorker.start(map);
+        DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
         this.inventoryName = dw.getString("inventoryName");
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
-        final List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
-        for (final Map<?, ?> recipeData : recipesSection)
+        List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
+        for (Map<?, ?> recipeData : recipesSection)
         {
             try
             {
-                final Recipe recipe = new Recipe((Map<String, Object>) recipeData);
+                Recipe recipe = new Recipe((Map<String, Object>) recipeData);
                 this.recipes.put(recipe.getName(), recipe);
-            } catch (final Exception e)
+            } catch (Exception e)
             {
                 DarkRiseCrafting.getInstance().error("Exception when reading config, Invalid entry in config of " + this.name + " crafting table. Value: " + recipeData);
                 throw new RuntimeException(e);
@@ -80,17 +80,17 @@ public class CraftingTable implements ConfigurationSerializable
         return this.recipes;
     }
 
-    public Recipe getRecipe(final String str)
+    public Recipe getRecipe(String str)
     {
         return this.recipes.get(str);
     }
 
-    public void addRecipe(final Recipe recipe)
+    public void addRecipe(Recipe recipe)
     {
         this.recipes.put(recipe.getName(), recipe);
     }
 
-    public Collection<Recipe> getRecipes(final Collection<ItemStack> items, final Player p)
+    public Collection<Recipe> getRecipes(Collection<ItemStack> items, Player p)
     {
         if (items.isEmpty())
         {

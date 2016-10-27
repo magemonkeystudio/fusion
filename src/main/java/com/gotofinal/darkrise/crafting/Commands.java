@@ -1,33 +1,31 @@
 package com.gotofinal.darkrise.crafting;
 
-
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.messages.api.messages.Message.MessageData;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import org.apache.commons.lang.StringUtils;
-
 public class Commands implements CommandExecutor
 {
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args)
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
-        final DarkRiseCrafting instance = DarkRiseCrafting.getInstance();
+        DarkRiseCrafting instance = DarkRiseCrafting.getInstance();
         if ((args.length == 2) || (args.length == 3))
         {
             if (args[0].equalsIgnoreCase("use"))
             {
-                if (! instance.checkPermission(sender, "crafting.use"))
+                if (! Utils.hasCraftingUsePermission(sender, null))
                 {
                     return true;
                 }
-                final CustomGUI eq = Cfg.getGuiMap().get(args[1]);
+                CustomGUI eq = Cfg.getGuiMap().get(args[1]);
                 if (eq == null)
                 {
                     return instance.sendMessage("crafting.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
@@ -38,19 +36,20 @@ public class Commands implements CommandExecutor
                     {
                         return true;
                     }
-                    final Player target = Bukkit.getPlayer(args[2]);
+                    Player target = Bukkit.getPlayer(args[2]);
                     if (target == null)
                     {
                         return instance.sendMessage("notAPlayer", sender, new MessageData("name", args[2]), new MessageData("sender", sender));
                     }
                     eq.open(target);
-                    return instance.sendMessage("crafting.useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender), new MessageData("target", target));
+                    return instance.sendMessage("crafting.useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender),
+                                                new MessageData("target", target));
                 }
                 else
                 {
                     if (sender instanceof Player)
                     {
-                        if (! instance.checkPermission(sender, "crafting.use." + eq.getName()))
+                        if (! Utils.hasCraftingUsePermission(sender, eq.getName()))
                         {
                             return true;
                         }
@@ -59,7 +58,8 @@ public class Commands implements CommandExecutor
                     }
                     else
                     {
-                        instance.sendMessage("crafting.help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                        instance.sendMessage("crafting.help", sender, new MessageData("sender", sender),
+                                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
             }
@@ -75,6 +75,7 @@ public class Commands implements CommandExecutor
             instance.reloadMessages();
             return instance.sendMessage("reload", sender, new MessageData("sender", sender));
         }
-        return instance.sendMessage("crafting.help", sender, new MessageData("sender", sender), new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+        return instance.sendMessage("crafting.help", sender, new MessageData("sender", sender),
+                                    new MessageData("text", label + " " + StringUtils.join(args, ' ')));
     }
 }
