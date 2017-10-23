@@ -1,6 +1,8 @@
 package com.gotofinal.darkrise.crafting;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
 import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
+import com.gotofinal.darkrise.spigot.core.utils.cmds.DelayedCommand;
 import com.gotofinal.darkrise.spigot.core.utils.item.ItemBuilder;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -23,6 +26,7 @@ public class InventoryPattern implements ConfigurationSerializable
 {
     private final String[]                  pattern; // _ for ingredients, = for result.
     private final Char2ObjectMap<ItemStack> items;
+    private final Char2ObjectMap<Collection<DelayedCommand>> commands = new Char2ObjectOpenHashMap<>();
 
     public InventoryPattern(String[] pattern, Char2ObjectMap<ItemStack> items)
     {
@@ -42,6 +46,12 @@ public class InventoryPattern implements ConfigurationSerializable
         {
             this.items.put(entry.charAt(0), new ItemBuilder(itemsTemp.getSection(entry)).build());
         }
+
+        final DeserializationWorker commandsTemp = DeserializationWorker.start(dw.getSection("commands", new HashMap<>(2)));
+        for (final String entry : commandsTemp.getMap().keySet())
+        {
+            this.commands.put(entry.charAt(0), commandsTemp.deserializeCollection(new ArrayList<>(5), entry, DelayedCommand.class));
+        }
     }
 
     public String[] getPattern()
@@ -54,6 +64,16 @@ public class InventoryPattern implements ConfigurationSerializable
         return this.items;
     }
 
+    public Collection<DelayedCommand> getCommands(char c)
+    {
+            return this.commands.get(c);
+    }
+
+    public Character getSlot(int slot)
+    {
+        return pattern[slot / 9].charAt(slot % 9);
+    }
+
     @Override
     public String toString()
     {
@@ -64,6 +84,9 @@ public class InventoryPattern implements ConfigurationSerializable
     public Map<String, Object> serialize()
     {
         //noinspection Convert2MethodRef,RedundantCast eclipse...,
-        return SerializationBuilder.start(2).append("pattern", this.pattern).append("items", this.items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey().toString(), ItemBuilder.newItem(e.getValue()).serialize())).collect(Collectors.toMap((stringMapSimpleEntry) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry).getKey(), (stringMapSimpleEntry1) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry1).getValue()))).build();
+        return SerializationBuilder.start(2)
+                                   .append("pattern", this.pattern)
+                                   .appendMap("commands", this.commands)
+                                   .append("items", this.items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey().toString(), ItemBuilder.newItem(e.getValue()).serialize())).collect(Collectors.toMap((stringMapSimpleEntry) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry).getKey(), (stringMapSimpleEntry1) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry1).getValue()))).build();
     }
 }

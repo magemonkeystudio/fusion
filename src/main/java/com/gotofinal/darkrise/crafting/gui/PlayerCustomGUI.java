@@ -20,6 +20,8 @@ import com.gotofinal.darkrise.spigot.core.Vault;
 import com.gotofinal.darkrise.spigot.core.utils.ExperienceManager;
 import com.gotofinal.darkrise.spigot.core.utils.ItemUtils;
 
+import com.gotofinal.darkrise.spigot.core.utils.cmds.DelayedCommand;
+import com.gotofinal.darkrise.spigot.core.utils.cmds.R;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -174,6 +176,15 @@ public class PlayerCustomGUI implements Listener
         {
             e.setResult(Result.DENY);
             return;
+        }
+
+        Character c = gui.getPattern().getSlot(e.getRawSlot());
+        Collection<DelayedCommand> patternCommands = gui.getPattern().getCommands(c);
+        if (patternCommands != null && ! patternCommands.isEmpty())
+        {
+            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), e.getWhoClicked(), patternCommands,
+                    R.r("{crafting}", this.gui.getName()),
+                    R.r("{inventoryName}", this.gui.getInventoryName()));
         }
 //        System.out.println("CLICK(" + e.getRawSlot() + ")..." + this.slots[e.getRawSlot()] + ", " + e.getAction() + ", Crafts: " + Arrays.toString(this
 // .craftingSlots.toArray()) + ", Results: " + Arrays.toString(this.resultSlots.toArray()) + ", Blockeds: " + Arrays.toString(this.blockedSlots.toArray()));

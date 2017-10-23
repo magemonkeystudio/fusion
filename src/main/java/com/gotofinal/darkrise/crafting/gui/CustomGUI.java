@@ -93,6 +93,10 @@ public class CustomGUI implements Listener
         return this.inventoryName;
     }
 
+    public InventoryPattern getPattern() {
+        return pattern;
+    }
+
     public void setSlot(int i, Slot slot)
     {
         this.slots[i] = slot;
