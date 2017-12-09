@@ -13,7 +13,7 @@ import com.gotofinal.darkrise.economy.DarkRiseItems;
 import com.gotofinal.darkrise.spigot.core.Vault;
 import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
 import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
-
+import com.gotofinal.darkrise.spigot.core.utils.cmds.DelayedCommand;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -28,6 +28,8 @@ public class Recipe implements ConfigurationSerializable
     protected final double                 price;
     protected final int                    neededLevels;
     protected final int                    neededXp;
+    protected final boolean                mastery;
+    protected final Collection<DelayedCommand> commands = new ArrayList<>();
 
     public Recipe(Map<String, Object> map)
     {
@@ -38,6 +40,8 @@ public class Recipe implements ConfigurationSerializable
         this.price = dw.getDouble("price", 0);
         this.neededLevels = dw.getInt("neededLevels", 0);
         this.neededXp = dw.getInt("neededXp", 0);
+        this.mastery = dw.getBoolean("mastery");
+        dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
     }
 
     public Recipe(String name, Collection<RecipeItem> pattern, RecipeEconomyItem result, double price, int neededLevels, int neededXp)
@@ -48,6 +52,7 @@ public class Recipe implements ConfigurationSerializable
         this.price = price;
         this.neededLevels = neededLevels;
         this.neededXp = neededXp;
+        this.mastery = false;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items)
@@ -156,6 +161,11 @@ public class Recipe implements ConfigurationSerializable
     public int getNeededXp()
     {
         return this.neededXp;
+    }
+
+    public Collection<DelayedCommand> getCommands()
+    {
+        return commands;
     }
 
     public Collection<RecipeItem> getPattern()

@@ -2,6 +2,7 @@ package com.gotofinal.darkrise.crafting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class CraftingTable implements ConfigurationSerializable
     private final String              inventoryName;
     private final InventoryPattern    pattern;
     private final Map<String, Recipe> recipes;
+    private final Map<String, Category> categories = new HashMap<>();
 
     public CraftingTable(String name, String inventoryName, InventoryPattern pattern, Map<String, Recipe> recipes)
     {
@@ -45,6 +47,10 @@ public class CraftingTable implements ConfigurationSerializable
         this.name = dw.getString("name");
         this.inventoryName = dw.getString("inventoryName");
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
+        Collection<Category> categoriesList = new ArrayList<>();
+        dw.deserializeCollection(categoriesList, "categories", Category.class);
+        categoriesList.forEach(c -> categories.put(c.getName(), c));
+
         List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
         for (Map<?, ?> recipeData : recipesSection)
         {
@@ -52,6 +58,18 @@ public class CraftingTable implements ConfigurationSerializable
             {
                 Recipe recipe = new Recipe((Map<String, Object>) recipeData);
                 this.recipes.put(recipe.getName(), recipe);
+
+                if (recipeData.containsKey("category") && recipeData.get("category") instanceof String)
+                {
+                    Category category = categories.get(recipeData.get("category"));
+
+                    if (category == null)
+                    {
+                        continue;
+                    }
+
+                    category.getRecipes().add(recipe);
+                }
             } catch (Exception e)
             {
                 DarkRiseCrafting.getInstance().error("Exception when reading config, Invalid entry in config of " + this.name + " crafting table. Value: " + recipeData);
@@ -80,6 +98,11 @@ public class CraftingTable implements ConfigurationSerializable
         return this.recipes;
     }
 
+    public Map<String, Category> getCategories()
+    {
+        return categories;
+    }
+
     public Recipe getRecipe(String str)
     {
         return this.recipes.get(str);
@@ -102,6 +125,10 @@ public class CraftingTable implements ConfigurationSerializable
     @Override
     public Map<String, Object> serialize()
     {
-        return SerializationBuilder.start(4).append("name", this.name).append("pattern", this.pattern.serialize()).append("inventoryName", this.inventoryName).append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList())).build();
+        return SerializationBuilder.start(4)
+                .append("name", this.name)
+                .append("pattern", this.pattern.serialize())
+                .append("inventoryName", this.inventoryName)
+                .append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList())).build();
     }
 }

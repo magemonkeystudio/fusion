@@ -52,6 +52,9 @@ public class DarkRiseCrafting extends DarkRisePlugin
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
         CALCULATED_RECIPE.registerChild("icon", Init.ITEM, CalculatedRecipe::getIcon);
+
+        LevelFunction.generate(200);
+
         super.onLoad();
     }
 

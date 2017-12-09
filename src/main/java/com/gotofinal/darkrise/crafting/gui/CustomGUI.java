@@ -107,7 +107,7 @@ public class CustomGUI implements Listener
         return this.slots[i];
     }
 
-    public PlayerCustomGUI open(Player p)
+    public PlayerCustomGUI open(Player p, PlayerCustomGUI playerCustomGUI)
     {
         InventoryView iv = p.getOpenInventory();
         if ((iv != null) && (iv.getTopInventory() != null))
@@ -115,12 +115,12 @@ public class CustomGUI implements Listener
             this.map.remove(p);
             p.closeInventory();
         }
-        PlayerCustomGUI gui = PlayerCustomGUI.open(this, p);
-        if (gui != null)
+
+        if (playerCustomGUI != null)
         {
-            this.map.put(p, gui);
+            this.map.put(p, playerCustomGUI);
         }
-        return gui;
+        return playerCustomGUI;
     }
 
     private boolean isThis(Inventory inv)
@@ -217,7 +217,11 @@ public class CustomGUI implements Listener
                 ItemStack it = inv.getItem(i);
                 if (it != null)
                 {
-                    pinv.addItem(it).values().stream().filter(itemStack -> itemStack != null).forEach(itemStack -> p.getWorld().dropItem(p.getLocation(), itemStack));
+                    pinv.addItem(it)
+                            .values()
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .forEach(itemStack -> p.getWorld().dropItem(p.getLocation(), itemStack));
                 }
             }
             this.map.remove(p);
@@ -262,6 +266,12 @@ public class CustomGUI implements Listener
     @Override
     public String toString()
     {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString()).append("name", this.name).append("inventoryName", this.inventoryName).append("slots", this.slots).append("pattern", this.pattern).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .appendSuper(super.toString())
+                .append("name", this.name)
+                .append("inventoryName", this.inventoryName)
+                .append("slots", this.slots)
+                .append("pattern", this.pattern)
+                .toString();
     }
 }

@@ -2,6 +2,7 @@ package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
+import com.gotofinal.darkrise.crafting.gui.PlayerInitialGUI;
 import com.gotofinal.messages.api.messages.Message.MessageData;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +42,7 @@ public class Commands implements CommandExecutor
                     {
                         return instance.sendMessage("notAPlayer", sender, new MessageData("name", args[2]), new MessageData("sender", sender));
                     }
-                    eq.open(target);
+                    PlayerInitialGUI.open(eq, target);
                     return instance.sendMessage("crafting.useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender),
                                                 new MessageData("target", target));
                 }
@@ -53,7 +54,7 @@ public class Commands implements CommandExecutor
                         {
                             return true;
                         }
-                        eq.open(Bukkit.getPlayer(((Player) sender).getUniqueId()));
+                        PlayerInitialGUI.open(eq, Bukkit.getPlayer(((Player) sender).getUniqueId()));
                         return instance.sendMessage("crafting.useConfirm", sender, new MessageData("craftingInventory", eq), new MessageData("player", sender));
                     }
                     else

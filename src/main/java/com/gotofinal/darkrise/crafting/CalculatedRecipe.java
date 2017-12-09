@@ -98,7 +98,7 @@ public class CalculatedRecipe
         String levelsLine;
         if (recipe.neededLevels != 0)
         {
-            if (player.getLevel() < recipe.neededLevels)
+            if (LevelFunction.getLevel(ExperienceManager.getTotalExperience(player)) < recipe.neededLevels)
             {
                 canCraft = false;
                 levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.false", "crafting.gui.xpLevels.false", new MessageData("recipe", recipe),

@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Objects;
 
 import com.gotofinal.darkrise.crafting.CalculatedRecipe;
+import com.gotofinal.darkrise.crafting.Category;
 import com.gotofinal.darkrise.crafting.CraftingTable;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.MasteryManager;
 import com.gotofinal.darkrise.crafting.Recipe;
 import com.gotofinal.darkrise.crafting.RecipeItem;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
@@ -44,17 +46,19 @@ public class PlayerCustomGUI implements Listener
     private final CustomGUI gui;
     private final Player    player;
     private final Inventory inventory;
+    private final Category  category;
 
     private       int page    = 0;
     private final int maxPage = 0;
     private final Int2ObjectMap<CalculatedRecipe> recipes;
 
-    private PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory)
+    public PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory, Category category)
     {
         this.gui = gui;
         this.player = player;
         this.inventory = inventory;
         this.recipes = new Int2ObjectOpenHashMap<>(20);
+        this.category = category;
     }
 
     public void reloadRecipesTask()
@@ -68,6 +72,7 @@ public class PlayerCustomGUI implements Listener
         {
             CraftingTable table = Cfg.getTable(this.gui.name);
             Collection<Recipe> allRecipes = table.getRecipes().values();
+            allRecipes.removeIf(r -> !category.getRecipes().contains(r));
             int pageSize = this.gui.resultSlots.size();
             int allRecipeCount = allRecipes.size();
             int i = 0;
@@ -83,6 +88,8 @@ public class PlayerCustomGUI implements Listener
                 return;
             }
 
+            allRecipes.removeIf(r -> r.getNeededLevels() > player.getLevel() + 5);
+            allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
             Collection<ItemStack> playerItems = getPlayerItems(this.player);
             CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
             Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
@@ -95,6 +102,13 @@ public class PlayerCustomGUI implements Listener
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++)
             {
                 Recipe recipe = allRecipesArray[k];
+
+                if (! player.hasPermission("caversia.crafting.recipe." + recipe.getName()))
+                {
+                    i--;
+                    continue;
+                }
+
                 int slot = slots[i];
                 CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player);
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
@@ -130,7 +144,7 @@ public class PlayerCustomGUI implements Listener
         return result;
     }
 
-    public static PlayerCustomGUI open(CustomGUI gui, Player player)
+    public static PlayerCustomGUI open(CustomGUI gui, Player player, Category category)
     {
         Inventory inv = null;
         try
@@ -150,8 +164,9 @@ public class PlayerCustomGUI implements Listener
                     }
                 }
             }
+            PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
+            gui.open(player, playerCustomGUI);
             player.openInventory(inv);
-            PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv);
             playerCustomGUI.reloadRecipesTask();
             return playerCustomGUI;
         }
@@ -335,6 +350,10 @@ public class PlayerCustomGUI implements Listener
         {
             return false;
         }
+        if (! MasteryManager.hasMastery(player, gui.name))
+        {
+            return false;
+        }
 
         RecipeItem recipeResult = recipe.getResult();
         ItemStack resultItem = recipeResult.getItemStack();
@@ -388,14 +407,6 @@ public class PlayerCustomGUI implements Listener
         }
 
         Vault.pay(this.player, recipe.getPrice());
-        if (recipe.getNeededLevels() != 0)
-        {
-            this.player.setLevel(this.player.getLevel() - recipe.getNeededLevels());
-        }
-        if (recipe.getNeededXp() != 0)
-        {
-            ExperienceManager.setTotalExperience(this.player, ExperienceManager.getTotalExperience(this.player) - recipe.getNeededXp());
-        }
         if (addToCursor)
         {
             if ((cursor != null) && (cursor.getType() != Material.AIR))
@@ -420,6 +431,10 @@ public class PlayerCustomGUI implements Listener
                 this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
             }
         }
+
+        //Commands
+        DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, recipe.getCommands());
+
         return true;
     }
 }
