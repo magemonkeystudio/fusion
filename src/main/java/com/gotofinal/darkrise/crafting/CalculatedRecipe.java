@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import com.gotofinal.darkrise.economy.DarkRiseItems;
 import com.gotofinal.darkrise.spigot.core.Vault;
 import com.gotofinal.messages.api.messages.Message.MessageData;
 
@@ -50,7 +48,6 @@ public class CalculatedRecipe
 
     public static CalculatedRecipe create(Recipe recipe, Collection<ItemStack> items, Player player)
     {
-        DarkRiseItems ir = DarkRiseEconomy.getInstance().getItems();
         DarkRiseCrafting pl = DarkRiseCrafting.getInstance();
 
         StringBuilder lore = new StringBuilder(512);
@@ -62,6 +59,14 @@ public class CalculatedRecipe
             lore.append('\n');
         }
         boolean canCraft = true;
+
+        //Rank line
+        String rankLine = null;
+        if (! player.hasPermission("crafting.rank." + recipe.getRank()))
+        {
+            canCraft = false;
+            rankLine = pl.getMessageAsString("crafting.gui.rank." + recipe.getRank(), null);
+        }
 
         String permissionLine;
         if (! Utils.hasCraftingPermission(player, recipe.name))
@@ -219,6 +224,12 @@ public class CalculatedRecipe
             lore.append(xpLine).append('\n');
         }
         lore.append(permissionLine);
+
+        if (rankLine != null)
+        {
+            lore.append('\n').append(rankLine);
+        }
+
         if (canCraftLine != null)
         {
             lore.append('\n').append(canCraftLine);

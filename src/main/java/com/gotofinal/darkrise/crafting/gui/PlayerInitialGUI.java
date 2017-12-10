@@ -83,13 +83,13 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
     @Override
     public void onClick(InventoryClickEvent e) {
+        e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
 
         if (category != null)
         {
             e.getWhoClicked().closeInventory();
             PlayerCustomGUI.open(gui, (Player) e.getWhoClicked(), category);
-            e.setCancelled(true);
         }
     }
 }

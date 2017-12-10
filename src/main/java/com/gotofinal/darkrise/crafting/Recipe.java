@@ -30,6 +30,7 @@ public class Recipe implements ConfigurationSerializable
     protected final int                    neededXp;
     protected final boolean                mastery;
     protected final Collection<DelayedCommand> commands = new ArrayList<>();
+    protected final String rank;
 
     public Recipe(Map<String, Object> map)
     {
@@ -41,6 +42,7 @@ public class Recipe implements ConfigurationSerializable
         this.neededLevels = dw.getInt("neededLevels", 0);
         this.neededXp = dw.getInt("neededXp", 0);
         this.mastery = dw.getBoolean("mastery");
+        this.rank = dw.getString("rank");
         dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
     }
 
@@ -53,6 +55,7 @@ public class Recipe implements ConfigurationSerializable
         this.neededLevels = neededLevels;
         this.neededXp = neededXp;
         this.mastery = false;
+        this.rank = "";
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items)
@@ -176,6 +179,11 @@ public class Recipe implements ConfigurationSerializable
     public Collection<ItemStack> getItemsToTake()
     {
         return this.pattern.stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
+    }
+
+    public String getRank()
+    {
+        return rank;
     }
 
     @Override

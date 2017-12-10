@@ -3,6 +3,7 @@ package com.gotofinal.darkrise.crafting.gui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +73,10 @@ public class PlayerCustomGUI implements Listener
         try
         {
             CraftingTable table = Cfg.getTable(this.gui.name);
-            Collection<Recipe> allRecipes = table.getRecipes().values();
+            Collection<Recipe> allRecipes = new HashSet<>(table.getRecipes().values());
+            allRecipes.removeIf(r -> r.getNeededLevels() > player.getLevel() + 5);
+            allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
+            allRecipes.removeIf(r -> !player.hasPermission("caversia.crafting.recipe." + r.getName()));
             allRecipes.removeIf(r -> !category.getRecipes().contains(r));
             int pageSize = this.gui.resultSlots.size();
             int allRecipeCount = allRecipes.size();
@@ -82,15 +86,13 @@ public class PlayerCustomGUI implements Listener
             int fullPages = allRecipeCount / pageSize;
             int rest = allRecipeCount % pageSize;
             int pages = (rest == 0) ? fullPages : (fullPages + 1);
-            if (page >= pages)
+            if (page > pages)
             {
                 this.page = pages - 1;
                 this.reloadRecipes();
                 return;
             }
 
-            allRecipes.removeIf(r -> r.getNeededLevels() > player.getLevel() + 5);
-            allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
             Collection<ItemStack> playerItems = getPlayerItems(this.player);
             CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
             Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
@@ -103,13 +105,6 @@ public class PlayerCustomGUI implements Listener
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++)
             {
                 Recipe recipe = allRecipesArray[k];
-
-                if (! player.hasPermission("caversia.crafting.recipe." + recipe.getName()))
-                {
-                    i--;
-                    continue;
-                }
-
                 int slot = slots[i];
                 CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player);
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
@@ -308,6 +303,7 @@ public class PlayerCustomGUI implements Listener
     {
         if (this.page <= 0)
         {
+            PlayerInitialGUI.open(gui, player);
             return;
         }
         this.page--;
@@ -360,7 +356,8 @@ public class PlayerCustomGUI implements Listener
         ItemStack resultItem = recipeResult.getItemStack();
 
         //Add "Crafted by"
-        if(player.hasPermission("crafting.craftedby." + recipe.getName())) {
+        if (player.hasPermission("crafting.craftedby." + recipe.getName()))
+        {
             ItemMeta meta = resultItem.getItemMeta();
             List<String> lore = meta.getLore();
             lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());

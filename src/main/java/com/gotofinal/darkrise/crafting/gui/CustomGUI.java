@@ -56,7 +56,7 @@ public class CustomGUI implements Listener
             for (char c : row.toCharArray())
             {
                 k++;
-                if (c == '=')
+                if (c == '=' || c == 'o')
                 {
                     this.slots[k] = Slot.BASE_RESULT_SLOT;
                     this.resultSlots.add(k);
@@ -205,7 +205,7 @@ public class CustomGUI implements Listener
         {
             return;
         }
-        Inventory pinv = p.getInventory();
+        Inventory pInventory = p.getInventory();
         if (this.isThis(inv))
         {
             for (int i = 0; i < this.slots.length; i++)
@@ -217,7 +217,7 @@ public class CustomGUI implements Listener
                 ItemStack it = inv.getItem(i);
                 if (it != null)
                 {
-                    pinv.addItem(it)
+                    pInventory.addItem(it)
                             .values()
                             .stream()
                             .filter(Objects::nonNull)
