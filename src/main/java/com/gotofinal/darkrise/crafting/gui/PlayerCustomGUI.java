@@ -40,6 +40,7 @@ import org.bukkit.inventory.PlayerInventory;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class PlayerCustomGUI implements Listener
 {
@@ -357,6 +358,16 @@ public class PlayerCustomGUI implements Listener
 
         RecipeItem recipeResult = recipe.getResult();
         ItemStack resultItem = recipeResult.getItemStack();
+
+        //Add "Crafted by"
+        if(player.hasPermission("crafting.craftedby." + recipe.getName())) {
+            ItemMeta meta = resultItem.getItemMeta();
+            List<String> lore = meta.getLore();
+            lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());
+            meta.setLore(lore);
+            resultItem.setItemMeta(meta);
+        }
+
         ItemStack cursor = this.player.getItemOnCursor();
         if (addToCursor)
         {
@@ -416,7 +427,7 @@ public class PlayerCustomGUI implements Listener
             }
             else
             {
-                this.player.setItemOnCursor(recipe.getResult().getItemStack());
+                this.player.setItemOnCursor(resultItem);
             }
         }
         else
