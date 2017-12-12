@@ -23,6 +23,10 @@ public class Category implements ConfigurationSerializable
         name = dw.getString("name");
         order = dw.getInt("order");
         iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
+
+        if(iconItem == null) {
+            DarkRiseCrafting.getInstance().getLogger().severe("Invalid category icon for: " + name);
+        }
     }
 
     @Override

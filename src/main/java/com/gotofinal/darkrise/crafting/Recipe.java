@@ -44,6 +44,10 @@ public class Recipe implements ConfigurationSerializable
         this.mastery = dw.getBoolean("mastery");
         this.rank = dw.getString("rank");
         dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
+
+        if(result == null) {
+            throw new IllegalArgumentException("Invalid result: " + map.get("result"));
+        }
     }
 
     public Recipe(String name, Collection<RecipeItem> pattern, RecipeEconomyItem result, double price, int neededLevels, int neededXp)

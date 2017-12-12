@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.gotofinal.darkrise.spigot.core.utils.DeserializationWorker;
 import com.gotofinal.darkrise.spigot.core.utils.SerializationBuilder;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -49,7 +50,9 @@ public class CraftingTable implements ConfigurationSerializable
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
         Collection<Category> categoriesList = new ArrayList<>();
         dw.deserializeCollection(categoriesList, "categories", Category.class);
-        categoriesList.forEach(c -> categories.put(c.getName(), c));
+        categoriesList.stream()
+                .filter(c -> c.getIconItem() != null)
+                .forEach(c -> categories.put(c.getName(), c));
 
         List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
         for (Map<?, ?> recipeData : recipesSection)
@@ -73,7 +76,7 @@ public class CraftingTable implements ConfigurationSerializable
             } catch (Exception e)
             {
                 DarkRiseCrafting.getInstance().error("Exception when reading config, Invalid entry in config of " + this.name + " crafting table. Value: " + recipeData);
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }
