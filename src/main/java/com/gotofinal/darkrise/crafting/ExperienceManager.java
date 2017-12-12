@@ -12,7 +12,7 @@ public final class ExperienceManager
 
     public static int getTotalExperience(Player player)
     {
-        int experience = 0;
+        int experience;
         int level = player.getLevel();
         if ((level >= 0) && (level <= 15))
         {

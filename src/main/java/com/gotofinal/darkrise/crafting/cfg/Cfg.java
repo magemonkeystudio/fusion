@@ -125,6 +125,7 @@ public final class Cfg
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
         for (Map<?, ?> typeData : typesSection)
         {
+            //noinspection unchecked
             CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
             map.put(ct.getName(), ct);
         }

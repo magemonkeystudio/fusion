@@ -16,10 +16,10 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -56,25 +56,24 @@ public class CustomGUI implements Listener
             for (char c : row.toCharArray())
             {
                 k++;
-                if (c == '=' || c == 'o')
-                {
-                    this.slots[k] = Slot.BASE_RESULT_SLOT;
-                    this.resultSlots.add(k);
-                }
-                else if (c == '>')
-                {
-                    this.slots[k] = Slot.BLOCKED_SLOT;
-                    nextPage = k;
-                }
-                else if (c == '<')
-                {
-                    this.slots[k] = Slot.BLOCKED_SLOT;
-                    prevPage = k;
-                }
-                else
-                {
-                    this.slots[k] = Slot.BLOCKED_SLOT;
-                    this.blockedSlots.add(k);
+                switch(c) {
+                    case '=':
+                    case 'o':
+                        this.slots[k] = Slot.BASE_RESULT_SLOT;
+                        this.resultSlots.add(k);
+                        break;
+                    case '>':
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        nextPage = k;
+                        break;
+                    case '<':
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        prevPage = k;
+                        break;
+                    default:
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        this.blockedSlots.add(k);
+                        break;
                 }
             }
         }
@@ -230,9 +229,13 @@ public class CustomGUI implements Listener
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onClose(PlayerPickupItemEvent e)
+    public void onClose(EntityPickupItemEvent e)
     {
-        PlayerCustomGUI customGUI = this.map.get(e.getPlayer());
+        if(!(e.getEntity() instanceof Player)) {
+            return;
+        }
+
+        PlayerCustomGUI customGUI = this.map.get(e.getEntity());
         if (customGUI == null)
         {
             return;

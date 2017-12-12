@@ -5,11 +5,10 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 public class LevelFunction
 {
-    private static Map<Integer, Double> map = new HashMap<>();
+    private static final Map<Integer, Double> map = new HashMap<>();
 
     public static double getXP(int level)
     {
