@@ -13,8 +13,8 @@ crafting:
       'true': "&3Cost: &a$<player.money>&8/&7$<recipe.price> &3$."
       'false': "&3Cost: &c$<player.money>&8/&7$<recipe.price> &3$."
     xpLevels:
-      'true': "&3Cost: &a$<player.xpLevel>&8/&7$<recipe.neededLevels> &3levels."
-      'false': "&3Cost: &c$<player.xpLevel>&8/&7$<recipe.neededLevels> &3levels."
+      'true': "&3Cost: &a$<level>&8/&7$<recipe.neededLevels> &3levels."
+      'false': "&3Cost: &c$<level>&8/&7$<recipe.neededLevels> &3levels."
     xp:
       'true': "&3Cost: &a$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."
       'false': "&3Cost: &c$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."

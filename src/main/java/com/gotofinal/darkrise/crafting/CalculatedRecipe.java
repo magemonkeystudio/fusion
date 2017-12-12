@@ -53,16 +53,18 @@ public class CalculatedRecipe
         StringBuilder lore = new StringBuilder(512);
         ItemStack result = recipe.getResult().getItemStack();
         List<String> resultLore = result.getItemMeta().getLore();
+
         if ((resultLore != null) && ! resultLore.isEmpty())
         {
             resultLore.forEach((str) -> lore.append(str).append('\n'));
             lore.append('\n');
         }
+
         boolean canCraft = true;
 
         //Rank line
         String rankLine = null;
-        if (! player.hasPermission("crafting.rank." + recipe.getRank()))
+        if (recipe.getRank() != null && ! player.hasPermission("crafting.rank." + recipe.getRank()))
         {
             canCraft = false;
             rankLine = pl.getMessageAsString("crafting.gui.rank." + recipe.getRank(), null);
@@ -80,7 +82,8 @@ public class CalculatedRecipe
             permissionLine = pl.getMessageAsString("crafting.gui.learned.true", "crafting.gui.learned.true", new MessageData("recipe", recipe),
                                                    new MessageData("player", player));
         }
-        String moneyLine;
+
+        String moneyLine = null;
         if (recipe.price != 0)
         {
             if (! Vault.canPay(player, recipe.price))
@@ -95,31 +98,24 @@ public class CalculatedRecipe
                                                   new MessageData("player", player));
             }
         }
-        else
-        {
-            moneyLine = null;
-        }
 
-        String levelsLine;
+        String levelsLine = null;
         if (recipe.neededLevels != 0)
         {
-            if (LevelFunction.getLevel(ExperienceManager.getTotalExperience(player)) < recipe.neededLevels)
+            if (LevelFunction.getLevel(player) < recipe.neededLevels)
             {
                 canCraft = false;
                 levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.false", "crafting.gui.xpLevels.false", new MessageData("recipe", recipe),
-                                                   new MessageData("player", player));
+                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player)));
             }
             else
             {
                 levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.true", "crafting.gui.xpLevels.true", new MessageData("recipe", recipe),
-                                                   new MessageData("player", player));
+                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player)));
             }
         }
-        else
-        {
-            levelsLine = null;
-        }
-        String xpLine;
+
+        String xpLine = null;
         if (recipe.neededXp != 0)
         {
             if (ExperienceManager.getTotalExperience(player) < recipe.neededXp)
@@ -133,10 +129,6 @@ public class CalculatedRecipe
                 xpLine = pl.getMessageAsString("crafting.gui.xp.true", "crafting.gui.xp.true", new MessageData("recipe", recipe),
                                                new MessageData("player", player));
             }
-        }
-        else
-        {
-            xpLine = null;
         }
 
 

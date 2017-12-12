@@ -12,9 +12,11 @@ import com.gotofinal.darkrise.crafting.CalculatedRecipe;
 import com.gotofinal.darkrise.crafting.Category;
 import com.gotofinal.darkrise.crafting.CraftingTable;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.LevelFunction;
 import com.gotofinal.darkrise.crafting.MasteryManager;
 import com.gotofinal.darkrise.crafting.Recipe;
 import com.gotofinal.darkrise.crafting.RecipeItem;
+import com.gotofinal.darkrise.crafting.Utils;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
@@ -74,9 +76,9 @@ public class PlayerCustomGUI implements Listener
         {
             CraftingTable table = Cfg.getTable(this.gui.name);
             Collection<Recipe> allRecipes = new HashSet<>(table.getRecipes().values());
-            allRecipes.removeIf(r -> r.getNeededLevels() > player.getLevel() + 5);
+            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player) + 5);
             allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
-            allRecipes.removeIf(r -> !player.hasPermission("caversia.crafting.recipe." + r.getName()));
+            allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
             allRecipes.removeIf(r -> !category.getRecipes().contains(r));
             int pageSize = this.gui.resultSlots.size();
             int allRecipeCount = allRecipes.size();
@@ -335,7 +337,7 @@ public class PlayerCustomGUI implements Listener
             return false;
         }
         Recipe recipe = calculatedRecipe.getRecipe();
-        if (this.player.getLevel() < recipe.getNeededLevels())
+        if (LevelFunction.getLevel(player) < recipe.getNeededLevels())
         {
             return false;
         }

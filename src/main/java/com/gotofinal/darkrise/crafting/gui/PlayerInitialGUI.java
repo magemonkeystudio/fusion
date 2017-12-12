@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,7 +43,11 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
             Char2ObjectMap<ItemStack> items = gui.pattern.getItems();
             PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
             CraftingTable table = Cfg.getTable(gui.name);
-            Iterator<Category> categoryIterator = table.getCategories().values().iterator();
+            Iterator<Category> categoryIterator = table.getCategories()
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparingInt(Category::getOrder))
+                    .iterator();
 
             for (String row : gui.pattern.getPattern())
             {

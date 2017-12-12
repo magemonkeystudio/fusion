@@ -100,7 +100,7 @@ public class Recipe implements ConfigurationSerializable
             {
                 return false;
             }
-            if (p.getLevel() < this.neededLevels)
+            if (LevelFunction.getLevel(p) < this.neededLevels)
             {
                 return false;
             }

@@ -1,5 +1,7 @@
 package com.gotofinal.darkrise.crafting;
 
+import org.bukkit.entity.Player;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,10 +20,15 @@ public class LevelFunction
     {
         Optional<Map.Entry<Integer, Double>> val = map.entrySet()
                 .stream()
-                .filter(e -> e.getValue() < xp)
+                .filter(e -> e.getValue() <= xp)
                 .reduce((i, d) -> d);
 
         return val.isPresent() ? val.get().getKey() : 0;
+    }
+
+    public static int getLevel(Player player)
+    {
+        return getLevel(ExperienceManager.getTotalExperience(player));
     }
 
     public static void generate(int levels)

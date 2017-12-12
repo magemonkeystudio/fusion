@@ -18,11 +18,13 @@ public class Category implements ConfigurationSerializable
     private final String name;
     private final DarkRiseItem iconItem;
     private final Collection<Recipe> recipes = new ArrayList<>();
+    private final int order;
 
     public Category(Map<String, Object> map)
     {
         DeserializationWorker dw = DeserializationWorker.start(map);
         name = dw.getString("name");
+        order = dw.getInt("order");
         iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
     }
 
@@ -47,5 +49,10 @@ public class Category implements ConfigurationSerializable
     public DarkRiseItem getIconItem()
     {
         return iconItem;
+    }
+
+    public int getOrder()
+    {
+        return order;
     }
 }
