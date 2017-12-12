@@ -75,11 +75,10 @@ public class PlayerCustomGUI implements Listener
         try
         {
             CraftingTable table = Cfg.getTable(this.gui.name);
-            Collection<Recipe> allRecipes = new HashSet<>(table.getRecipes().values());
+            Collection<Recipe> allRecipes = new HashSet<>(category.getRecipes());
             allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player) + 5);
             allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
-            allRecipes.removeIf(r -> !category.getRecipes().contains(r));
             int pageSize = this.gui.resultSlots.size();
             int allRecipeCount = allRecipes.size();
             int i = 0;

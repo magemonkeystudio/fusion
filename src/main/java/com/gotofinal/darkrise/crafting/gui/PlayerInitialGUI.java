@@ -2,6 +2,10 @@ package com.gotofinal.darkrise.crafting.gui;
 
 import com.gotofinal.darkrise.crafting.Category;
 import com.gotofinal.darkrise.crafting.CraftingTable;
+import com.gotofinal.darkrise.crafting.LevelFunction;
+import com.gotofinal.darkrise.crafting.MasteryManager;
+import com.gotofinal.darkrise.crafting.Recipe;
+import com.gotofinal.darkrise.crafting.Utils;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import org.bukkit.Bukkit;
@@ -12,9 +16,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
@@ -51,7 +57,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
             for (String row : gui.pattern.getPattern())
             {
-                for (char c : row.toCharArray())
+                charLoop: for (char c : row.toCharArray())
                 {
                     k++;
                     ItemStack item = items.get(c);
@@ -63,7 +69,21 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     //Slots
                     if (c == 'o' && categoryIterator.hasNext())
                     {
-                        Category category = categoryIterator.next();
+                        List<Recipe> recipes;
+                        Category category;
+                        do {
+                            category = categoryIterator.next();
+                            recipes = new ArrayList<>(category.getRecipes());
+                            recipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
+                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player) + 5);
+                            recipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
+
+                            if(recipes.isEmpty() && !categoryIterator.hasNext()) {
+                                continue charLoop;
+                            }
+
+                        } while(recipes.isEmpty());
+
                         inv.setItem(k, category.getIconItem().getItem());
                         playerCustomGUI.slotMap.put(k, category);
                     }
