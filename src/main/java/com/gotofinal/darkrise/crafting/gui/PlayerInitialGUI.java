@@ -2,11 +2,14 @@ package com.gotofinal.darkrise.crafting.gui;
 
 import com.gotofinal.darkrise.crafting.Category;
 import com.gotofinal.darkrise.crafting.CraftingTable;
+import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.LevelFunction;
 import com.gotofinal.darkrise.crafting.MasteryManager;
 import com.gotofinal.darkrise.crafting.Recipe;
 import com.gotofinal.darkrise.crafting.Utils;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.spigot.core.utils.cmds.DelayedCommand;
+import com.gotofinal.darkrise.spigot.core.utils.cmds.R;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,6 +20,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -115,6 +119,16 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
         {
             e.getWhoClicked().closeInventory();
             PlayerCustomGUI.open(gui, (Player) e.getWhoClicked(), category);
+        }
+
+        //Execute commands
+        Character c = gui.getPattern().getSlot(e.getRawSlot());
+        Collection<DelayedCommand> patternCommands = gui.getPattern().getCommands(c);
+        if (patternCommands != null && ! patternCommands.isEmpty())
+        {
+            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), e.getWhoClicked(), patternCommands,
+                    R.r("{crafting}", this.gui.getName()),
+                    R.r("{inventoryName}", this.gui.getInventoryName()));
         }
     }
 }
