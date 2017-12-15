@@ -198,6 +198,13 @@ public class PlayerCustomGUI implements Listener
                     R.r("{crafting}", this.gui.getName()),
                     R.r("{inventoryName}", this.gui.getInventoryName()));
         }
+
+        //Close on click
+        if (gui.getPattern().getCloseOnClickSlots().contains(c))
+        {
+            Bukkit.getScheduler().runTask(DarkRiseCrafting.getInstance(), () -> e.getWhoClicked().closeInventory());
+        }
+
 //        System.out.println("CLICK(" + e.getRawSlot() + ")..." + this.slots[e.getRawSlot()] + ", " + e.getAction() + ", Crafts: " + Arrays.toString(this
 // .craftingSlots.toArray()) + ", Results: " + Arrays.toString(this.resultSlots.toArray()) + ", Blockeds: " + Arrays.toString(this.blockedSlots.toArray()));
         if (this.gui.slots[e.getRawSlot()].equals(Slot.BLOCKED_SLOT))

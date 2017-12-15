@@ -130,5 +130,11 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     R.r("{crafting}", this.gui.getName()),
                     R.r("{inventoryName}", this.gui.getInventoryName()));
         }
+
+        //Close on click
+        if (gui.getPattern().getCloseOnClickSlots().contains(c))
+        {
+            e.getWhoClicked().closeInventory();
+        }
     }
 }

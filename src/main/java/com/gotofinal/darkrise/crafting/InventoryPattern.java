@@ -27,6 +27,7 @@ public class InventoryPattern implements ConfigurationSerializable
     private final String[]                  pattern; // _ for ingredients, = for result.
     private final Char2ObjectMap<ItemStack> items;
     private final Char2ObjectMap<Collection<DelayedCommand>> commands = new Char2ObjectOpenHashMap<>();
+    private final List<Character> closeOnClickSlots = new ArrayList<>();
 
     public InventoryPattern(String[] pattern, Char2ObjectMap<ItemStack> items)
     {
@@ -44,7 +45,13 @@ public class InventoryPattern implements ConfigurationSerializable
         DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
         for (String entry : itemsTemp.getMap().keySet())
         {
-            this.items.put(entry.charAt(0), new ItemBuilder(itemsTemp.getSection(entry)).build());
+            Map<String, Object> section = itemsTemp.getSection(entry);
+            this.items.put(entry.charAt(0), new ItemBuilder(section).build());
+
+            if (section.containsKey("closeonclick") && (boolean) section.get("closeonclick"))
+            {
+                closeOnClickSlots.add(entry.charAt(0));
+            }
         }
 
         final DeserializationWorker commandsTemp = DeserializationWorker.start(dw.getSection("commands", new HashMap<>(2)));
@@ -67,6 +74,11 @@ public class InventoryPattern implements ConfigurationSerializable
     public Collection<DelayedCommand> getCommands(char c)
     {
             return this.commands.get(c);
+    }
+
+    public List<Character> getCloseOnClickSlots()
+    {
+        return closeOnClickSlots;
     }
 
     public Character getSlot(int slot)
