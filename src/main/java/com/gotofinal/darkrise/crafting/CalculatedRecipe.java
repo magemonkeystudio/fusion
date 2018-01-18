@@ -154,7 +154,27 @@ public class CalculatedRecipe
             ItemStack recipeItemStack = recipeItem.getItemStack();
             ItemStack recipeItemStackOne = recipeItemStack.clone();
             recipeItemStackOne.setAmount(1);
-            int eqAmount = eqItems.getOrDefault(recipeItemStackOne, - 1);
+            int eqAmount = 0;
+            for (Map.Entry<ItemStack, Integer> entry : eqItems.entrySet())
+            {
+                ItemStack item = entry.getKey().clone();
+                if (item.hasItemMeta() && item.getItemMeta().hasLore())
+                {
+                    item = item.clone();
+                    ItemMeta meta = item.getItemMeta();
+                    List<String> itemLore = meta.getLore();
+                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+                    meta.setLore(itemLore);
+                    item.setItemMeta(meta);
+
+                    if (item.isSimilar(recipeItemStackOne))
+                    {
+                        eqAmount = entry.getValue();
+                        break;
+                    }
+                }
+            }
+
             if (eqAmount == -1)
             {
                 canCraft = false;

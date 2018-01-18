@@ -396,6 +396,28 @@ public class PlayerCustomGUI implements Listener
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); )
         {
             ItemStack toTake = iterator.next();
+            for (ItemStack entry : getPlayerItems(player))
+            {
+                ItemStack item = entry.clone();
+                entry = entry.clone();
+                if (item.hasItemMeta() && item.getItemMeta().hasLore())
+                {
+                    item = item.clone();
+                    ItemMeta meta = item.getItemMeta();
+                    List<String> itemLore = meta.getLore();
+                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+                    meta.setLore(itemLore);
+                    item.setItemMeta(meta);
+                    entry.setAmount(toTake.getAmount());
+
+                    if (item.isSimilar(toTake))
+                    {
+                        toTake = entry;
+                        break;
+                    }
+                }
+            }
+
             HashMap<Integer, ItemStack> notRemoved = inventory.removeItem(toTake);
             if (notRemoved.isEmpty())
             {
