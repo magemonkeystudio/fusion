@@ -46,7 +46,7 @@ public class CalculatedRecipe
         return this.canCraft;
     }
 
-    public static CalculatedRecipe create(Recipe recipe, Collection<ItemStack> items, Player player)
+    public static CalculatedRecipe create(Recipe recipe, Collection<ItemStack> items, Player player, CraftingTable craftingTable)
     {
         DarkRiseCrafting pl = DarkRiseCrafting.getInstance();
 
@@ -102,23 +102,23 @@ public class CalculatedRecipe
         String levelsLine = null;
         if (recipe.neededLevels != 0)
         {
-            if (LevelFunction.getLevel(player) < recipe.neededLevels)
+            if (LevelFunction.getLevel(player, craftingTable) < recipe.neededLevels)
             {
                 canCraft = false;
                 levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.false", "crafting.gui.xpLevels.false", new MessageData("recipe", recipe),
-                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player)));
+                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player, craftingTable)));
             }
             else
             {
                 levelsLine = pl.getMessageAsString("crafting.gui.xpLevels.true", "crafting.gui.xpLevels.true", new MessageData("recipe", recipe),
-                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player)));
+                                                   new MessageData("player", player), new MessageData("level", LevelFunction.getLevel(player, craftingTable)));
             }
         }
 
         String xpLine = null;
         if (recipe.neededXp != 0)
         {
-            if (ExperienceManager.getTotalExperience(player) < recipe.neededXp)
+            if (DarkRiseCrafting.getExperienceManager().getExperience(player, craftingTable) < recipe.neededXp)
             {
                 canCraft = false;
                 xpLine = pl.getMessageAsString("crafting.gui.xp.false", "crafting.gui.xp.false", new MessageData("recipe", recipe),

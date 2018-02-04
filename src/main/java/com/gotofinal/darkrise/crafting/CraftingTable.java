@@ -122,7 +122,7 @@ public class CraftingTable implements ConfigurationSerializable
         {
             return new ArrayList<>(this.recipes.values());
         }
-        return this.recipes.values().stream().unordered().filter(r -> r.isValid(items, p)).collect(Collectors.toList());
+        return this.recipes.values().stream().unordered().filter(r -> r.isValid(items, p, this)).collect(Collectors.toList());
     }
 
     @Override

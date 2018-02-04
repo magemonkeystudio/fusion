@@ -6,8 +6,13 @@ import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 import com.gotofinal.darkrise.spigot.core.DarkRisePlugin;
 import com.gotofinal.messages.Init;
 import com.gotofinal.messages.api.chat.placeholder.PlaceholderType;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerLoginEvent;
 
-public class DarkRiseCrafting extends DarkRisePlugin
+import java.io.IOException;
+
+public class DarkRiseCrafting extends DarkRisePlugin implements Listener
 {
     public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        = PlaceholderType.create("recipeItem", RecipeItem.class);
     public static final PlaceholderType<Recipe>           RECIPE             = PlaceholderType.create("recipe", Recipe.class);
@@ -16,6 +21,7 @@ public class DarkRiseCrafting extends DarkRisePlugin
     public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY = PlaceholderType.create("craftingInventory", CustomGUI.class);
 
     private static DarkRiseCrafting instance;
+    private static ExperienceManager experienceManager;
 
     {
         instance = this;
@@ -64,6 +70,9 @@ public class DarkRiseCrafting extends DarkRisePlugin
         super.onEnable();
         this.reloadConfigs();
         this.getCommand("craft").setExecutor(new Commands());
+        experienceManager = new ExperienceManager();
+        experienceManager.load();
+        getServer().getPluginManager().registerEvents(this, this);
     }
 
     public void closeAll()
@@ -75,6 +84,24 @@ public class DarkRiseCrafting extends DarkRisePlugin
     public void onDisable()
     {
         super.onDisable();
+        try
+        {
+            experienceManager.save();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
         this.closeAll();
+    }
+
+    /**
+     * Gets the experience manager
+     *
+     * @return experience manager
+     */
+    public static ExperienceManager getExperienceManager()
+    {
+        return experienceManager;
     }
 }

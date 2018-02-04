@@ -1,15 +1,214 @@
 package com.gotofinal.darkrise.crafting;
 
-import java.math.BigDecimal;
-
+import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import org.apache.commons.lang.Validate;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public final class ExperienceManager
 {
-    private ExperienceManager()
+    public static class PlayerData implements ConfigurationSerializable
     {
+        private final UUID uuid;
+        private final Map<CraftingTable, Integer> data = new HashMap<>();
+
+        /**
+         * The constructor
+         *
+         * @param map serialized data
+         */
+        public PlayerData(Map<String, Object> map)
+        {
+            uuid = UUID.fromString((String) map.get("uuid"));
+            //noinspection unchecked
+            ((Map<String, Object>) map.get("data")).forEach((key, value) -> data.put(Cfg.getTable(key), (Integer) value));
+        }
+
+        /**
+         * The constructor
+         *
+         * @param uuid player uuid
+         */
+        public PlayerData(UUID uuid)
+        {
+            this.uuid = uuid;
+        }
+
+        /**
+         * Gets player uuid
+         *
+         * @return uuid
+         */
+        public UUID getUuid()
+        {
+            return uuid;
+        }
+
+        /**
+         * Gets data map
+         *
+         * @return data map
+         */
+        public Map<CraftingTable, Integer> getMap()
+        {
+            return data;
+        }
+
+        /**
+         * Gets experience
+         *
+         * @param craftingTable table
+         * @return experience
+         */
+        public Integer getExperience(CraftingTable craftingTable)
+        {
+            return data.getOrDefault(craftingTable, 0);
+        }
+
+        /**
+         * Adds experience
+         *
+         * @param craftingTable table
+         * @param experience    experience
+         */
+        public void add(CraftingTable craftingTable, Integer experience)
+        {
+            data.put(craftingTable, data.getOrDefault(craftingTable, 0) + experience);
+        }
+
+        @Override
+        public Map<String, Object> serialize()
+        {
+            final Map<String, Object> map = new HashMap<>();
+
+            map.put("uuid", uuid.toString());
+            Map<String, Object> dataMap = new HashMap<>();
+            data.forEach((key, value) -> dataMap.put(key.getName(), value));
+            map.put("data", dataMap);
+
+            return map;
+        }
     }
 
+    private final Collection<PlayerData> playerDataSet = new HashSet<>();
+    private final File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "data.yml");
+
+    /**
+     * Loads data
+     */
+    public void load()
+    {
+        try
+        {
+            if ( !file.exists() && !file.createNewFile())
+            {
+                DarkRiseCrafting.getInstance().getLogger().severe("Failed to create exp data file");
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        YamlConfiguration configuration = new YamlConfiguration();
+
+        try
+        {
+            configuration.load(file);
+        }
+        catch (Exception e)
+        {
+            DarkRiseCrafting.getInstance().getLogger().warning("Can't load exp data file: " + file);
+            e.printStackTrace();
+            return;
+        }
+
+        List<Map<?, ?>> typesSection = configuration.getMapList("data");
+        for (Map<?, ?> typeData : typesSection)
+        {
+            //noinspection unchecked
+            PlayerData playerData = new PlayerData((Map<String, Object>) typeData);
+            this.playerDataSet.add(playerData);
+        }
+    }
+
+    /**
+     * Saves all the data
+     *
+     * @throws IOException when something goes wrong
+     */
+    public void save() throws IOException
+    {
+        YamlConfiguration configuration = new YamlConfiguration();
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        this.playerDataSet.forEach(playerData -> list.add(playerData.serialize()));
+
+        configuration.set("data", list);
+        configuration.save(file);
+    }
+
+    /**
+     * Gets player experience
+     *
+     * @param player        player
+     * @param craftingTable table
+     * @return experience as int
+     */
+    public int getExperience(Player player, CraftingTable craftingTable)
+    {
+        Validate.notNull(player);
+        Validate.notNull(craftingTable);
+        PlayerData playerData = getPlayerData(player);
+        Validate.notNull(playerData);
+        return playerData.getExperience(craftingTable);
+    }
+
+    /**
+     * Gets player data
+     *
+     * @param player player
+     * @return player data object
+     */
+    public PlayerData getPlayerData(Player player)
+    {
+        for (PlayerData data : playerDataSet)
+        {
+            if (data.getUuid().equals(player.getUniqueId()))
+            {
+                return data;
+            }
+        }
+
+        return createPlayerData(player);
+    }
+
+    /**
+     * Creates player data
+     *
+     * @param player player
+     * @return player data object
+     */
+    public PlayerData createPlayerData(Player player)
+    {
+        PlayerData playerData = new PlayerData(player.getUniqueId());
+        playerDataSet.add(playerData);
+        return playerData;
+    }
+
+    @Deprecated
     public static int getTotalExperience(Player player)
     {
         int experience;
@@ -40,6 +239,7 @@ public final class ExperienceManager
         }
     }
 
+    @Deprecated
     public static void setTotalExperience(Player player, int xp)
     {
         //Levels 0 through 15

@@ -28,6 +28,7 @@ public class Recipe implements ConfigurationSerializable
     protected final double                 price;
     protected final int                    neededLevels;
     protected final int                    neededXp;
+    protected final int                    xpGain;
     protected final boolean                mastery;
     protected final Collection<DelayedCommand> commands = new ArrayList<>();
     protected final String rank;
@@ -41,6 +42,7 @@ public class Recipe implements ConfigurationSerializable
         this.price = dw.getDouble("price", 0);
         this.neededLevels = dw.getInt("neededLevels", 0);
         this.neededXp = dw.getInt("neededXp", 0);
+        this.xpGain = dw.getInt("xpGain", 0);
         this.mastery = dw.getBoolean("mastery");
         this.rank = dw.getString("rank");
         dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
@@ -58,6 +60,7 @@ public class Recipe implements ConfigurationSerializable
         this.price = price;
         this.neededLevels = neededLevels;
         this.neededXp = neededXp;
+        this.xpGain = 0;
         this.mastery = false;
         this.rank = "";
     }
@@ -92,7 +95,7 @@ public class Recipe implements ConfigurationSerializable
         return localPattern;
     }
 
-    public boolean isValid(Collection<ItemStack> items, Player p)
+    public boolean isValid(Collection<ItemStack> items, Player p, CraftingTable craftingTable)
     {
         if (items.isEmpty())
         {
@@ -104,11 +107,11 @@ public class Recipe implements ConfigurationSerializable
             {
                 return false;
             }
-            if (LevelFunction.getLevel(p) < this.neededLevels)
+            if (LevelFunction.getLevel(p, craftingTable) < this.neededLevels)
             {
                 return false;
             }
-            if (ExperienceManager.getTotalExperience(p) < this.neededXp)
+            if (DarkRiseCrafting.getExperienceManager().getExperience(p, craftingTable) < this.neededXp)
             {
                 return false;
             }
@@ -168,6 +171,11 @@ public class Recipe implements ConfigurationSerializable
     public int getNeededXp()
     {
         return this.neededXp;
+    }
+
+    public int getXpGain()
+    {
+        return this.xpGain;
     }
 
     public Collection<DelayedCommand> getCommands()

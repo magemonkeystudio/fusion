@@ -79,7 +79,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());
                             recipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
-                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player) + 5);
+                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
                             recipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
 
                             if(recipes.isEmpty() && !categoryIterator.hasNext()) {

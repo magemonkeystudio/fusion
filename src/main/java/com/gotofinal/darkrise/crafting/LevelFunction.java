@@ -25,9 +25,9 @@ public class LevelFunction
         return val.isPresent() ? val.get().getKey() : 0;
     }
 
-    public static int getLevel(Player player)
+    public static int getLevel(Player player, CraftingTable craftingTable)
     {
-        return getLevel(ExperienceManager.getTotalExperience(player));
+        return getLevel(DarkRiseCrafting.getExperienceManager().getExperience(player, craftingTable));
     }
 
     public static void generate(int levels)

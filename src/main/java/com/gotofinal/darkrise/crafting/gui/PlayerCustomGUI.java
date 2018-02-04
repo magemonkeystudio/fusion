@@ -76,7 +76,7 @@ public class PlayerCustomGUI implements Listener
         {
             CraftingTable table = Cfg.getTable(this.gui.name);
             Collection<Recipe> allRecipes = new HashSet<>(category.getRecipes());
-            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player) + 5);
+            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
             allRecipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
             int pageSize = this.gui.resultSlots.size();
@@ -107,7 +107,7 @@ public class PlayerCustomGUI implements Listener
             {
                 Recipe recipe = allRecipesArray[k];
                 int slot = slots[i];
-                CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player);
+                CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                 this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
             }
@@ -343,7 +343,7 @@ public class PlayerCustomGUI implements Listener
             return false;
         }
         Recipe recipe = calculatedRecipe.getRecipe();
-        if (LevelFunction.getLevel(player) < recipe.getNeededLevels())
+        if (LevelFunction.getLevel(player, Cfg.getTable(this.gui.name)) < recipe.getNeededLevels())
         {
             return false;
         }
@@ -472,6 +472,14 @@ public class PlayerCustomGUI implements Listener
 
         //Commands
         DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, recipe.getCommands());
+
+        //Experience
+        CraftingTable table = Cfg.getTable(this.gui.name);
+
+        if(recipe.getXpGain() > 0)
+        {
+            DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+        }
 
         return true;
     }
