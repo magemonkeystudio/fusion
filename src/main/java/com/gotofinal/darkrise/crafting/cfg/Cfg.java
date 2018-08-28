@@ -60,7 +60,7 @@ public final class Cfg
     private static void addDefs(FileConfiguration cfg)
     {
         Char2ObjectMap<ItemStack> items = new Char2ObjectOpenHashMap<>();
-        items.put('0', ItemBuilder.newItem(Material.STAINED_GLASS_PANE).durability(ItemColors.BLACK).build());
+        items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
         items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
         items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
         InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);

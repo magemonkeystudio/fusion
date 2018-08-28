@@ -26,6 +26,7 @@ package com.gotofinal.darkrise.crafting.gui.slot;
 
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 
+import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
 
@@ -68,7 +69,7 @@ public abstract class Slot
         @Override
         public ItemStack canHoldItem(ItemStack item)
         {
-            if ((item == null) || (item.getTypeId() == 0))
+            if (item == null || item.getType() == Material.AIR)
             {
                 return null;
             }
