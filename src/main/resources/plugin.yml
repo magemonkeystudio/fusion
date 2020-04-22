@@ -1,0 +1,8 @@
+name: Crafting
+main: com.gotofinal.darkrise.crafting.DarkRiseCrafting
+author: GotoFinal
+version: 1.0-Trav
+depend: [Economy]
+api-version: 1.13
+commands:
+  craft:

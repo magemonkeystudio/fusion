@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>risecore-parent</artifactId>
+        <groupId>me.travja</groupId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../RiseCore Parent/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>crafting</artifactId>
+    <name>Crafting</name>
+    <version>1.0-SNAPSHOT</version>
+
+    <build>
+        <finalName>${project.name}-${project.version}</finalName>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>me.travja</groupId>
+            <artifactId>risecore</artifactId>
+            <version>${rc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gotofinal</groupId>
+            <artifactId>economy</artifactId>
+            <version>1.0-Travja</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>it.unimi.dsi</groupId>-->
+<!--            <artifactId>fastutil</artifactId>-->
+<!--        </dependency>-->
+    </dependencies>
+
+</project>
