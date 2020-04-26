@@ -47,11 +47,12 @@ public final class Cfg {
         items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
         items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
         InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
-        CraftingTable a = new CraftingTable("forge", "Forge inventory name", ip, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), 0, 0);
+        ItemStack item = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
+        CraftingTable a = new CraftingTable("forge", "Forge inventory name", ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
 
         a.addRecipe(new Recipe("test", Arrays.asList(new RecipeEconomyItem("testItem", 5), new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
                 new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
-        CraftingTable b = new CraftingTable("craft", "Craft inventory name", ip, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), 0, 0);
+        CraftingTable b = new CraftingTable("craft", "Craft inventory name", ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
         List<Map<String, Object>> list = new ArrayList<>(3);
         list.add(a.serialize());
         list.add(b.serialize());
