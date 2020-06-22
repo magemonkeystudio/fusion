@@ -55,8 +55,8 @@ public class CraftingTable implements ConfigurationSerializable {
         if (dw.getSection("fillItem") != null)
             this.fillItem = new ItemBuilder(dw.getSection("fillItem")).build();
         else
-            this.fillItem = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
-//            this.fillItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+//            this.fillItem = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
+            this.fillItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         Collection<Category> categoriesList = new ArrayList<>();
         dw.deserializeCollection(categoriesList, "categories", Category.class);
         categoriesList.stream()

@@ -16,6 +16,7 @@ public class PlayerConfig {
     private Player player;
     private FileConfiguration config;
     private HashMap<String, Boolean> mastery = new HashMap<>();
+    private boolean autoCraft = false;
     private File file;
 
     public PlayerConfig(Player player) {
@@ -33,9 +34,12 @@ public class PlayerConfig {
             config = yaml;
 
             for (Map.Entry<String, CustomGUI> entry : Cfg.getGuiMap().entrySet()) {
-                if(config.contains("guis." + entry.getKey()))
+                if (config.contains("guis." + entry.getKey()))
                     mastery.put(entry.getKey(), config.getBoolean("guis." + entry.getKey()));
             }
+
+            if (config.contains("autoCraft"))
+                autoCraft = config.getBoolean("autoCraft");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,6 +52,16 @@ public class PlayerConfig {
     public void setHasMastery(String gui, boolean hasMastery) {
         mastery.put(gui, hasMastery);
         config.set("guis", mastery);
+        saveConfig();
+    }
+
+    public boolean isAutoCraft() {
+        return autoCraft;
+    }
+
+    public void setAutoCraft(boolean auto) {
+        autoCraft = auto;
+        config.set("autoCraft", auto);
         saveConfig();
     }
 

@@ -111,6 +111,23 @@ public class Commands implements CommandExecutor {
             }
 
             return true;
+        } else if(args.length == 1 && args[0].equalsIgnoreCase("auto")) {
+            if (!(sender instanceof Player)) {
+                MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                return true;
+            }
+            if (!instance.checkPermission(sender, "crafting.reload")) {
+                return true;
+            }
+            Player player = (Player) sender;
+
+            boolean autoOn = MasteryManager.getPlayerConfig(player).isAutoCraft();
+
+            MasteryManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
+
+            MessageUtil.sendMessage("crafting.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
+
+            return true;
         }
         MessageUtil.sendMessage("crafting.help", sender, new MessageData("sender", sender),
                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));

@@ -49,6 +49,8 @@ public class PlayerCustomGUI implements Listener {
     private Collection<ItemStack> refund = new ArrayList<>();
     private ItemStack previousCursor;
 
+    private boolean craftingSuccess = true;
+
     public PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory, Category category) {
         this.gui = gui;
         this.player = player;
@@ -267,10 +269,11 @@ public class PlayerCustomGUI implements Listener {
     }
 
     private boolean craft(int slot, boolean addToCursor) {
-        if (craftingTask != null) {
+/*        if (craftingTask != null) {
             MessageUtil.sendMessage("crafting.alreadyCrafting", player);
             return false;
-        }
+        }*/
+        cancel();
 
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
         if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !MasteryManager.hasMastery(player, this.gui.getName())) {
@@ -364,14 +367,16 @@ public class PlayerCustomGUI implements Listener {
             }
             break;
         }
+
+        refund = taken;
         if (!itemsToTake.isEmpty()) {
             MessageUtil.sendMessage("crafting.error.insufficientItems", player, new MessageData("recipe", recipe));
+            cancel();
             return false;
         }
 
         double modifier = DarkRiseCrafting.getInstance().getPlayerCooldown(player);
         int cooldown = modifier == 0d ? 0 : (int) Math.round(recipe.getCooldown() / modifier);
-        cancel();
         showBossBar(this.player, cooldown);
 
         if (cooldown != 0) {
@@ -379,8 +384,9 @@ public class PlayerCustomGUI implements Listener {
             player.getOpenInventory().setCursor(new ItemStack(Material.BARRIER));
         }
 
-        refund = taken;
+        craftingSuccess = false;
         craftingTask = DarkRiseCrafting.getInstance().runTaskLater(cooldown, () -> {
+            craftingSuccess = true;
             cancel(false);
             Vault.pay(this.player, recipe.getPrice());
             if (recipe.getCommands().size() == 0) {
@@ -410,6 +416,14 @@ public class PlayerCustomGUI implements Listener {
             if (recipe.getXpGain() > 0) {
                 System.out.println("Adding xp " + recipe.getXpGain());
                 DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+            }
+
+            //Restart the crafting sequence if auto-crafting is enabled
+            if (MasteryManager.getPlayerConfig(player).isAutoCraft()) {
+                reloadRecipesTask();
+                boolean success = craft(slot, addToCursor); //Call this method again recursively
+                if (!success)
+                    MessageUtil.sendMessage("crafting.autoCancelled", player);
             }
         });
 
@@ -444,8 +458,16 @@ public class PlayerCustomGUI implements Listener {
     }
 
     private void cancel(boolean refund) {
-        if (barTask == null)
-            return;
+        if (barTask != null) {
+            barTask.cancel();
+            barTask = null;
+            bar.removeAll();
+            bar = null;
+        }
+
+        if (!craftingSuccess && MasteryManager.getPlayerConfig(player).isAutoCraft()) {
+            MessageUtil.sendMessage("crafting.autoCancelled", player);
+        }
 
         if (player.getOpenInventory().getCursor() != null && player.getOpenInventory().getCursor().getType() == Material.BARRIER)
             if (previousCursor != null) {
@@ -454,14 +476,11 @@ public class PlayerCustomGUI implements Listener {
             } else
                 player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
 
-        barTask.cancel();
-        barTask = null;
-        bar.removeAll();
-        bar = null;
-        craftingTask.cancel();
+        if (craftingTask != null)
+            craftingTask.cancel();
         craftingTask = null;
 
-        if (!refund)
+        if (!refund || craftingSuccess)
             return;
 
         PlayerInventory inventory = player.getInventory();
@@ -471,5 +490,6 @@ public class PlayerCustomGUI implements Listener {
                 player.getLocation().getWorld().dropItemNaturally(player.getLocation(), item);
             }
         }
+        this.refund.clear();
     }
 }

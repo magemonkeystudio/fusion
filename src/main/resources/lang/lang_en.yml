@@ -41,6 +41,8 @@ crafting:
   useConfirm: false
   useConfirmOther: "&7You opened Crafting Inventory &8\"&3$<craftingInventory.name>&8\"&7 for player: &3$<player:target.name>&7."
   reload: "&7Reloaded settings!"
+  autoToggle: "&6Your auto-crafting has been turned $<state>."
+  autoCancelled: "&cAuto-crafting cancelled."
   levelup: "&3You leveled up! &7($<level>)"
   level:
     format: "&7$<category>: &8Level &r$<level> &8($<experience>)"
