@@ -20,6 +20,7 @@ import java.util.*;
 public class PlayerInitialGUI extends PlayerCustomGUI {
     private final CustomGUI gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
+    private boolean isBase = false;
 
     private PlayerInitialGUI(CustomGUI gui, Player player, Inventory inventory) {
         super(gui, player, inventory, null);
@@ -39,6 +40,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
             int k = -1;
             HashMap<Character, ItemStack> items = gui.pattern.getItems();
             PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
+            playerCustomGUI.isBase = true;
             CraftingTable table = Cfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
                     .values()
@@ -63,8 +65,13 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                         do {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());
+//                            for (Recipe r : recipes) {
+//                                System.out.println("Has permission (" + r.getName() + ")? " +
+//                                        Utils.hasCraftingPermission(player, r.getName()) +
+//                                        " -- Has levels? " + (r.getNeededLevels() < LevelFunction.getLevel(player, table) + 5));
+//                            }
                             recipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
-                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
+//                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
 //                            recipes.removeIf(r -> r.isMastery() && !MasteryManager.hasMastery(player, gui.name));
 
                             if (recipes.isEmpty() && !categoryIterator.hasNext()) {
@@ -103,6 +110,11 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
     public void onClick(InventoryClickEvent e) {
         e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
+
+        if (this.gui.prevPage != -1 && e.getSlot() == this.gui.prevPage) {
+            BrowseGUI.open((Player) e.getWhoClicked());
+            return;
+        }
 
         if (category != null) {
             e.getWhoClicked().closeInventory();

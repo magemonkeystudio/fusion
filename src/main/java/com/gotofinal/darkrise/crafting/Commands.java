@@ -1,6 +1,7 @@
 package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.crafting.gui.PlayerInitialGUI;
 import me.travja.darkrise.core.legacy.util.Vault;
@@ -66,7 +67,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    if(MasteryManager.hasMastery(player, table.getName())) {
+                    if (MasteryManager.hasMastery(player, table.getName())) {
                         MessageUtil.sendMessage("crafting.error.alreadyMastered", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
                         return true;
                     }
@@ -98,6 +99,14 @@ public class Commands implements CommandExecutor {
             instance.reloadLang();
             MessageUtil.sendMessage("crafting.reload", sender, new MessageData("sender", sender));
             return true;
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("browse")) {
+            if (!(sender instanceof Player)) {
+                MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                return true;
+            }
+            Player player = (Player) sender;
+
+            BrowseGUI.open(player);
         } else if (args.length == 1 && args[0].equalsIgnoreCase("level")) {
             if (!(sender instanceof Player)) {
                 MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
@@ -111,7 +120,7 @@ public class Commands implements CommandExecutor {
             }
 
             return true;
-        } else if(args.length == 1 && args[0].equalsIgnoreCase("auto")) {
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("auto")) {
             if (!(sender instanceof Player)) {
                 MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                 return true;

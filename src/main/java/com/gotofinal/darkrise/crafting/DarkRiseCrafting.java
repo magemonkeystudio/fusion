@@ -1,6 +1,7 @@
 package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 import me.travja.darkrise.core.ConfigManager;
@@ -81,6 +82,7 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
 
     public void closeAll() {
         Cfg.getGuiMap().values().forEach(CustomGUI::closeAll);
+        BrowseGUI.closeAll();
     }
 
     @Override

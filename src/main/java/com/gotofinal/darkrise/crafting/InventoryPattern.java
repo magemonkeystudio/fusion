@@ -4,6 +4,7 @@ import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
 import me.travja.darkrise.core.legacy.util.SerializationBuilder;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -26,12 +27,16 @@ public class InventoryPattern implements ConfigurationSerializable {
 
     @SuppressWarnings("unchecked")
     public InventoryPattern(Map<String, Object> map) {
+
         DeserializationWorker dw = DeserializationWorker.start(map);
         List<String> temp = dw.getStringList("pattern");
         this.pattern = temp.toArray(new String[temp.size()]);
         this.items = new HashMap<>();
         DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
         for (String entry : itemsTemp.getMap().keySet()) {
+            if (entry.contains("."))
+                continue;
+
             Map<String, Object> section = itemsTemp.getSection(entry);
             this.items.put(entry.charAt(0), new ItemBuilder(section).build());
 

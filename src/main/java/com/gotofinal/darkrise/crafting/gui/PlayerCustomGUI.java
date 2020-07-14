@@ -68,7 +68,7 @@ public class PlayerCustomGUI implements Listener {
             CraftingTable table = Cfg.getTable(this.gui.name);
             ItemStack fill = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
-            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
+//            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
 //            allRecipes.removeIf(r -> r.isMastery() && !MasteryManager.hasMastery(player, gui.name));
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
             int pageSize = this.gui.resultSlots.size();
@@ -200,9 +200,8 @@ public class PlayerCustomGUI implements Listener {
                 this.nextPage();
                 return;
             }
-            if ((this.gui.prevPage != -1) && (e.getSlot() == this.gui.prevPage)) {
+            if (this.gui.prevPage != -1 && e.getSlot() == this.gui.prevPage) {
                 this.prevPage();
-                return;
             }
             return;
         }
@@ -414,7 +413,6 @@ public class PlayerCustomGUI implements Listener {
             CraftingTable table = Cfg.getTable(this.gui.name);
 
             if (recipe.getXpGain() > 0) {
-                System.out.println("Adding xp " + recipe.getXpGain());
                 DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
             }
 

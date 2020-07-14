@@ -49,6 +49,7 @@ crafting:
   help: |2-
     You typed: &7$<text>&r
       Valid syntax:
+        &8/&7craft &rbrowse
         &8/&7craft &ruse &8<&7crafting&8>
         &8/&7craft &ruse &8<&7crafting&8> <&7nickname&8>
         &8/&7craft &rlevel

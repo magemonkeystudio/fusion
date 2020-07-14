@@ -1,5 +1,7 @@
 package com.gotofinal.darkrise.crafting;
 
+import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import me.travja.darkrise.core.item.DarkRiseItem;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
 import me.travja.darkrise.core.legacy.util.SerializationBuilder;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
@@ -17,15 +19,17 @@ public class CraftingTable implements ConfigurationSerializable {
     private final InventoryPattern pattern;
     private final ItemStack fillItem;
     private final Map<String, Recipe> recipes;
+    private final DarkRiseItem iconItem;
     private final LinkedHashMap<String, Category> categories = new LinkedHashMap<>();
 
     //Mastery!
     private final int masteryUnlock;
     private final int masteryFee;
 
-    public CraftingTable(String name, String inventoryName, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee, Map<String, Recipe> recipes) {
+    public CraftingTable(String name, String inventoryName, DarkRiseItem iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee, Map<String, Recipe> recipes) {
         this.name = name;
         this.inventoryName = inventoryName;
+        this.iconItem = iconItem;
         this.pattern = pattern;
         this.recipes = recipes;
         this.fillItem = fillItem;
@@ -33,9 +37,10 @@ public class CraftingTable implements ConfigurationSerializable {
         this.masteryFee = masteryFee;
     }
 
-    public CraftingTable(String name, String inventoryName, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee) {
+    public CraftingTable(String name, String inventoryName, DarkRiseItem iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee) {
         this.name = name;
         this.inventoryName = inventoryName;
+        this.iconItem = iconItem;
         this.pattern = pattern;
         this.recipes = new LinkedHashMap<>(5);
         this.fillItem = fillItem;
@@ -52,6 +57,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
+        this.iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
         if (dw.getSection("fillItem") != null)
             this.fillItem = new ItemBuilder(dw.getSection("fillItem")).build();
         else
@@ -91,6 +97,10 @@ public class CraftingTable implements ConfigurationSerializable {
 
     public String getInventoryName() {
         return this.inventoryName;
+    }
+
+    public DarkRiseItem getIconItem() {
+        return iconItem;
     }
 
     public InventoryPattern getPattern() {
@@ -136,6 +146,7 @@ public class CraftingTable implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         return SerializationBuilder.start(4)
                 .append("name", this.name)
+                .append("icon", this.iconItem.getId())
                 .append("pattern", this.pattern.serialize())
                 .append("inventoryName", this.inventoryName)
                 .append("masteryUnlock", this.masteryUnlock)
