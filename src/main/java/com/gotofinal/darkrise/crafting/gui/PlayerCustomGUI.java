@@ -94,6 +94,15 @@ public class PlayerCustomGUI implements Listener {
             for (int slot : slots) {
                 this.inventory.setItem(slot, null);
             }
+
+            this.gui.resetBlockedSlots(this.player, this.inventory, page, allRecipeCount,
+                    new MessageData[]{
+                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("category", category),
+                            new MessageData("gui", gui.getName()),
+                            new MessageData("player", player.getName())
+                    }, true);
+
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++) {
                 Recipe recipe = allRecipesArray[k];
                 int slot = slots[i];
@@ -144,19 +153,26 @@ public class PlayerCustomGUI implements Listener {
         Inventory inv = null;
         try {
             inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            int k = -1;
-            HashMap<Character, ItemStack> items = gui.pattern.getItems();
-            for (String row : gui.pattern.getPattern()) {
-                for (char c : row.toCharArray()) {
-                    k++;
-                    ItemStack item = ItemUtils.replaceText(items.get(c),
+            gui.resetBlockedSlots(player, inv, 0, category.getRecipes().size(),
+                    new MessageData[]{
                             new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName()));
-                    if (item != null) inv.setItem(k, item.clone());
-                }
-            }
+                            new MessageData("player", player.getName())
+                    });
+//            int k = -1;
+//            HashMap<Character, ItemStack> items = gui.pattern.getItems();
+//            for (String row : gui.pattern.getPattern()) {
+//                for (char c : row.toCharArray()) {
+//                    k++;
+//                    ItemStack item = ItemUtils.replaceText(items.get(c),
+//                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+//                            new MessageData("category", category),
+//                            new MessageData("gui", gui.getName()),
+//                            new MessageData("player", player.getName()));
+//                    if (item != null) inv.setItem(k, item.clone());
+//                }
+//            }
             PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
             gui.open(player, playerCustomGUI);
             player.openInventory(inv);

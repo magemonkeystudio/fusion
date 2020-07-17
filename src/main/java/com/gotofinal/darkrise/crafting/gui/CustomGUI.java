@@ -3,6 +3,8 @@ package com.gotofinal.darkrise.crafting.gui;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
+import me.travja.darkrise.core.legacy.util.ItemUtils;
+import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.Bukkit;
@@ -24,6 +26,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
@@ -73,6 +76,30 @@ public class CustomGUI implements Listener {
         this.nextPage = nextPage;
         this.prevPage = prevPage;
         Bukkit.getPluginManager().registerEvents(this, DarkRiseCrafting.getInstance());
+    }
+
+    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data) {
+        resetBlockedSlots(player, inv, page, totalItems, data, false);
+    }
+
+    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data, boolean includeBack) {
+        int fullPages = totalItems / resultSlots.size();
+        int rest = totalItems % resultSlots.size();
+        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+
+        int k = -1;
+        HashMap<Character, ItemStack> items = pattern.getItems();
+
+        for (String row : pattern.getPattern()) {
+            for (char c : row.toCharArray()) {
+                k++;
+                ItemStack item = ItemUtils.replaceText(items.get(c), data);
+                if (!includeBack && c == '<' && page <= 0) continue;
+                if (c == '>' && page + 1 >= pages) continue;
+
+                if (item != null) inv.setItem(k, item.clone());
+            }
+        }
     }
 
     public String getName() {

@@ -4,7 +4,6 @@ import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
 import me.travja.darkrise.core.legacy.cmds.R;
-import me.travja.darkrise.core.legacy.util.ItemUtils;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -48,15 +47,21 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     .sorted(Comparator.comparingInt(Category::getOrder))
                     .iterator();
 
+            gui.resetBlockedSlots(player, inv, 0, table.getCategories().size(),
+                    new MessageData[]{
+                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("gui", gui.getName()),
+                            new MessageData("player", player.getName())
+                    });
             for (String row : gui.pattern.getPattern()) {
                 charLoop:
                 for (char c : row.toCharArray()) {
                     k++;
-                    ItemStack item = ItemUtils.replaceText(items.get(c),
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
-                            new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName()));
-                    if (item != null) inv.setItem(k, item.clone());
+//                    ItemStack item = ItemUtils.replaceText(items.get(c),
+//                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+//                            new MessageData("gui", gui.getName()),
+//                            new MessageData("player", player.getName()));
+//                    if (item != null) inv.setItem(k, item.clone());
 
                     //Slots
                     if (c == 'o' && categoryIterator.hasNext()) {
@@ -111,10 +116,10 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
         e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
 
-        if (this.gui.prevPage != -1 && e.getSlot() == this.gui.prevPage) {
-            BrowseGUI.open((Player) e.getWhoClicked());
-            return;
-        }
+//        if (this.gui.prevPage != -1 && e.getSlot() == this.gui.prevPage) {
+//            BrowseGUI.open((Player) e.getWhoClicked());
+//            return;
+//        }
 
         if (category != null) {
             e.getWhoClicked().closeInventory();
