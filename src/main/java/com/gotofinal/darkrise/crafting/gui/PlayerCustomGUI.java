@@ -2,6 +2,7 @@ package com.gotofinal.darkrise.crafting.gui;
 
 import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 import com.gotofinal.darkrise.economy.DarkRiseItems;
@@ -275,7 +276,7 @@ public class PlayerCustomGUI implements Listener {
         cancel();
 
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
-        if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !MasteryManager.hasMastery(player, this.gui.getName())) {
+        if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player, this.gui.getName())) {
             MessageUtil.sendMessage("crafting.error.noMastery", player, new MessageData("craftingTable", Cfg.getTable(gui.getName())));
             return false;
         }
@@ -417,7 +418,7 @@ public class PlayerCustomGUI implements Listener {
             }
 
             //Restart the crafting sequence if auto-crafting is enabled
-            if (MasteryManager.getPlayerConfig(player).isAutoCraft()) {
+            if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
                 reloadRecipesTask();
                 boolean success = craft(slot, addToCursor); //Call this method again recursively
                 if (!success)
@@ -463,7 +464,7 @@ public class PlayerCustomGUI implements Listener {
             bar = null;
         }
 
-        if (!craftingSuccess && MasteryManager.getPlayerConfig(player).isAutoCraft()) {
+        if (!craftingSuccess && PConfigManager.getPlayerConfig(player).isAutoCraft()) {
             MessageUtil.sendMessage("crafting.autoCancelled", player);
         }
 

@@ -1,5 +1,6 @@
 package com.gotofinal.darkrise.crafting;
 
+import com.gotofinal.darkrise.crafting.cfg.BrowseConfig;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
@@ -43,6 +44,7 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         FileConfiguration lang = ConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"), getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
+        BrowseConfig.load();
     }
 
     @Override

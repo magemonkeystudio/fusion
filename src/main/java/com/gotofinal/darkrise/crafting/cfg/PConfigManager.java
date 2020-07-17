@@ -1,4 +1,4 @@
-package com.gotofinal.darkrise.crafting;
+package com.gotofinal.darkrise.crafting.cfg;
 
 import com.gotofinal.darkrise.crafting.cfg.PlayerConfig;
 import org.bukkit.command.CommandSender;
@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MasteryManager {
+public class PConfigManager {
 
     private static HashMap<UUID, PlayerConfig> pConfig = new HashMap<>();
 

@@ -1,8 +1,6 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.crafting.cfg.Cfg;
-import com.gotofinal.darkrise.crafting.gui.PlayerCustomGUI;
-import me.travja.darkrise.core.legacy.util.ItemUtils;
+import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
 import me.travja.darkrise.core.legacy.util.Vault;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
 import me.travja.darkrise.core.legacy.util.message.MessageUtil;
@@ -108,7 +106,7 @@ public class CalculatedRecipe {
 
         String masteryLine = null;
         if(recipe.mastery) {
-            if(!MasteryManager.hasMastery(player, craftingTable.getName())) {
+            if(!PConfigManager.hasMastery(player, craftingTable.getName())) {
                 canCraft = false;
                 masteryLine = MessageUtil.getMessageAsString("crafting.gui.mastery.false", "crafting.gui.mastery.false", new MessageData("recipe", recipe),
                         new MessageData("craftingTable", craftingTable));

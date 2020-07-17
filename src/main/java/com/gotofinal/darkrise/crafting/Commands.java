@@ -1,6 +1,7 @@
 package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
 import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.crafting.gui.PlayerInitialGUI;
@@ -39,6 +40,9 @@ public class Commands implements CommandExecutor {
                         MessageUtil.sendMessage("notAPlayer", sender, new MessageData("name", args[2]), new MessageData("sender", sender));
                         return true;
                     }
+
+                    //TODO ?? Make sure they have unlocked this crafting menu
+
                     PlayerInitialGUI.open(eq, target);
                     MessageUtil.sendMessage("crafting.useConfirmOther", sender, new MessageData("craftingInventory", eq), new MessageData("sender", sender),
                             new MessageData("target", target));
@@ -48,6 +52,12 @@ public class Commands implements CommandExecutor {
                         if (!Utils.hasCraftingUsePermission(sender, eq.getName())) {
                             return true;
                         }
+                        //Make sure they have unlocked this crafting menu
+                        if (!PConfigManager.getPlayerConfig((Player) sender).hasProfession(eq.getName())) {
+                            MessageUtil.sendMessage("crafting.error.notUnlocked", sender);
+                            return true;
+                        }
+
                         PlayerInitialGUI.open(eq, Bukkit.getPlayer(((Player) sender).getUniqueId()));
 
                         MessageUtil.sendMessage("crafting.useConfirm", sender, new MessageData("craftingInventory", eq), new MessageData("player", sender));
@@ -67,7 +77,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    if (MasteryManager.hasMastery(player, table.getName())) {
+                    if (PConfigManager.hasMastery(player, table.getName())) {
                         MessageUtil.sendMessage("crafting.error.alreadyMastered", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
                         return true;
                     }
@@ -82,7 +92,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    MasteryManager.getPlayerConfig(player).setHasMastery(table.getName(), true);
+                    PConfigManager.getPlayerConfig(player).setHasMastery(table.getName(), true);
                     MessageUtil.sendMessage("crafting.mastered", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
                     return true;
                 } else {
@@ -130,9 +140,9 @@ public class Commands implements CommandExecutor {
             }
             Player player = (Player) sender;
 
-            boolean autoOn = MasteryManager.getPlayerConfig(player).isAutoCraft();
+            boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
 
-            MasteryManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
+            PConfigManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
 
             MessageUtil.sendMessage("crafting.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
 

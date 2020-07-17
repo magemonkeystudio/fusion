@@ -3,11 +3,20 @@ package com.gotofinal.darkrise.crafting.gui;
 import com.gotofinal.darkrise.crafting.CraftingTable;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.Utils;
+import com.gotofinal.darkrise.crafting.cfg.BrowseConfig;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
+import com.gotofinal.darkrise.crafting.cfg.PlayerConfig;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
+import com.gotofinal.darkrise.crafting.util.PlayerUtil;
+import me.travja.darkrise.core.legacy.util.Vault;
+import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
+import me.travja.darkrise.core.legacy.util.message.MessageData;
+import me.travja.darkrise.core.legacy.util.message.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -43,13 +52,13 @@ public class BrowseGUI implements Listener {
         this.opener = player.getUniqueId();
 
         if (fill == null)
-            fill = Cfg.getBrowseFill();
+            fill = BrowseConfig.getBrowseFill();
 
         this.fillItem = fill;
 
         int k = -1;
 
-        for (String row : Cfg.getBrowsePattern().getPattern()) {
+        for (String row : BrowseConfig.getBrowsePattern().getPattern()) {
             for (char c : row.toCharArray()) {
                 k++;
                 switch (c) {
@@ -66,17 +75,17 @@ public class BrowseGUI implements Listener {
 
     public static BrowseGUI open(Player player) {
         Inventory inv = null;
-        String title = ChatColor.translateAlternateColorCodes('&', Cfg.getBrowseName());
+        String title = ChatColor.translateAlternateColorCodes('&', BrowseConfig.getBrowseName());
         try {
             BrowseGUI gui = new BrowseGUI(title, player, null);
 
-            inv = Bukkit.createInventory(player, Cfg.getBrowsePattern().getPattern().length * 9, title);
+            inv = Bukkit.createInventory(player, BrowseConfig.getBrowsePattern().getPattern().length * 9, title);
             int i = 0;
             int k = gui.slots.get(i);
 
-            HashMap<Character, ItemStack> specItems = Cfg.getBrowsePattern().getItems();
+            HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
             int slot = 0;
-            for (String pat : Cfg.getBrowsePattern().getPattern()) {
+            for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
                         inv.setItem(slot, specItems.get(c));
@@ -89,7 +98,11 @@ public class BrowseGUI implements Listener {
                 if (!Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 
-                inv.setItem(k, table.getIconItem().getItem());
+                ItemStack item = table.getIconItem() != null ? table.getIconItem().getItem() : ItemBuilder.newItem(Material.BEDROCK)
+                        .name(ChatColor.RED + table.getName()).newLoreLine(ChatColor.RED + "Missing icon in config.").newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                        .build();
+
+                inv.setItem(k, item);
                 gui.slotMap.put(k, table.getName());
 
                 k = gui.slots.get(++i);
@@ -130,11 +143,52 @@ public class BrowseGUI implements Listener {
             return;
 
         Player p = (Player) e.getWhoClicked();
+        e.setCancelled(true);
 
         CustomGUI guiToOpen = Cfg.getGUI(this.slotMap.get(e.getRawSlot()));
         if (guiToOpen == null) return;
 
-        PlayerInitialGUI.open(guiToOpen, p);
+        String profession = guiToOpen.getName();
+        PlayerConfig conf = PConfigManager.getPlayerConfig(p);
+
+        int unlocked = conf.getUnlockedProfessions().size();
+        int allowed = PlayerUtil.getPermOption(p, "craft.limit");
+        int cost = BrowseConfig.getProfCost(profession);
+
+        MessageData[] data = {
+                new MessageData("profession", profession),
+                new MessageData("unlocked", unlocked),
+                new MessageData("limit", allowed),
+                new MessageData("cost", cost)
+        };
+
+        if (conf.hasProfession(profession)) {
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("crafting.error.profAlreadyUnlocked", p, data);
+            return;
+        }
+
+        if (unlocked >= allowed) {
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("crafting.error.limitReached", p, data);
+            return;
+        }
+
+        if (cost > 0 && !Vault.canPay(p, cost)) {
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("crafting.error.profNoFunds", p, data);
+            return;
+        }
+
+        conf.unlockProfession(profession);
+        if (cost > 0)
+            Vault.pay(p, cost);
+        data[1] = new MessageData("unlocked", unlocked + 1);
+        MessageUtil.sendMessage("crafting.unlockedProfession", p, data);
+        p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+
+//
+//        PlayerInitialGUI.open(guiToOpen, p);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -180,7 +234,7 @@ public class BrowseGUI implements Listener {
     public static void closeAll() {
         for (UUID id : map.keySet()) {
             Player target = Bukkit.getPlayer(id);
-            if(target != null && target.isOnline())
+            if (target != null && target.isOnline())
                 target.closeInventory();
         }
 

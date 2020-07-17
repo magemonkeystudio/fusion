@@ -8,14 +8,14 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerConfig {
 
     private Player player;
     private FileConfiguration config;
     private HashMap<String, Boolean> mastery = new HashMap<>();
+    private List<String> professions = new ArrayList<>();
     private boolean autoCraft = false;
     private File file;
 
@@ -40,9 +40,38 @@ public class PlayerConfig {
 
             if (config.contains("autoCraft"))
                 autoCraft = config.getBoolean("autoCraft");
+
+            if (config.contains("professions"))
+                professions = config.getStringList("professions");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean hasProfession(String profession) {
+        return professions.contains(profession);
+    }
+
+    public List<String> getUnlockedProfessions() {
+        if (!config.contains("professions"))
+            return Collections.emptyList();
+
+        if (professions != null && !professions.isEmpty())
+            return professions;
+
+        List<String> profess = config.getStringList("professions");
+        professions = profess;
+        return profess;
+    }
+
+    public void unlockProfession(String profession) {
+        professions.add(profession);
+        saveConfig();
+    }
+
+    public void removeProfession(String profession) {
+        professions.remove(profession);
+        saveConfig();
     }
 
     public boolean hasMastery(String gui) {
@@ -51,7 +80,6 @@ public class PlayerConfig {
 
     public void setHasMastery(String gui, boolean hasMastery) {
         mastery.put(gui, hasMastery);
-        config.set("guis", mastery);
         saveConfig();
     }
 
@@ -61,12 +89,13 @@ public class PlayerConfig {
 
     public void setAutoCraft(boolean auto) {
         autoCraft = auto;
-        config.set("autoCraft", auto);
         saveConfig();
     }
 
     public void saveConfig() {
         config.set("guis", mastery);
+        config.set("autoCraft", autoCraft);
+        config.set("professions", professions);
         try {
             config.save(file);
         } catch (IOException e) {
