@@ -3,7 +3,9 @@ package com.gotofinal.darkrise.crafting;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 import me.travja.darkrise.core.item.DarkRiseItem;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
+import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +18,12 @@ public class Category implements ConfigurationSerializable
     private final DarkRiseItem iconItem;
     private final Collection<Recipe> recipes = new ArrayList<>();
     private final int order;
+
+    public Category(String name) {
+        this.name = name;
+        this.order = 0;
+        this.iconItem = DarkRiseEconomy.getInstance().getItems().getItems().iterator().next();
+    }
 
     public Category(Map<String, Object> map)
     {

@@ -21,6 +21,8 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
     private final Map<Integer, Category> slotMap = new HashMap<>();
     private boolean isBase = false;
 
+    private Category masterCat = new Category("master");
+
     private PlayerInitialGUI(CustomGUI gui, Player player, Inventory inventory) {
         super(gui, player, inventory, null);
         this.gui = gui;
@@ -78,6 +80,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                             recipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
 //                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
 //                            recipes.removeIf(r -> r.isMastery() && !MasteryManager.hasMastery(player, gui.name));
+                            playerCustomGUI.masterCat.getRecipes().addAll(recipes);
 
                             if (recipes.isEmpty() && !categoryIterator.hasNext()) {
                                 continue charLoop;
@@ -98,9 +101,14 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                 inv.setItem(j, table.getFillItem());
             }
 
-            gui.open(player, playerCustomGUI);
-            player.openInventory(inv);
-            gui.map.put(player, playerCustomGUI);
+            if (table.getUseCategories()) {
+                gui.open(player, playerCustomGUI);
+                player.openInventory(inv);
+                gui.map.put(player, playerCustomGUI);
+            } else {
+                player.closeInventory();
+                PlayerCustomGUI.open(gui, player, playerCustomGUI.masterCat);
+            }
             return playerCustomGUI;
         } catch (Exception e) {
             if (inv != null) {

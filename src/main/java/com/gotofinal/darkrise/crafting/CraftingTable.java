@@ -20,6 +20,7 @@ public class CraftingTable implements ConfigurationSerializable {
     private final ItemStack fillItem;
     private final Map<String, Recipe> recipes;
     private final DarkRiseItem iconItem;
+    private boolean useCategories = true;
     private final LinkedHashMap<String, Category> categories = new LinkedHashMap<>();
 
     //Mastery!
@@ -57,6 +58,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
+        this.useCategories = dw.getBoolean("useCategories", true);
         this.iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
         if (dw.getSection("fillItem") != null)
             this.fillItem = new ItemBuilder(dw.getSection("fillItem")).build();
@@ -135,6 +137,10 @@ public class CraftingTable implements ConfigurationSerializable {
         return masteryFee;
     }
 
+    public boolean getUseCategories() {
+        return useCategories;
+    }
+
     public Collection<Recipe> getRecipes(Collection<ItemStack> items, Player p) {
         if (items.isEmpty()) {
             return new ArrayList<>(this.recipes.values());
@@ -152,6 +158,7 @@ public class CraftingTable implements ConfigurationSerializable {
                 .append("masteryUnlock", this.masteryUnlock)
                 .append("masteryFee", this.masteryFee)
                 .append("fillItem", ItemBuilder.newItem(fillItem).serialize())
+                .append("useCategories", useCategories)
                 .append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList())).build();
     }
 }
