@@ -101,7 +101,7 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName())
-                    }, true);
+                    }, category.hasPrevious());
 
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++) {
                 Recipe recipe = allRecipesArray[k];

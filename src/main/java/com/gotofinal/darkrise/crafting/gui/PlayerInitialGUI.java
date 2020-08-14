@@ -107,6 +107,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                 gui.map.put(player, playerCustomGUI);
             } else {
                 player.closeInventory();
+                playerCustomGUI.masterCat.hasPrevious(false);
                 PlayerCustomGUI.open(gui, player, playerCustomGUI.masterCat);
             }
             return playerCustomGUI;
