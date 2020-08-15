@@ -25,86 +25,67 @@
 package com.gotofinal.darkrise.crafting.gui.slot;
 
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 
 /**
  * Represent slot properties, multiple inventory slots may use this same instance of slot object as it don't
  * represent some slot, but properties of it.
  */
-public abstract class Slot
-{
-    public static final Slot BASE_CONTAINER_SLOT   = new Slot(SlotType.CONTAINER)
-    {
+public abstract class Slot {
+    public static final Slot BASE_CONTAINER_SLOT = new Slot(SlotType.CONTAINER) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return item;
         }
     };
-    public static final Slot BASE_HOTBAR_SLOT      = new Slot(SlotType.QUICKBAR)
-    {
+    public static final Slot BASE_HOTBAR_SLOT = new Slot(SlotType.QUICKBAR) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return item;
         }
     };
-    public static final Slot BASE_CRAFTING_SLOT    = new Slot(SlotType.CRAFTING)
-    {
+    public static final Slot BASE_CRAFTING_SLOT = new Slot(SlotType.CRAFTING) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return item;
         }
     };
-    public static final Slot SPECIAL_CRAFTING_SLOT = new Slot(SlotType.CRAFTING)
-    {
+    public static final Slot SPECIAL_CRAFTING_SLOT = new Slot(SlotType.CRAFTING) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
-            if (item == null || item.getType() == Material.AIR)
-            {
+        public ItemStack canHoldItem(ItemStack item) {
+            if (item == null || item.getType() == Material.AIR) {
                 return null;
             }
             return (DarkRiseEconomy.getItemsRegistry().getItemByStack(item) == null) ? null : item;
         }
     };
-    public static final Slot BASE_RESULT_SLOT      = new Slot(SlotType.RESULT)
-    {
+    public static final Slot BASE_RESULT_SLOT = new Slot(SlotType.RESULT) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return null;
         }
     };
-    public static final Slot BLOCKED_SLOT          = new Slot(SlotType.CONTAINER)
-    {
+    public static final Slot BLOCKED_SLOT = new Slot(SlotType.CONTAINER) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return null;
         }
     };
-    public static final Slot BASE_OUTSIDE_SLOT     = new Slot(SlotType.OUTSIDE)
-    {
+    public static final Slot BASE_OUTSIDE_SLOT = new Slot(SlotType.OUTSIDE) {
         @Override
-        public ItemStack canHoldItem(ItemStack item)
-        {
+        public ItemStack canHoldItem(ItemStack item) {
             return item;
         }
     };
 
     protected final SlotType slotType;
 
-    public Slot(SlotType slotType)
-    {
+    public Slot(SlotType slotType) {
         this.slotType = slotType;
     }
 
@@ -113,8 +94,7 @@ public abstract class Slot
      *
      * @return base slot type.
      */
-    public SlotType getSlotType()
-    {
+    public SlotType getSlotType() {
         return this.slotType;
     }
 
@@ -131,14 +111,12 @@ public abstract class Slot
      * check if this slot can hold this type of item.
      *
      * @param item item stack to check.
-     *
      * @return item stack that can be inserted here or null.
      */
     public abstract ItemStack canHoldItem(ItemStack item);
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString()).append("slotType", this.slotType).toString();
     }
 }

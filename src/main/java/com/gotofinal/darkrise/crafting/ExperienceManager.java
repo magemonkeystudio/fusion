@@ -1,7 +1,10 @@
 package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
+import me.travja.darkrise.core.legacy.util.message.MessageData;
+import me.travja.darkrise.core.legacy.util.message.MessageUtil;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -9,18 +12,10 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-public final class ExperienceManager
-{
-    public static class PlayerData implements ConfigurationSerializable
-    {
+public final class ExperienceManager {
+    public static class PlayerData implements ConfigurationSerializable {
         private final UUID uuid;
         private final Map<CraftingTable, Integer> data = new HashMap<>();
 
@@ -29,8 +24,7 @@ public final class ExperienceManager
          *
          * @param map serialized data
          */
-        public PlayerData(Map<String, Object> map)
-        {
+        public PlayerData(Map<String, Object> map) {
             uuid = UUID.fromString((String) map.get("uuid"));
             //noinspection unchecked
             ((Map<String, Object>) map.get("data")).forEach((key, value) -> data.put(Cfg.getTable(key), (Integer) value));
@@ -41,8 +35,7 @@ public final class ExperienceManager
          *
          * @param uuid player uuid
          */
-        public PlayerData(UUID uuid)
-        {
+        public PlayerData(UUID uuid) {
             this.uuid = uuid;
         }
 
@@ -51,8 +44,7 @@ public final class ExperienceManager
          *
          * @return uuid
          */
-        public UUID getUuid()
-        {
+        public UUID getUuid() {
             return uuid;
         }
 
@@ -61,8 +53,7 @@ public final class ExperienceManager
          *
          * @return data map
          */
-        public Map<CraftingTable, Integer> getMap()
-        {
+        public Map<CraftingTable, Integer> getMap() {
             return data;
         }
 
@@ -72,8 +63,7 @@ public final class ExperienceManager
          * @param craftingTable table
          * @return experience
          */
-        public Integer getExperience(CraftingTable craftingTable)
-        {
+        public Integer getExperience(CraftingTable craftingTable) {
             return data.getOrDefault(craftingTable, 0);
         }
 
@@ -83,14 +73,17 @@ public final class ExperienceManager
          * @param craftingTable table
          * @param experience    experience
          */
-        public void add(CraftingTable craftingTable, Integer experience)
-        {
-            data.put(craftingTable, data.getOrDefault(craftingTable, 0) + experience);
+        public void add(CraftingTable craftingTable, Integer experience) {
+            int previousXp = data.getOrDefault(craftingTable, 0);
+            int previousLevel = LevelFunction.getLevel(previousXp);
+            data.put(craftingTable, previousXp + experience);
+            int newLevel = LevelFunction.getLevel(previousXp + experience);
+            if (newLevel > previousLevel)
+                MessageUtil.sendMessage("crafting.levelup", Bukkit.getPlayer(uuid), new MessageData("level", newLevel), new MessageData("experience", previousXp + experience));
         }
 
         @Override
-        public Map<String, Object> serialize()
-        {
+        public Map<String, Object> serialize() {
             final Map<String, Object> map = new HashMap<>();
 
             map.put("uuid", uuid.toString());
@@ -108,36 +101,27 @@ public final class ExperienceManager
     /**
      * Loads data
      */
-    public void load()
-    {
-        try
-        {
-            if ( !file.exists() && !file.createNewFile())
-            {
+    public void load() {
+        try {
+            if (!file.exists() && !file.createNewFile()) {
                 DarkRiseCrafting.getInstance().getLogger().severe("Failed to create exp data file");
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         YamlConfiguration configuration = new YamlConfiguration();
 
-        try
-        {
+        try {
             configuration.load(file);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             DarkRiseCrafting.getInstance().getLogger().warning("Can't load exp data file: " + file);
             e.printStackTrace();
             return;
         }
 
         List<Map<?, ?>> typesSection = configuration.getMapList("data");
-        for (Map<?, ?> typeData : typesSection)
-        {
+        for (Map<?, ?> typeData : typesSection) {
             //noinspection unchecked
             PlayerData playerData = new PlayerData((Map<String, Object>) typeData);
             this.playerDataSet.add(playerData);
@@ -149,8 +133,7 @@ public final class ExperienceManager
      *
      * @throws IOException when something goes wrong
      */
-    public void save() throws IOException
-    {
+    public void save() throws IOException {
         YamlConfiguration configuration = new YamlConfiguration();
         List<Map<String, Object>> list = new ArrayList<>();
 
@@ -167,8 +150,7 @@ public final class ExperienceManager
      * @param craftingTable table
      * @return experience as int
      */
-    public int getExperience(Player player, CraftingTable craftingTable)
-    {
+    public int getExperience(Player player, CraftingTable craftingTable) {
         Validate.notNull(player);
         Validate.notNull(craftingTable);
         PlayerData playerData = getPlayerData(player);
@@ -182,12 +164,9 @@ public final class ExperienceManager
      * @param player player
      * @return player data object
      */
-    public PlayerData getPlayerData(Player player)
-    {
-        for (PlayerData data : playerDataSet)
-        {
-            if (data.getUuid().equals(player.getUniqueId()))
-            {
+    public PlayerData getPlayerData(Player player) {
+        for (PlayerData data : playerDataSet) {
+            if (data.getUuid().equals(player.getUniqueId())) {
                 return data;
             }
         }
@@ -201,36 +180,29 @@ public final class ExperienceManager
      * @param player player
      * @return player data object
      */
-    public PlayerData createPlayerData(Player player)
-    {
+    public PlayerData createPlayerData(Player player) {
         PlayerData playerData = new PlayerData(player.getUniqueId());
         playerDataSet.add(playerData);
         return playerData;
     }
 
     @Deprecated
-    public static int getTotalExperience(Player player)
-    {
+    public static int getTotalExperience(Player player) {
         int experience;
         int level = player.getLevel();
-        if ((level >= 0) && (level <= 15))
-        {
+        if ((level >= 0) && (level <= 15)) {
             experience = (int) Math.ceil(Math.pow(level, 2) + (6 * level));
             int requiredExperience = (2 * level) + 7;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
             experience += Math.ceil(currentExp * requiredExperience);
             return experience;
-        }
-        else if ((level > 15) && (level <= 30))
-        {
+        } else if ((level > 15) && (level <= 30)) {
             experience = (int) Math.ceil((((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360));
             int requiredExperience = (5 * level) - 38;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
             experience += Math.ceil(currentExp * requiredExperience);
             return experience;
-        }
-        else
-        {
+        } else {
             experience = (int) Math.ceil(((((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220)));
             int requiredExperience = (9 * level) - 158;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
@@ -240,16 +212,14 @@ public final class ExperienceManager
     }
 
     @Deprecated
-    public static void setTotalExperience(Player player, int xp)
-    {
+    public static void setTotalExperience(Player player, int xp) {
         //Levels 0 through 15
-        if ((xp >= 0) && (xp < 351))
-        {
+        if ((xp >= 0) && (xp < 351)) {
             //Calculate Everything
             int a = 1;
             int b = 6;
-            int c = - xp;
-            int level = (int) (- b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            int c = -xp;
+            int level = (int) (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
             int xpForLevel = (int) (Math.pow(level, 2) + (6 * level));
             int remainder = xp - xpForLevel;
             int experienceNeeded = (2 * level) + 7;
@@ -262,14 +232,12 @@ public final class ExperienceManager
             player.setLevel(level);
             player.setExp(experience);
             //Levels 16 through 30
-        }
-        else if ((xp >= 352) && (xp < 1507))
-        {
+        } else if ((xp >= 352) && (xp < 1507)) {
             //Calculate Everything
             double a = 2.5;
-            double b = - 40.5;
-            int c = - xp + 360;
-            double dLevel = (- b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            double b = -40.5;
+            int c = -xp + 360;
+            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
             int level = (int) Math.floor(dLevel);
             int xpForLevel = (int) (((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360);
             int remainder = xp - xpForLevel;
@@ -283,14 +251,12 @@ public final class ExperienceManager
             player.setLevel(level);
             player.setExp(experience);
             //Level 31 and greater
-        }
-        else
-        {
+        } else {
             //Calculate Everything
             double a = 4.5;
-            double b = - 162.5;
-            int c = - xp + 2220;
-            double dLevel = (- b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            double b = -162.5;
+            int c = -xp + 2220;
+            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
             int level = (int) Math.floor(dLevel);
             int xpForLevel = (int) (((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220);
             int remainder = xp - xpForLevel;
@@ -306,8 +272,7 @@ public final class ExperienceManager
         }
     }
 
-    private static float round(float d, int decimalPlace)
-    {
+    private static float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
         return bd.floatValue();

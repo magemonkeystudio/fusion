@@ -18,18 +18,45 @@ crafting:
     xp:
       'true': "&3Cost: &a$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."
       'false': "&3Cost: &c$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."
+    mastery:
+      'true': "&3Mastery Unlocked: &aTrue"
+      'false': "&3Mastery Unlocked: &cFalse &7(Level required: $<craftingTable.masteryUnlock>, Fee: $<craftingTable.masteryFee>)"
     canCraft:
       'true': "&aYou can craft this item."
       'false': "&cYou can't craft this item."
     rank:
       epic: "&cEpic rank needed to craft this item!"
+  error:
+    alreadyMastered: "&cYou have already mastered this!"
+    noMasteryLevel: "&cYou must be at least level $<craftingTable.masteryUnlock> to unlock this!"
+    noMasteryFunds: "&cYou need $$<craftingTable.masteryFee> to unlock this!"
+    noMastery: "&cYou have not mastered this skill yet. You need to reach level $<craftingTable.masteryUnlock> and pay the fee &7($$<craftingTable.masteryFee>)\n&5The fee can be paid using &7/craft master $<craftingTable.name>"
+    noLevel: "&cYou need to be $<recipe.neededLevels> to craft this!"
+    noXP: "&cYou need $<recipe.neededXp> to craft this."
+    noFunds: "&cYou need $$<recipe.price> to craft this"
+    insufficientItems: "&cYou lack some of the required items for this!"
+    profAlreadyUnlocked: "&cYou have already unlocked this profession!"
+    profNoFunds: "&cYou need &3$$<cost> to buy this!"
+    limitReached: "&cYou have already unlocked &3$<unlocked>/$<limit> &cprofessions."
+    notUnlocked: "&cYou haven't unlocked this profession yet. Use &3/craft browse &c to view all professions."
+  unlockedProfession: "&aYou unlocked &3$<profession>. &7($<unlocked>/$<limit>)"
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"
+  alreadyCrafting: "&cYou're already crafting something!"
+  mastered: "&3You have mastered &e$<craftingTable.name>! &a$$<craftingTable.masteryFee> &3has been taken from your account."
   useConfirm: false
   useConfirmOther: "&7You opened Crafting Inventory &8\"&3$<craftingInventory.name>&8\"&7 for player: &3$<player:target.name>&7."
   reload: "&7Reloaded settings!"
+  autoToggle: "&6Your auto-crafting has been turned $<state>."
+  autoCancelled: "&cAuto-crafting cancelled."
+  levelup: "&3You leveled up! &7($<level>)"
+  level:
+    format: "&7$<category>: &8Level &r$<level> &8($<experience>)"
   help: |2-
     You typed: &7$<text>&r
       Valid syntax:
+        &8/&7craft &rbrowse
         &8/&7craft &ruse &8<&7crafting&8>
         &8/&7craft &ruse &8<&7crafting&8> <&7nickname&8>
+        &8/&7craft &rlevel
+        &8/&7craft &rmaster &8<&7crafting&8>
         &8/&7craft &rreload

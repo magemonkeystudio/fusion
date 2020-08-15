@@ -1,19 +1,16 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.spigot.core.utils.item.ItemBuilder;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
 
-public class RecipeCustomItem implements RecipeItem
-{
+public class RecipeCustomItem implements RecipeItem {
     private final ItemStack item;
-    private final int       amount;
-    private final boolean   simple;
+    private final int amount;
+    private final boolean simple;
 
-    public RecipeCustomItem(ItemStack item, int amount, boolean simple)
-    {
+    public RecipeCustomItem(ItemStack item, int amount, boolean simple) {
         this.item = item;
         item.setAmount(1);
         this.amount = amount;
@@ -21,38 +18,31 @@ public class RecipeCustomItem implements RecipeItem
     }
 
     @Override
-    public int getAmount()
-    {
+    public int getAmount() {
         return this.amount;
     }
 
     @Override
-    public ItemStack getItemStack()
-    {
+    public ItemStack getItemStack() {
         ItemStack clone = this.item.clone();
         clone.setAmount(clone.getAmount() * this.amount);
         return clone;
     }
 
     @Override
-    public Object toConfig()
-    {
-        if (this.simple)
-        {
+    public Object toConfig() {
+        if (this.simple) {
             return CUSTOM_PREFIX + this.item.getType().name() + ":" + this.item.getDurability() + (this.amount != 0 ? (":" + this.amount) : "");
         }
         return ItemBuilder.newItem(this.item).serialize();
     }
 
     @Override
-    public boolean equals(Object o)
-    {
-        if (this == o)
-        {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (! (o instanceof RecipeCustomItem))
-        {
+        if (!(o instanceof RecipeCustomItem)) {
             return false;
         }
 
@@ -63,16 +53,14 @@ public class RecipeCustomItem implements RecipeItem
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString())
-                                                                          .append("item", ItemBuilder.newItem(this.item).toString())
-                                                                          .append("amount", this.amount).toString();
+                .append("item", ItemBuilder.newItem(this.item).toString())
+                .append("amount", this.amount).toString();
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = this.item.hashCode();
         result = (31 * result) + this.amount;
         return result;

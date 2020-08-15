@@ -1,57 +1,48 @@
 package com.gotofinal.darkrise.crafting.gui;
 
-import com.gotofinal.darkrise.crafting.Category;
-import com.gotofinal.darkrise.crafting.CraftingTable;
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
-import com.gotofinal.darkrise.crafting.LevelFunction;
-import com.gotofinal.darkrise.crafting.MasteryManager;
-import com.gotofinal.darkrise.crafting.Recipe;
-import com.gotofinal.darkrise.crafting.Utils;
+import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
-import com.gotofinal.darkrise.spigot.core.utils.cmds.DelayedCommand;
-import com.gotofinal.darkrise.spigot.core.utils.cmds.R;
-import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
+import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
+import me.travja.darkrise.core.legacy.cmds.R;
+import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
     private final CustomGUI gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
+    private boolean isBase = false;
+
+    private Category masterCat = new Category("master");
 
     private PlayerInitialGUI(CustomGUI gui, Player player, Inventory inventory) {
         super(gui, player, inventory, null);
         this.gui = gui;
     }
 
-    public static PlayerInitialGUI open(CustomGUI gui, Player player)
-    {
+    public static PlayerInitialGUI open(CustomGUI gui, Player player) {
+        gui.resetPattern();
         InventoryView iv = player.getOpenInventory();
-        if ((iv != null) && (iv.getTopInventory() != null))
-        {
+        if ((iv != null) && (iv.getTopInventory() != null)) {
             gui.map.remove(player);
             player.closeInventory();
         }
 
         Inventory inv = null;
-        try
-        {
+        try {
             inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            int k = - 1;
-            Char2ObjectMap<ItemStack> items = gui.pattern.getItems();
+            int k = -1;
+            HashMap<Character, ItemStack> items = gui.pattern.getItems();
             PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
+            playerCustomGUI.isBase = true;
             CraftingTable table = Cfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
                     .values()
@@ -59,34 +50,44 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     .sorted(Comparator.comparingInt(Category::getOrder))
                     .iterator();
 
-            for (String row : gui.pattern.getPattern())
-            {
-                charLoop: for (char c : row.toCharArray())
-                {
+            gui.resetBlockedSlots(player, inv, 0, table.getCategories().size(),
+                    new MessageData[]{
+                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("gui", gui.getName()),
+                            new MessageData("player", player.getName())
+                    });
+            for (String row : gui.pattern.getPattern()) {
+                charLoop:
+                for (char c : row.toCharArray()) {
                     k++;
-                    ItemStack item = items.get(c);
-                    if (item != null)
-                    {
-                        inv.setItem(k, item.clone());
-                    }
+//                    ItemStack item = ItemUtils.replaceText(items.get(c),
+//                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+//                            new MessageData("gui", gui.getName()),
+//                            new MessageData("player", player.getName()));
+//                    if (item != null) inv.setItem(k, item.clone());
 
                     //Slots
-                    if (c == 'o' && categoryIterator.hasNext())
-                    {
+                    if (c == 'o' && categoryIterator.hasNext()) {
                         List<Recipe> recipes;
                         Category category;
                         do {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());
+//                            for (Recipe r : recipes) {
+//                                System.out.println("Has permission (" + r.getName() + ")? " +
+//                                        Utils.hasCraftingPermission(player, r.getName()) +
+//                                        " -- Has levels? " + (r.getNeededLevels() < LevelFunction.getLevel(player, table) + 5));
+//                            }
                             recipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
-                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
-                            recipes.removeIf(r -> !MasteryManager.hasMastery(player, gui.name));
+//                            recipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
+//                            recipes.removeIf(r -> r.isMastery() && !MasteryManager.hasMastery(player, gui.name));
+                            playerCustomGUI.masterCat.getRecipes().addAll(recipes);
 
-                            if(recipes.isEmpty() && !categoryIterator.hasNext()) {
+                            if (recipes.isEmpty() && !categoryIterator.hasNext()) {
                                 continue charLoop;
                             }
 
-                        } while(recipes.isEmpty());
+                        } while (recipes.isEmpty());
 
                         inv.setItem(k, category.getIconItem().getItem());
                         playerCustomGUI.slotMap.put(k, category);
@@ -94,15 +95,25 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                 }
             }
 
-            gui.open(player, playerCustomGUI);
-            player.openInventory(inv);
-            gui.map.put(player, playerCustomGUI);
+            for (int j = 0; j < inv.getSize(); j++) {
+                if (inv.getItem(j) != null && inv.getItem(j).getType() != Material.AIR)
+                    continue;
+
+                inv.setItem(j, table.getFillItem());
+            }
+
+            if (table.getUseCategories()) {
+                gui.open(player, playerCustomGUI);
+                player.openInventory(inv);
+                gui.map.put(player, playerCustomGUI);
+            } else {
+                player.closeInventory();
+                playerCustomGUI.masterCat.hasPrevious(false);
+                PlayerCustomGUI.open(gui, player, playerCustomGUI.masterCat);
+            }
             return playerCustomGUI;
-        }
-        catch (Exception e)
-        {
-            if (inv != null)
-            {
+        } catch (Exception e) {
+            if (inv != null) {
                 inv.clear();
             }
             player.closeInventory();
@@ -115,8 +126,12 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
         e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
 
-        if (category != null)
-        {
+//        if (this.gui.prevPage != -1 && e.getSlot() == this.gui.prevPage) {
+//            BrowseGUI.open((Player) e.getWhoClicked());
+//            return;
+//        }
+
+        if (category != null) {
             e.getWhoClicked().closeInventory();
             PlayerCustomGUI.open(gui, (Player) e.getWhoClicked(), category);
         }
@@ -124,16 +139,14 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
         //Execute commands
         Character c = gui.getPattern().getSlot(e.getRawSlot());
         Collection<DelayedCommand> patternCommands = gui.getPattern().getCommands(c);
-        if (patternCommands != null && ! patternCommands.isEmpty())
-        {
+        if (patternCommands != null && !patternCommands.isEmpty()) {
             DelayedCommand.invoke(DarkRiseCrafting.getInstance(), e.getWhoClicked(), patternCommands,
                     R.r("{crafting}", this.gui.getName()),
                     R.r("{inventoryName}", this.gui.getInventoryName()));
         }
 
         //Close on click
-        if (gui.getPattern().getCloseOnClickSlots().contains(c))
-        {
+        if (gui.getPattern().getCloseOnClickSlots().contains(c)) {
             e.getWhoClicked().closeInventory();
         }
     }
