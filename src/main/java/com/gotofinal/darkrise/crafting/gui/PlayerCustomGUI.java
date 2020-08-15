@@ -66,6 +66,10 @@ public class PlayerCustomGUI implements Listener {
 
     public void reloadRecipes() {
         try {
+            if (category.getPattern() != null)
+                gui.setPattern(category.getPattern());
+            else
+                gui.resetPattern();
             CraftingTable table = Cfg.getTable(this.gui.name);
             ItemStack fill = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
@@ -150,6 +154,10 @@ public class PlayerCustomGUI implements Listener {
     }
 
     public static PlayerCustomGUI open(CustomGUI gui, Player player, Category category) {
+        if (category.getPattern() != null)
+            gui.setPattern(category.getPattern());
+        else
+            gui.resetPattern();
         Inventory inv = null;
         try {
             inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));

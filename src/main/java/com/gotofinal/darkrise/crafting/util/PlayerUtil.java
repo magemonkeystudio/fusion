@@ -21,7 +21,7 @@ public class PlayerUtil {
             if (ps.startsWith(permission)) {
                 String end = ps.substring(ps.lastIndexOf('.')+1);
                 try {
-                    ret = Integer.parseInt(end);
+                    ret = Math.max(ret, Integer.parseInt(end));
                 } catch (NumberFormatException e) {
                     DarkRiseCrafting.log.warning("Could not get numeric permission value from '" + end + "'");
                     continue;

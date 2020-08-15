@@ -29,6 +29,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
     }
 
     public static PlayerInitialGUI open(CustomGUI gui, Player player) {
+        gui.resetPattern();
         InventoryView iv = player.getOpenInventory();
         if ((iv != null) && (iv.getTopInventory() != null)) {
             gui.map.remove(player);

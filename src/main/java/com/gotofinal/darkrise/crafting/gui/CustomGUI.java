@@ -33,12 +33,13 @@ import java.util.Objects;
 public class CustomGUI implements Listener {
     protected final String name;
     protected final String inventoryName;
-    protected final Slot[] slots;
-    protected final transient ArrayList<Integer> resultSlots = new ArrayList<>(20);
-    protected final transient ArrayList<Integer> blockedSlots = new ArrayList<>(20);
-    protected final transient int nextPage;
-    protected final transient int prevPage;
-    protected final InventoryPattern pattern;
+    protected Slot[] slots;
+    protected transient ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    protected transient ArrayList<Integer> blockedSlots = new ArrayList<>(20);
+    protected transient int nextPage;
+    protected transient int prevPage;
+    protected InventoryPattern pattern;
+    protected final InventoryPattern defaultPattern;
 
     protected final LinkedHashMap<Player, PlayerCustomGUI> map = new LinkedHashMap<>(20);
 
@@ -46,6 +47,51 @@ public class CustomGUI implements Listener {
         this.name = name;
         this.inventoryName = inventoryName;
         this.pattern = pattern;
+        this.defaultPattern = pattern;
+        mapSlots();
+        Bukkit.getPluginManager().registerEvents(this, DarkRiseCrafting.getInstance());
+    }
+
+    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data) {
+        resetBlockedSlots(player, inv, page, totalItems, data, false);
+    }
+
+    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data, boolean includeBack) {
+        int fullPages = totalItems / resultSlots.size();
+        int rest = totalItems % resultSlots.size();
+        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+
+        int k = -1;
+        HashMap<Character, ItemStack> items = pattern.getItems();
+
+        ArrayList<Integer> leaveBlank = new ArrayList<>();
+        for (String row : pattern.getPattern()) {
+            for (char c : row.toCharArray()) {
+                k++;
+                ItemStack item = ItemUtils.replaceText(items.get(c), data);
+                if (!includeBack && c == '<' && page <= 0) {
+                    leaveBlank.add(k);
+                    continue;
+                }
+                if (c == '>' && page + 1 >= pages) {
+                    leaveBlank.add(k);
+                    continue;
+                }
+
+                if (item != null) inv.setItem(k, item.clone());
+            }
+        }
+
+        for (Integer index : leaveBlank) {
+            if (inv.getSize() > index + 1)
+                inv.setItem(index, inv.getItem(index + 1));
+            else
+                inv.setItem(index, inv.getItem(index - 1));
+        }
+    }
+
+    private void mapSlots() {
+        this.resultSlots.clear();
         this.slots = new Slot[pattern.getPattern().length * 9];
         int k = -1;
         int prevPage = -1, nextPage = -1;
@@ -75,31 +121,6 @@ public class CustomGUI implements Listener {
         }
         this.nextPage = nextPage;
         this.prevPage = prevPage;
-        Bukkit.getPluginManager().registerEvents(this, DarkRiseCrafting.getInstance());
-    }
-
-    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data) {
-        resetBlockedSlots(player, inv, page, totalItems, data, false);
-    }
-
-    public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data, boolean includeBack) {
-        int fullPages = totalItems / resultSlots.size();
-        int rest = totalItems % resultSlots.size();
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
-
-        int k = -1;
-        HashMap<Character, ItemStack> items = pattern.getItems();
-
-        for (String row : pattern.getPattern()) {
-            for (char c : row.toCharArray()) {
-                k++;
-                ItemStack item = ItemUtils.replaceText(items.get(c), data);
-                if (!includeBack && c == '<' && page <= 0) continue;
-                if (c == '>' && page + 1 >= pages) continue;
-
-                if (item != null) inv.setItem(k, item.clone());
-            }
-        }
     }
 
     public String getName() {
@@ -108,6 +129,16 @@ public class CustomGUI implements Listener {
 
     public String getInventoryName() {
         return this.inventoryName;
+    }
+
+    public void setPattern(InventoryPattern pattern) {
+        this.pattern = pattern;
+        mapSlots();
+    }
+
+    public void resetPattern() {
+        this.pattern = defaultPattern;
+        mapSlots();
     }
 
     public InventoryPattern getPattern() {

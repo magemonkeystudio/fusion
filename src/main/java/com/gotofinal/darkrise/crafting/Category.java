@@ -14,6 +14,7 @@ public class Category implements ConfigurationSerializable {
     private final String name;
     private final DarkRiseItem iconItem;
     private final Collection<Recipe> recipes = new ArrayList<>();
+    private InventoryPattern pattern;
     private final int order;
     private boolean hasPrevious = true;
 
@@ -32,13 +33,25 @@ public class Category implements ConfigurationSerializable {
         if (iconItem == null) {
             DarkRiseCrafting.getInstance().getLogger().severe("Invalid category icon for: " + name);
         }
+
+        pattern = dw.getSection("pattern") != null ? new InventoryPattern(dw.getSection("pattern")) : null;
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
+        if (pattern != null)
+            map.put("pattern", pattern.serialize());
         return map;
+    }
+
+    public InventoryPattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(InventoryPattern pattern) {
+        this.pattern = pattern;
     }
 
     public String getName() {
