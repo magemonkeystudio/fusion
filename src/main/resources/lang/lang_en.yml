@@ -43,6 +43,7 @@ crafting:
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"
   alreadyCrafting: "&cYou're already crafting something!"
   mastered: "&3You have mastered &e$<craftingTable.name>! &a$$<craftingTable.masteryFee> &3has been taken from your account."
+  forgotten: "&7*Poof* &3You have forgotten &e$<craftingTable.name>!"
   useConfirm: false
   useConfirmOther: "&7You opened Crafting Inventory &8\"&3$<craftingInventory.name>&8\"&7 for player: &3$<player:target.name>&7."
   reload: "&7Reloaded settings!"
@@ -59,4 +60,5 @@ crafting:
         &8/&7craft &ruse &8<&7crafting&8> <&7nickname&8>
         &8/&7craft &rlevel
         &8/&7craft &rmaster &8<&7crafting&8>
+        &8/&7craft &rforget &8<&7crafting&8>
         &8/&7craft &rreload

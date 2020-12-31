@@ -4,6 +4,7 @@ import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
 import me.travja.darkrise.core.legacy.cmds.R;
+import me.travja.darkrise.core.legacy.util.Vault;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -54,7 +55,8 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     new MessageData[]{
                             new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
                             new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName())
+                            new MessageData("player", player.getName()),
+                            new MessageData("bal", Vault.getMoney(player))
                     });
             for (String row : gui.pattern.getPattern()) {
                 charLoop:

@@ -105,8 +105,8 @@ public class CalculatedRecipe {
         }
 
         String masteryLine = null;
-        if(recipe.mastery) {
-            if(!PConfigManager.hasMastery(player, craftingTable.getName())) {
+        if (recipe.mastery) {
+            if (!PConfigManager.hasMastery(player, craftingTable.getName())) {
                 canCraft = false;
                 masteryLine = MessageUtil.getMessageAsString("crafting.gui.mastery.false", "crafting.gui.mastery.false", new MessageData("recipe", recipe),
                         new MessageData("craftingTable", craftingTable));
@@ -141,13 +141,14 @@ public class CalculatedRecipe {
                 ItemStack item = entry.getKey().clone();
                 if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
                     item = item.clone();
-                    ItemMeta meta = item.getItemMeta();
-                    List<String> itemLore = meta.getLore();
-                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
-                    meta.setLore(itemLore);
-                    item.setItemMeta(meta);
+//                    ItemMeta meta = item.getItemMeta();
+//                    List<String> itemLore = meta.getLore();
+//                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+//                    meta.setLore(itemLore);
+//                    item.setItemMeta(meta);
 
-                    if (item.isSimilar(recipeItemStackOne)) {
+//                    if (item.isSimilar(recipeItemStackOne)) {
+                    if (CalculatedRecipe.isSimilar(recipeItemStackOne, item)) {
                         eqAmount = entry.getValue();
                         break;
                     }
@@ -188,6 +189,7 @@ public class CalculatedRecipe {
                     new MessageData("recipeItem", recipeItem), new MessageData("player", player), new MessageData("recipe", recipe),
                     new MessageData("item", recipeItemStack))).append('\n');
         }
+
         String canCraftLine;
         if (canCraft) {
             canCraftLine = MessageUtil.getMessageAsString("crafting.gui.canCraft.true", null, new MessageData("recipe", recipe), new MessageData("player", player));
@@ -205,7 +207,7 @@ public class CalculatedRecipe {
         if (xpLine != null) {
             lore.append(xpLine).append('\n');
         }
-        if(masteryLine != null) {
+        if (masteryLine != null) {
             lore.append(masteryLine).append('\n');
         }
         lore.append(permissionLine);
@@ -223,7 +225,10 @@ public class CalculatedRecipe {
         itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
         icon.setItemMeta(itemMeta);
 
-        return new CalculatedRecipe(recipe, icon, canCraft);
+        return new
+
+                CalculatedRecipe(recipe, icon, canCraft);
+
     }
 
     @Override
@@ -238,6 +243,48 @@ public class CalculatedRecipe {
 
         CalculatedRecipe that = (CalculatedRecipe) o;
         return new EqualsBuilder().append(this.recipe, that.recipe).append(this.icon, that.icon).isEquals();
+    }
+
+    public static boolean isSimilar(ItemStack is1, ItemStack is2) {
+
+        //More relaxed comparison
+        if (is1.getType() != is2.getType())
+            return false;
+
+        if (is1.hasItemMeta() && is2.hasItemMeta()) {
+            ItemMeta im1 = is1.getItemMeta();
+            ItemMeta im2 = is2.getItemMeta();
+            if (im1.hasDisplayName() && im2.hasDisplayName())
+                return im1.getDisplayName().equals(im2.getDisplayName());
+        }
+
+        return is1.isSimilar(is2);
+
+        //More Strict comparison
+        /*ItemStack recipeItemStackOne = is1.clone();
+        recipeItemStackOne.setAmount(1);
+        trimLore(recipeItemStackOne);
+
+        ItemStack item = is2.clone();
+        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+            item = item.clone();
+            trimLore(item);
+
+            return item.isSimilar(recipeItemStackOne);
+        }
+        return false;*/
+    }
+
+    public static void trimLore(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        List<String> itemLore = meta.getLore();
+        itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by") || s.trim().equals("")
+                || org.apache.commons.lang.StringUtils.contains(s, "Craft Requirements")
+                || org.apache.commons.lang.StringUtils.contains(s, "Item")
+                || org.apache.commons.lang.StringUtils.contains(s, "Level Needed")
+                || org.apache.commons.lang.StringUtils.contains(s, "Mastery"));
+        meta.setLore(itemLore);
+        item.setItemMeta(meta);
     }
 
     @Override

@@ -17,6 +17,7 @@ public class CraftingTable implements ConfigurationSerializable {
     private final String name;
     private final String inventoryName;
     private final InventoryPattern pattern;
+    private final InventoryPattern catPattern;
     private final ItemStack fillItem;
     private final Map<String, Recipe> recipes;
     private final DarkRiseItem iconItem;
@@ -32,6 +33,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
         this.pattern = pattern;
+        this.catPattern = null;
         this.recipes = recipes;
         this.fillItem = fillItem;
         this.masteryUnlock = masteryUnlock;
@@ -43,6 +45,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
         this.pattern = pattern;
+        this.catPattern = null;
         this.recipes = new LinkedHashMap<>(5);
         this.fillItem = fillItem;
         this.masteryUnlock = masteryUnlock;
@@ -56,6 +59,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.name = dw.getString("name");
         this.inventoryName = dw.getString("inventoryName");
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
+        this.catPattern = dw.getSection("categoryPattern") != null ? new InventoryPattern(dw.getSection("categoryPattern")) : null;
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
         this.useCategories = dw.getBoolean("useCategories", true);
@@ -69,7 +73,11 @@ public class CraftingTable implements ConfigurationSerializable {
         dw.deserializeCollection(categoriesList, "categories", Category.class);
         categoriesList.stream()
                 .filter(c -> c.getIconItem() != null)
-                .forEach(c -> categories.put(c.getName(), c));
+                .forEach(c -> {
+                    if (c.getPattern() == null)
+                        c.setPattern(catPattern);
+                    categories.put(c.getName(), c);
+                });
 
         List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
         for (Map<?, ?> recipeData : recipesSection) {
@@ -154,6 +162,7 @@ public class CraftingTable implements ConfigurationSerializable {
                 .append("name", this.name)
                 .append("icon", this.iconItem.getId())
                 .append("pattern", this.pattern.serialize())
+                .append("categoryPattern", this.catPattern != null ? this.catPattern.serialize() : null)
                 .append("inventoryName", this.inventoryName)
                 .append("masteryUnlock", this.masteryUnlock)
                 .append("masteryFee", this.masteryFee)

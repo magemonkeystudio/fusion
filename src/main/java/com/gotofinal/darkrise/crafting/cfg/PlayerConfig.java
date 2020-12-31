@@ -70,7 +70,9 @@ public class PlayerConfig {
     }
 
     public void removeProfession(String profession) {
-        professions.remove(profession);
+        while (professions.contains(profession))
+            professions.remove(profession);
+        DarkRiseCrafting.getExperienceManager().getPlayerData(player).remove(profession);
         saveConfig();
     }
 

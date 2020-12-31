@@ -93,8 +93,9 @@ public class BrowseGUI implements Listener {
                 }
             }
 
-            for (CraftingTable table : Cfg.getMap().values()) {
-
+//            for (CraftingTable table : Cfg.getMap().values()) {
+            for (String profession : BrowseConfig.getProfessions()) {
+                CraftingTable table = Cfg.getTable(profession);
                 if (!Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 
@@ -152,14 +153,15 @@ public class BrowseGUI implements Listener {
         PlayerConfig conf = PConfigManager.getPlayerConfig(p);
 
         int unlocked = conf.getUnlockedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(p, "craft.limit");
+        int allowed = PlayerUtil.getPermOption(p, "craft.limit"); //Set the max number of unlockable professions.
         int cost = BrowseConfig.getProfCost(profession);
 
         MessageData[] data = {
                 new MessageData("profession", profession),
                 new MessageData("unlocked", unlocked),
                 new MessageData("limit", allowed),
-                new MessageData("cost", cost)
+                new MessageData("cost", cost),
+                new MessageData("bal", Vault.getMoney(p))
         };
 
         if (conf.hasProfession(profession)) {

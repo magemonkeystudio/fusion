@@ -104,7 +104,8 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName())
+                            new MessageData("player", player.getName()),
+                            new MessageData("bal", Vault.getMoney(player))
                     }, category.hasPrevious());
 
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++) {
@@ -166,7 +167,8 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName())
+                            new MessageData("player", player.getName()),
+                            new MessageData("bal", Vault.getMoney(player))
                     });
 //            int k = -1;
 //            HashMap<Character, ItemStack> items = gui.pattern.getItems();
@@ -292,14 +294,22 @@ public class PlayerCustomGUI implements Listener {
         }
     }
 
+    private Recipe craftingRecipe = null;
+
     private boolean craft(int slot, boolean addToCursor) {
 /*        if (craftingTask != null) {
             MessageUtil.sendMessage("crafting.alreadyCrafting", player);
             return false;
         }*/
-        cancel();
 
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
+        Recipe recipe = calculatedRecipe.getRecipe();
+        if (craftingRecipe != null && craftingRecipe.equals(recipe)) {
+            cancel();
+            return false;
+        }
+
+        cancel();
         if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player, this.gui.getName())) {
             MessageUtil.sendMessage("crafting.error.noMastery", player, new MessageData("craftingTable", Cfg.getTable(gui.getName())));
             return false;
@@ -312,7 +322,6 @@ public class PlayerCustomGUI implements Listener {
         if (!Objects.equals(this.recipes.get(slot), calculatedRecipe)) {
             return false;
         }
-        Recipe recipe = calculatedRecipe.getRecipe();
         if (LevelFunction.getLevel(player, Cfg.getTable(this.gui.name)) < recipe.getNeededLevels()) {
             MessageUtil.sendMessage("crafting.error.noLevel", player, new MessageData("recipe", recipe));
             return false;
@@ -360,14 +369,15 @@ public class PlayerCustomGUI implements Listener {
                 entry = entry.clone();
                 if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
                     item = item.clone();
-                    ItemMeta meta = item.getItemMeta();
-                    List<String> itemLore = meta.getLore();
-                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
-                    meta.setLore(itemLore);
-                    item.setItemMeta(meta);
+//                    ItemMeta meta = item.getItemMeta();
+//                    List<String> itemLore = meta.getLore();
+//                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+//                    meta.setLore(itemLore);
+//                    item.setItemMeta(meta);
                     entry.setAmount(toTake.getAmount());
 
-                    if (item.isSimilar(toTake)) {
+//                    if (item.isSimilar(toTake)) {
+                    if (CalculatedRecipe.isSimilar(toTake, item)) {
                         toTake = entry;
                         break;
                     }
@@ -409,6 +419,7 @@ public class PlayerCustomGUI implements Listener {
         }
 
         craftingSuccess = false;
+        craftingRecipe = recipe;
         craftingTask = DarkRiseCrafting.getInstance().runTaskLater(cooldown, () -> {
             craftingSuccess = true;
             cancel(false);
@@ -481,6 +492,7 @@ public class PlayerCustomGUI implements Listener {
     }
 
     private void cancel(boolean refund) {
+        craftingRecipe = null;
         if (barTask != null) {
             barTask.cancel();
             barTask = null;

@@ -23,7 +23,7 @@ public class PlayerUtil {
                 try {
                     ret = Math.max(ret, Integer.parseInt(end));
                 } catch (NumberFormatException e) {
-                    DarkRiseCrafting.log.warning("Could not get numeric permission value from '" + end + "'");
+                    DarkRiseCrafting.getInstance().log.warning("Could not get numeric permission value from '" + end + "'");
                     continue;
                 }
             }

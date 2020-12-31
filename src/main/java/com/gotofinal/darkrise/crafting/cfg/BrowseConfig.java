@@ -11,16 +11,15 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 
 public class BrowseConfig {
 
     private static FileConfiguration config;
     private static File file;
 
-    private static List<String> professions = new ArrayList<>();
+    private static LinkedList<String> professions = new LinkedList<>();
     private static HashMap<String, Integer> profCosts = new HashMap<>();
 
     private static String browseName = ChatColor.DARK_AQUA + "Browse";
@@ -43,7 +42,7 @@ public class BrowseConfig {
                     config.options().copyDefaults(true);
                     attemptPort();
                     config.save(file);
-                    DarkRiseCrafting.log.info("Created default browse.yml");
+                    DarkRiseCrafting.getInstance().log.info("Created default browse.yml");
                 }
             }
 
@@ -53,11 +52,15 @@ public class BrowseConfig {
 
             setDefaults();
             readData();
-            DarkRiseCrafting.log.info("Successfully loaded browse.yml data");
+            DarkRiseCrafting.getInstance().log.info("Successfully loaded browse.yml data");
         } catch (IOException e) {
-            DarkRiseCrafting.log.severe("Could not load browse.yml data");
+            DarkRiseCrafting.getInstance().log.severe("Could not load browse.yml data");
             e.printStackTrace();
         }
+    }
+
+    public static LinkedList<String> getProfessions() {
+        return professions;
     }
 
     private static void attemptPort() {
@@ -80,7 +83,7 @@ public class BrowseConfig {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DarkRiseCrafting.log.info("Successfully ported old browse info to new browse.yml");
+            DarkRiseCrafting.getInstance().log.info("Successfully ported old browse info to new browse.yml");
         }
     }
 
@@ -99,6 +102,8 @@ public class BrowseConfig {
     }
 
     private static void readData() {
+        professions.clear();
+        profCosts.clear();
         browseName = config.getString("name");
         browseFill = config.getItemStack("fillItem");
         browsePattern = new InventoryPattern(config.getConfigurationSection("pattern").getValues(false));
@@ -109,7 +114,7 @@ public class BrowseConfig {
             if (config.contains("professions." + prof + ".cost"))
                 profCosts.put(prof.toLowerCase(), config.getInt("professions." + prof + ".cost"));
 
-            DarkRiseCrafting.log.info("Loaded info for profession '" + prof + "'");
+            DarkRiseCrafting.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }
 

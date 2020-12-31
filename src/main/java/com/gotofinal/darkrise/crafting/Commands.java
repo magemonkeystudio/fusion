@@ -2,6 +2,7 @@ package com.gotofinal.darkrise.crafting;
 
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
+import com.gotofinal.darkrise.crafting.cfg.PlayerConfig;
 import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.crafting.gui.PlayerInitialGUI;
@@ -67,7 +68,7 @@ public class Commands implements CommandExecutor {
                                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
-            } else if (args[0].equals("master")) {
+            } else if (args[0].equalsIgnoreCase("master")) {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     String guiName = args[1];
@@ -99,6 +100,22 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("crafting.help", sender, new MessageData("sender", sender),
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
+            } else if (args[0].equalsIgnoreCase("forget")) {
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    CraftingTable table = Cfg.getTable(args[1]);
+                    if (table == null) {
+                        MessageUtil.sendMessage("crafting.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
+                        return true;
+                    }
+                    PlayerConfig conf = PConfigManager.getPlayerConfig(player);
+                    conf.removeProfession(table.getName());
+                    MessageUtil.sendMessage("crafting.forgotten", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
+                    return true;
+                } else {
+                    MessageUtil.sendMessage("crafting.help", sender, new MessageData("sender", sender),
+                            new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                }
             }
         } else if ((args.length == 1) && args[0].equalsIgnoreCase("reload")) {
             if (!instance.checkPermission(sender, "crafting.reload")) {
@@ -117,6 +134,7 @@ public class Commands implements CommandExecutor {
             Player player = (Player) sender;
 
             BrowseGUI.open(player);
+            return true;
         } else if (args.length == 1 && args[0].equalsIgnoreCase("level")) {
             if (!(sender instanceof Player)) {
                 MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));

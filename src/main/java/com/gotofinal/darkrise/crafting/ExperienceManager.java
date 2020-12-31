@@ -82,6 +82,16 @@ public final class ExperienceManager {
                 MessageUtil.sendMessage("crafting.levelup", Bukkit.getPlayer(uuid), new MessageData("level", newLevel), new MessageData("experience", previousXp + experience));
         }
 
+        public void remove(String craftingTable) {
+            data.remove(Cfg.getTable(craftingTable));
+
+            try {
+                DarkRiseCrafting.getExperienceManager().save();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         @Override
         public Map<String, Object> serialize() {
             final Map<String, Object> map = new HashMap<>();
