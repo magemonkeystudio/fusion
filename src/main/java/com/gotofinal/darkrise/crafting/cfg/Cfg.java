@@ -1,6 +1,8 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
-import com.gotofinal.darkrise.crafting.*;
+import com.gotofinal.darkrise.crafting.CraftingTable;
+import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
@@ -12,7 +14,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public final class Cfg {
@@ -20,6 +25,8 @@ public final class Cfg {
     private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
     public static String recursive = "floor(n+300^(n/7)^2)";
     public static String finalMod = "floor(x)/4";
+    public static long dataSaveInterval = 12000;
+    public static double forgetPenalty = 0.2d;
 
     private Cfg() {
     }
@@ -77,6 +84,8 @@ public final class Cfg {
     private static void addDefs(FileConfiguration cfg) {
         cfg.addDefault("recursive_level_formula", recursive);
         cfg.addDefault("final_level_mod", finalMod);
+        cfg.addDefault("data_save_interval", dataSaveInterval); //Auto save every 10 minutes
+        cfg.addDefault("forget.penalty", forgetPenalty);
 
         HashMap<Character, ItemStack> items = new HashMap<>();
         items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
@@ -84,13 +93,15 @@ public final class Cfg {
         items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
         InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
         ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE/*, 1, (short) 15*/);
-        CraftingTable a = new CraftingTable("forge", "Forge inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
-
-        a.addRecipe(new Recipe("test", Arrays.asList(new RecipeEconomyItem("testItem", 5), new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
-                new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
+//        CraftingTable a = new CraftingTable("forge", "Forge inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
+//
+//        a.addRecipe(new Recipe("test",
+//                Arrays.asList(new RecipeEconomyItem("testItem", 5),
+//                        new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
+//                new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
         CraftingTable b = new CraftingTable("craft", "Craft inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
         List<Map<String, Object>> list = new ArrayList<>(3);
-        list.add(a.serialize());
+//        list.add(a.serialize());
         list.add(b.serialize());
         cfg.addDefault("types", list);
     }
@@ -130,6 +141,8 @@ public final class Cfg {
 
         recursive = cfg.getString("recursive_level_formula");
         finalMod = cfg.getString("final_level_mod");
+        dataSaveInterval = cfg.getLong("data_save_interval");
+        forgetPenalty = cfg.getDouble("forget.penalty");
 
 
         List<Map<?, ?>> typesSection = cfg.getMapList("types");

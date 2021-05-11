@@ -49,6 +49,10 @@ crafting:
   reload: "&7Reloaded settings!"
   autoToggle: "&6Your auto-crafting has been turned $<state>."
   autoCancelled: "&cAuto-crafting cancelled."
+  confirm: "&ePlease type &d/craft confirm &eto confirm this action!"
+  forget:
+    confirm: "&eAre you sure you want to forget $<craftingTable.name>? Type &d/craft confirm &eto confirm this action!"
+  nothingToConfirm: "&cYou don't have anything to confirm."
   levelup: "&3You leveled up! &7($<level>)"
   level:
     format: "&7$<category>: &8Level &r$<level> &8($<experience>)"

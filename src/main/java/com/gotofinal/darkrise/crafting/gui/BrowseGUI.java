@@ -95,7 +95,9 @@ public class BrowseGUI implements Listener {
 
 //            for (CraftingTable table : Cfg.getMap().values()) {
             for (String profession : BrowseConfig.getProfessions()) {
+                if (i >= gui.slots.size()) break;
                 CraftingTable table = Cfg.getTable(profession);
+                // Removes items from the menu if the player doesn't have permission.
                 if (!Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 

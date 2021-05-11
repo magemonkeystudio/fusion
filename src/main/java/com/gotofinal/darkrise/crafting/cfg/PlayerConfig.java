@@ -1,6 +1,8 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
+import com.gotofinal.darkrise.crafting.CraftingTable;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ExperienceManager;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -70,9 +72,19 @@ public class PlayerConfig {
     }
 
     public void removeProfession(String profession) {
+        removeProfession(profession, true);
+    }
+
+    public void removeProfession(String profession, boolean penalty) {
         while (professions.contains(profession))
             professions.remove(profession);
-        DarkRiseCrafting.getExperienceManager().getPlayerData(player).remove(profession);
+
+        CraftingTable table = Cfg.getTable(profession);
+        ExperienceManager.PlayerData dat = DarkRiseCrafting.getExperienceManager().getPlayerData(player);
+        int exp = dat.getExperience(table);
+        int dock = (int) (exp * Cfg.forgetPenalty);
+        dat.add(table, -dock);
+
         saveConfig();
     }
 

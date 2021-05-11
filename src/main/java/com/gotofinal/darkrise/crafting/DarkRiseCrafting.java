@@ -10,10 +10,12 @@ import me.travja.darkrise.core.RisePlugin;
 import me.travja.darkrise.core.legacy.killme.chat.placeholder.PlaceholderType;
 import me.travja.darkrise.core.legacy.util.Init;
 import me.travja.darkrise.core.legacy.util.message.MessageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,8 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
     private static DarkRiseCrafting instance;
     private static ExperienceManager experienceManager;
 
+    private BukkitTask saveTask;
+
     {
         instance = this;
     }
@@ -45,6 +49,7 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         MessageUtil.reload(lang, this);
         Cfg.init();
         BrowseConfig.load();
+        runSaveTask();
     }
 
     @Override
@@ -98,6 +103,23 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         this.closeAll();
     }
 
+    private void runSaveTask() {
+        if (saveTask != null && !saveTask.isCancelled())
+            saveTask.cancel();
+
+        long period = Cfg.dataSaveInterval;
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            try {
+                experienceManager.save();
+            } catch (IOException e) {
+                System.out.println("Could not save data files.");
+                e.printStackTrace();
+            }
+        }, period, period);
+        this.saveTask = task;
+    }
+
     /**
      * Gets the experience manager
      *
@@ -113,17 +135,18 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         if (cachedCooldowns.containsKey(player.getUniqueId()))
             return cachedCooldowns.get(player.getUniqueId());
 
-        double num = 1d;
+        double num = 0d;
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission();
             if (perm.startsWith("craft.cooldown")) {
-                String mod = perm.substring(perm.lastIndexOf(".")+1);
+                String mod = perm.substring(perm.lastIndexOf(".") + 1);
                 if (mod.equals("*"))
-                    num = 0d;
+                    num = 1d;
                 else {
                     try {
                         num = Integer.parseInt(mod) / 100d;
-                    } catch(NumberFormatException e) {}
+                    } catch (NumberFormatException e) {
+                    }
                 }
             }
         }

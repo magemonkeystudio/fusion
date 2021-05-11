@@ -24,6 +24,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -39,11 +40,9 @@ public class PlayerCustomGUI implements Listener {
     private final Player player;
     private final Inventory inventory;
     private final Category category;
-
-    private int page = 0;
     private final int maxPage = 0;
     private final HashMap<Integer, CalculatedRecipe> recipes;
-
+    private int page = 0;
     private BukkitTask craftingTask;
     private BukkitTask barTask;
     private BossBar bar;
@@ -51,6 +50,7 @@ public class PlayerCustomGUI implements Listener {
     private ItemStack previousCursor;
 
     private boolean craftingSuccess = true;
+    private Recipe craftingRecipe = null;
 
     public PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory, Category category) {
         this.gui = gui;
@@ -58,6 +58,67 @@ public class PlayerCustomGUI implements Listener {
         this.inventory = inventory;
         this.recipes = new HashMap<>(20);
         this.category = category;
+    }
+
+    public static Collection<ItemStack> getPlayerItems(InventoryHolder player) {
+        DarkRiseItems itemsRegistry = DarkRiseEconomy.getItemsRegistry();
+        ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
+        List<ItemStack> result = new ArrayList<>(contents.length);
+        for (ItemStack content : contents) {
+            if (content == null) {
+                continue;
+            }
+//            DarkRiseItem item = itemsRegistry.getItemByStack(content);
+//            if (item == null)
+//            {
+//                continue;
+//            }
+            result.add(content);
+        }
+        return result;
+    }
+
+    public static PlayerCustomGUI open(CustomGUI gui, Player player, Category category) {
+        if (category.getPattern() != null)
+            gui.setPattern(category.getPattern());
+        else
+            gui.resetPattern();
+        Inventory inv = null;
+        try {
+            inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
+            gui.resetBlockedSlots(player, inv, 0, category.getRecipes().size(),
+                    new MessageData[]{
+                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("category", category),
+                            new MessageData("gui", gui.getName()),
+                            new MessageData("player", player.getName()),
+                            new MessageData("bal", Vault.getMoney(player))
+                    });
+//            int k = -1;
+//            HashMap<Character, ItemStack> items = gui.pattern.getItems();
+//            for (String row : gui.pattern.getPattern()) {
+//                for (char c : row.toCharArray()) {
+//                    k++;
+//                    ItemStack item = ItemUtils.replaceText(items.get(c),
+//                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+//                            new MessageData("category", category),
+//                            new MessageData("gui", gui.getName()),
+//                            new MessageData("player", player.getName()));
+//                    if (item != null) inv.setItem(k, item.clone());
+//                }
+//            }
+            PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
+            gui.open(player, playerCustomGUI);
+            player.openInventory(inv);
+            playerCustomGUI.reloadRecipesTask();
+            return playerCustomGUI;
+        } catch (Exception e) {
+            if (inv != null) {
+                inv.clear();
+            }
+            player.closeInventory();
+            throw new RuntimeException("Exception was thrown on gui open for: " + player.getName(), e);
+        }
     }
 
     public void reloadRecipesTask() {
@@ -128,73 +189,12 @@ public class PlayerCustomGUI implements Listener {
         }
     }
 
-    public static Collection<ItemStack> getPlayerItems(InventoryHolder player) {
-        DarkRiseItems itemsRegistry = DarkRiseEconomy.getItemsRegistry();
-        ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
-        List<ItemStack> result = new ArrayList<>(contents.length);
-        for (ItemStack content : contents) {
-            if (content == null) {
-                continue;
-            }
-//            DarkRiseItem item = itemsRegistry.getItemByStack(content);
-//            if (item == null)
-//            {
-//                continue;
-//            }
-            result.add(content);
-        }
-        return result;
-    }
-
     public Category getCategory() {
         return category;
     }
 
     public String getName() {
         return gui.getName();
-    }
-
-    public static PlayerCustomGUI open(CustomGUI gui, Player player, Category category) {
-        if (category.getPattern() != null)
-            gui.setPattern(category.getPattern());
-        else
-            gui.resetPattern();
-        Inventory inv = null;
-        try {
-            inv = Bukkit.createInventory(player, gui.slots.length, ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            gui.resetBlockedSlots(player, inv, 0, category.getRecipes().size(),
-                    new MessageData[]{
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
-                            new MessageData("category", category),
-                            new MessageData("gui", gui.getName()),
-                            new MessageData("player", player.getName()),
-                            new MessageData("bal", Vault.getMoney(player))
-                    });
-//            int k = -1;
-//            HashMap<Character, ItemStack> items = gui.pattern.getItems();
-//            for (String row : gui.pattern.getPattern()) {
-//                for (char c : row.toCharArray()) {
-//                    k++;
-//                    ItemStack item = ItemUtils.replaceText(items.get(c),
-//                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
-//                            new MessageData("category", category),
-//                            new MessageData("gui", gui.getName()),
-//                            new MessageData("player", player.getName()));
-//                    if (item != null) inv.setItem(k, item.clone());
-//                }
-//            }
-            PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
-            gui.open(player, playerCustomGUI);
-            player.openInventory(inv);
-            playerCustomGUI.reloadRecipesTask();
-            return playerCustomGUI;
-        } catch (Exception e) {
-            if (inv != null) {
-                inv.clear();
-            }
-            player.closeInventory();
-            throw new RuntimeException("Exception was thrown on gui open for: " + player.getName(), e);
-        }
     }
 
     public void onClick(InventoryClickEvent e) {
@@ -294,8 +294,6 @@ public class PlayerCustomGUI implements Listener {
         }
     }
 
-    private Recipe craftingRecipe = null;
-
     private boolean craft(int slot, boolean addToCursor) {
 /*        if (craftingTask != null) {
             MessageUtil.sendMessage("crafting.alreadyCrafting", player);
@@ -347,8 +345,8 @@ public class PlayerCustomGUI implements Listener {
             resultItem.setItemMeta(meta);
         }
 
-        ItemStack cursor = this.player.getItemOnCursor();
         if (addToCursor) {
+            ItemStack cursor = this.player.getItemOnCursor();
             if (resultItem.isSimilar(cursor)) {
                 if ((resultItem.getAmount() + cursor.getAmount()) > resultItem.getMaxStackSize()) {
                     return false;
@@ -410,7 +408,9 @@ public class PlayerCustomGUI implements Listener {
         }
 
         double modifier = DarkRiseCrafting.getInstance().getPlayerCooldown(player);
-        int cooldown = modifier == 0d ? 0 : (int) Math.round(recipe.getCooldown() / modifier);
+        int cooldown = modifier == 0d
+                ? recipe.getCooldown()
+                : (int) Math.round(recipe.getCooldown() - (recipe.getCooldown() * modifier));
         showBossBar(this.player, cooldown);
 
         if (cooldown != 0) {
@@ -422,46 +422,68 @@ public class PlayerCustomGUI implements Listener {
         craftingRecipe = recipe;
         craftingTask = DarkRiseCrafting.getInstance().runTaskLater(cooldown, () -> {
             craftingSuccess = true;
-            cancel(false);
-            Vault.pay(this.player, recipe.getPrice());
             if (recipe.getCommands().size() == 0) {
                 if (addToCursor) {
-                    if ((cursor != null) && (cursor.getType() != Material.AIR)) {
-                        cursor.setAmount(cursor.getAmount() + recipe.getResult().getAmount());
-                        this.player.setItemOnCursor(cursor);
-                    } else {
+                    ItemStack cursor = this.player.getItemOnCursor();
+                    if (cursor != null && cursor.isSimilar(recipe.getResult().getItemStack())) {
+                        if (cursor.getAmount() < cursor.getMaxStackSize() && cursor.getAmount() + recipe.getResult().getAmount() <= cursor.getMaxStackSize()) {
+                            cursor.setAmount(cursor.getAmount() + recipe.getResult().getAmount());
+                            this.player.setItemOnCursor(cursor);
+                        } else {
+                            craftingSuccess = false;
+                        }
+                    } else if (cursor == null || cursor.getType() == Material.AIR) {
                         this.player.setItemOnCursor(resultItem);
+                    } else {
+                        craftingSuccess = false;
                     }
                 } else {
-                    HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
-                    if (!notAdded.isEmpty()) {
-                        for (ItemStack stack : notAdded.values()) {
-                            this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
+                    boolean fits = calcWillFit(resultItem);
+                    if (fits) {
+                        HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
+                        if (!notAdded.isEmpty()) {
+                            for (ItemStack stack : notAdded.values()) {
+                                this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
+                            }
                         }
+                    } else {
+                        craftingSuccess = false;
                     }
                 }
             }
 
-            //Commands
-            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, recipe.getCommands());
+            if (craftingSuccess) {
+                cancel(false);
+                Vault.pay(this.player, recipe.getPrice());
+                //Commands
+                DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, recipe.getCommands());
 
-            //Experience
-            CraftingTable table = Cfg.getTable(this.gui.name);
+                //Experience
+                CraftingTable table = Cfg.getTable(this.gui.name);
 
-            if (recipe.getXpGain() > 0) {
-                DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
-            }
+                if (recipe.getXpGain() > 0) {
+                    DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+                }
 
-            //Restart the crafting sequence if auto-crafting is enabled
-            if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
-                reloadRecipesTask();
-                boolean success = craft(slot, addToCursor); //Call this method again recursively
-                if (!success)
-                    MessageUtil.sendMessage("crafting.autoCancelled", player);
+                //Restart the crafting sequence if auto-crafting is enabled
+                if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
+                    reloadRecipesTask();
+                    boolean success = craft(slot, addToCursor); //Call this method again recursively
+                    if (!success)
+                        MessageUtil.sendMessage("crafting.autoCancelled", player);
+                }
+            } else {
+                cancel();
             }
         });
 
         return true;
+    }
+
+    private boolean calcWillFit(ItemStack item) {
+        Inventory inv = Bukkit.createInventory(null, InventoryType.PLAYER);
+        inv.setContents(inventory.getContents());
+        return inv.addItem(item).isEmpty();
     }
 
     private void showBossBar(Player target, double cooldown) {

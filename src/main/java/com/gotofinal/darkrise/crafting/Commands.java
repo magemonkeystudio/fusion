@@ -16,9 +16,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Commands implements CommandExecutor {
+
+    private Map<String, ConfirmationAction> confirmation = new HashMap<>();
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         DarkRiseCrafting instance = DarkRiseCrafting.getInstance();
@@ -108,16 +112,24 @@ public class Commands implements CommandExecutor {
                         MessageUtil.sendMessage("crafting.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
                         return true;
                     }
-                    PlayerConfig conf = PConfigManager.getPlayerConfig(player);
-                    conf.removeProfession(table.getName());
-                    MessageUtil.sendMessage("crafting.forgotten", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
+                    ConfirmationAction action = () -> {
+                        PlayerConfig conf = PConfigManager.getPlayerConfig(player);
+                        conf.removeProfession(table.getName());
+                        MessageUtil.sendMessage("crafting.forgotten", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
+                    };
+
+                    confirmation.put(player.getUniqueId().toString(), action);
+                    MessageUtil.sendMessage("crafting.forget.confirm", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
+
+                    Bukkit.getScheduler().runTaskLater(DarkRiseCrafting.getInstance(),
+                            () -> confirmation.remove(player.getUniqueId().toString()), 15 * 20l);
+
                     return true;
                 } else {
                     MessageUtil.sendMessage("crafting.help", sender, new MessageData("sender", sender),
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             }
-        } else if ((args.length == 1) && args[0].equalsIgnoreCase("reload")) {
             if (!instance.checkPermission(sender, "crafting.reload")) {
                 return true;
             }
@@ -126,48 +138,66 @@ public class Commands implements CommandExecutor {
             instance.reloadLang();
             MessageUtil.sendMessage("crafting.reload", sender, new MessageData("sender", sender));
             return true;
-        } else if (args.length == 1 && args[0].equalsIgnoreCase("browse")) {
-            if (!(sender instanceof Player)) {
-                MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+        } else if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("browse")) {
+                if (!(sender instanceof Player)) {
+                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    return true;
+                }
+                Player player = (Player) sender;
+
+                BrowseGUI.open(player);
+                return true;
+            } else if (args[0].equalsIgnoreCase("level")) {
+                if (!(sender instanceof Player)) {
+                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    return true;
+                }
+                for (Map.Entry<String, CraftingTable> entry : Cfg.getMap().entrySet()) {
+                    MessageUtil.sendMessage("crafting.level.format", sender,
+                            new MessageData("category", entry.getValue().getName()),
+                            new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
+                            new MessageData("experience", DarkRiseCrafting.getExperienceManager().getExperience((Player) sender, entry.getValue())));
+                }
+
+                return true;
+            } else if (args[0].equalsIgnoreCase("auto")) {
+                if (!(sender instanceof Player)) {
+                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    return true;
+                }
+                if (!instance.checkPermission(sender, "crafting.auto")) {
+                    return true;
+                }
+                Player player = (Player) sender;
+
+                boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
+
+                PConfigManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
+
+                MessageUtil.sendMessage("crafting.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
+
+                return true;
+            } else if (args[0].equalsIgnoreCase("confirm")) {
+                String id = sender instanceof Player ? ((Player) sender).getUniqueId().toString() : "console";
+
+                if (confirmation.containsKey(id)) {
+                    confirmation.get(id).doAction();
+                    confirmation.remove(id);
+                } else {
+                    MessageUtil.sendMessage("crafting.nothingToConfirm", sender, new MessageData("sender", sender));
+                }
+
                 return true;
             }
-            Player player = (Player) sender;
-
-            BrowseGUI.open(player);
-            return true;
-        } else if (args.length == 1 && args[0].equalsIgnoreCase("level")) {
-            if (!(sender instanceof Player)) {
-                MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
-                return true;
-            }
-            for (Map.Entry<String, CraftingTable> entry : Cfg.getMap().entrySet()) {
-                MessageUtil.sendMessage("crafting.level.format", sender,
-                        new MessageData("category", entry.getValue().getName()),
-                        new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
-                        new MessageData("experience", DarkRiseCrafting.getExperienceManager().getExperience((Player) sender, entry.getValue())));
-            }
-
-            return true;
-        } else if (args.length == 1 && args[0].equalsIgnoreCase("auto")) {
-            if (!(sender instanceof Player)) {
-                MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
-                return true;
-            }
-            if (!instance.checkPermission(sender, "crafting.reload")) {
-                return true;
-            }
-            Player player = (Player) sender;
-
-            boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
-
-            PConfigManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
-
-            MessageUtil.sendMessage("crafting.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
-
-            return true;
         }
         MessageUtil.sendMessage("crafting.help", sender, new MessageData("sender", sender),
                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
         return true;
+    }
+
+
+    public interface ConfirmationAction {
+        void doAction();
     }
 }

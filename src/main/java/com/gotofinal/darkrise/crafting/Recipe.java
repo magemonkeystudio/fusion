@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class Recipe implements ConfigurationSerializable {
     protected final String name;
-    protected final Collection<RecipeItem> pattern;
+    protected final LinkedList<RecipeItem> pattern;
     protected final RecipeItem result;
     protected final double price;
     protected final int neededLevels;
@@ -34,7 +34,8 @@ public class Recipe implements ConfigurationSerializable {
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
         this.result = RecipeItem.fromConfig(map.get("result"));
-        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
+//        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
+        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toCollection(LinkedList::new));
         this.price = dw.getDouble("price", 0);
         this.neededLevels = dw.getInt("neededLevels", 0);
         this.neededXp = dw.getInt("neededXp", 0);
@@ -51,7 +52,7 @@ public class Recipe implements ConfigurationSerializable {
 
     public Recipe(String name, Collection<RecipeItem> pattern, RecipeEconomyItem result, double price, int neededLevels, int neededXp) {
         this.name = name;
-        this.pattern = new ArrayList<>(pattern);
+        this.pattern = new LinkedList<>(pattern);
         this.result = result;
         this.price = price;
         this.neededLevels = neededLevels;
