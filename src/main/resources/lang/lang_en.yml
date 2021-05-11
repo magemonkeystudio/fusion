@@ -1,31 +1,31 @@
 crafting:
   gui:
     learned:
-      'true': "&3Learned: &ayes"
-      'false': "&3Learned: &cno"
+      'true': "&aYou have unlocked this recipe: &ayes"
+      'false': "&cThis recipe is locked: &cno"
     ingredient:
-      'true': "&a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.customItem.name>"
-      'false': "&c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.customItem.name>"
+      'true': "&6- &r$<recipeItem.customItem.name> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
+      'false': "&6- &r$<recipeItem.customItem.name> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"
     ingredientSimple:
-      'true': "&a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
-      'false': "&c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
+      'true': "&6- &a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
+      'false': "&6- &c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
     money:
-      'true': "&3Cost: &a$<player.money>&8/&7$<recipe.price> &3$."
-      'false': "&3Cost: &c$<player.money>&8/&7$<recipe.price> &3$."
+      'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<recipe.price>&7)"
+      'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<recipe.price>&7)"
     xpLevels:
-      'true': "&3Cost: &a$<level>&8/&7$<recipe.neededLevels> &3levels."
-      'false': "&3Cost: &c$<level>&8/&7$<recipe.neededLevels> &3levels."
+      'true': '&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.neededLevels>&7)'
+      'false': '&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.neededLevels>&7)'
     xp:
-      'true': "&3Cost: &a$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."
-      'false': "&3Cost: &c$<player.totalExperience>&8/&7$<recipe.neededXp> &3xp."
+      'true': '&3Cost: &a$<player.totalExperience>&8/&7$<recipe.neededXp>&3xp.'
+      'false': '&3Cost: &c$<player.totalExperience>&8/&7$<recipe.neededXp>&3xp.'
     mastery:
-      'true': "&3Mastery Unlocked: &aTrue"
-      'false': "&3Mastery Unlocked: &cFalse &7(Level required: $<craftingTable.masteryUnlock>, Fee: $<craftingTable.masteryFee>)"
+      'true': '&6- &eMastery: &7(Unlocked)'
+      'false': '&6- &eMastery: &8(locked)'
     canCraft:
-      'true': "&aYou can craft this item."
-      'false': "&cYou can't craft this item."
+      'true': '&aYou can craft this item.'
+      'false': '&cYou can''t craft this item.'
     rank:
-      epic: "&cEpic rank needed to craft this item!"
+      epic: '&cEpic rank needed to craft this item!'
   error:
     alreadyMastered: "&cYou have already mastered this!"
     noMasteryLevel: "&cYou must be at least level $<craftingTable.masteryUnlock> to unlock this!"
@@ -60,9 +60,9 @@ crafting:
     You typed: &7$<text>&r
       Valid syntax:
         &8/&7craft &rbrowse
-        &8/&7craft &ruse &8<&7crafting&8>
-        &8/&7craft &ruse &8<&7crafting&8> <&7nickname&8>
+        &8/&7craft &ruse &8<&7profession&8>
+        &8/&7craft &ruse &8<&7profession&8> <&7player&8>
         &8/&7craft &rlevel
-        &8/&7craft &rmaster &8<&7crafting&8>
-        &8/&7craft &rforget &8<&7crafting&8>
+        &8/&7craft &rmaster &8<&7profession&8>
+        &8/&7craft &rforget &8<&7profession&8>
         &8/&7craft &rreload
