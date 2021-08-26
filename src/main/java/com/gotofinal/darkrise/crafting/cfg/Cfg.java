@@ -21,12 +21,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public final class Cfg {
-    private static final Map<String, CraftingTable> map = new HashMap<>(4);
-    private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
-    public static String recursive = "floor(n+300^(n/7)^2)";
-    public static String finalMod = "floor(x)/4";
-    public static long dataSaveInterval = 12000;
-    public static double forgetPenalty = 0.2d;
+    private static final Map<String, CraftingTable> map              = new HashMap<>(4);
+    private static final Map<String, CustomGUI>     guiMap           = new HashMap<>(4);
+    public static        String                     recursive        = "floor(n+300^(n/7)^2)";
+    public static        String                     finalMod         = "floor(x)/4";
+    public static        long                       dataSaveInterval = 12000;
+    public static        double                     forgetPenalty    = 0.2d;
 
     private Cfg() {
     }
@@ -36,6 +36,7 @@ public final class Cfg {
     }
 
     public static CustomGUI getGUI(String str) {
+        if (str == null) return null;
         return guiMap.get(str.toLowerCase().trim());
     }
 
@@ -48,8 +49,8 @@ public final class Cfg {
     }
 
     protected static FileConfiguration getConfig() {
-        File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
-        FileConfiguration cfg = new YamlConfiguration();
+        File              file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration cfg  = new YamlConfiguration();
 
         if (!file.exists()) {
             addDefs(cfg);
@@ -91,15 +92,15 @@ public final class Cfg {
         items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
         items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
         items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-        InventoryPattern ip = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
-        ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE/*, 1, (short) 15*/);
+        InventoryPattern ip   = new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"}, items);
+        ItemStack        item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE/*, 1, (short) 15*/);
 //        CraftingTable a = new CraftingTable("forge", "Forge inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
 //
 //        a.addRecipe(new Recipe("test",
 //                Arrays.asList(new RecipeEconomyItem("testItem", 5),
 //                        new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
 //                new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
-        CraftingTable b = new CraftingTable("craft", "Craft inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
+        CraftingTable             b    = new CraftingTable("craft", "Craft inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
         List<Map<String, Object>> list = new ArrayList<>(3);
 //        list.add(a.serialize());
         list.add(b.serialize());
@@ -109,8 +110,8 @@ public final class Cfg {
     public static void init() {
         map.clear();
         guiMap.clear();
-        File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
-        FileConfiguration cfg = new YamlConfiguration();
+        File              file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration cfg  = new YamlConfiguration();
 
         if (!file.exists()) {
             addDefs(cfg);
@@ -160,7 +161,7 @@ public final class Cfg {
         }
 
         for (Entry<String, CraftingTable> entry : map.entrySet()) {
-            String key = entry.getKey();
+            String        key   = entry.getKey();
             CraftingTable value = entry.getValue();
             guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
         }
