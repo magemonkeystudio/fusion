@@ -146,7 +146,8 @@ public class PlayerCustomGUI implements Listener {
             int rest = allRecipeCount % pageSize;
             int pages = (rest == 0) ? fullPages : (fullPages + 1);
             if (page >= pages) {
-                this.page = pages - 1;
+                if (page > 0)
+                    this.page = pages - 1;
                 this.reloadRecipes();
                 return;
             }

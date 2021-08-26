@@ -1,6 +1,5 @@
 package com.gotofinal.darkrise.crafting.queue;
 
-import com.gotofinal.darkrise.crafting.Recipe;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -20,6 +19,4 @@ public class CraftingQueue {
     public CraftingQueue(Player owner) {
         setOwner(owner.getUniqueId());
     }
-
-
 }

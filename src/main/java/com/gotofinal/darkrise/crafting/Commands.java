@@ -130,14 +130,6 @@ public class Commands implements CommandExecutor {
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             }
-            if (!instance.checkPermission(sender, "crafting.reload")) {
-                return true;
-            }
-            instance.closeAll();
-            instance.reloadConfig();
-            instance.reloadLang();
-            MessageUtil.sendMessage("crafting.reload", sender, new MessageData("sender", sender));
-            return true;
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("browse")) {
                 if (!(sender instanceof Player)) {
@@ -188,6 +180,15 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("crafting.nothingToConfirm", sender, new MessageData("sender", sender));
                 }
 
+                return true;
+            } else if (args[0].equalsIgnoreCase("reload")) {
+                if (!instance.checkPermission(sender, "crafting.reload")) {
+                    return true;
+                }
+                instance.closeAll();
+                instance.reloadConfig();
+                instance.reloadLang();
+                MessageUtil.sendMessage("crafting.reload", sender, new MessageData("sender", sender));
                 return true;
             }
         }

@@ -138,7 +138,7 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         double num = 0d;
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission();
-            if (perm.startsWith("craft.cooldown")) {
+            if (perm.startsWith("crafting.cooldown")) {
                 String mod = perm.substring(perm.lastIndexOf(".") + 1);
                 if (mod.equals("*"))
                     num = 1d;

@@ -155,7 +155,7 @@ public class BrowseGUI implements Listener {
         PlayerConfig conf = PConfigManager.getPlayerConfig(p);
 
         int unlocked = conf.getUnlockedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(p, "craft.limit"); //Set the max number of unlockable professions.
+        int allowed = PlayerUtil.getPermOption(p, "crafting.limit"); //Set the max number of unlockable professions.
         int cost = BrowseConfig.getProfCost(profession);
 
         MessageData[] data = {
