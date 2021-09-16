@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class DarkRiseCrafting extends RisePlugin implements Listener {
-    public static final PlaceholderType<RecipeItem> RECIPE_ITEM = PlaceholderType.create("recipeItem", RecipeItem.class);
-    public static final PlaceholderType<Recipe> RECIPE = PlaceholderType.create("recipe", Recipe.class);
-    public static final PlaceholderType<CraftingTable> CRAFTING_TABLE = PlaceholderType.create("craftingTable", CraftingTable.class);
-    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE = PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
-    public static final PlaceholderType<CustomGUI> CRAFTING_INVENTORY = PlaceholderType.create("craftingInventory", CustomGUI.class);
+    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        = PlaceholderType.create("recipeItem", RecipeItem.class);
+    public static final PlaceholderType<Recipe>           RECIPE             = PlaceholderType.create("recipe", Recipe.class);
+    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     = PlaceholderType.create("craftingTable", CraftingTable.class);
+    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  = PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
+    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY = PlaceholderType.create("craftingInventory", CustomGUI.class);
 
-    private static DarkRiseCrafting instance;
+    private static DarkRiseCrafting  instance;
     private static ExperienceManager experienceManager;
 
     private BukkitTask saveTask;
@@ -48,6 +48,16 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         FileConfiguration lang = ConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"), getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
+        if (experienceManager != null) {
+            try {
+                experienceManager.save();
+            } catch (IOException e) {
+                log.warning("Error saving data.yml");
+                e.printStackTrace();
+            }
+        }
+        experienceManager = new ExperienceManager();
+        experienceManager.load();
         BrowseConfig.load();
         runSaveTask();
     }
@@ -82,8 +92,6 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         this.reloadConfig();
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
-        experienceManager = new ExperienceManager();
-        experienceManager.load();
         getServer().getPluginManager().registerEvents(this, this);
     }
 

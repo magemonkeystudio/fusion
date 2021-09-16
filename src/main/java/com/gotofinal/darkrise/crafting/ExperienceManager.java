@@ -16,7 +16,7 @@ import java.util.*;
 
 public final class ExperienceManager {
     public static class PlayerData implements ConfigurationSerializable {
-        private final UUID uuid;
+        private final UUID                        uuid;
         private final Map<CraftingTable, Integer> data = new HashMap<>();
 
         /**
@@ -74,7 +74,7 @@ public final class ExperienceManager {
          * @param experience    experience
          */
         public void add(CraftingTable craftingTable, Integer experience) {
-            int previousXp = data.getOrDefault(craftingTable, 0);
+            int previousXp    = data.getOrDefault(craftingTable, 0);
             int previousLevel = LevelFunction.getLevel(previousXp);
             data.put(craftingTable, previousXp + experience);
             int newLevel = LevelFunction.getLevel(previousXp + experience);
@@ -106,7 +106,7 @@ public final class ExperienceManager {
     }
 
     private final Collection<PlayerData> playerDataSet = new HashSet<>();
-    private final File file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "data.yml");
+    private final File                   file          = new File(DarkRiseCrafting.getInstance().getDataFolder(), "data.yml");
 
     /**
      * Loads data
@@ -134,7 +134,8 @@ public final class ExperienceManager {
         for (Map<?, ?> typeData : typesSection) {
             //noinspection unchecked
             PlayerData playerData = new PlayerData((Map<String, Object>) typeData);
-            this.playerDataSet.add(playerData);
+            if (playerDataSet.stream().filter(data -> data.getUuid().equals(playerData.getUuid())).count() == 0)
+                this.playerDataSet.add(playerData);
         }
     }
 
@@ -144,8 +145,8 @@ public final class ExperienceManager {
      * @throws IOException when something goes wrong
      */
     public void save() throws IOException {
-        YamlConfiguration configuration = new YamlConfiguration();
-        List<Map<String, Object>> list = new ArrayList<>();
+        YamlConfiguration         configuration = new YamlConfiguration();
+        List<Map<String, Object>> list          = new ArrayList<>();
 
         this.playerDataSet.forEach(playerData -> list.add(playerData.serialize()));
 
@@ -202,20 +203,20 @@ public final class ExperienceManager {
         int level = player.getLevel();
         if ((level >= 0) && (level <= 15)) {
             experience = (int) Math.ceil(Math.pow(level, 2) + (6 * level));
-            int requiredExperience = (2 * level) + 7;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
+            int    requiredExperience = (2 * level) + 7;
+            double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
             experience += Math.ceil(currentExp * requiredExperience);
             return experience;
         } else if ((level > 15) && (level <= 30)) {
             experience = (int) Math.ceil((((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360));
-            int requiredExperience = (5 * level) - 38;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
+            int    requiredExperience = (5 * level) - 38;
+            double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
             experience += Math.ceil(currentExp * requiredExperience);
             return experience;
         } else {
             experience = (int) Math.ceil(((((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220)));
-            int requiredExperience = (9 * level) - 158;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
+            int    requiredExperience = (9 * level) - 158;
+            double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
             experience += Math.ceil(currentExp * requiredExperience);
             return experience;
         }
@@ -226,14 +227,14 @@ public final class ExperienceManager {
         //Levels 0 through 15
         if ((xp >= 0) && (xp < 351)) {
             //Calculate Everything
-            int a = 1;
-            int b = 6;
-            int c = -xp;
-            int level = (int) (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int xpForLevel = (int) (Math.pow(level, 2) + (6 * level));
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (2 * level) + 7;
-            float experience = (float) remainder / (float) experienceNeeded;
+            int   a                = 1;
+            int   b                = 6;
+            int   c                = -xp;
+            int   level            = (int) (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            int   xpForLevel       = (int) (Math.pow(level, 2) + (6 * level));
+            int   remainder        = xp - xpForLevel;
+            int   experienceNeeded = (2 * level) + 7;
+            float experience       = (float) remainder / (float) experienceNeeded;
             experience = round(experience, 2);
 //            System.out.println("xpForLevel: " + xpForLevel);
 //            System.out.println(experience);
@@ -244,15 +245,15 @@ public final class ExperienceManager {
             //Levels 16 through 30
         } else if ((xp >= 352) && (xp < 1507)) {
             //Calculate Everything
-            double a = 2.5;
-            double b = -40.5;
-            int c = -xp + 360;
-            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int level = (int) Math.floor(dLevel);
-            int xpForLevel = (int) (((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360);
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (5 * level) - 38;
-            float experience = (float) remainder / (float) experienceNeeded;
+            double a                = 2.5;
+            double b                = -40.5;
+            int    c                = -xp + 360;
+            double dLevel           = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            int    level            = (int) Math.floor(dLevel);
+            int    xpForLevel       = (int) (((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360);
+            int    remainder        = xp - xpForLevel;
+            int    experienceNeeded = (5 * level) - 38;
+            float  experience       = (float) remainder / (float) experienceNeeded;
             experience = round(experience, 2);
 //            System.out.println("xpForLevel: " + xpForLevel);
 //            System.out.println(experience);
@@ -263,15 +264,15 @@ public final class ExperienceManager {
             //Level 31 and greater
         } else {
             //Calculate Everything
-            double a = 4.5;
-            double b = -162.5;
-            int c = -xp + 2220;
-            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int level = (int) Math.floor(dLevel);
-            int xpForLevel = (int) (((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220);
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (9 * level) - 158;
-            float experience = (float) remainder / (float) experienceNeeded;
+            double a                = 4.5;
+            double b                = -162.5;
+            int    c                = -xp + 2220;
+            double dLevel           = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            int    level            = (int) Math.floor(dLevel);
+            int    xpForLevel       = (int) (((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220);
+            int    remainder        = xp - xpForLevel;
+            int    experienceNeeded = (9 * level) - 158;
+            float  experience       = (float) remainder / (float) experienceNeeded;
             experience = round(experience, 2);
 //            System.out.println("xpForLevel: " + xpForLevel);
 //            System.out.println(experience);
