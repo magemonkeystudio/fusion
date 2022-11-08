@@ -5,8 +5,7 @@
     <parent>
         <artifactId>risecore-parent</artifactId>
         <groupId>me.travja</groupId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../RiseCore Parent/pom.xml</relativePath>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +14,7 @@
     <version>1.02.1-SNAPSHOT</version>
 
     <build>
-        <finalName>${project.name}-${project.version}</finalName>
+        <finalName>${project.name}-${project.version}-${maven.build.timestamp}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
@@ -54,7 +53,7 @@
         <dependency>
             <groupId>com.gotofinal</groupId>
             <artifactId>economy</artifactId>
-            <version>1.0-Travja</version>
+            <version>1.0-4322210</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
