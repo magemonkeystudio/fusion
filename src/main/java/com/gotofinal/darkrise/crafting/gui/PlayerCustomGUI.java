@@ -4,10 +4,7 @@ import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.cfg.PConfigManager;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import com.gotofinal.darkrise.economy.DarkRiseItems;
 import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
-import me.travja.darkrise.core.legacy.cmds.R;
 import me.travja.darkrise.core.legacy.util.ItemUtils;
 import me.travja.darkrise.core.legacy.util.Vault;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
@@ -36,21 +33,20 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public class PlayerCustomGUI implements Listener {
-    private final CustomGUI gui;
-    private final Player player;
-    private final Inventory inventory;
-    private final Category category;
-    private final int maxPage = 0;
+    private final CustomGUI                          gui;
+    private final Player                             player;
+    private final Inventory                          inventory;
+    private final Category                           category;
     private final HashMap<Integer, CalculatedRecipe> recipes;
-    private int page = 0;
-    private BukkitTask craftingTask;
-    private BukkitTask barTask;
-    private BossBar bar;
-    private Collection<ItemStack> refund = new ArrayList<>();
-    private ItemStack previousCursor;
+    private       int                                page   = 0;
+    private       BukkitTask                         craftingTask;
+    private       BukkitTask                         barTask;
+    private       BossBar                            bar;
+    private       Collection<ItemStack>              refund = new ArrayList<>();
+    private       ItemStack                          previousCursor;
 
     private boolean craftingSuccess = true;
-    private Recipe craftingRecipe = null;
+    private Recipe  craftingRecipe  = null;
 
     public PlayerCustomGUI(CustomGUI gui, Player player, Inventory inventory, Category category) {
         this.gui = gui;
@@ -61,18 +57,12 @@ public class PlayerCustomGUI implements Listener {
     }
 
     public static Collection<ItemStack> getPlayerItems(InventoryHolder player) {
-        DarkRiseItems itemsRegistry = DarkRiseEconomy.getItemsRegistry();
-        ItemStack[] contents = ItemUtils.compact(false, player.getInventory().getContents());
-        List<ItemStack> result = new ArrayList<>(contents.length);
+        ItemStack[]     contents = ItemUtils.compact(false, player.getInventory().getContents());
+        List<ItemStack> result   = new ArrayList<>(contents.length);
         for (ItemStack content : contents) {
             if (content == null) {
                 continue;
             }
-//            DarkRiseItem item = itemsRegistry.getItemByStack(content);
-//            if (item == null)
-//            {
-//                continue;
-//            }
             result.add(content);
         }
         return result;
@@ -131,20 +121,20 @@ public class PlayerCustomGUI implements Listener {
                 gui.setPattern(category.getPattern());
             else
                 gui.resetPattern();
-            CraftingTable table = Cfg.getTable(this.gui.name);
-            ItemStack fill = table.getFillItem();
+            CraftingTable      table      = Cfg.getTable(this.gui.name);
+            ItemStack          fill       = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
 //            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
 //            allRecipes.removeIf(r -> r.isMastery() && !MasteryManager.hasMastery(player, gui.name));
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
-            int pageSize = this.gui.resultSlots.size();
+            int pageSize       = this.gui.resultSlots.size();
             int allRecipeCount = allRecipes.size();
-            int i = 0;
-            int page = this.page;
+            int i              = 0;
+            int page           = this.page;
 
             int fullPages = allRecipeCount / pageSize;
-            int rest = allRecipeCount % pageSize;
-            int pages = (rest == 0) ? fullPages : (fullPages + 1);
+            int rest      = allRecipeCount % pageSize;
+            int pages     = (rest == 0) ? fullPages : (fullPages + 1);
             if (page >= pages) {
                 if (page > 0)
                     this.page = pages - 1;
@@ -152,9 +142,9 @@ public class PlayerCustomGUI implements Listener {
                 return;
             }
 
-            Collection<ItemStack> playerItems = getPlayerItems(this.player);
-            CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
-            Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
+            Collection<ItemStack> playerItems       = getPlayerItems(this.player);
+            CalculatedRecipe[]    calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
+            Recipe[]              allRecipesArray   = allRecipes.toArray(new Recipe[allRecipeCount]);
 
             Integer[] slots = this.gui.resultSlots.toArray(new Integer[0]);
             for (int slot : slots) {
@@ -171,8 +161,8 @@ public class PlayerCustomGUI implements Listener {
                     }, category.hasPrevious());
 
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length); (k < allRecipesArray.length) && (i < e); k++, i++) {
-                Recipe recipe = allRecipesArray[k];
-                int slot = slots[i];
+                Recipe           recipe           = allRecipesArray[k];
+                int              slot             = slots[i];
                 CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
                 this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                 this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
@@ -210,12 +200,7 @@ public class PlayerCustomGUI implements Listener {
         }
 
         Character c = gui.getPattern().getSlot(e.getRawSlot());
-        Collection<DelayedCommand> patternCommands = gui.getPattern().getCommands(c);
-        if (patternCommands != null && !patternCommands.isEmpty()) {
-            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), e.getWhoClicked(), patternCommands,
-                    R.r("{crafting}", this.gui.getName()),
-                    R.r("{inventoryName}", this.gui.getInventoryName()));
-        }
+        gui.executeCommands(c, e.getWhoClicked());
 
         //Close on click
         if (gui.getPattern().getCloseOnClickSlots().contains(c)) {
@@ -259,16 +244,16 @@ public class PlayerCustomGUI implements Listener {
             this.reloadRecipesTask();
             return false;
         }
-        CraftingTable table = Cfg.getTable(this.gui.name);
-        Collection<Recipe> allRecipes = table.getRecipes().values();
-        int pageSize = this.gui.resultSlots.size();
-        int allRecipeCount = allRecipes.size();
-        int i = 0;
-        int page = this.page;
+        CraftingTable      table          = Cfg.getTable(this.gui.name);
+        Collection<Recipe> allRecipes     = table.getRecipes().values();
+        int                pageSize       = this.gui.resultSlots.size();
+        int                allRecipeCount = allRecipes.size();
+        int                i              = 0;
+        int                page           = this.page;
 
         int fullPages = allRecipeCount / pageSize;
-        int rest = allRecipeCount % pageSize;
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = allRecipeCount % pageSize;
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
         if (page >= pages) {
             this.page = pages;
             this.reloadRecipesTask();
@@ -279,6 +264,7 @@ public class PlayerCustomGUI implements Listener {
 
     private void prevPage() {
         if (this.page <= 0) {
+            cancel();
             PlayerInitialGUI.open(gui, player);
             return;
         }
@@ -295,20 +281,8 @@ public class PlayerCustomGUI implements Listener {
         }
     }
 
-    private boolean craft(int slot, boolean addToCursor) {
-/*        if (craftingTask != null) {
-            MessageUtil.sendMessage("crafting.alreadyCrafting", player);
-            return false;
-        }*/
-
-        CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
+    private boolean canCraft(CalculatedRecipe calculatedRecipe, int slot) {
         Recipe recipe = calculatedRecipe.getRecipe();
-        if (craftingRecipe != null && craftingRecipe.equals(recipe)) {
-            cancel();
-            return false;
-        }
-
-        cancel();
         if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player, this.gui.getName())) {
             MessageUtil.sendMessage("crafting.error.noMastery", player, new MessageData("craftingTable", Cfg.getTable(gui.getName())));
             return false;
@@ -334,12 +308,31 @@ public class PlayerCustomGUI implements Listener {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean craft(int slot, boolean addToCursor) {
+        /* if (craftingTask != null) {
+            MessageUtil.sendMessage("crafting.alreadyCrafting", player);
+            return false;
+        }*/
+
+        CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
+        Recipe           recipe           = calculatedRecipe.getRecipe();
+        if (craftingRecipe != null && craftingRecipe.equals(recipe)) {
+            cancel();
+            return false;
+        }
+
+        cancel();
+        if (!canCraft(calculatedRecipe, slot)) return false;
+
         RecipeItem recipeResult = recipe.getResult();
-        ItemStack resultItem = recipeResult.getItemStack();
+        ItemStack  resultItem   = recipeResult.getItemStack();
 
         //Add "Crafted by"
         if (player.hasPermission("crafting.craftedby." + recipe.getName())) {
-            ItemMeta meta = resultItem.getItemMeta();
+            ItemMeta     meta = resultItem.getItemMeta();
             List<String> lore = meta.getLore();
             lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());
             meta.setLore(lore);
@@ -358,8 +351,8 @@ public class PlayerCustomGUI implements Listener {
         }
 
         Collection<ItemStack> itemsToTake = recipe.getItemsToTake();
-        Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
-        PlayerInventory inventory = this.player.getInventory();
+        Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
+        PlayerInventory       inventory   = this.player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
             ItemStack toTake = iterator.next();
@@ -375,7 +368,6 @@ public class PlayerCustomGUI implements Listener {
 //                    item.setItemMeta(meta);
                     entry.setAmount(toTake.getAmount());
 
-//                    if (item.isSimilar(toTake)) {
                     if (CalculatedRecipe.isSimilar(toTake, item)) {
                         toTake = entry;
                         break;
@@ -515,6 +507,7 @@ public class PlayerCustomGUI implements Listener {
     }
 
     private void cancel(boolean refund) {
+        if (craftingTask == null) return;
         craftingRecipe = null;
         if (barTask != null) {
             barTask.cancel();
@@ -541,8 +534,8 @@ public class PlayerCustomGUI implements Listener {
         if (!refund || craftingSuccess)
             return;
 
-        PlayerInventory inventory = player.getInventory();
-        Collection<ItemStack> notAdded = inventory.addItem(this.refund.toArray(new ItemStack[0])).values();
+        PlayerInventory       inventory = player.getInventory();
+        Collection<ItemStack> notAdded  = inventory.addItem(this.refund.toArray(new ItemStack[0])).values();
         if (!notAdded.isEmpty()) {
             for (ItemStack item : notAdded) {
                 player.getLocation().getWorld().dropItemNaturally(player.getLocation(), item);

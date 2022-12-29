@@ -11,10 +11,10 @@
 
     <artifactId>crafting</artifactId>
     <name>ProRPGCrafting</name>
-    <version>1.02.1-SNAPSHOT</version>
+    <version>1.2.2-R0.1-SNAPSHOT</version>
 
     <build>
-        <finalName>${project.name}-${project.version}-${maven.build.timestamp}</finalName>
+        <finalName>${project.name}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>1.18.24</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>it.unimi.dsi</groupId>-->

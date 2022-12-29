@@ -140,12 +140,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
         //Execute commands
         Character c = gui.getPattern().getSlot(e.getRawSlot());
-        Collection<DelayedCommand> patternCommands = gui.getPattern().getCommands(c);
-        if (patternCommands != null && !patternCommands.isEmpty()) {
-            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), e.getWhoClicked(), patternCommands,
-                    R.r("{crafting}", this.gui.getName()),
-                    R.r("{inventoryName}", this.gui.getInventoryName()));
-        }
+        gui.executeCommands(c, e.getWhoClicked());
 
         //Close on click
         if (gui.getPattern().getCloseOnClickSlots().contains(c)) {

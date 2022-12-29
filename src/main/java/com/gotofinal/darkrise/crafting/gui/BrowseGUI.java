@@ -98,7 +98,7 @@ public class BrowseGUI implements Listener {
                 if (i >= gui.slots.size()) break;
                 CraftingTable table = Cfg.getTable(profession);
                 // Removes items from the menu if the player doesn't have permission.
-                if (!Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
+                if (table == null || !Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 
                 ItemStack item = table.getIconItem() != null ? table.getIconItem().getItem() : ItemBuilder.newItem(Material.BEDROCK)

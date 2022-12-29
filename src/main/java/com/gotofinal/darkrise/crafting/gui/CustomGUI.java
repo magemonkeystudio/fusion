@@ -3,6 +3,8 @@ package com.gotofinal.darkrise.crafting.gui;
 import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
+import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
+import me.travja.darkrise.core.legacy.cmds.R;
 import me.travja.darkrise.core.legacy.util.ItemUtils;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -10,6 +12,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -25,21 +28,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Objects;
+import java.util.*;
 
 public class CustomGUI implements Listener {
-    protected final String name;
-    protected final String inventoryName;
-    protected Slot[] slots;
-    protected transient ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    protected final     String             name;
+    protected final     String             inventoryName;
+    protected           Slot[]             slots;
+    protected transient ArrayList<Integer> resultSlots  = new ArrayList<>(20);
     protected transient ArrayList<Integer> blockedSlots = new ArrayList<>(20);
-    protected transient int nextPage;
-    protected transient int prevPage;
-    protected InventoryPattern pattern;
-    protected final InventoryPattern defaultPattern;
+    protected transient int                nextPage;
+    protected transient int                prevPage;
+    protected           InventoryPattern   pattern;
+    protected final     InventoryPattern   defaultPattern;
 
     protected final LinkedHashMap<Player, PlayerCustomGUI> map = new LinkedHashMap<>(20);
 
@@ -58,10 +58,10 @@ public class CustomGUI implements Listener {
 
     public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data, boolean includeBack) {
         int fullPages = totalItems / resultSlots.size();
-        int rest = totalItems % resultSlots.size();
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = totalItems % resultSlots.size();
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
 
-        int k = -1;
+        int                           k     = -1;
         HashMap<Character, ItemStack> items = pattern.getItems();
 
         ArrayList<Integer> leaveBlank = new ArrayList<>();
@@ -93,7 +93,7 @@ public class CustomGUI implements Listener {
     private void mapSlots() {
         this.resultSlots.clear();
         this.slots = new Slot[pattern.getPattern().length * 9];
-        int k = -1;
+        int k        = -1;
         int prevPage = -1, nextPage = -1;
         for (String row : this.pattern.getPattern()) {
             for (char c : row.toCharArray()) {
@@ -166,6 +166,21 @@ public class CustomGUI implements Listener {
         return playerCustomGUI;
     }
 
+    /**
+     * Executes the commands for the gui on the given character
+     *
+     * @param c      The character to execute commands of
+     * @param player The player to use in execution
+     */
+    public void executeCommands(Character c, HumanEntity player) {
+        Collection<DelayedCommand> patternCommands = getPattern().getCommands(c);
+        if (patternCommands != null && !patternCommands.isEmpty()) {
+            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, patternCommands,
+                    R.r("{crafting}", getName()),
+                    R.r("{inventoryName}", getInventoryName()));
+        }
+    }
+
     private boolean isThis(InventoryView inv) {
         return inventoryName != null && inv.getTitle().equals(ChatColor.translateAlternateColorCodes('&', this.inventoryName));
     }
@@ -181,7 +196,7 @@ public class CustomGUI implements Listener {
 //            System.out.println("Ugh, fail!");
             return;
         }
-        Player p = (Player) e.getWhoClicked();
+        Player          p               = (Player) e.getWhoClicked();
         PlayerCustomGUI playerCustomGUI = this.map.get(p);
         if (playerCustomGUI == null) {
             return;
@@ -231,8 +246,10 @@ public class CustomGUI implements Listener {
                 event.getItemDrop().remove();
                 if (player.getOpenInventory().getCursor() == null || player.getOpenInventory().getCursor().getType() == Material.AIR)
                     player.getOpenInventory().setCursor(stack);
-            }
 
+                PlayerCustomGUI customGUI = this.map.get(player);
+                if (customGUI != null) customGUI.cancel();
+            }
         }
     }
 
