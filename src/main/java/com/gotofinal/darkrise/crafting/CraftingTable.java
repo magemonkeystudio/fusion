@@ -95,7 +95,7 @@ public class CraftingTable implements ConfigurationSerializable {
                     category.getRecipes().add(recipe);
                 }
             } catch (Exception e) {
-                DarkRiseCrafting.getInstance().error("Exception when reading config, Invalid entry in config of " + this.name + " crafting table. Value: " + recipeData);
+                ProRPGCrafting.getInstance().error("Exception when reading config, Invalid entry in config of " + this.name + " crafting table. Value: " + recipeData);
                 e.printStackTrace();
             }
         }

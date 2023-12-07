@@ -1,8 +1,8 @@
-name: ProRPGCrafting
-main: com.gotofinal.darkrise.crafting.DarkRiseCrafting
+name: ${project.name}
+main: com.gotofinal.darkrise.crafting.ProRPGCrafting
 authors: [Travja, goflish]
-version: %PROJECT_VERSION%
-depend: [ProMCUtilities]
+version: ${project.version}
+depend: [ ProMCUtilities ]
 api-version: 1.13
 commands:
   craft:

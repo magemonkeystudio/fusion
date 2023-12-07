@@ -37,7 +37,7 @@ public interface RecipeItem {
                         result = recipeEconomyItem;
                     }
                 } catch (Exception e) {
-                    DarkRiseCrafting.getInstance()
+                    ProRPGCrafting.getInstance()
                             .error("Error on loading configuration of RecipeItem: " + obj + ", exception: " + e.getMessage() + ", more in console.");
                     throw new RuntimeException(e);
                 }
@@ -59,7 +59,7 @@ public interface RecipeItem {
                     ItemBuilder builder = ItemBuilder.newItem(mat).durability(type).amount(amount);
                     result = new RecipeCustomItem(builder.build(), builder.getAmount(), true);
                 } catch (Exception e) {
-                    DarkRiseCrafting.getInstance()
+                    ProRPGCrafting.getInstance()
                             .error("Error on loading configuration of RecipeItem: " + obj + ", exception: " + e.getMessage() + ", more in console.");
                     throw new RuntimeException(e);
                 }

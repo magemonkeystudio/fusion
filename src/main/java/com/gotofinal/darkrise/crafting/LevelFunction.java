@@ -35,7 +35,7 @@ public class LevelFunction {
     }
 
     public static int getLevel(Player player, CraftingTable craftingTable) {
-        return getLevel(DarkRiseCrafting.getExperienceManager().getExperience(player, craftingTable));
+        return getLevel(ProRPGCrafting.getExperienceManager().getExperience(player, craftingTable));
     }
 
     public static void generate(int levels) {
@@ -52,7 +52,7 @@ public class LevelFunction {
             try {
                 xp = Maths.eval(Cfg.finalMod.replace("x", format.format(xp)));
             } catch (RuntimeException e) {
-                DarkRiseCrafting.getInstance().getLogger().info("Added levels up to " + (level - 1) + " before reaching Java limitations.");
+                ProRPGCrafting.getInstance().getLogger().info("Added levels up to " + (level - 1) + " before reaching Java limitations.");
                 break;
             }
 //            xp = Math.floor(xp);

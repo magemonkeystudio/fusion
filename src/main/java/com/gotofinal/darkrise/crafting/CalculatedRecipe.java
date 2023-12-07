@@ -38,7 +38,7 @@ public class CalculatedRecipe {
     }
 
     public static CalculatedRecipe create(Recipe recipe, Collection<ItemStack> items, Player player, CraftingTable craftingTable) {
-        DarkRiseCrafting pl = DarkRiseCrafting.getInstance();
+        ProRPGCrafting pl = ProRPGCrafting.getInstance();
 
         StringBuilder lore = new StringBuilder(512);
         ItemStack result = recipe.getResult().getItemStack();
@@ -94,7 +94,7 @@ public class CalculatedRecipe {
 
         String xpLine = null;
         if (recipe.neededXp != 0) {
-            if (DarkRiseCrafting.getExperienceManager().getExperience(player, craftingTable) < recipe.neededXp) {
+            if (ProRPGCrafting.getExperienceManager().getExperience(player, craftingTable) < recipe.neededXp) {
                 canCraft = false;
                 xpLine = MessageUtil.getMessageAsString("crafting.gui.xp.false", "crafting.gui.xp.false", new MessageData("recipe", recipe),
                         new MessageData("player", player));

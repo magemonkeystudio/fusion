@@ -86,7 +86,7 @@ public final class ExperienceManager {
             data.remove(Cfg.getTable(craftingTable));
 
             try {
-                DarkRiseCrafting.getExperienceManager().save();
+                ProRPGCrafting.getExperienceManager().save();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -106,7 +106,7 @@ public final class ExperienceManager {
     }
 
     private final Collection<PlayerData> playerDataSet = new HashSet<>();
-    private final File                   file          = new File(DarkRiseCrafting.getInstance().getDataFolder(), "data.yml");
+    private final File                   file          = new File(ProRPGCrafting.getInstance().getDataFolder(), "data.yml");
 
     /**
      * Loads data
@@ -114,7 +114,7 @@ public final class ExperienceManager {
     public void load() {
         try {
             if (!file.exists() && !file.createNewFile()) {
-                DarkRiseCrafting.getInstance().getLogger().severe("Failed to create exp data file");
+                ProRPGCrafting.getInstance().getLogger().severe("Failed to create exp data file");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,7 +125,7 @@ public final class ExperienceManager {
         try {
             configuration.load(file);
         } catch (Exception e) {
-            DarkRiseCrafting.getInstance().getLogger().warning("Can't load exp data file: " + file);
+            ProRPGCrafting.getInstance().getLogger().warning("Can't load exp data file: " + file);
             e.printStackTrace();
             return;
         }

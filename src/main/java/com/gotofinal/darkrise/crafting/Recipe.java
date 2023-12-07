@@ -100,7 +100,7 @@ public class Recipe implements ConfigurationSerializable {
             if (LevelFunction.getLevel(p, craftingTable) < this.neededLevels) {
                 return false;
             }
-            if (DarkRiseCrafting.getExperienceManager().getExperience(p, craftingTable) < this.neededXp) {
+            if (ProRPGCrafting.getExperienceManager().getExperience(p, craftingTable) < this.neededXp) {
                 return false;
             }
             if (!Vault.canPay(p, this.price)) {

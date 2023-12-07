@@ -1,7 +1,7 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
 import com.gotofinal.darkrise.crafting.CraftingTable;
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
@@ -49,7 +49,7 @@ public final class Cfg {
     }
 
     protected static FileConfiguration getConfig() {
-        File              file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
+        File              file = new File(ProRPGCrafting.getInstance().getDataFolder(), "config.yml");
         FileConfiguration cfg  = new YamlConfiguration();
 
         if (!file.exists()) {
@@ -58,21 +58,21 @@ public final class Cfg {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't create config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't create config file: " + file);
                 e.printStackTrace();
             }
             cfg.options().copyDefaults(true);
             try {
                 cfg.save(file);
             } catch (IOException e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
                 e.printStackTrace();
             }
         } else {
             try {
                 cfg.load(file);
             } catch (Exception e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't load config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't load config file: " + file);
                 e.printStackTrace();
                 return null;
             }
@@ -110,7 +110,7 @@ public final class Cfg {
     public static void init() {
         map.clear();
         guiMap.clear();
-        File              file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml");
+        File              file = new File(ProRPGCrafting.getInstance().getDataFolder(), "config.yml");
         FileConfiguration cfg  = new YamlConfiguration();
 
         if (!file.exists()) {
@@ -119,21 +119,21 @@ public final class Cfg {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't create config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't create config file: " + file);
                 e.printStackTrace();
             }
             cfg.options().copyDefaults(true);
             try {
                 cfg.save(file);
             } catch (IOException e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
                 e.printStackTrace();
             }
         } else {
             try {
                 cfg.load(file);
             } catch (Exception e) {
-                DarkRiseCrafting.getInstance().getLogger().warning("Can't load config file: " + file);
+                ProRPGCrafting.getInstance().getLogger().warning("Can't load config file: " + file);
                 e.printStackTrace();
                 return;
             }
@@ -156,7 +156,7 @@ public final class Cfg {
         try {
             cfg.save(file);
         } catch (IOException e) {
-            DarkRiseCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
+            ProRPGCrafting.getInstance().getLogger().warning("Can't save config file: " + file);
             e.printStackTrace();
         }
 
