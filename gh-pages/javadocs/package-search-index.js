@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.gotofinal.darkrise.crafting"},{"l":"com.gotofinal.darkrise.crafting.cfg"},{"l":"com.gotofinal.darkrise.crafting.gui"},{"l":"com.gotofinal.darkrise.crafting.gui.slot"},{"l":"com.gotofinal.darkrise.crafting.queue"},{"l":"com.gotofinal.darkrise.crafting.util"}];updateSearchResults();
