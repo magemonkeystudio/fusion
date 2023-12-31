@@ -1,6 +1,6 @@
 package com.gotofinal.darkrise.crafting.util;
 
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
@@ -23,7 +23,7 @@ public class PlayerUtil {
                 try {
                     ret = Math.max(ret, Integer.parseInt(end));
                 } catch (NumberFormatException e) {
-                    DarkRiseCrafting.getInstance().log.warning("Could not get numeric permission value from '" + end + "'");
+                    ProRPGCrafting.getInstance().log.warning("Could not get numeric permission value from '" + end + "'");
                     continue;
                 }
             }

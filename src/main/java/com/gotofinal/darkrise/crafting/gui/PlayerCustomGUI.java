@@ -112,7 +112,7 @@ public class PlayerCustomGUI implements Listener {
     }
 
     public void reloadRecipesTask() {
-        DarkRiseCrafting.getInstance().runSync(this::reloadRecipes);
+        ProRPGCrafting.getInstance().runSync(this::reloadRecipes);
     }
 
     public void reloadRecipes() {
@@ -204,7 +204,7 @@ public class PlayerCustomGUI implements Listener {
 
         //Close on click
         if (gui.getPattern().getCloseOnClickSlots().contains(c)) {
-            Bukkit.getScheduler().runTask(DarkRiseCrafting.getInstance(), () -> e.getWhoClicked().closeInventory());
+            Bukkit.getScheduler().runTask(ProRPGCrafting.getInstance(), () -> e.getWhoClicked().closeInventory());
         }
 
         if (this.gui.slots[e.getRawSlot()].equals(Slot.BLOCKED_SLOT)) {
@@ -221,7 +221,7 @@ public class PlayerCustomGUI implements Listener {
         if (this.gui.slots[e.getRawSlot()].equals(Slot.BASE_RESULT_SLOT)) {
             e.setCancelled(true);
             e.setResult(Result.DENY);
-            DarkRiseCrafting.getInstance().runSync(() ->
+            ProRPGCrafting.getInstance().runSync(() ->
             {
                 this.reloadRecipes();
                 this.craft(e.getRawSlot(), false);
@@ -400,7 +400,7 @@ public class PlayerCustomGUI implements Listener {
             return false;
         }
 
-        double modifier = DarkRiseCrafting.getInstance().getPlayerCooldown(player);
+        double modifier = ProRPGCrafting.getInstance().getPlayerCooldown(player);
         int cooldown = modifier == 0d
                 ? recipe.getCooldown()
                 : (int) Math.round(recipe.getCooldown() - (recipe.getCooldown() * modifier));
@@ -413,7 +413,7 @@ public class PlayerCustomGUI implements Listener {
 
         craftingSuccess = false;
         craftingRecipe = recipe;
-        craftingTask = DarkRiseCrafting.getInstance().runTaskLater(cooldown, () -> {
+        craftingTask = ProRPGCrafting.getInstance().runTaskLater(cooldown, () -> {
             craftingSuccess = true;
             if (recipe.getCommands().size() == 0) {
                 if (addToCursor) {
@@ -449,13 +449,13 @@ public class PlayerCustomGUI implements Listener {
                 cancel(false);
                 Vault.pay(this.player, recipe.getPrice());
                 //Commands
-                DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, recipe.getCommands());
+                DelayedCommand.invoke(ProRPGCrafting.getInstance(), player, recipe.getCommands());
 
                 //Experience
                 CraftingTable table = Cfg.getTable(this.gui.name);
 
                 if (recipe.getXpGain() > 0) {
-                    DarkRiseCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+                    ProRPGCrafting.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
                 }
 
                 //Restart the crafting sequence if auto-crafting is enabled
@@ -499,7 +499,7 @@ public class PlayerCustomGUI implements Listener {
 
                 count++;
             }
-        }.runTaskTimer(DarkRiseCrafting.getInstance(), 1L, 1L);
+        }.runTaskTimer(ProRPGCrafting.getInstance(), 1L, 1L);
     }
 
     public void cancel() {

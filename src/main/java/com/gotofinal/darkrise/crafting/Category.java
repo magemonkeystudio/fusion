@@ -31,7 +31,7 @@ public class Category implements ConfigurationSerializable {
         iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
 
         if (iconItem == null) {
-            DarkRiseCrafting.getInstance().getLogger().severe("Invalid category icon for: " + name);
+            ProRPGCrafting.getInstance().getLogger().severe("Invalid category icon for: " + name);
         }
 
         pattern = dw.getSection("pattern") != null ? new InventoryPattern(dw.getSection("pattern")) : null;

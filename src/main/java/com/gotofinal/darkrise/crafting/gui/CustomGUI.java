@@ -1,6 +1,6 @@
 package com.gotofinal.darkrise.crafting.gui;
 
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import com.gotofinal.darkrise.crafting.gui.slot.Slot;
 import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
@@ -49,7 +49,7 @@ public class CustomGUI implements Listener {
         this.pattern = pattern;
         this.defaultPattern = pattern;
         mapSlots();
-        Bukkit.getPluginManager().registerEvents(this, DarkRiseCrafting.getInstance());
+        Bukkit.getPluginManager().registerEvents(this, ProRPGCrafting.getInstance());
     }
 
     public void resetBlockedSlots(Player player, Inventory inv, int page, int totalItems, MessageData[] data) {
@@ -175,7 +175,7 @@ public class CustomGUI implements Listener {
     public void executeCommands(Character c, HumanEntity player) {
         Collection<DelayedCommand> patternCommands = getPattern().getCommands(c);
         if (patternCommands != null && !patternCommands.isEmpty()) {
-            DelayedCommand.invoke(DarkRiseCrafting.getInstance(), player, patternCommands,
+            DelayedCommand.invoke(ProRPGCrafting.getInstance(), player, patternCommands,
                     R.r("{crafting}", getName()),
                     R.r("{inventoryName}", getInventoryName()));
         }
@@ -205,7 +205,7 @@ public class CustomGUI implements Listener {
     }
 
     private void reloadRecipeTask(Player p) {
-        DarkRiseCrafting.getInstance().runSync(() -> this.reloadRecipe(p));
+        ProRPGCrafting.getInstance().runSync(() -> this.reloadRecipe(p));
     }
 
     private void reloadRecipe(Player p) {

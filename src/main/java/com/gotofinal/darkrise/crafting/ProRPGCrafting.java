@@ -22,14 +22,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class DarkRiseCrafting extends RisePlugin implements Listener {
-    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        = PlaceholderType.create("recipeItem", RecipeItem.class);
-    public static final PlaceholderType<Recipe>           RECIPE             = PlaceholderType.create("recipe", Recipe.class);
-    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     = PlaceholderType.create("craftingTable", CraftingTable.class);
-    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  = PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
-    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY = PlaceholderType.create("craftingInventory", CustomGUI.class);
+public class ProRPGCrafting extends RisePlugin implements Listener {
+    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        =
+            PlaceholderType.create("recipeItem", RecipeItem.class);
+    public static final PlaceholderType<Recipe>           RECIPE             =
+            PlaceholderType.create("recipe", Recipe.class);
+    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     =
+            PlaceholderType.create("craftingTable", CraftingTable.class);
+    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  =
+            PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
+    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY =
+            PlaceholderType.create("craftingInventory", CustomGUI.class);
 
-    private static DarkRiseCrafting  instance;
+    private static ProRPGCrafting    instance;
     private static ExperienceManager experienceManager;
 
     private BukkitTask saveTask;
@@ -38,14 +43,16 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         instance = this;
     }
 
-    public static DarkRiseCrafting getInstance() {
+    public static ProRPGCrafting getInstance() {
         return instance;
     }
 
     @Override
     public void reloadConfig() {
         super.reloadConfig();
-        FileConfiguration lang = ConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"), getResource("lang/lang_en.yml"));
+        FileConfiguration lang =
+                ConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
+                        getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
         if (experienceManager != null) {
@@ -65,7 +72,8 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
     @Override
     public void onLoad() {
         RECIPE_ITEM.registerItem("amount", RecipeItem::getAmount);
-        RECIPE_ITEM.registerItem("itemName", i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).getItemName() : null);
+        RECIPE_ITEM.registerItem("itemName",
+                i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).getItemName() : null);
         RECIPE.registerItem("name", Recipe::getName);
         RECIPE.registerItem("price", Recipe::getPrice);
         RECIPE.registerItem("neededLevels", Recipe::getNeededLevels);
@@ -77,7 +85,9 @@ public class DarkRiseCrafting extends RisePlugin implements Listener {
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        RECIPE_ITEM.registerChild("customItem", DarkRiseEconomy.RISE_ITEM, i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).asRiseItem() : null);
+        RECIPE_ITEM.registerChild("customItem",
+                DarkRiseEconomy.RISE_ITEM,
+                i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).asRiseItem() : null);
         RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);

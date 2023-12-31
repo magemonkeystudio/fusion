@@ -1,7 +1,7 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
 import com.gotofinal.darkrise.crafting.CraftingTable;
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.ExperienceManager;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,7 +25,7 @@ public class PlayerConfig {
         this.player = player;
 
         try {
-            file = new File(DarkRiseCrafting.getInstance().getDataFolder() + File.separator + "players", player.getUniqueId().toString() + ".yml");
+            file = new File(ProRPGCrafting.getInstance().getDataFolder() + File.separator + "players", player.getUniqueId().toString() + ".yml");
             file.getParentFile().mkdirs();
             if (!file.exists()) {
                 file.createNewFile();
@@ -80,7 +80,7 @@ public class PlayerConfig {
             professions.remove(profession);
 
         CraftingTable table = Cfg.getTable(profession);
-        ExperienceManager.PlayerData dat = DarkRiseCrafting.getExperienceManager().getPlayerData(player);
+        ExperienceManager.PlayerData dat = ProRPGCrafting.getExperienceManager().getPlayerData(player);
         int exp = dat.getExperience(table);
         int dock = (int) (exp * Cfg.forgetPenalty);
         dat.add(table, -dock);

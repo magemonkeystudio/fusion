@@ -32,8 +32,8 @@ public class RecipeEconomyItem implements RecipeItem {
     public ItemStack getItemStack() {
         DarkRiseItem customItem = this.asRiseItem();
         if (customItem == null) {
-            DarkRiseCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
-            DarkRiseCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
+            ProRPGCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
+            ProRPGCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
             throw new NullPointerException("Can't find CustomItem named: " + this.itemName);
         }
         return customItem.getItem(this.amount);

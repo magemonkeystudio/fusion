@@ -1,6 +1,6 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
 import org.bukkit.ChatColor;
@@ -34,7 +34,7 @@ public class BrowseConfig {
         try {
             if (file == null || !file.exists()) {
                 config = new YamlConfiguration();
-                file = new File(DarkRiseCrafting.getInstance().getDataFolder(), "browse.yml");
+                file = new File(ProRPGCrafting.getInstance().getDataFolder(), "browse.yml");
                 file.getParentFile().mkdirs();
                 setDefaults();
                 if (!file.exists()) {
@@ -42,7 +42,7 @@ public class BrowseConfig {
                     config.options().copyDefaults(true);
                     attemptPort();
                     config.save(file);
-                    DarkRiseCrafting.getInstance().log.info("Created default browse.yml");
+                    ProRPGCrafting.getInstance().log.info("Created default browse.yml");
                 }
             }
 
@@ -52,9 +52,9 @@ public class BrowseConfig {
 
             setDefaults();
             readData();
-            DarkRiseCrafting.getInstance().log.info("Successfully loaded browse.yml data");
+            ProRPGCrafting.getInstance().log.info("Successfully loaded browse.yml data");
         } catch (IOException e) {
-            DarkRiseCrafting.getInstance().log.severe("Could not load browse.yml data");
+            ProRPGCrafting.getInstance().log.severe("Could not load browse.yml data");
             e.printStackTrace();
         }
     }
@@ -79,11 +79,11 @@ public class BrowseConfig {
         if (changed) {
             conf.set("browse", null);
             try {
-                conf.save(new File(DarkRiseCrafting.getInstance().getDataFolder(), "config.yml"));
+                conf.save(new File(ProRPGCrafting.getInstance().getDataFolder(), "config.yml"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DarkRiseCrafting.getInstance().log.info("Successfully ported old browse info to new browse.yml");
+            ProRPGCrafting.getInstance().log.info("Successfully ported old browse info to new browse.yml");
         }
     }
 
@@ -114,7 +114,7 @@ public class BrowseConfig {
             if (config.contains("professions." + prof + ".cost"))
                 profCosts.put(prof.toLowerCase(), config.getInt("professions." + prof + ".cost"));
 
-            DarkRiseCrafting.getInstance().log.info("Loaded info for profession '" + prof + "'");
+            ProRPGCrafting.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }
 

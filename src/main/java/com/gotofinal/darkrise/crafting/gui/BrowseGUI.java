@@ -1,7 +1,7 @@
 package com.gotofinal.darkrise.crafting.gui;
 
 import com.gotofinal.darkrise.crafting.CraftingTable;
-import com.gotofinal.darkrise.crafting.DarkRiseCrafting;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.Utils;
 import com.gotofinal.darkrise.crafting.cfg.BrowseConfig;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
@@ -70,7 +70,7 @@ public class BrowseGUI implements Listener {
             }
         }
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, DarkRiseCrafting.getInstance());
+        Bukkit.getServer().getPluginManager().registerEvents(this, ProRPGCrafting.getInstance());
     }
 
     public static BrowseGUI open(Player player) {

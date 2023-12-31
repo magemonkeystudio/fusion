@@ -25,7 +25,7 @@ public class Commands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        DarkRiseCrafting instance = DarkRiseCrafting.getInstance();
+        ProRPGCrafting instance = ProRPGCrafting.getInstance();
         if ((args.length == 2) || (args.length == 3)) {
             if (args[0].equalsIgnoreCase("use")) {
                 if (!Utils.hasCraftingUsePermission(sender, null)) {
@@ -121,7 +121,7 @@ public class Commands implements CommandExecutor {
                     confirmation.put(player.getUniqueId().toString(), action);
                     MessageUtil.sendMessage("crafting.forget.confirm", sender, new MessageData("sender", sender), new MessageData("craftingTable", table));
 
-                    Bukkit.getScheduler().runTaskLater(DarkRiseCrafting.getInstance(),
+                    Bukkit.getScheduler().runTaskLater(ProRPGCrafting.getInstance(),
                             () -> confirmation.remove(player.getUniqueId().toString()), 15 * 20l);
 
                     return true;
@@ -149,7 +149,7 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("crafting.level.format", sender,
                             new MessageData("category", entry.getValue().getName()),
                             new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
-                            new MessageData("experience", DarkRiseCrafting.getExperienceManager().getExperience((Player) sender, entry.getValue())));
+                            new MessageData("experience", ProRPGCrafting.getExperienceManager().getExperience((Player) sender, entry.getValue())));
                 }
 
                 return true;
