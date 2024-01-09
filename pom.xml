@@ -11,7 +11,7 @@
 
     <artifactId>crafting</artifactId>
     <name>ProRPGCrafting</name>
-    <version>1.2.2-R1.0-SNAPSHOT</version>
+    <version>1.2.2-R2</version>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>
