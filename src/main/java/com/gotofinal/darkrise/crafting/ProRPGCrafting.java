@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
-
+/*
+ * © 2024 ProMCTeam
+ */
 public class ProRPGCrafting extends RisePlugin implements Listener {
     public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        =
             PlaceholderType.create("recipeItem", RecipeItem.class);

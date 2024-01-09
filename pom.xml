@@ -11,7 +11,7 @@
 
     <artifactId>crafting</artifactId>
     <name>ProRPGCrafting</name>
-    <version>1.2.2-R0.2-SNAPSHOT</version>
+    <version>1.2.2-R1.0-SNAPSHOT</version>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>
@@ -34,7 +34,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.basedir}</outputDirec>
+                            <outputDirectory>${project.basedir}</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>doc</directory>
@@ -50,7 +50,7 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>jar</nonFilteredFileExtens>
+                        <nonFilteredFileExtension>jar</nonFilteredFileExtension>
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
