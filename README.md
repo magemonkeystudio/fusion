@@ -1,5 +1,5 @@
-[![Build](https://github.com/promcteam/crafting/actions/workflows/release.yml/badge.svg?branch=main)](https://s01.oss.sonatype.org/content/repositories/releases/com/promcteam/crafting/1.2.2-R2)
-[![Build](https://github.com/promcteam/crafting/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/promcteam/crafting/1.2.2-R2)
+[![Build](https://github.com/promcteam/crafting/actions/workflows/release.yml/badge.svg?branch=main)](https://s01.oss.sonatype.org/content/repositories/releases/com/promcteam/crafting/1.2.3-R1)
+[![Build](https://github.com/promcteam/crafting/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/promcteam/crafting/1.2.3-R1)
 
 # ProRPGCrafting
 
@@ -10,7 +10,7 @@ or snapshots through Sonatype.
 <dependency>
     <groupId>com.promcteam</groupId>
     <artifactId>crafting</artifactId>
-    <version>1.2.2-R2</version>
+    <version>1.2.3-R1</version>
 </dependency>
 ```
 
