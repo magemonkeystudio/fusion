@@ -1,7 +1,9 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import me.travja.darkrise.core.item.DarkRiseItem;
+import mc.promcteam.engine.NexEngine;
+import mc.promcteam.engine.items.ItemType;
+import mc.promcteam.engine.items.exception.MissingItemException;
+import mc.promcteam.engine.items.exception.MissingProviderException;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
 import me.travja.darkrise.core.legacy.util.SerializationBuilder;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
@@ -20,15 +22,15 @@ public class CraftingTable implements ConfigurationSerializable {
     private final InventoryPattern catPattern;
     private final ItemStack fillItem;
     private final Map<String, Recipe> recipes;
-    private final DarkRiseItem iconItem;
-    private boolean useCategories = true;
+    private final ItemType            iconItem;
+    private       boolean             useCategories = true;
     private final LinkedHashMap<String, Category> categories = new LinkedHashMap<>();
 
     //Mastery!
     private final int masteryUnlock;
     private final int masteryFee;
 
-    public CraftingTable(String name, String inventoryName, DarkRiseItem iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee, Map<String, Recipe> recipes) {
+    public CraftingTable(String name, String inventoryName, ItemType iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee, Map<String, Recipe> recipes) {
         this.name = name;
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
@@ -40,7 +42,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.masteryFee = masteryFee;
     }
 
-    public CraftingTable(String name, String inventoryName, DarkRiseItem iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee) {
+    public CraftingTable(String name, String inventoryName, ItemType iconItem, InventoryPattern pattern, ItemStack fillItem, int masteryUnlock, int masteryFee) {
         this.name = name;
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
@@ -53,7 +55,7 @@ public class CraftingTable implements ConfigurationSerializable {
     }
 
     @SuppressWarnings("unchecked")
-    public CraftingTable(Map<String, Object> map) {
+    public CraftingTable(Map<String, Object> map) throws MissingProviderException, MissingItemException {
         this.recipes = new LinkedHashMap<>(5);
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
@@ -63,7 +65,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
         this.useCategories = dw.getBoolean("useCategories", true);
-        this.iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
+        this.iconItem = NexEngine.get().getItemManager().getItemType(dw.getString("icon"));
         if (dw.getSection("fillItem") != null)
             this.fillItem = new ItemBuilder(dw.getSection("fillItem")).build();
         else
@@ -109,7 +111,7 @@ public class CraftingTable implements ConfigurationSerializable {
         return this.inventoryName;
     }
 
-    public DarkRiseItem getIconItem() {
+    public ItemType getIconItem() {
         return iconItem;
     }
 
@@ -160,7 +162,7 @@ public class CraftingTable implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         return SerializationBuilder.start(4)
                 .append("name", this.name)
-                .append("icon", this.iconItem.getId())
+                .append("icon", this.iconItem.getNamespacedID())
                 .append("pattern", this.pattern.serialize())
                 .append("categoryPattern", this.catPattern != null ? this.catPattern.serialize() : null)
                 .append("inventoryName", this.inventoryName)

@@ -2,7 +2,12 @@ name: ${project.name}
 main: com.gotofinal.darkrise.crafting.ProRPGCrafting
 authors: [Travja, goflish]
 version: ${project.version}
-depend: [ ProMCUtilities ]
+depend:
+  - RiseCore
+  - ProMCCore
+softdepend:
+  - ProMCUtilities
+  - ProRPGItems
 api-version: 1.13
 commands:
   craft:

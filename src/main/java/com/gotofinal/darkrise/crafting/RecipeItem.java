@@ -1,6 +1,6 @@
 package com.gotofinal.darkrise.crafting;
 
-import me.travja.darkrise.core.item.DarkRiseItem;
+import mc.promcteam.engine.items.ItemType;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
@@ -32,8 +32,8 @@ public interface RecipeItem {
             if (!custom && (srrs.length == 2)) {
                 try {
                     RecipeEconomyItem recipeEconomyItem = new RecipeEconomyItem(srrs[0], Integer.parseInt(srrs[1]));
-                    DarkRiseItem darkRiseItem = recipeEconomyItem.asRiseItem();
-                    if (darkRiseItem != null) {
+                    ItemType          itemType          = recipeEconomyItem.asItemType();
+                    if (itemType != null) {
                         result = recipeEconomyItem;
                     }
                 } catch (Exception e) {

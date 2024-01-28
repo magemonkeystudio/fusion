@@ -1,7 +1,5 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import com.gotofinal.darkrise.economy.DarkRiseItems;
 import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
 import me.travja.darkrise.core.legacy.util.SerializationBuilder;
@@ -107,7 +105,6 @@ public class Recipe implements ConfigurationSerializable {
                 return false;
             }
         }
-        DarkRiseItems ir = DarkRiseEconomy.getInstance().getItems();
         Map<ItemStack, Integer> eqItems = getItems(items);
         Map<ItemStack, Integer> localPattern = getPattern(this.pattern);
         for (Iterator<Entry<ItemStack, Integer>> iterator = localPattern.entrySet().iterator(); iterator.hasNext(); ) {

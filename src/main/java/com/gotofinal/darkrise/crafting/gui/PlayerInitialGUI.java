@@ -2,8 +2,6 @@ package com.gotofinal.darkrise.crafting.gui;
 
 import com.gotofinal.darkrise.crafting.*;
 import com.gotofinal.darkrise.crafting.cfg.Cfg;
-import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
-import me.travja.darkrise.core.legacy.cmds.R;
 import me.travja.darkrise.core.legacy.util.Vault;
 import me.travja.darkrise.core.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
@@ -91,7 +89,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
                         } while (recipes.isEmpty());
 
-                        inv.setItem(k, category.getIconItem().getItem());
+                        inv.setItem(k, category.getIconItem().create());
                         playerCustomGUI.slotMap.put(k, category);
                     }
                 }

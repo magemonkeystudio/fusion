@@ -1,10 +1,11 @@
 package com.gotofinal.darkrise.crafting.cfg;
 
 import com.gotofinal.darkrise.crafting.CraftingTable;
-import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.InventoryPattern;
+import com.gotofinal.darkrise.crafting.ProRPGCrafting;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import mc.promcteam.engine.items.exception.ProItemException;
+import mc.promcteam.engine.items.providers.VanillaProvider;
 import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
 import me.travja.darkrise.core.legacy.util.item.ItemColors;
 import org.bukkit.Material;
@@ -100,7 +101,7 @@ public final class Cfg {
 //                Arrays.asList(new RecipeEconomyItem("testItem", 5),
 //                        new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
 //                new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
-        CraftingTable             b    = new CraftingTable("craft", "Craft inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
+        CraftingTable             b    = new CraftingTable("craft", "Craft inventory name", new VanillaProvider.VanillaItemType(Material.PAPER), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
         List<Map<String, Object>> list = new ArrayList<>(3);
 //        list.add(a.serialize());
         list.add(b.serialize());
@@ -148,9 +149,13 @@ public final class Cfg {
 
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
         for (Map<?, ?> typeData : typesSection) {
-            //noinspection unchecked
-            CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
-            map.put(ct.getName(), ct);
+            try {
+                //noinspection unchecked
+                CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
+                map.put(ct.getName(), ct);
+            } catch (ProItemException e) {
+                ProRPGCrafting.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
+            }
         }
         cfg.options().copyDefaults(true);
         try {

@@ -101,7 +101,7 @@ public class BrowseGUI implements Listener {
                 if (table == null || !Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 
-                ItemStack item = table.getIconItem() != null ? table.getIconItem().getItem() : ItemBuilder.newItem(Material.BEDROCK)
+                ItemStack item = table.getIconItem() != null ? table.getIconItem().create() : ItemBuilder.newItem(Material.BEDROCK)
                         .name(ChatColor.RED + table.getName()).newLoreLine(ChatColor.RED + "Missing icon in config.").newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
                         .build();
 

@@ -1,7 +1,8 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import me.travja.darkrise.core.item.DarkRiseItem;
+import mc.promcteam.engine.NexEngine;
+import mc.promcteam.engine.items.ItemType;
+import mc.promcteam.engine.items.exception.ProItemException;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
@@ -24,19 +25,25 @@ public class RecipeEconomyItem implements RecipeItem {
         return this.amount;
     }
 
-    public DarkRiseItem asRiseItem() {
-        return DarkRiseEconomy.getInstance().getItems().getItemById(this.itemName);
+    public ItemType asItemType() {
+        try {
+            return NexEngine.get().getItemManager().getItemType(this.itemName);
+        } catch (ProItemException e) {
+            return null;
+        }
     }
 
     @Override
     public ItemStack getItemStack() {
-        DarkRiseItem customItem = this.asRiseItem();
+        ItemType customItem = this.asItemType();
         if (customItem == null) {
             ProRPGCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
             ProRPGCrafting.getInstance().error("Can't find CustomItem named: " + this.itemName);
             throw new NullPointerException("Can't find CustomItem named: " + this.itemName);
         }
-        return customItem.getItem(this.amount);
+        ItemStack itemStack = customItem.create();
+        itemStack.setAmount(this.amount);
+        return itemStack;
     }
 
     @Override

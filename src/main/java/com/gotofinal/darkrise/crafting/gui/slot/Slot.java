@@ -24,7 +24,7 @@
 
 package com.gotofinal.darkrise.crafting.gui.slot;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import mc.promcteam.engine.NexEngine;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.bukkit.Material;
@@ -61,7 +61,7 @@ public abstract class Slot {
             if (item == null || item.getType() == Material.AIR) {
                 return null;
             }
-            return (DarkRiseEconomy.getItemsRegistry().getItemByStack(item) == null) ? null : item;
+            return (NexEngine.get().getItemManager().getItemTypes(item).isEmpty()) ? null : item;
         }
     };
     public static final Slot BASE_RESULT_SLOT = new Slot(SlotType.RESULT) {

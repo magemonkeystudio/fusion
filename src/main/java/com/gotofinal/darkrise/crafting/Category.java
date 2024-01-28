@@ -1,8 +1,11 @@
 package com.gotofinal.darkrise.crafting;
 
-import com.gotofinal.darkrise.economy.DarkRiseEconomy;
-import me.travja.darkrise.core.item.DarkRiseItem;
+import mc.promcteam.engine.NexEngine;
+import mc.promcteam.engine.items.ItemType;
+import mc.promcteam.engine.items.exception.ProItemException;
+import mc.promcteam.engine.items.providers.VanillaProvider;
 import me.travja.darkrise.core.legacy.util.DeserializationWorker;
+import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.ArrayList;
@@ -11,8 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Category implements ConfigurationSerializable {
-    private final String name;
-    private final DarkRiseItem iconItem;
+    private final String             name;
+    private final ItemType           iconItem;
     private final Collection<Recipe> recipes = new ArrayList<>();
     private InventoryPattern pattern;
     private final int order;
@@ -21,14 +24,18 @@ public class Category implements ConfigurationSerializable {
     public Category(String name) {
         this.name = name;
         this.order = 0;
-        this.iconItem = DarkRiseEconomy.getInstance().getItems().getItems().iterator().next();
+        this.iconItem = new VanillaProvider.VanillaItemType(Material.PAPER);
     }
 
     public Category(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
         name = dw.getString("name");
         order = dw.getInt("order");
-        iconItem = DarkRiseEconomy.getInstance().getItems().getItemById(dw.getString("icon"));
+        try {
+            iconItem = NexEngine.get().getItemManager().getItemType(dw.getString("icon"));
+        } catch (ProItemException e) {
+            throw new RuntimeException(e);
+        }
 
         if (iconItem == null) {
             ProRPGCrafting.getInstance().getLogger().severe("Invalid category icon for: " + name);
@@ -62,7 +69,7 @@ public class Category implements ConfigurationSerializable {
         return recipes;
     }
 
-    public DarkRiseItem getIconItem() {
+    public ItemType getIconItem() {
         return iconItem;
     }
 

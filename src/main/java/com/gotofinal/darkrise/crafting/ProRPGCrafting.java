@@ -5,6 +5,8 @@ import com.gotofinal.darkrise.crafting.cfg.Cfg;
 import com.gotofinal.darkrise.crafting.gui.BrowseGUI;
 import com.gotofinal.darkrise.crafting.gui.CustomGUI;
 import com.gotofinal.darkrise.economy.DarkRiseEconomy;
+import com.gotofinal.darkrise.economy.ProMCUtilitiesProvider;
+import mc.promcteam.engine.items.ItemType;
 import me.travja.darkrise.core.ConfigManager;
 import me.travja.darkrise.core.RisePlugin;
 import me.travja.darkrise.core.legacy.killme.chat.placeholder.PlaceholderType;
@@ -87,9 +89,19 @@ public class ProRPGCrafting extends RisePlugin implements Listener {
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        RECIPE_ITEM.registerChild("customItem",
-                DarkRiseEconomy.RISE_ITEM,
-                i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).asRiseItem() : null);
+        if (!Bukkit.getPluginManager().isPluginEnabled("ProMCUtilities")) {
+            RECIPE_ITEM.registerChild("customItem",
+                    DarkRiseEconomy.RISE_ITEM,
+                    i -> {
+                        if (i instanceof RecipeEconomyItem) {
+                            ItemType itemType = ((RecipeEconomyItem) i).asItemType();
+                            if (itemType instanceof ProMCUtilitiesProvider.ProMCUtilitiesItemType) {
+                                return ((ProMCUtilitiesProvider.ProMCUtilitiesItemType) itemType).getRiseItem();
+                            }
+                        }
+                        return null;
+                    });
+        }
         RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
