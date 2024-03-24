@@ -10,9 +10,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>crafting</artifactId>
-    <name>ProRPGCrafting</name>
-    <version>1.2.4-R0.1-SNAPSHOT</version>
+    <artifactId>fusion</artifactId>
+    <name>Fusion</name>
+    <version>1.0.0-R0.1-SNAPSHOT</version>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>
@@ -73,23 +73,18 @@
         </dependency>
         <dependency>
             <groupId>com.promcteam</groupId>
-            <artifactId>promcutilities</artifactId>
-            <version>1.1.0-R0.1-SNAPSHOT</version>
+            <artifactId>sapphire</artifactId>
+            <version>1.0.0-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.promcteam</groupId>
-            <artifactId>promccore</artifactId>
-            <version>1.2.0-R0.5-SNAPSHOT</version>
+            <artifactId>codex</artifactId>
+            <version>1.0.0-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.32</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>it.unimi.dsi</groupId>-->
-        <!--            <artifactId>fastutil</artifactId>-->
-        <!--        </dependency>-->
     </dependencies>
-
 </project>

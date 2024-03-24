@@ -1,4 +1,4 @@
-crafting:
+fusion:
   gui:
     learned:
       'true': "&aYou have unlocked this recipe: &ayes"
