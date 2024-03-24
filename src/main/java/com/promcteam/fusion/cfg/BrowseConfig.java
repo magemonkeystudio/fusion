@@ -2,7 +2,7 @@ package com.promcteam.fusion.cfg;
 
 import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.InventoryPattern;
-import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
+import com.promcteam.risecore.legacy.util.item.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;

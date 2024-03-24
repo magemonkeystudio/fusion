@@ -4,7 +4,7 @@ import com.promcteam.codex.CodexEngine;
 import com.promcteam.codex.items.ItemType;
 import com.promcteam.codex.items.exception.ProItemException;
 import com.promcteam.codex.items.providers.VanillaProvider;
-import me.travja.darkrise.core.legacy.util.DeserializationWorker;
+import com.promcteam.risecore.legacy.util.DeserializationWorker;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 

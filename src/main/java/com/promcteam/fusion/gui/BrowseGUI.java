@@ -1,5 +1,6 @@
 package com.promcteam.fusion.gui;
 
+import com.promcteam.codex.CodexEngine;
 import com.promcteam.fusion.CraftingTable;
 import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.Utils;
@@ -9,10 +10,9 @@ import com.promcteam.fusion.cfg.PConfigManager;
 import com.promcteam.fusion.cfg.PlayerConfig;
 import com.promcteam.fusion.gui.slot.Slot;
 import com.promcteam.fusion.util.PlayerUtil;
-import me.travja.darkrise.core.legacy.util.Vault;
-import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
-import me.travja.darkrise.core.legacy.util.message.MessageData;
-import me.travja.darkrise.core.legacy.util.message.MessageUtil;
+import com.promcteam.risecore.legacy.util.item.ItemBuilder;
+import com.promcteam.risecore.legacy.util.message.MessageData;
+import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -168,7 +168,7 @@ public class BrowseGUI implements Listener {
                 new MessageData("unlocked", unlocked),
                 new MessageData("limit", allowed),
                 new MessageData("cost", cost),
-                new MessageData("bal", Vault.getMoney(p))
+                new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };
 
         if (conf.hasProfession(profession)) {
@@ -183,7 +183,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        if (cost > 0 && !Vault.canPay(p, cost)) {
+        if (cost > 0 && !CodexEngine.get().getVault().canPay(p, cost)) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             MessageUtil.sendMessage("fusion.error.profNoFunds", p, data);
             return;
@@ -191,7 +191,7 @@ public class BrowseGUI implements Listener {
 
         conf.unlockProfession(profession);
         if (cost > 0)
-            Vault.pay(p, cost);
+            CodexEngine.get().getVault().take(p, cost);
         data[1] = new MessageData("unlocked", unlocked + 1);
         MessageUtil.sendMessage("fusion.unlockedProfession", p, data);
         p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);

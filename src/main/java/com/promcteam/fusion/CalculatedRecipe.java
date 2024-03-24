@@ -1,12 +1,12 @@
 package com.promcteam.fusion;
 
+import com.promcteam.codex.CodexEngine;
 import com.promcteam.fusion.cfg.PConfigManager;
-import me.travja.darkrise.core.legacy.util.Vault;
-import me.travja.darkrise.core.legacy.util.message.MessageData;
-import me.travja.darkrise.core.legacy.util.message.MessageUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import com.promcteam.risecore.legacy.util.message.MessageData;
+import com.promcteam.risecore.legacy.util.message.MessageUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -77,7 +77,7 @@ public class CalculatedRecipe {
 
         String moneyLine = null;
         if (recipe.price != 0) {
-            if (!Vault.canPay(player, recipe.price)) {
+            if (!CodexEngine.get().getVault().canPay(player, recipe.price)) {
                 canCraft = false;
                 moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.false",
                         "fusion.gui.money.false",
@@ -168,7 +168,7 @@ public class CalculatedRecipe {
                     item = item.clone();
 //                    ItemMeta meta = item.getItemMeta();
 //                    List<String> itemLore = meta.getLore();
-//                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+//                    itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by"));
 //                    meta.setLore(itemLore);
 //                    item.setItemMeta(meta);
 
@@ -318,11 +318,11 @@ public class CalculatedRecipe {
     public static void trimLore(ItemStack item) {
         ItemMeta     meta     = item.getItemMeta();
         List<String> itemLore = meta.getLore();
-        itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by") || s.trim().equals("")
-                || org.apache.commons.lang.StringUtils.contains(s, "Craft Requirements")
-                || org.apache.commons.lang.StringUtils.contains(s, "Item")
-                || org.apache.commons.lang.StringUtils.contains(s, "Level Needed")
-                || org.apache.commons.lang.StringUtils.contains(s, "Mastery"));
+        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().equals("")
+                || org.apache.commons.lang3.StringUtils.contains(s, "Craft Requirements")
+                || org.apache.commons.lang3.StringUtils.contains(s, "Item")
+                || org.apache.commons.lang3.StringUtils.contains(s, "Level Needed")
+                || org.apache.commons.lang3.StringUtils.contains(s, "Mastery"));
         meta.setLore(itemLore);
         item.setItemMeta(meta);
     }

@@ -1,9 +1,9 @@
 package com.promcteam.fusion.gui;
 
+import com.promcteam.codex.CodexEngine;
 import com.promcteam.fusion.*;
 import com.promcteam.fusion.cfg.Cfg;
-import me.travja.darkrise.core.legacy.util.Vault;
-import me.travja.darkrise.core.legacy.util.message.MessageData;
+import com.promcteam.risecore.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -56,7 +56,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                             new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
-                            new MessageData("bal", Vault.getMoney(player))
+                            new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
                     });
             for (String row : gui.pattern.getPattern()) {
                 charLoop:

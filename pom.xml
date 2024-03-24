@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.promcteam</groupId>
-        <artifactId>risecore-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
-        <relativePath/>
+        <artifactId>promc-parent</artifactId>
+        <version>1.20.4-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>fusion</artifactId>
     <name>Fusion</name>
@@ -68,8 +68,7 @@
     <dependencies>
         <dependency>
             <groupId>com.promcteam</groupId>
-            <artifactId>risecore</artifactId>
-            <version>1.0.1-R0.1-SNAPSHOT</version>
+            <artifactId>codex</artifactId>
         </dependency>
         <dependency>
             <groupId>com.promcteam</groupId>
@@ -77,14 +76,8 @@
             <version>1.0.0-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.promcteam</groupId>
-            <artifactId>codex</artifactId>
-            <version>1.0.0-R0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
         </dependency>
     </dependencies>
 </project>

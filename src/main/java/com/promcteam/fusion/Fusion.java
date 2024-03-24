@@ -5,13 +5,14 @@ import com.promcteam.fusion.cfg.BrowseConfig;
 import com.promcteam.fusion.cfg.Cfg;
 import com.promcteam.fusion.gui.BrowseGUI;
 import com.promcteam.fusion.gui.CustomGUI;
+import com.promcteam.risecore.ConfigManager;
+import com.promcteam.risecore.RisePlugin;
+import com.promcteam.risecore.legacy.chat.placeholder.PlaceholderType;
+import com.promcteam.risecore.legacy.util.Init;
+import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import com.promcteam.sapphire.Sapphire;
 import com.promcteam.sapphire.SapphireItemProvider;
-import me.travja.darkrise.core.ConfigManager;
-import me.travja.darkrise.core.RisePlugin;
-import me.travja.darkrise.core.legacy.killme.chat.placeholder.PlaceholderType;
-import me.travja.darkrise.core.legacy.util.Init;
-import me.travja.darkrise.core.legacy.util.message.MessageUtil;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -39,6 +40,7 @@ public class Fusion extends RisePlugin implements Listener {
     public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY =
             PlaceholderType.create("craftingInventory", CustomGUI.class);
 
+    @Getter
     private static Fusion            instance;
     private static ExperienceManager experienceManager;
 
@@ -46,10 +48,6 @@ public class Fusion extends RisePlugin implements Listener {
 
     {
         instance = this;
-    }
-
-    public static Fusion getInstance() {
-        return instance;
     }
 
     @Override
@@ -178,7 +176,7 @@ public class Fusion extends RisePlugin implements Listener {
                 else {
                     try {
                         num = Integer.parseInt(mod) / 100d;
-                    } catch (NumberFormatException e) {
+                    } catch (NumberFormatException ignored) {
                     }
                 }
             }

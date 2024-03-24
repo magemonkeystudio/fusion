@@ -1,8 +1,8 @@
 package com.promcteam.fusion;
 
 import com.promcteam.codex.items.ItemType;
-import me.travja.darkrise.core.legacy.util.item.ItemBuilder;
-import org.apache.commons.lang.StringUtils;
+import com.promcteam.risecore.legacy.util.item.ItemBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 

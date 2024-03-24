@@ -1,14 +1,15 @@
 package com.promcteam.fusion.gui;
 
+import com.promcteam.codex.CodexEngine;
 import com.promcteam.fusion.*;
 import com.promcteam.fusion.cfg.Cfg;
 import com.promcteam.fusion.cfg.PConfigManager;
 import com.promcteam.fusion.gui.slot.Slot;
-import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
-import me.travja.darkrise.core.legacy.util.ItemUtils;
-import me.travja.darkrise.core.legacy.util.Vault;
-import me.travja.darkrise.core.legacy.util.message.MessageData;
-import me.travja.darkrise.core.legacy.util.message.MessageUtil;
+import com.promcteam.risecore.legacy.cmds.DelayedCommand;
+import com.promcteam.risecore.legacy.util.ItemUtils;
+import com.promcteam.risecore.legacy.util.message.MessageData;
+import com.promcteam.risecore.legacy.util.message.MessageUtil;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,6 +37,7 @@ public class PlayerCustomGUI implements Listener {
     private final CustomGUI                          gui;
     private final Player                             player;
     private final Inventory                          inventory;
+    @Getter
     private final Category                           category;
     private final HashMap<Integer, CalculatedRecipe> recipes;
     private       int                                page   = 0;
@@ -84,7 +86,7 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
-                            new MessageData("bal", Vault.getMoney(player))
+                            new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
                     });
 //            int k = -1;
 //            HashMap<Character, ItemStack> items = gui.pattern.getItems();
@@ -160,7 +162,7 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
-                            new MessageData("bal", Vault.getMoney(player))
+                            new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
                     }, category.hasPrevious());
 
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length);
@@ -183,10 +185,6 @@ public class PlayerCustomGUI implements Listener {
             this.player.closeInventory();
             throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(), e);
         }
-    }
-
-    public Category getCategory() {
-        return category;
     }
 
     public String getName() {
@@ -311,7 +309,7 @@ public class PlayerCustomGUI implements Listener {
             MessageUtil.sendMessage("fusion.error.noXP", player, new MessageData("recipe", recipe));
             return false;
         }
-        if (!Vault.canPay(this.player, recipe.getPrice())) {
+        if (!CodexEngine.get().getVault().canPay(this.player, recipe.getPrice())) {
             MessageUtil.sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
             return false;
         }
@@ -371,7 +369,7 @@ public class PlayerCustomGUI implements Listener {
                     item = item.clone();
 //                    ItemMeta meta = item.getItemMeta();
 //                    List<String> itemLore = meta.getLore();
-//                    itemLore.removeIf(s -> org.apache.commons.lang.StringUtils.contains(s, "Crafted by"));
+//                    itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by"));
 //                    meta.setLore(itemLore);
 //                    item.setItemMeta(meta);
                     entry.setAmount(toTake.getAmount());
@@ -456,7 +454,7 @@ public class PlayerCustomGUI implements Listener {
 
             if (craftingSuccess) {
                 cancel(false);
-                Vault.pay(this.player, recipe.getPrice());
+                CodexEngine.get().getVault().take(this.player, recipe.getPrice());
                 //Commands
                 DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getCommands());
 

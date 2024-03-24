@@ -1,11 +1,13 @@
 package com.promcteam.fusion;
 
-import me.travja.darkrise.core.legacy.cmds.DelayedCommand;
-import me.travja.darkrise.core.legacy.util.DeserializationWorker;
-import me.travja.darkrise.core.legacy.util.SerializationBuilder;
-import me.travja.darkrise.core.legacy.util.Vault;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import com.promcteam.codex.CodexEngine;
+import com.promcteam.risecore.legacy.cmds.DelayedCommand;
+import com.promcteam.risecore.legacy.util.DeserializationWorker;
+import com.promcteam.risecore.legacy.util.SerializationBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,18 +16,29 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
+    @Getter
     protected final String                     name;
     protected final LinkedList<RecipeItem>     pattern;
+    @Getter
     protected final RecipeItem                 result;
+    @Getter
     protected final double                     price;
+    @Getter
     protected final int                        neededLevels;
+    @Getter
     protected final int                        neededXp;
+    @Getter
     protected final int                        xpGain;
+    @Getter
     protected final boolean                    mastery;
+    @Getter
     protected final Collection<DelayedCommand> commands = new ArrayList<>();
+    @Getter
     protected final String                     rank;
 
+    @Getter
     protected final int cooldown;
 
     public Recipe(Map<String, Object> map) {
@@ -109,7 +122,7 @@ public class Recipe implements ConfigurationSerializable {
             if (Fusion.getExperienceManager().getExperience(p, craftingTable) < this.neededXp) {
                 return false;
             }
-            if (!Vault.canPay(p, this.price)) {
+            if (!CodexEngine.get().getVault().canPay(p, this.price)) {
                 return false;
             }
         }
@@ -136,71 +149,12 @@ public class Recipe implements ConfigurationSerializable {
         return localPattern.isEmpty();
     }
 
-    public RecipeItem getResult() {
-        return this.result;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public double getPrice() {
-        return this.price;
-    }
-
-    public int getNeededLevels() {
-        return this.neededLevels;
-    }
-
-    public int getNeededXp() {
-        return this.neededXp;
-    }
-
-    public int getXpGain() {
-        return this.xpGain;
-    }
-
-    public int getCooldown() {
-        return cooldown;
-    }
-
-    public Collection<DelayedCommand> getCommands() {
-        return commands;
-    }
-
     public Collection<RecipeItem> getPattern() {
         return this.pattern;
     }
 
-    public boolean isMastery() {
-        return mastery;
-    }
-
     public Collection<ItemStack> getItemsToTake() {
         return this.pattern.stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
-    }
-
-    public String getRank() {
-        return rank;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Recipe)) {
-            return false;
-        }
-        Recipe recipe = (Recipe) o;
-        return this.name.equals(recipe.name) && this.pattern.equals(recipe.pattern);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = this.name.hashCode();
-        result = (31 * result) + this.pattern.hashCode();
-        return result;
     }
 
     @Override
