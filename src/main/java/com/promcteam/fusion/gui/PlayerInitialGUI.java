@@ -1,9 +1,9 @@
 package com.promcteam.fusion.gui;
 
 import com.promcteam.codex.CodexEngine;
+import com.promcteam.codex.util.messages.MessageData;
 import com.promcteam.fusion.*;
 import com.promcteam.fusion.cfg.Cfg;
-import com.promcteam.risecore.legacy.util.message.MessageData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

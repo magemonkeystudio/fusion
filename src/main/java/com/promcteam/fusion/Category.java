@@ -2,7 +2,7 @@ package com.promcteam.fusion;
 
 import com.promcteam.codex.CodexEngine;
 import com.promcteam.codex.items.ItemType;
-import com.promcteam.codex.items.exception.ProItemException;
+import com.promcteam.codex.items.exception.CodexItemException;
 import com.promcteam.codex.items.providers.VanillaProvider;
 import com.promcteam.risecore.legacy.util.DeserializationWorker;
 import org.bukkit.Material;
@@ -33,7 +33,7 @@ public class Category implements ConfigurationSerializable {
         order = dw.getInt("order");
         try {
             iconItem = CodexEngine.get().getItemManager().getItemType(dw.getString("icon"));
-        } catch (ProItemException e) {
+        } catch (CodexItemException e) {
             throw new RuntimeException(e);
         }
 

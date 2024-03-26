@@ -1,12 +1,12 @@
 package com.promcteam.fusion.gui;
 
+import com.promcteam.codex.api.DelayedCommand;
+import com.promcteam.codex.api.Replacer;
+import com.promcteam.codex.util.ItemUtils;
+import com.promcteam.codex.util.messages.MessageData;
 import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.InventoryPattern;
 import com.promcteam.fusion.gui.slot.Slot;
-import com.promcteam.risecore.legacy.cmds.DelayedCommand;
-import com.promcteam.risecore.legacy.cmds.R;
-import com.promcteam.risecore.legacy.util.ItemUtils;
-import com.promcteam.risecore.legacy.util.message.MessageData;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Bukkit;
@@ -181,8 +181,8 @@ public class CustomGUI implements Listener {
         Collection<DelayedCommand> patternCommands = getPattern().getCommands(c);
         if (patternCommands != null && !patternCommands.isEmpty()) {
             DelayedCommand.invoke(Fusion.getInstance(), player, patternCommands,
-                    R.r("{crafting}", getName()),
-                    R.r("{inventoryName}", getInventoryName()));
+                    Replacer.replacer("{crafting}", getName()),
+                    Replacer.replacer("{inventoryName}", getInventoryName()));
         }
     }
 

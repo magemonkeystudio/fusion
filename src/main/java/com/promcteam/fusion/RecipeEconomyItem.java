@@ -2,7 +2,7 @@ package com.promcteam.fusion;
 
 import com.promcteam.codex.CodexEngine;
 import com.promcteam.codex.items.ItemType;
-import com.promcteam.codex.items.exception.ProItemException;
+import com.promcteam.codex.items.exception.CodexItemException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +28,7 @@ public class RecipeEconomyItem implements RecipeItem {
     public ItemType asItemType() {
         try {
             return CodexEngine.get().getItemManager().getItemType(this.itemName);
-        } catch (ProItemException e) {
+        } catch (CodexItemException e) {
             return null;
         }
     }

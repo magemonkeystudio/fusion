@@ -1,9 +1,9 @@
 package com.promcteam.fusion;
 
 import com.promcteam.codex.CodexEngine;
-import com.promcteam.risecore.legacy.cmds.DelayedCommand;
+import com.promcteam.codex.api.DelayedCommand;
+import com.promcteam.codex.util.SerializationBuilder;
 import com.promcteam.risecore.legacy.util.DeserializationWorker;
-import com.promcteam.risecore.legacy.util.SerializationBuilder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;

@@ -1,8 +1,8 @@
 package com.promcteam.fusion.cfg;
 
 import com.promcteam.fusion.CraftingTable;
-import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.ExperienceManager;
+import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.gui.CustomGUI;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

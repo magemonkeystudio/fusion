@@ -1,8 +1,8 @@
 package com.promcteam.fusion.cfg;
 
+import com.promcteam.codex.legacy.item.ItemBuilder;
 import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.InventoryPattern;
-import com.promcteam.risecore.legacy.util.item.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -64,8 +64,8 @@ public class BrowseConfig {
     }
 
     private static void attemptPort() {
-        FileConfiguration conf    = Cfg.getConfig();
-        boolean           changed =
+        FileConfiguration conf = Cfg.getConfig();
+        boolean changed =
                 conf.contains("browse.name") || conf.contains("browse.fillItem") || conf.contains("browse.pattern");
 
         if (conf.contains("browse.name"))

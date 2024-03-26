@@ -3,7 +3,6 @@ main: com.promcteam.fusion.Fusion
 authors: [ Travja, goflish ]
 version: ${project.version}
 depend:
-  - RiseCore
   - Codex
 softdepend:
   - Sapphire

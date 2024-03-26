@@ -1,14 +1,14 @@
 package com.promcteam.fusion;
 
 import com.promcteam.codex.CodexEngine;
+import com.promcteam.codex.util.messages.MessageData;
+import com.promcteam.codex.util.messages.MessageUtil;
 import com.promcteam.fusion.cfg.Cfg;
 import com.promcteam.fusion.cfg.PConfigManager;
 import com.promcteam.fusion.cfg.PlayerConfig;
 import com.promcteam.fusion.gui.BrowseGUI;
 import com.promcteam.fusion.gui.CustomGUI;
 import com.promcteam.fusion.gui.PlayerInitialGUI;
-import com.promcteam.risecore.legacy.util.message.MessageData;
-import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

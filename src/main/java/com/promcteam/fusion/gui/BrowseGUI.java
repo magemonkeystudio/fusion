@@ -1,6 +1,9 @@
 package com.promcteam.fusion.gui;
 
 import com.promcteam.codex.CodexEngine;
+import com.promcteam.codex.legacy.item.ItemBuilder;
+import com.promcteam.codex.util.messages.MessageData;
+import com.promcteam.codex.util.messages.MessageUtil;
 import com.promcteam.fusion.CraftingTable;
 import com.promcteam.fusion.Fusion;
 import com.promcteam.fusion.Utils;
@@ -10,9 +13,6 @@ import com.promcteam.fusion.cfg.PConfigManager;
 import com.promcteam.fusion.cfg.PlayerConfig;
 import com.promcteam.fusion.gui.slot.Slot;
 import com.promcteam.fusion.util.PlayerUtil;
-import com.promcteam.risecore.legacy.util.item.ItemBuilder;
-import com.promcteam.risecore.legacy.util.message.MessageData;
-import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

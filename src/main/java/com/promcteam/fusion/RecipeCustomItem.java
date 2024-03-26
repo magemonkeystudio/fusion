@@ -1,6 +1,6 @@
 package com.promcteam.fusion;
 
-import com.promcteam.risecore.legacy.util.item.ItemBuilder;
+import com.promcteam.codex.legacy.item.ItemBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;

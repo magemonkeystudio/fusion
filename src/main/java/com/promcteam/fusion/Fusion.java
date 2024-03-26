@@ -1,15 +1,15 @@
 package com.promcteam.fusion;
 
+import com.promcteam.codex.config.legacy.LegacyConfigManager;
 import com.promcteam.codex.items.ItemType;
+import com.promcteam.codex.legacy.RisePlugin;
+import com.promcteam.codex.legacy.placeholder.PlaceholderRegistry;
+import com.promcteam.codex.legacy.placeholder.PlaceholderType;
+import com.promcteam.codex.util.messages.MessageUtil;
 import com.promcteam.fusion.cfg.BrowseConfig;
 import com.promcteam.fusion.cfg.Cfg;
 import com.promcteam.fusion.gui.BrowseGUI;
 import com.promcteam.fusion.gui.CustomGUI;
-import com.promcteam.risecore.ConfigManager;
-import com.promcteam.risecore.RisePlugin;
-import com.promcteam.risecore.legacy.chat.placeholder.PlaceholderType;
-import com.promcteam.risecore.legacy.util.Init;
-import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import com.promcteam.sapphire.Sapphire;
 import com.promcteam.sapphire.SapphireItemProvider;
 import lombok.Getter;
@@ -54,7 +54,7 @@ public class Fusion extends RisePlugin implements Listener {
     public void reloadConfig() {
         super.reloadConfig();
         FileConfiguration lang =
-                ConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
+                LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
@@ -101,10 +101,10 @@ public class Fusion extends RisePlugin implements Listener {
                         return null;
                     });
         }
-        RECIPE_ITEM.registerChild("item", Init.ITEM, RecipeItem::getItemStack);
+        RECIPE_ITEM.registerChild("item", PlaceholderRegistry.ITEM, RecipeItem::getItemStack);
         RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
-        CALCULATED_RECIPE.registerChild("icon", Init.ITEM, CalculatedRecipe::getIcon);
+        CALCULATED_RECIPE.registerChild("icon", PlaceholderRegistry.ITEM, CalculatedRecipe::getIcon);
 
         super.onLoad();
     }

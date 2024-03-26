@@ -1,14 +1,14 @@
 package com.promcteam.fusion.gui;
 
 import com.promcteam.codex.CodexEngine;
+import com.promcteam.codex.api.DelayedCommand;
+import com.promcteam.codex.util.ItemUtils;
+import com.promcteam.codex.util.messages.MessageData;
+import com.promcteam.codex.util.messages.MessageUtil;
 import com.promcteam.fusion.*;
 import com.promcteam.fusion.cfg.Cfg;
 import com.promcteam.fusion.cfg.PConfigManager;
 import com.promcteam.fusion.gui.slot.Slot;
-import com.promcteam.risecore.legacy.cmds.DelayedCommand;
-import com.promcteam.risecore.legacy.util.ItemUtils;
-import com.promcteam.risecore.legacy.util.message.MessageData;
-import com.promcteam.risecore.legacy.util.message.MessageUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
