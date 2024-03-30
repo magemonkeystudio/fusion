@@ -4,6 +4,7 @@ import com.promcteam.codex.api.DelayedCommand;
 import com.promcteam.codex.legacy.item.ItemBuilder;
 import com.promcteam.codex.util.SerializationBuilder;
 import com.promcteam.risecore.legacy.util.DeserializationWorker;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -14,9 +15,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class InventoryPattern implements ConfigurationSerializable {
+    @Getter
     private final String[]                                       pattern; // _ for ingredients, = for result.
+    @Getter
     private final HashMap<Character, ItemStack>                  items;
     private final HashMap<Character, Collection<DelayedCommand>> commands          = new HashMap<>();
+    @Getter
     private final List<Character>                                closeOnClickSlots = new ArrayList<>();
 
     public InventoryPattern(String[] pattern, HashMap<Character, ItemStack> items) {
@@ -24,12 +28,11 @@ public class InventoryPattern implements ConfigurationSerializable {
         this.items = items;
     }
 
-    @SuppressWarnings("unchecked")
     public InventoryPattern(Map<String, Object> map) {
 
         DeserializationWorker dw   = DeserializationWorker.start(map);
         List<String>          temp = dw.getStringList("pattern");
-        this.pattern = temp.toArray(new String[temp.size()]);
+        this.pattern = temp.toArray(new String[0]);
         this.items = new HashMap<>();
         DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
         for (String entry : itemsTemp.getMap().keySet()) {
@@ -52,20 +55,8 @@ public class InventoryPattern implements ConfigurationSerializable {
         }
     }
 
-    public String[] getPattern() {
-        return this.pattern;
-    }
-
-    public HashMap<Character, ItemStack> getItems() {
-        return this.items;
-    }
-
     public Collection<DelayedCommand> getCommands(char c) {
         return this.commands.get(c);
-    }
-
-    public List<Character> getCloseOnClickSlots() {
-        return closeOnClickSlots;
     }
 
     public Character getSlot(int slot) {
