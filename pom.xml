@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.promcteam</groupId>
-        <artifactId>promc-parent</artifactId>
-        <version>1.20.4-R1-SNAPSHOT</version>
+        <groupId>studio.magemonkey</groupId>
+        <artifactId>magemonkey-parent</artifactId>
+        <version>1.20.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>fusion</artifactId>
@@ -67,11 +67,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.promcteam</groupId>
+            <groupId>studio.magemonkey</groupId>
             <artifactId>codex</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.promcteam</groupId>
+            <groupId>studio.magemonkey</groupId>
             <artifactId>sapphire</artifactId>
             <version>1.0.0-R0.1-SNAPSHOT</version>
         </dependency>
