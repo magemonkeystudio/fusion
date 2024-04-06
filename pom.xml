@@ -75,9 +75,5 @@
             <artifactId>sapphire</artifactId>
             <version>1.0.0-R0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
     </dependencies>
 </project>
