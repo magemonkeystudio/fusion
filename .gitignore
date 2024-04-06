@@ -11,6 +11,7 @@ buildNumber.properties
 .mvn/timing.properties
 settings.xml
 toolchains.xml
+log.txt
 
 
 ### Intellij ###

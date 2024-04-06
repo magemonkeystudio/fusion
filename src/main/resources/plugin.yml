@@ -1,13 +1,12 @@
 name: ${project.name}
-main: com.gotofinal.darkrise.crafting.ProRPGCrafting
-authors: [Travja, goflish]
+main: studio.magemonkey.fusion.Fusion
+authors: [ Travja, goflish ]
 version: ${project.version}
 depend:
-  - RiseCore
-  - ProMCCore
+  - Codex
 softdepend:
-  - ProMCUtilities
-  - ProRPGItems
+  - Sapphire
+  - Divinity
 api-version: 1.13
 commands:
   craft:
