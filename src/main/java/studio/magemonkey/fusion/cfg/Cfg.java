@@ -1,57 +1,30 @@
 package studio.magemonkey.fusion.cfg;
 
-import studio.magemonkey.codex.items.exception.CodexItemException;
-import studio.magemonkey.codex.items.providers.VanillaProvider;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.legacy.item.ItemColors;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.gui.CustomGUI;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.legacy.item.ItemColors;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.InventoryPattern;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public final class Cfg {
-    private static final Map<String, CraftingTable> map              = new HashMap<>(4);
-    private static final Map<String, CustomGUI>     guiMap           = new HashMap<>(4);
-    public static        String                     recursive        = "floor(n+300^(n/7)^2)";
-    public static        String                     finalMod         = "floor(x)/4";
-    public static        long                       dataSaveInterval = 12000;
-    public static        double                     forgetPenalty    = 0.2d;
-
-    private Cfg() {
-    }
-
-    public static CraftingTable getTable(String str) {
-        return map.get(str.toLowerCase().trim());
-    }
-
-    public static CustomGUI getGUI(String str) {
-        if (str == null) return null;
-        return guiMap.get(str.toLowerCase().trim());
-    }
-
-    public static Map<String, CraftingTable> getMap() {
-        return map;
-    }
-
-    public static Map<String, CustomGUI> getGuiMap() {
-        return guiMap;
-    }
+    public static String recursive = "floor(n+300^(n/7)^2)";
+    public static String finalMod = "floor(x)/4";
+    public static long dataSaveInterval = 12000;
+    public static double forgetPenalty = 0.2d;
+    public static boolean craftingQueue = true;
 
     static FileConfiguration getConfig() {
-        File              file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
-        FileConfiguration cfg  = new YamlConfiguration();
+        File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration cfg = new YamlConfiguration();
 
         if (!file.exists()) {
             addDefs(cfg);
@@ -88,6 +61,7 @@ public final class Cfg {
         cfg.addDefault("final_level_mod", finalMod);
         cfg.addDefault("data_save_interval", dataSaveInterval); //Auto save every 10 minutes
         cfg.addDefault("forget.penalty", forgetPenalty);
+        cfg.addDefault("crafting_queue", craftingQueue);
 
         HashMap<Character, ItemStack> items = new HashMap<>();
         items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
@@ -97,30 +71,22 @@ public final class Cfg {
                 new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"},
                         items);
         ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE/*, 1, (short) 15*/);
-//        CraftingTable a = new CraftingTable("forge", "Forge inventory name", DarkRiseEconomy.getItemsRegistry().getItems().iterator().next(), ip, item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/, 0, 0);
-//
-//        a.addRecipe(new Recipe("test",
-//                Arrays.asList(new RecipeEconomyItem("testItem", 5),
-//                        new RecipeCustomItem(new ItemStack(Material.COOKIE), 2, true)),
-//                new RecipeEconomyItem("resultItem", 4), 0, 0, 0));
-        CraftingTable b = new CraftingTable("craft",
+        /*CraftingTable b = new CraftingTable("craft",
                 "Craft inventory name",
                 new VanillaProvider.VanillaItemType(Material.PAPER),
                 ip,
-                item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE)*/,
+                item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE),
                 0,
                 0);
         List<Map<String, Object>> list = new ArrayList<>(3);
-//        list.add(a.serialize());
+        list.add(a.serialize());
         list.add(b.serialize());
-        cfg.addDefault("types", list);
+        cfg.addDefault("types", list);*/
     }
 
     public static void init() {
-        map.clear();
-        guiMap.clear();
-        File              file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
-        FileConfiguration cfg  = new YamlConfiguration();
+        File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration cfg = new YamlConfiguration();
 
         if (!file.exists()) {
             addDefs(cfg);
@@ -153,30 +119,25 @@ public final class Cfg {
         finalMod = cfg.getString("final_level_mod");
         dataSaveInterval = cfg.getLong("data_save_interval");
         forgetPenalty = cfg.getDouble("forget.penalty");
+        craftingQueue = cfg.getBoolean("crafting_queue");
 
+        migrateOldTypes(cfg);
+    }
 
+    public static void migrateOldTypes(FileConfiguration cfg) {
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
-        for (Map<?, ?> typeData : typesSection) {
-            try {
-                //noinspection unchecked
-                CraftingTable ct = new CraftingTable((Map<String, Object>) typeData);
-                map.put(ct.getName(), ct);
-            } catch (CodexItemException e) {
-                Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
-            }
+        if (typesSection.isEmpty()) return;
+        Fusion.getInstance().getLogger().warning("Found old types section in config.yml. Migrating...");
+        typesSection.removeIf(typeData -> ProfessionsCfg.migration((String) typeData.get("name"), (Map<String, Object>) typeData));
+        cfg.set("types", typesSection);
+        if (cfg.getMapList("types").isEmpty()) {
+            cfg.set("types", null);
         }
-        cfg.options().copyDefaults(true);
         try {
-            cfg.save(file);
+            cfg.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
         } catch (IOException e) {
-            Fusion.getInstance().getLogger().warning("Can't save config file: " + file);
+            Fusion.getInstance().getLogger().warning("Can't save config file: " + e.getMessage());
             e.printStackTrace();
-        }
-
-        for (Entry<String, CraftingTable> entry : map.entrySet()) {
-            String        key   = entry.getKey();
-            CraftingTable value = entry.getValue();
-            guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
         }
     }
 }
