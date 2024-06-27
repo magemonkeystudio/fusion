@@ -1,14 +1,22 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.items.providers.VanillaProvider;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.legacy.item.ItemColors;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.gui.CustomGUI;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ProfessionsCfg {
@@ -25,8 +33,28 @@ public class ProfessionsCfg {
         if (!professionFolder.exists()) {
             professionFolder.mkdirs();
         }
-        if(professionFolder.listFiles() == null) {
-            Fusion.getInstance().getLogger().warning("There are no professions registered to load");
+        if (professionFolder.listFiles() == null) {
+            Fusion.getInstance().getLogger().warning("There are no professions registered to load.");
+            Fusion.getInstance().getLogger().warning("Initializing default profession 'craft'");
+            HashMap<Character, ItemStack> items = new HashMap<>();
+            items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
+            items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
+            items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
+            InventoryPattern ip =
+                    new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"},
+                            items);
+            ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+            CraftingTable b = new CraftingTable("craft",
+                    "Craft inventory name",
+                    new VanillaProvider.VanillaItemType(Material.PAPER),
+                    ip,
+                    item,
+                    0,
+                    0);
+            List<Map<String, Object>> list = new ArrayList<>(3);
+            list.add(b.serialize());
+            FileConfiguration cfg = new YamlConfiguration();
+            loadFrom("craft", b.serialize());
             return;
         }
         for (File file : professionFolder.listFiles()) {
@@ -62,7 +90,7 @@ public class ProfessionsCfg {
         return guiMap.get(str.toLowerCase().trim());
     }
 
-    public static boolean migration(String key, Map<String, Object> map) {
+    public static boolean loadFrom(String key, Map<String, Object> map) {
         try {
             File professionFolder = new File(Fusion.getInstance().getDataFolder(), "professions");
             if (!professionFolder.exists()) {
@@ -70,7 +98,7 @@ public class ProfessionsCfg {
             }
 
             File file = new File(professionFolder, key + ".yml");
-            if(file.exists()) {
+            if (file.exists()) {
                 Fusion.getInstance().getLogger().warning("Profession '" + key + "' was already migrated.");
                 return true;
             }

@@ -62,26 +62,6 @@ public final class Cfg {
         cfg.addDefault("data_save_interval", dataSaveInterval); //Auto save every 10 minutes
         cfg.addDefault("forget.penalty", forgetPenalty);
         cfg.addDefault("crafting_queue", craftingQueue);
-
-        HashMap<Character, ItemStack> items = new HashMap<>();
-        items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
-        items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
-        items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-        InventoryPattern ip =
-                new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"},
-                        items);
-        ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE/*, 1, (short) 15*/);
-        /*CraftingTable b = new CraftingTable("craft",
-                "Craft inventory name",
-                new VanillaProvider.VanillaItemType(Material.PAPER),
-                ip,
-                item/*new ItemStack(Material.BLACK_STAINED_GLASS_PANE),
-                0,
-                0);
-        List<Map<String, Object>> list = new ArrayList<>(3);
-        list.add(a.serialize());
-        list.add(b.serialize());
-        cfg.addDefault("types", list);*/
     }
 
     public static void init() {
@@ -108,8 +88,7 @@ public final class Cfg {
             try {
                 cfg.load(file);
             } catch (Exception e) {
-                Fusion.getInstance().getLogger().warning("Can't load config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
                 return;
             }
             addDefs(cfg);
@@ -128,7 +107,7 @@ public final class Cfg {
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
         if (typesSection.isEmpty()) return;
         Fusion.getInstance().getLogger().warning("Found old types section in config.yml. Migrating...");
-        typesSection.removeIf(typeData -> ProfessionsCfg.migration((String) typeData.get("name"), (Map<String, Object>) typeData));
+        typesSection.removeIf(typeData -> ProfessionsCfg.loadFrom((String) typeData.get("name"), (Map<String, Object>) typeData));
         cfg.set("types", typesSection);
         if (cfg.getMapList("types").isEmpty()) {
             cfg.set("types", null);
@@ -137,7 +116,6 @@ public final class Cfg {
             cfg.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
         } catch (IOException e) {
             Fusion.getInstance().getLogger().warning("Can't save config file: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }
