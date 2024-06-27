@@ -8,6 +8,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -82,7 +83,7 @@ public class PlayerCustomGUI implements Listener {
                     ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
             gui.resetBlockedSlots(player, inv, 0, category.getRecipes().size(),
                     new MessageData[]{
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(gui.name))),
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
@@ -125,7 +126,7 @@ public class PlayerCustomGUI implements Listener {
                 gui.setPattern(category.getPattern());
             else
                 gui.resetPattern();
-            CraftingTable      table      = Cfg.getTable(this.gui.name);
+            CraftingTable      table      = ProfessionsCfg.getTable(this.gui.name);
             ItemStack          fill       = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
 //            allRecipes.removeIf(r -> r.getNeededLevels() > LevelFunction.getLevel(player, table) + 5);
@@ -158,7 +159,7 @@ public class PlayerCustomGUI implements Listener {
 
             this.gui.resetBlockedSlots(this.player, this.inventory, page, allRecipeCount,
                     new MessageData[]{
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(gui.name))),
                             new MessageData("category", category),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
@@ -247,7 +248,7 @@ public class PlayerCustomGUI implements Listener {
             this.reloadRecipesTask();
             return false;
         }
-        CraftingTable      table          = Cfg.getTable(this.gui.name);
+        CraftingTable      table          = ProfessionsCfg.getTable(this.gui.name);
         Collection<Recipe> allRecipes     = table.getRecipes().values();
         int                pageSize       = this.gui.resultSlots.size();
         int                allRecipeCount = allRecipes.size();
@@ -290,7 +291,7 @@ public class PlayerCustomGUI implements Listener {
                 this.gui.getName())) {
             MessageUtil.sendMessage("fusion.error.noMastery",
                     player,
-                    new MessageData("craftingTable", Cfg.getTable(gui.getName())));
+                    new MessageData("craftingTable", ProfessionsCfg.getTable(gui.getName())));
             return false;
         }
         if ((calculatedRecipe == null) || !calculatedRecipe.isCanCraft()) {
@@ -301,7 +302,7 @@ public class PlayerCustomGUI implements Listener {
         if (!Objects.equals(this.recipes.get(slot), calculatedRecipe)) {
             return false;
         }
-        if (LevelFunction.getLevel(player, Cfg.getTable(this.gui.name)) < recipe.getNeededLevels()) {
+        if (LevelFunction.getLevel(player, ProfessionsCfg.getTable(this.gui.name)) < recipe.getNeededLevels()) {
             MessageUtil.sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
             return false;
         }
@@ -459,7 +460,7 @@ public class PlayerCustomGUI implements Listener {
                 DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getCommands());
 
                 //Experience
-                CraftingTable table = Cfg.getTable(this.gui.name);
+                CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
 
                 if (recipe.getXpGain() > 0) {
                     Fusion.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());

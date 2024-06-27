@@ -36,7 +36,7 @@ public class PlayerConfig {
 
             config = yaml;
 
-            for (Map.Entry<String, CustomGUI> entry : Cfg.getGuiMap().entrySet()) {
+            for (Map.Entry<String, CustomGUI> entry : ProfessionsCfg.getGuiMap().entrySet()) {
                 if (config.contains("guis." + entry.getKey()))
                     mastery.put(entry.getKey(), config.getBoolean("guis." + entry.getKey()));
             }
@@ -80,7 +80,7 @@ public class PlayerConfig {
         while (professions.contains(profession))
             professions.remove(profession);
 
-        CraftingTable                table = Cfg.getTable(profession);
+        CraftingTable                table = ProfessionsCfg.getTable(profession);
         ExperienceManager.PlayerData dat   = Fusion.getExperienceManager().getPlayerData(player);
         int                          exp   = dat.getExperience(table);
         int                          dock  = (int) (exp * Cfg.forgetPenalty);

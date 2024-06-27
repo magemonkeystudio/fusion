@@ -7,10 +7,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Utils;
-import studio.magemonkey.fusion.cfg.BrowseConfig;
-import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
-import studio.magemonkey.fusion.cfg.PlayerConfig;
+import studio.magemonkey.fusion.cfg.*;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import org.bukkit.Bukkit;
@@ -96,7 +93,7 @@ public class BrowseGUI implements Listener {
 //            for (CraftingTable table : Cfg.getMap().values()) {
             for (String profession : BrowseConfig.getProfessions()) {
                 if (i >= gui.slots.size()) break;
-                CraftingTable table = Cfg.getTable(profession);
+                CraftingTable table = ProfessionsCfg.getTable(profession);
                 // Removes items from the menu if the player doesn't have permission.
                 if (table == null || !Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
@@ -153,7 +150,7 @@ public class BrowseGUI implements Listener {
         Player p = (Player) e.getWhoClicked();
         e.setCancelled(true);
 
-        CustomGUI guiToOpen = Cfg.getGUI(this.slotMap.get(e.getRawSlot()));
+        CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
         if (guiToOpen == null) return;
 
         String       profession = guiToOpen.getName();

@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 
 import java.util.*;
 
@@ -44,7 +45,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
             HashMap<Character, ItemStack> items           = gui.pattern.getItems();
             PlayerInitialGUI              playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
             playerCustomGUI.isBase = true;
-            CraftingTable table = Cfg.getTable(gui.name);
+            CraftingTable table = ProfessionsCfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
                     .values()
                     .stream()
@@ -53,7 +54,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
             gui.resetBlockedSlots(player, inv, 0, table.getCategories().size(),
                     new MessageData[]{
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(gui.name))),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
                             new MessageData("bal", CodexEngine.get().getVault().getBalance(player))

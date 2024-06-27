@@ -8,6 +8,7 @@ import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.sapphire.Sapphire;
@@ -58,6 +59,7 @@ public class Fusion extends RisePlugin implements Listener {
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
+        ProfessionsCfg.init();
         if (experienceManager != null) {
             try {
                 experienceManager.save();
@@ -88,7 +90,7 @@ public class Fusion extends RisePlugin implements Listener {
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        if (!Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
                     Sapphire.RISE_ITEM,
                     i -> {
@@ -119,7 +121,7 @@ public class Fusion extends RisePlugin implements Listener {
     }
 
     public void closeAll() {
-        Cfg.getGuiMap().values().forEach(CustomGUI::closeAll);
+        ProfessionsCfg.getGuiMap().values().forEach(CustomGUI::closeAll);
         BrowseGUI.closeAll();
     }
 
