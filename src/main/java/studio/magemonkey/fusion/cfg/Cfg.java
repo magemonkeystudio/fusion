@@ -50,18 +50,19 @@ public final class Cfg {
                 e.printStackTrace();
                 return null;
             }
-            addDefs(cfg);
         }
 
         return cfg;
     }
 
     private static void addDefs(FileConfiguration cfg) {
-        cfg.addDefault("recursive_level_formula", recursive);
-        cfg.addDefault("final_level_mod", finalMod);
-        cfg.addDefault("data_save_interval", dataSaveInterval); //Auto save every 10 minutes
-        cfg.addDefault("forget.penalty", forgetPenalty);
-        cfg.addDefault("crafting_queue", craftingQueue);
+        // addDefault did not add it to config, so here is a work around
+        if(!cfg.isSet("recursive_level_formula")) cfg.set("recursive_level_formula", recursive);
+        if(!cfg.isSet("final_level_mod")) cfg.set("final_level_mod", dataSaveInterval);
+        if(!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
+        if(!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
+        if(!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
+
     }
 
     public static void init() {
@@ -86,12 +87,17 @@ public final class Cfg {
             }
         } else {
             try {
+                // Update the config from file
+                cfg.load(file);
+                // Add and save the defaults
+                addDefs(cfg);
+                cfg.save(file);
+                // Load the config again
                 cfg.load(file);
             } catch (Exception e) {
                 Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
                 return;
             }
-            addDefs(cfg);
         }
 
         recursive = cfg.getString("recursive_level_formula");

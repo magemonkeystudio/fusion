@@ -1,12 +1,12 @@
 package studio.magemonkey.fusion.cfg;
 
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.ExperienceManager;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +14,12 @@ import java.util.*;
 
 public class PlayerConfig {
 
-    private final Player                   player;
-    private       FileConfiguration        config;
-    private final HashMap<String, Boolean> mastery     = new HashMap<>();
-    private       List<String>             professions = new ArrayList<>();
-    private       boolean                  autoCraft   = false;
-    private       File                     file;
+    private final Player player;
+    private FileConfiguration config;
+    private final HashMap<String, Boolean> mastery = new HashMap<>();
+    private List<String> professions = new ArrayList<>();
+    private boolean autoCraft = false;
+    private File file;
 
     public PlayerConfig(Player player) {
         this.player = player;
@@ -31,11 +31,7 @@ public class PlayerConfig {
             if (!file.exists()) {
                 file.createNewFile();
             }
-
-            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
-
-            config = yaml;
-
+            config = YamlConfiguration.loadConfiguration(file);
             for (Map.Entry<String, CustomGUI> entry : ProfessionsCfg.getGuiMap().entrySet()) {
                 if (config.contains("guis." + entry.getKey()))
                     mastery.put(entry.getKey(), config.getBoolean("guis." + entry.getKey()));
@@ -80,10 +76,10 @@ public class PlayerConfig {
         while (professions.contains(profession))
             professions.remove(profession);
 
-        CraftingTable                table = ProfessionsCfg.getTable(profession);
-        ExperienceManager.PlayerData dat   = Fusion.getExperienceManager().getPlayerData(player);
-        int                          exp   = dat.getExperience(table);
-        int                          dock  = (int) (exp * Cfg.forgetPenalty);
+        CraftingTable table = ProfessionsCfg.getTable(profession);
+        ExperienceManager.PlayerData dat = Fusion.getExperienceManager().getPlayerData(player);
+        int exp = dat.getExperience(table);
+        int dock = (int) (exp * Cfg.forgetPenalty);
         dat.add(table, -dock);
 
         saveConfig();
@@ -99,11 +95,12 @@ public class PlayerConfig {
     }
 
     public boolean isAutoCraft() {
-        return autoCraft;
+        return !Cfg.craftingQueue && autoCraft;
     }
 
     public void setAutoCraft(boolean auto) {
-        autoCraft = auto;
+        // If crafting queue is enabled, auto-crafting shall always be disabled
+        autoCraft = !Cfg.craftingQueue && auto;
         saveConfig();
     }
 

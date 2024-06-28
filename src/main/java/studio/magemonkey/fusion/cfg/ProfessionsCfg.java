@@ -40,6 +40,11 @@ public class ProfessionsCfg {
             items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
             items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
             items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
+            if(Cfg.craftingQueue) {
+                items.put('-', ItemBuilder.newItem(Material.PAPER).name("%name%").lore(List.of("&7&oThis item is in the crafting queue", " ", " &7Time left: &c%time%", " ", "&eClick to cancel")).build());
+                items.put('}', ItemBuilder.newItem(Material.BOOK).name("Next queued items").build());
+                items.put('{', ItemBuilder.newItem(Material.BOOK).name("Previous queued items").build());
+            }
             InventoryPattern ip =
                     new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"},
                             items);
@@ -62,7 +67,8 @@ public class ProfessionsCfg {
                 FileConfiguration cfg = new YamlConfiguration();
                 try {
                     cfg.load(file);
-                    Map<String, Object> _map = cfg.getValues(false);
+                    // Get the YAMLs whole content as a map
+                    Map<String, Object> _map = cfg.getValues(true);
                     CraftingTable ct = new CraftingTable(_map);
                     map.put(ct.getName(), ct);
 
