@@ -14,6 +14,10 @@
     <name>Fusion</name>
     <version>1.0.0-R0.2-SNAPSHOT</version>
 
+    <properties>
+        <codex.version>1.0.0-R0.20-SNAPSHOT</codex.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>

@@ -5,6 +5,7 @@ import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
+import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -90,13 +91,10 @@ public class Fusion extends RisePlugin implements Listener {
 
         if (!Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
-                    Sapphire.RISE_ITEM,
+                    ItemUtils.ITEM_TYPE,
                     i -> {
                         if (i instanceof RecipeEconomyItem) {
-                            ItemType itemType = ((RecipeEconomyItem) i).asItemType();
-                            if (itemType instanceof SapphireItemProvider.SapphireItemType) {
-                                return ((SapphireItemProvider.SapphireItemType) itemType).getRiseItem();
-                            }
+                            return ((RecipeEconomyItem) i).asItemType();
                         }
                         return null;
                     });
