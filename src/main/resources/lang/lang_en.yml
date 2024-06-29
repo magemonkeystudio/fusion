@@ -49,6 +49,7 @@ fusion:
   reload: "&7Reloaded settings!"
   autoToggle: "&6Your auto-crafting has been turned $<state>."
   autoCancelled: "&cAuto-crafting cancelled."
+  autoDisabled: "&cAuto-crafting is disabled."
   confirm: "&ePlease type &d/craft confirm &eto confirm this action!"
   forget:
     confirm: "&eAre you sure you want to forget $<craftingTable.name>? Type &d/craft confirm &eto confirm this action!"

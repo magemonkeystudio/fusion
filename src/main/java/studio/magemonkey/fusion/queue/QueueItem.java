@@ -1,42 +1,40 @@
 package studio.magemonkey.fusion.queue;
 
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 
+@Getter
 @AllArgsConstructor
 public class QueueItem {
 
-    @Getter
-    @Setter
+    private String profession;
+    private Category category;
     private @NonNull Recipe recipe;
-
-    @Getter
-    private int amount;
-
-    @Getter
+    private ItemStack icon;
+    private long timestamp;
+    private int difference;
     private boolean done;
 
-
-    public void attemptCraft() {
-        if (amount > 0) {
-
-            //Craft the item.
-
-        }
-
-        done = amount == 0;
-
+    public QueueItem(String profession, Category category, @NotNull Recipe recipe, long timestamp) {
+        this.profession = profession;
+        this.category = category;
+        this.recipe = recipe;
+        this.timestamp = timestamp;
+        update();
     }
 
-    public void setAmount(int amount) {
-        if (amount < 0) {
-            throw new IndexOutOfBoundsException("Amount cannot be less than 0.");
-        }
+    public void update() {
+        this.icon = ProfessionsCfg.getQueueItem(profession, this);
 
+        // Get the difference of timestamp (long) and current time (long) in seconds (int)
+        difference = (int) ((System.currentTimeMillis() - timestamp) / 1000);
+        this.done = difference >= recipe.getCooldown();
 
     }
-
 }

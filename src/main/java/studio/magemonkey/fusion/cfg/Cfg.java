@@ -1,17 +1,11 @@
 package studio.magemonkey.fusion.cfg;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.legacy.item.ItemColors;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,22 +26,19 @@ public final class Cfg {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't create config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't create config file: " + file + ":" + e.getMessage());
             }
             cfg.options().copyDefaults(true);
             try {
                 cfg.save(file);
             } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't save config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't save config file: " + file + ":" + e.getMessage());
             }
         } else {
             try {
-                cfg.load(file);
+                reload(cfg, file);
             } catch (Exception e) {
-                Fusion.getInstance().getLogger().warning("Can't load config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
                 return null;
             }
         }
@@ -62,7 +53,6 @@ public final class Cfg {
         if(!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
         if(!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
         if(!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
-
     }
 
     public static void init() {
@@ -75,25 +65,17 @@ public final class Cfg {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't create config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't create config file: " + file + ":" + e.getMessage());
             }
             cfg.options().copyDefaults(true);
             try {
                 cfg.save(file);
             } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't save config file: " + file);
-                e.printStackTrace();
+                Fusion.getInstance().getLogger().warning("Can't save config file: " + file + ":" + e.getMessage());
             }
         } else {
             try {
-                // Update the config from file
-                cfg.load(file);
-                // Add and save the defaults
-                addDefs(cfg);
-                cfg.save(file);
-                // Load the config again
-                cfg.load(file);
+                reload(cfg, file);
             } catch (Exception e) {
                 Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
                 return;
@@ -109,6 +91,19 @@ public final class Cfg {
         migrateOldTypes(cfg);
     }
 
+    private static void reload(FileConfiguration cfg, File file) {
+        try {
+            // Update the config from file
+            cfg.load(file);
+            // Add and save the defaults
+            addDefs(cfg);
+            cfg.save(file);
+            // Load the config again
+            cfg.load(file);
+        } catch (Exception e) {
+            Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
+        }
+    }
     public static void migrateOldTypes(FileConfiguration cfg) {
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
         if (typesSection.isEmpty()) return;

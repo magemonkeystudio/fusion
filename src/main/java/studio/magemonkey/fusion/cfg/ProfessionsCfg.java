@@ -12,12 +12,10 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.queue.QueueItem;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ProfessionsCfg {
 
@@ -25,6 +23,8 @@ public class ProfessionsCfg {
     private static final Map<String, CraftingTable> map = new HashMap<>(4);
     @Getter
     private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
+    @Getter
+    private static final Map<String, FileConfiguration> cfgs = new HashMap<>(4);
 
     public static void init() {
         map.clear();
@@ -40,13 +40,13 @@ public class ProfessionsCfg {
             items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
             items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
             items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-            if(Cfg.craftingQueue) {
+            if (Cfg.craftingQueue) {
                 items.put('-', ItemBuilder.newItem(Material.PAPER).name("%name%").lore(List.of("&7&oThis item is in the crafting queue", " ", " &7Time left: &c%time%", " ", "&eClick to cancel")).build());
                 items.put('}', ItemBuilder.newItem(Material.BOOK).name("Next queued items").build());
                 items.put('{', ItemBuilder.newItem(Material.BOOK).name("Previous queued items").build());
             }
             InventoryPattern ip =
-                    new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", "=========", "<0000000>"},
+                    new InventoryPattern(new String[]{"=========", "=========", "=========", "=========", Cfg.craftingQueue ? "{-------}" : "=========", "<0000000>"},
                             items);
             ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
             CraftingTable b = new CraftingTable("craft",
@@ -58,21 +58,22 @@ public class ProfessionsCfg {
                     0);
             List<Map<String, Object>> list = new ArrayList<>(3);
             list.add(b.serialize());
-            FileConfiguration cfg = new YamlConfiguration();
             loadFrom("craft", b.serialize());
             return;
         }
-        for (File file : professionFolder.listFiles()) {
+        for (File file : Objects.requireNonNull(professionFolder.listFiles())) {
             if (file.getName().endsWith(".yml")) {
                 FileConfiguration cfg = new YamlConfiguration();
                 try {
+                    cfg.load(file);
+                    addCraftingQueueDefs(cfg);
+                    cfg.save(file);
                     cfg.load(file);
                     // Get the YAMLs whole content as a map
                     Map<String, Object> _map = cfg.getValues(true);
                     CraftingTable ct = new CraftingTable(_map);
                     map.put(ct.getName(), ct);
-
-
+                    cfgs.put(ct.getName(), cfg);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
@@ -94,6 +95,57 @@ public class ProfessionsCfg {
     public static CustomGUI getGUI(String str) {
         if (str == null) return null;
         return guiMap.get(str.toLowerCase().trim());
+    }
+
+    private static void addCraftingQueueDefs(FileConfiguration cfg) {
+        if (!cfg.isSet("queueSlot")) {
+            cfg.set("queueSlot.material", "GRAY_STAINED_GLASS_PANE");
+            cfg.set("queueSlot.name", "&cQueue Slot");
+            cfg.set("queueSlot.lore", List.of("&7This slot is empty."));
+        }
+        if (!cfg.isSet("pattern.items.}")) {
+            cfg.set("pattern.items.}.material", "BOOK");
+            cfg.set("pattern.items.}.amount", 1);
+            cfg.set("pattern.items.}.durability", 0);
+            cfg.set("pattern.items.}.unbreakable", false);
+            cfg.set("pattern.items.}.name", "Next queued items");
+            cfg.set("pattern.items.}.lore", List.of());
+            cfg.set("pattern.items.}.flags", List.of());
+            cfg.set("pattern.items.}.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.{")) {
+            cfg.set("pattern.items.{.material", "BOOK");
+            cfg.set("pattern.items.{.amount", 1);
+            cfg.set("pattern.items.{.durability", 0);
+            cfg.set("pattern.items.{.unbreakable", false);
+            cfg.set("pattern.items.{.name", "Previous queued items");
+            cfg.set("pattern.items.{.lore", List.of());
+            cfg.set("pattern.items.{.flags", List.of());
+            cfg.set("pattern.items.{.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.-")) {
+            cfg.set("pattern.items.-.material", "PAPER");
+            cfg.set("pattern.items.-.amount", 1);
+            cfg.set("pattern.items.-.durability", 0);
+            cfg.set("pattern.items.-.unbreakable", false);
+            cfg.set("pattern.items.-.name", "%name%");
+            cfg.set("pattern.items.-.lore", List.of("&7&oThis item is in the crafting queue", " ", " &7Time left: &c%time%", " ", "&eClick to cancel"));
+            cfg.set("pattern.items.-.flags", List.of());
+            cfg.set("pattern.items.-.enchants", Map.of());
+        }
+    }
+
+    public static ItemStack getQueueSlot(String key) {
+        FileConfiguration cfg = cfgs.get(key);
+        if (!cfg.isSet("queueSlot")) {
+            Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue item. Using default.");
+            return ItemBuilder.newItem(Material.GRAY_STAINED_GLASS_PANE).name("&cQueue Slot").lore(List.of("&7This slot is empty.")).build();
+        }
+        Material material = Material.getMaterial(cfg.getString("queueSlot.material", "GRAY_STAINED_GLASS_PANE"));
+        return ItemBuilder.newItem(material)
+                .name(cfg.getString("queueSlot.name", "&cQueue Slot"))
+                .lore(cfg.getStringList("queueSlot.lore"))
+                .build();
     }
 
     public static boolean loadFrom(String key, Map<String, Object> map) {
@@ -127,5 +179,22 @@ public class ProfessionsCfg {
             Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
             return false;
         }
+    }
+
+    public static ItemStack getQueueItem(String key, QueueItem item) {
+        /* Fetch stored data to the queued item */
+        System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
+        FileConfiguration cfg = cfgs.get(key);
+
+
+        if (!cfg.isSet("pattern.items.-")) {
+            Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue item.");
+            return null;
+        }
+        ItemStack result = item.getRecipe().getResult().getItemStack();
+        Material material = Material.getMaterial(cfg.getString("pattern.items.-.material", "STONE").replace("%material%", result.getType().toString()).toUpperCase());
+        List<String> lore = cfg.getStringList("pattern.items.-.lore");
+        lore.replaceAll(s -> s.replace("%time%", String.valueOf(item.getDifference())));
+        return ItemBuilder.newItem(result).lore(lore).build();
     }
 }

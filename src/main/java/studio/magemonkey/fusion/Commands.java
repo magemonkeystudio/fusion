@@ -196,6 +196,10 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
+                if(Cfg.craftingQueue) {
+                    MessageUtil.sendMessage("fusion.error.autoDisabled", sender);
+                    return true;
+                }
                 if (!instance.checkPermission(sender, "fusion.auto")) {
                     return true;
                 }
