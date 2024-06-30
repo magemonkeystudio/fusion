@@ -47,7 +47,7 @@ public class PlayerCustomGUI implements Listener {
     private BukkitTask craftingTask;
     private BukkitTask barTask;
     private BossBar bar;
-    private Collection<ItemStack> refund = new ArrayList<>();
+    private final Collection<ItemStack> refund = new ArrayList<>();
     private ItemStack previousCursor;
 
     private boolean craftingSuccess = true;
@@ -173,9 +173,10 @@ public class PlayerCustomGUI implements Listener {
             }
 
             /* Additionally, when crafting_queue: true */
+            this.queue.getQueuedItems().clear();
             Collection<QueueItem> allQueuedItems = queue != null ? queue.getQueue() : List.of();
             int queueAllItemsCount = allQueuedItems.size();
-            if(!allQueuedItems.isEmpty()) {
+            if (!allQueuedItems.isEmpty()) {
                 int queuePageSize = this.gui.queuedSlots.size();
                 int j = 0;
                 int queuePage = this.queuePage;
@@ -190,12 +191,12 @@ public class PlayerCustomGUI implements Listener {
                     return;
                 }
 
-                if(this.category.getName() != null) {
-                    QueueItem[] queuedItems = new QueueItem[(queuePage < queuePages) ? queuePageSize : ((queueRest == 0) ? queuePageSize : queueRest)];
+                if (this.category.getName() != null) {
+                    QueueItem[] queuedItems = new QueueItem[queuePageSize];
                     QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
                     Integer[] queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
 
-                    for (int k = (queuePage * queuePageSize), e = Math.min(queuedSlots.length, queuedItems.length);
+                    for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
                          (k < allQueueItemsArray.length) && (j < e);
                          k++, j++) {
                         QueueItem queueItem = allQueueItemsArray[k];
@@ -242,15 +243,15 @@ public class PlayerCustomGUI implements Listener {
             this.player.closeInventory();
             throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(), e);
         } finally {
-            if(!queue.getQueuedItems().isEmpty()) {
+            if (!queue.getQueuedItems().isEmpty()) {
                 boolean requiresUpdate = false;
-                for(Map.Entry<Integer, QueueItem> entry : queue.getQueuedItems().entrySet()) {
-                    if(!entry.getValue().isDone()) {
+                for (Map.Entry<Integer, QueueItem> entry : queue.getQueuedItems().entrySet()) {
+                    if (!entry.getValue().isDone()) {
                         requiresUpdate = true;
                         break;
                     }
                 }
-                if(requiresUpdate) {
+                if (requiresUpdate) {
                     Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
                 }
             }
@@ -293,12 +294,12 @@ public class PlayerCustomGUI implements Listener {
                 this.prevPage();
                 return;
             }
-            if (this.gui.nextQueuePage > -1 && e.getSlot() == this.gui.nextQueuePage) {
+            if ((this.gui.nextQueuePage != -1) && e.getSlot() == this.gui.nextQueuePage) {
                 // Open the next queue page
                 this.nextQueuePage();
                 return;
             }
-            if (this.gui.prevQueuePage > -1 && e.getSlot() == this.gui.prevQueuePage) {
+            if (this.gui.prevQueuePage != -1 && e.getSlot() == this.gui.prevQueuePage) {
                 // Open the previous queue page
                 this.prevQueuePage();
             }
@@ -311,10 +312,7 @@ public class PlayerCustomGUI implements Listener {
             Fusion.getInstance().runSync(() ->
             {
                 this.reloadRecipes();
-
                 //this.craft(e.getRawSlot(), false);
-
-                //Simulate addition into the queue
                 this.queue.addRecipe(this.recipes.get(e.getRawSlot()).getRecipe());
                 this.reloadRecipesTask();
             });
@@ -329,6 +327,7 @@ public class PlayerCustomGUI implements Listener {
                 QueueItem item = queue.getQueuedItems().get(e.getSlot());
                 if (item == null) return;
                 Bukkit.getConsoleSender().sendMessage("Recipe: " + item.getRecipe().getName());
+                Bukkit.getConsoleSender().sendMessage("Timestamp: " + item.getTimestamp());
                 //queue.finishRecipe(item);
             }
             return;
@@ -392,7 +391,7 @@ public class PlayerCustomGUI implements Listener {
         Collection<QueueItem> allQueuedItems = queue.getQueue();
         int pageSize = this.gui.queuedSlots.size();
         int count = allQueuedItems.size();
-        int page = this.page;
+        int page = this.queuePage;
 
         int fullPages = count / pageSize;
         int rest = count % pageSize;
@@ -406,7 +405,9 @@ public class PlayerCustomGUI implements Listener {
     }
 
     private void prevQueuePage() {
-        this.page--;
+        if (this.queuePage <= 0)
+            return;
+        this.queuePage--;
         if (this.validateQueuePageCount()) {
             this.reloadRecipesTask();
         }
@@ -421,14 +422,14 @@ public class PlayerCustomGUI implements Listener {
 
     private boolean canCraft(CalculatedRecipe calculatedRecipe, int slot) {
         Recipe recipe = calculatedRecipe.getRecipe();
-        if (calculatedRecipe != null && calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player,
+        if (calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player,
                 this.gui.getName())) {
             MessageUtil.sendMessage("fusion.error.noMastery",
                     player,
                     new MessageData("craftingTable", ProfessionsCfg.getTable(gui.getName())));
             return false;
         }
-        if ((calculatedRecipe == null) || !calculatedRecipe.isCanCraft()) {
+        if (!calculatedRecipe.isCanCraft()) {
             MessageUtil.sendMessage("fusion.gui.canCraft.false", player);
             return false;
         }
@@ -457,7 +458,7 @@ public class PlayerCustomGUI implements Listener {
             MessageUtil.sendMessage("fusion.alreadyCrafting", player);
             return false;
         }*/
-        if(!recipes.containsKey(slot)) {
+        if (!recipes.containsKey(slot)) {
             return false;
         }
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
@@ -536,84 +537,86 @@ public class PlayerCustomGUI implements Listener {
             break;
         }
 
-        refund = taken;
+        refund.addAll(taken);
         if (!itemsToTake.isEmpty()) {
             MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
             cancel();
             return false;
         }
+        if (!Cfg.craftingQueue) {
+            double modifier = Fusion.getInstance().getPlayerCooldown(player);
+            int cooldown = modifier == 0d
+                    ? recipe.getCooldown()
+                    : (int) Math.round(recipe.getCooldown() - (recipe.getCooldown() * modifier));
+            showBossBar(this.player, cooldown);
 
-        double modifier = Fusion.getInstance().getPlayerCooldown(player);
-        int cooldown = modifier == 0d
-                ? recipe.getCooldown()
-                : (int) Math.round(recipe.getCooldown() - (recipe.getCooldown() * modifier));
-        showBossBar(this.player, cooldown);
+            if (cooldown != 0) {
+                previousCursor = player.getOpenInventory().getCursor();
+                player.getOpenInventory().setCursor(new ItemStack(Material.BARRIER));
+            }
 
-        if (cooldown != 0) {
-            previousCursor = player.getOpenInventory().getCursor();
-            player.getOpenInventory().setCursor(new ItemStack(Material.BARRIER));
-        }
-
-        craftingSuccess = false;
-        craftingRecipe = recipe;
-        craftingTask = Fusion.getInstance().runTaskLater(cooldown, () -> {
-            craftingSuccess = true;
-            if (recipe.getCommands().size() == 0) {
-                if (addToCursor) {
-                    ItemStack cursor = this.player.getItemOnCursor();
-                    if (cursor != null && cursor.isSimilar(recipe.getResult().getItemStack())) {
-                        if (cursor.getAmount() < cursor.getMaxStackSize()
-                                && cursor.getAmount() + recipe.getResult().getAmount() <= cursor.getMaxStackSize()) {
-                            cursor.setAmount(cursor.getAmount() + recipe.getResult().getAmount());
-                            this.player.setItemOnCursor(cursor);
+            craftingSuccess = false;
+            craftingRecipe = recipe;
+            craftingTask = Fusion.getInstance().runTaskLater(cooldown, () -> {
+                craftingSuccess = true;
+                if (recipe.getCommands().size() == 0) {
+                    if (addToCursor) {
+                        ItemStack cursor = this.player.getItemOnCursor();
+                        if (cursor != null && cursor.isSimilar(recipe.getResult().getItemStack())) {
+                            if (cursor.getAmount() < cursor.getMaxStackSize()
+                                    && cursor.getAmount() + recipe.getResult().getAmount() <= cursor.getMaxStackSize()) {
+                                cursor.setAmount(cursor.getAmount() + recipe.getResult().getAmount());
+                                this.player.setItemOnCursor(cursor);
+                            } else {
+                                craftingSuccess = false;
+                            }
+                        } else if (cursor == null || cursor.getType() == Material.AIR) {
+                            this.player.setItemOnCursor(resultItem);
                         } else {
                             craftingSuccess = false;
                         }
-                    } else if (cursor == null || cursor.getType() == Material.AIR) {
-                        this.player.setItemOnCursor(resultItem);
                     } else {
-                        craftingSuccess = false;
+                        boolean fits = calcWillFit(resultItem);
+                        if (fits) {
+                            HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
+                            if (!notAdded.isEmpty()) {
+                                for (ItemStack stack : notAdded.values()) {
+                                    this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
+                                }
+                            }
+                        } else {
+                            craftingSuccess = false;
+                        }
+                    }
+                }
+
+                if (craftingSuccess) {
+                    cancel(false);
+                    CodexEngine.get().getVault().take(this.player, recipe.getPrice());
+                    //Commands
+                    DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getCommands());
+
+                    //Experience
+                    CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
+
+                    if (recipe.getXpGain() > 0) {
+                        Fusion.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+                    }
+
+                    //Restart the crafting sequence if auto-crafting is enabled
+                    if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
+                        reloadRecipesTask();
+                        boolean success = craft(slot, addToCursor); //Call this method again recursively
+                        if (!success)
+                            MessageUtil.sendMessage("fusion.autoCancelled", player);
                     }
                 } else {
-                    boolean fits = calcWillFit(resultItem);
-                    if (fits) {
-                        HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
-                        if (!notAdded.isEmpty()) {
-                            for (ItemStack stack : notAdded.values()) {
-                                this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
-                            }
-                        }
-                    } else {
-                        craftingSuccess = false;
-                    }
+                    cancel();
                 }
-            }
-
-            if (craftingSuccess) {
-                cancel(false);
-                CodexEngine.get().getVault().take(this.player, recipe.getPrice());
-                //Commands
-                DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getCommands());
-
-                //Experience
-                CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
-
-                if (recipe.getXpGain() > 0) {
-                    Fusion.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
-                }
-
-                //Restart the crafting sequence if auto-crafting is enabled
-                if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
-                    reloadRecipesTask();
-                    boolean success = craft(slot, addToCursor); //Call this method again recursively
-                    if (!success)
-                        MessageUtil.sendMessage("fusion.autoCancelled", player);
-                }
-            } else {
-                cancel();
-            }
-        });
-
+            });
+        } else {
+            this.queue.addRecipe(this.recipes.get(slot).getRecipe());
+        }
         return true;
     }
 
@@ -650,35 +653,41 @@ public class PlayerCustomGUI implements Listener {
     }
 
     public void cancel() {
+        if (Cfg.craftingQueue && !player.hasPermission("fusion.queue.keep")) {
+            cancel(true);
+            queue.cancelQueue();
+            return;
+        }
         cancel(true);
     }
 
     private void cancel(boolean refund) {
-        if (craftingTask == null) return;
-        craftingRecipe = null;
-        if (barTask != null) {
-            barTask.cancel();
-            barTask = null;
-            bar.removeAll();
-            bar = null;
+        if(!Cfg.craftingQueue) {
+            if (craftingTask == null) return;
+            craftingRecipe = null;
+            if (barTask != null) {
+                barTask.cancel();
+                barTask = null;
+                bar.removeAll();
+                bar = null;
+            }
+
+            if (!craftingSuccess && PConfigManager.getPlayerConfig(player).isAutoCraft()) {
+                MessageUtil.sendMessage("fusion.autoCancelled", player);
+            }
+
+            if (player.getOpenInventory().getCursor() != null
+                    && player.getOpenInventory().getCursor().getType() == Material.BARRIER)
+                if (previousCursor != null) {
+                    player.getOpenInventory().setCursor(previousCursor);
+                    previousCursor = null;
+                } else
+                    player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
+
+            if (craftingTask != null)
+                craftingTask.cancel();
+            craftingTask = null;
         }
-
-        if (!craftingSuccess && PConfigManager.getPlayerConfig(player).isAutoCraft()) {
-            MessageUtil.sendMessage("fusion.autoCancelled", player);
-        }
-
-        if (player.getOpenInventory().getCursor() != null
-                && player.getOpenInventory().getCursor().getType() == Material.BARRIER)
-            if (previousCursor != null) {
-                player.getOpenInventory().setCursor(previousCursor);
-                previousCursor = null;
-            } else
-                player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
-
-        if (craftingTask != null)
-            craftingTask.cancel();
-        craftingTask = null;
-
         if (!refund || craftingSuccess)
             return;
 

@@ -53,7 +53,6 @@ public class CraftingQueue {
                 if(passedSeconds >= Cfg.finishedMessageInterval && !removables.isEmpty()) {
                     lastTimestamp = System.currentTimeMillis();
                     player.sendMessage("Finished items: " + removables.size());
-                    //removables.forEach(CraftingQueue.this::finishRecipe);
                 }
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);
@@ -99,12 +98,8 @@ public class CraftingQueue {
         }
     }
 
-    private QueueItem getQueueItemByTimestamp(long timestamp) {
-        for (QueueItem item : queue) {
-            if (item.getTimestamp() == timestamp) {
-                return item;
-            }
-        }
-        return null;
+    public void cancelQueue() {
+        queue.clear();
+        PConfigManager.getPlayerConfig(player).clearQueue(profession, category);
     }
 }

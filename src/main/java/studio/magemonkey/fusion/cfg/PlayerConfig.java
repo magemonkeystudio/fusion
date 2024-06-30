@@ -43,6 +43,7 @@ public class PlayerConfig {
 
             if (config.contains("professions"))
                 professions = config.getStringList("professions");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -162,6 +163,7 @@ public class PlayerConfig {
      */
     public int[] getQueueSizes(String profession, String category) {
         int[] sizes = new int[]{0, 0, 0};
+        if(!config.isSet("queue")) return sizes;
         for (String prof : config.getConfigurationSection("queue").getKeys(false)) {
             for (String cat : config.getConfigurationSection("queue." + prof).getKeys(false)) {
                 for (String recipe : config.getConfigurationSection("queue." + prof + "." + cat).getKeys(false)) {
@@ -177,6 +179,12 @@ public class PlayerConfig {
             }
         }
         return sizes;
+    }
+
+    public void clearQueue(String profession, Category category) {
+        for (QueueItem item : getQueueItems(profession, category)) {
+            removeQueueItem(item);
+        }
     }
 
     public int getFinishedQueueAmount() {

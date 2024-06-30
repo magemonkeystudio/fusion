@@ -72,6 +72,7 @@ public class Fusion extends RisePlugin implements Listener {
         experienceManager = new ExperienceManager();
         experienceManager.load();
         BrowseConfig.load();
+        PConfigManager.resetPlayerConfigs();
         runSaveTask();
     }
 

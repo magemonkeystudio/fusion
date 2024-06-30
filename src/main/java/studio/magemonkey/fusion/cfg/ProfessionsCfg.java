@@ -100,7 +100,7 @@ public class ProfessionsCfg {
 
     private static void addCraftingQueueDefs(FileConfiguration cfg) {
         if (!cfg.isSet("pattern.items.}")) {
-            cfg.set("pattern.items.}.material", "BOOK");
+            cfg.set("pattern.items.}.material", "LIME_DYE");
             cfg.set("pattern.items.}.amount", 1);
             cfg.set("pattern.items.}.durability", 0);
             cfg.set("pattern.items.}.unbreakable", false);
@@ -110,7 +110,7 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.}.enchants", Map.of());
         }
         if (!cfg.isSet("pattern.items.{")) {
-            cfg.set("pattern.items.{.material", "BOOK");
+            cfg.set("pattern.items.{.material", "LIME_DYE");
             cfg.set("pattern.items.{.amount", 1);
             cfg.set("pattern.items.{.durability", 0);
             cfg.set("pattern.items.{.unbreakable", false);
@@ -138,7 +138,7 @@ public class ProfessionsCfg {
 
     public static ItemStack getQueueSlot(String key) {
         FileConfiguration cfg = cfgs.get(key);
-        if (!cfg.isSet("queueSlot")) {
+        if (!cfg.isSet("queue.Slot")) {
             Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue slot. Using default.");
             return ItemBuilder.newItem(Material.GRAY_STAINED_GLASS_PANE).name("&cQueue Slot").lore(List.of("&7This slot is empty.")).build();
         }
