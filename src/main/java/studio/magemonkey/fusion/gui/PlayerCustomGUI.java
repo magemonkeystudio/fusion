@@ -1,7 +1,6 @@
 package studio.magemonkey.fusion.gui;
 
 import lombok.Getter;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -534,7 +533,7 @@ public class PlayerCustomGUI implements Listener {
             break;
         }
 
-            refund.addAll(taken);
+        refund.addAll(taken);
 
         if (!itemsToTake.isEmpty()) {
             MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));

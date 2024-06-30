@@ -122,12 +122,7 @@ public class ProfessionsCfg {
         if(!cfg.isSet("fillItem")) {
             cfg.set("fillItem.material", "BLACK_STAINED_GLASS_PANE");
             cfg.set("fillItem.name", " ");
-            cfg.set("fillItem.amount", 1);
-            cfg.set("fillItem.durability", 0);
-            cfg.set("fillItem.unbreakable", false);
             cfg.set("fillItem.lore", List.of());
-            cfg.set("fillItem.flags", List.of());
-            cfg.set("fillItem.enchants", Map.of());
         }
         if (!cfg.isSet("queue.Slot")) {
             cfg.set("queue.Slot.material", "GRAY_STAINED_GLASS_PANE");
@@ -147,8 +142,10 @@ public class ProfessionsCfg {
     }
 
     public static ItemStack getFillItem(String key) {
-        Map<String, Object> map = cfgs.get(key).getConfigurationSection("fillItem").getValues(true);
-        return new ItemBuilder(map).build();
+        String name = cfgs.get(key).getString("fillItem.name", " ");
+        List<String> lore = cfgs.get(key).getStringList("fillItem.lore");
+        Material material = Material.getMaterial(cfgs.get(key).getString("fillItem.material", "BLACK_STAINED_GLASS_PANE"));
+        return ItemBuilder.newItem(material).name(name).lore(lore).build();
     }
 
     public static ItemStack getQueueSlot(String key) {
