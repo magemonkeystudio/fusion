@@ -119,6 +119,16 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.{.flags", List.of());
             cfg.set("pattern.items.{.enchants", Map.of());
         }
+        if(!cfg.isSet("fillItem")) {
+            cfg.set("fillItem.material", "BLACK_STAINED_GLASS_PANE");
+            cfg.set("fillItem.name", " ");
+            cfg.set("fillItem.amount", 1);
+            cfg.set("fillItem.durability", 0);
+            cfg.set("fillItem.unbreakable", false);
+            cfg.set("fillItem.lore", List.of());
+            cfg.set("fillItem.flags", List.of());
+            cfg.set("fillItem.enchants", Map.of());
+        }
         if (!cfg.isSet("queue.Slot")) {
             cfg.set("queue.Slot.material", "GRAY_STAINED_GLASS_PANE");
             cfg.set("queue.Slot.name", "&cQueue Slot");
@@ -134,6 +144,11 @@ public class ProfessionsCfg {
             cfg.set("queue.Finished.amount", 1);
             cfg.set("queue.Finished.lore", List.of("&7&oThis item is in the crafting queue", " ", "&7The item is &afinished&7!", " ", "&eClick to obtain"));
         }
+    }
+
+    public static ItemStack getFillItem(String key) {
+        Map<String, Object> map = cfgs.get(key).getConfigurationSection("fillItem").getValues(true);
+        return new ItemBuilder(map).build();
     }
 
     public static ItemStack getQueueSlot(String key) {

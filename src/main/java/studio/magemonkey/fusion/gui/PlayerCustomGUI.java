@@ -170,7 +170,7 @@ public class PlayerCustomGUI implements Listener {
 
             /* Additionally, when crafting_queue: true */
             this.queue.getQueuedItems().clear();
-            Collection<QueueItem> allQueuedItems = queue != null ? queue.getQueue() : List.of();
+            Collection<QueueItem> allQueuedItems = queue.getQueue();
             int queueAllItemsCount = allQueuedItems.size();
             if (!allQueuedItems.isEmpty()) {
                 int queuePageSize = this.gui.queuedSlots.size();
@@ -500,7 +500,7 @@ public class PlayerCustomGUI implements Listener {
             for (ItemStack entry : getPlayerItems(player)) {
                 ItemStack item = entry.clone();
                 entry = entry.clone();
-                if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+                if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
                     item = item.clone();
 //                    ItemMeta meta = item.getItemMeta();
 //                    List<String> itemLore = meta.getLore();
@@ -557,7 +557,7 @@ public class PlayerCustomGUI implements Listener {
             craftingRecipe = recipe;
             craftingTask = Fusion.getInstance().runTaskLater(cooldown, () -> {
                 craftingSuccess = true;
-                if (recipe.getCommands().size() == 0) {
+                if (recipe.getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
                         if (cursor != null && cursor.isSimilar(recipe.getResult().getItemStack())) {
@@ -568,7 +568,7 @@ public class PlayerCustomGUI implements Listener {
                             } else {
                                 craftingSuccess = false;
                             }
-                        } else if (cursor == null || cursor.getType() == Material.AIR) {
+                        } else if (cursor.getType() == Material.AIR) {
                             this.player.setItemOnCursor(resultItem);
                         } else {
                             craftingSuccess = false;

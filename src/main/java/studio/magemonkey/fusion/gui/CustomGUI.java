@@ -88,7 +88,7 @@ public class CustomGUI implements Listener {
         HashMap<Character, ItemStack> items = pattern.getItems();
 
         ArrayList<Integer> leaveBlank = new ArrayList<>();
-        ArrayList<Integer> ignore = new ArrayList<>();
+        ArrayList<Integer> fill = new ArrayList<>();
         for (String row : pattern.getPattern()) {
             for (char c : row.toCharArray()) {
                 k++;
@@ -102,11 +102,11 @@ public class CustomGUI implements Listener {
                     continue;
                 }
                 if (c == '{' && queuedPage <= 0) {
-                    ignore.add(k);
+                    fill.add(k);
                     continue;
                 }
                 if (c == '}' && queuedPage + 1 >= queuedPages) {
-                    ignore.add(k);
+                    fill.add(k);
                     continue;
                 }
                 if (item != null && (c != '-')) inv.setItem(k, item.clone());
@@ -125,6 +125,9 @@ public class CustomGUI implements Listener {
                 inv.setItem(index, inv.getItem(index + 1));
             else
                 inv.setItem(index, inv.getItem(index - 1));
+        }
+        for(Integer index : fill) {
+            inv.setItem(index, ProfessionsCfg.getFillItem(name));
         }
     }
 
