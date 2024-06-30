@@ -43,7 +43,6 @@ public class PlayerCustomGUI implements Listener {
     @Getter
     private final Category category;
     private final HashMap<Integer, CalculatedRecipe> recipes;
-    private final HashMap<Integer, QueueItem> queuedItems;
     private int page = 0;
     private BukkitTask craftingTask;
     private BukkitTask barTask;
@@ -65,7 +64,6 @@ public class PlayerCustomGUI implements Listener {
         this.player = player;
         this.inventory = inventory;
         this.recipes = new HashMap<>(20);
-        this.queuedItems = new HashMap<>(20);
         this.category = category;
         if (Cfg.craftingQueue && category != null) {
             this.queue = new CraftingQueue(player, gui.name, category);
@@ -192,7 +190,7 @@ public class PlayerCustomGUI implements Listener {
                     return;
                 }
 
-                if(this.category.getName() == null) {
+                if(this.category.getName() != null) {
                     QueueItem[] queuedItems = new QueueItem[(queuePage < queuePages) ? queuePageSize : ((queueRest == 0) ? queuePageSize : queueRest)];
                     QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
                     Integer[] queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
@@ -202,8 +200,8 @@ public class PlayerCustomGUI implements Listener {
                          k++, j++) {
                         QueueItem queueItem = allQueueItemsArray[k];
                         int slot = queuedSlots[j];
-                        this.queuedItems.put(slot, queuedItems[j] = queueItem);
-                        this.queuedItems.get(slot).update();
+                        this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
+                        this.queue.getQueuedItems().get(slot).update();
                         this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
                     }
                 }
@@ -214,7 +212,7 @@ public class PlayerCustomGUI implements Listener {
             }
 
 
-            this.gui.resetBlockedSlots(this.player, this.inventory, page, queuePage, allRecipeCount, queueAllItemsCount,
+            this.gui.resetBlockedSlots(this.player, this.inventory, page, queuePage, allRecipeCount, queueAllItemsCount, queue,
                     new MessageData[]{
                             new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(gui.name))),
                             new MessageData("category", category),
@@ -244,7 +242,18 @@ public class PlayerCustomGUI implements Listener {
             this.player.closeInventory();
             throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(), e);
         } finally {
-            isReloading = false;
+            if(!queue.getQueuedItems().isEmpty()) {
+                boolean requiresUpdate = false;
+                for(Map.Entry<Integer, QueueItem> entry : queue.getQueuedItems().entrySet()) {
+                    if(!entry.getValue().isDone()) {
+                        requiresUpdate = true;
+                        break;
+                    }
+                }
+                if(requiresUpdate) {
+                    Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
+                }
+            }
         }
     }
 
@@ -317,8 +326,9 @@ public class PlayerCustomGUI implements Listener {
             Bukkit.getConsoleSender().sendMessage("Clicked on queued slot");
             if (this.gui.queuedSlots.contains(e.getSlot())) {
                 // Interact with a queued item
-                QueueItem item = queuedItems.get(e.getSlot());
+                QueueItem item = queue.getQueuedItems().get(e.getSlot());
                 if (item == null) return;
+                Bukkit.getConsoleSender().sendMessage("Recipe: " + item.getRecipe().getName());
                 //queue.finishRecipe(item);
             }
             return;

@@ -11,6 +11,7 @@ import studio.magemonkey.codex.legacy.item.ItemColors;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
+import studio.magemonkey.fusion.Utils;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.queue.QueueItem;
 
@@ -129,7 +130,7 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.-.durability", 0);
             cfg.set("pattern.items.-.unbreakable", false);
             cfg.set("pattern.items.-.name", "%name%");
-            cfg.set("pattern.items.-.lore", List.of("&7&oThis item is in the crafting queue", " ", " &7Time left: &c%time%", " ", "&eClick to cancel"));
+            cfg.set("pattern.items.-.lore", List.of("&7&oThis item is in the crafting queue", " ", "&7Time left: &c%time%", " ", "&eClick to cancel"));
             cfg.set("pattern.items.-.flags", List.of());
             cfg.set("pattern.items.-.enchants", Map.of());
         }
@@ -183,7 +184,7 @@ public class ProfessionsCfg {
 
     public static ItemStack getQueueItem(String key, QueueItem item) {
         /* Fetch stored data to the queued item */
-        System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
+        //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
         FileConfiguration cfg = cfgs.get(key);
 
 
@@ -194,7 +195,7 @@ public class ProfessionsCfg {
         ItemStack result = item.getRecipe().getResult().getItemStack();
         Material material = Material.getMaterial(cfg.getString("pattern.items.-.material", "STONE").replace("%material%", result.getType().toString()).toUpperCase());
         List<String> lore = cfg.getStringList("pattern.items.-.lore");
-        lore.replaceAll(s -> s.replace("%time%", String.valueOf(item.getDifference())));
+        lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getRecipe().getCooldown() - item.getDifference())));
         return ItemBuilder.newItem(result).lore(lore).build();
     }
 }

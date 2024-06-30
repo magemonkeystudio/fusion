@@ -29,6 +29,7 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.queue.CraftingQueue;
 
 import java.util.*;
 
@@ -63,7 +64,7 @@ public class CustomGUI implements Listener {
     }
 
     public void resetBlockedSlots(Player player, Inventory inv, int page, int queuedPage, int totalItems, int queuedTotalItems, MessageData[] data) {
-        resetBlockedSlots(player, inv, page, queuedPage, totalItems, queuedTotalItems, data, false, false);
+        resetBlockedSlots(player, inv, page, queuedPage, totalItems, queuedTotalItems, null, data, false, false);
     }
 
     public void resetBlockedSlots(Player player,
@@ -72,6 +73,7 @@ public class CustomGUI implements Listener {
                                   int queuedPage,
                                   int totalItems,
                                   int queuedTotalItems,
+                                  CraftingQueue queue,
                                   MessageData[] data,
                                   boolean includeBack, boolean isCategory) {
         int fullPages = totalItems / resultSlots.size();
@@ -99,7 +101,6 @@ public class CustomGUI implements Listener {
                     leaveBlank.add(k);
                     continue;
                 }
-
                 if (c == '{' && queuedPage <= 0) {
                     ignore.add(k);
                     continue;
@@ -110,7 +111,11 @@ public class CustomGUI implements Listener {
                 }
                 if (item != null && (c != '-')) inv.setItem(k, item.clone());
                 else if (item != null && isCategory) {
-                    inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                    if(queue != null && queue.getQueuedItems().containsKey(k)) {
+                        inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
+                    } else {
+                        inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                    }
                 }
             }
         }

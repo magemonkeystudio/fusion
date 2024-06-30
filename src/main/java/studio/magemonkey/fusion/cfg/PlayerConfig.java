@@ -149,6 +149,21 @@ public class PlayerConfig {
         }
         return items;
     }
+
+    public int getFinishedQueueAmount() {
+        List<Long> entries = new ArrayList<>();
+        for(String profession : config.getConfigurationSection("queue").getKeys(false)) {
+            for(String category : config.getConfigurationSection("queue." + profession).getKeys(false)) {
+                for(String recipe : config.getConfigurationSection("queue." + profession + "." + category).getKeys(false)) {
+                    List<Long> timestamps = config.getLongList("queue." + profession + "." + category + "." + recipe + ".timestamps");
+                    int cooldown = config.getInt("queue." + profession + "." + category + "." + recipe + ".cooldown");
+                    timestamps.removeIf(timestamp -> (System.currentTimeMillis() - timestamp) / 1000 < cooldown);
+                    entries.addAll(timestamps);
+                }
+            }
+        }
+        return entries.size();
+    }
     
     public void saveConfig() {
         config.set("guis", mastery);

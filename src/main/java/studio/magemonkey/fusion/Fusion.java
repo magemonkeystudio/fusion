@@ -1,14 +1,15 @@
 package studio.magemonkey.fusion;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
+import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.BrowseConfig;
-import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.*;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.sapphire.Sapphire;
@@ -185,5 +186,19 @@ public class Fusion extends RisePlugin implements Listener {
         }
         cachedCooldowns.put(player.getUniqueId(), num);
         return num;
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (Cfg.craftingQueue) {
+            Bukkit.getConsoleSender().sendMessage("Player joined: " + player.getName());
+            PlayerConfig config = PConfigManager.getPlayerConfig(player);
+            int finishedQueueAmount = config.getFinishedQueueAmount();
+            if(finishedQueueAmount > 0) {
+                MessageUtil.sendMessage("fusion.queue.finished", Bukkit.getConsoleSender(), new MessageData("amount", finishedQueueAmount));
+                MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
+            }
+        }
     }
 }

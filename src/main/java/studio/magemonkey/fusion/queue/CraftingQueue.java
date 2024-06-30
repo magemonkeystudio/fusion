@@ -1,50 +1,69 @@
 package studio.magemonkey.fusion.queue;
 
 import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
 
 @Getter
 public class CraftingQueue {
 
-    private Player player;
-    private String profession;
-    private Category category;
+    private final Player player;
+    private final String profession;
+    private final Category category;
     private final List<QueueItem> queue = new ArrayList<>();
+    private final HashMap<Integer, QueueItem> queuedItems;
     private final BukkitTask queueTask;
+
+    private long lastTimestamp = 0;
+    private long passedSeconds = 0;
 
     public CraftingQueue(Player player, String profession, Category category) {
         this.player = player;
         this.profession = profession;
         this.category = category;
+        this.queuedItems = new HashMap<>(20);
         queue.addAll(PConfigManager.getPlayerConfig(player).getQueueItems(profession, category));
+
         queueTask = new BukkitRunnable() {
             @Override
             public void run() {
+                List<QueueItem> removables = new ArrayList<>();
                 for (QueueItem item : queue) {
                     item.update();
+
                     if (item.isDone()) {
-                        player.sendMessage("Your item is done!");
-                        //finishRecipe(item);
                         // Here is potential to notify the player when his item is done (would require some time between the messages)
-                        continue;
+                            removables.add(item);
+                        }
                     }
+                passedSeconds = (int) ((System.currentTimeMillis() - lastTimestamp) / 1000);
+                if(passedSeconds >= Cfg.finishedMessageInterval && !removables.isEmpty()) {
+                    lastTimestamp = System.currentTimeMillis();
+                    player.sendMessage("Finished items: " + removables.size());
+                    //removables.forEach(CraftingQueue.this::finishRecipe);
                 }
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);
     }
 
     public void addRecipe(Recipe recipe) {
+        int queueLimit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+        if(queue.size() == queueLimit) {
+            MessageUtil.sendMessage("fusion.queue.full", player, new MessageData("limit", queueLimit));
+            return;
+        }
         QueueItem item = new QueueItem(profession, category, recipe, System.currentTimeMillis());
         queue.add(item);
         PConfigManager.getPlayerConfig(player).addQueueItem(item);
@@ -56,9 +75,15 @@ public class CraftingQueue {
             RecipeItem result = item.getRecipe().getResult();
             result.getItemStack().setAmount(result.getAmount());
             // TODO Checks if the inventory is full to drop the items instead
-            player.getInventory().addItem(result.getItemStack());
-            queue.remove(item);
+
             PConfigManager.getPlayerConfig(player).removeQueueItem(item);
+            queue.remove(item);
+            for(Map.Entry<Integer, QueueItem> entry : queuedItems.entrySet()) {
+                if(entry.getValue().equals(item)) {
+                    queuedItems.remove(entry.getKey());
+                    break;
+                }
+            }
         }
     }
 

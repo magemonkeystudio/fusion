@@ -30,11 +30,10 @@ public class QueueItem {
     }
 
     public void update() {
-        this.icon = ProfessionsCfg.getQueueItem(profession, this);
-
         // Get the difference of timestamp (long) and current time (long) in seconds (int)
         difference = (int) ((System.currentTimeMillis() - timestamp) / 1000);
         this.done = difference >= recipe.getCooldown();
+        this.icon = ProfessionsCfg.getQueueItem(profession, this);
 
     }
 }
