@@ -15,6 +15,7 @@ public final class Cfg {
     public static long dataSaveInterval = 12000;
     public static double forgetPenalty = 0.2d;
     public static boolean craftingQueue = true;
+    public static int finishedMessageInterval = 300;
 
     static FileConfiguration getConfig() {
         File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
@@ -53,6 +54,7 @@ public final class Cfg {
         if(!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
         if(!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
         if(!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
+        if(!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", 300);
     }
 
     public static void init() {
@@ -87,6 +89,7 @@ public final class Cfg {
         dataSaveInterval = cfg.getLong("data_save_interval");
         forgetPenalty = cfg.getDouble("forget.penalty");
         craftingQueue = cfg.getBoolean("crafting_queue");
+        finishedMessageInterval = cfg.getInt("finished_message_interval");
 
         migrateOldTypes(cfg);
     }
