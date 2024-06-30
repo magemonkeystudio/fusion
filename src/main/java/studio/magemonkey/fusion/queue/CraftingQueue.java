@@ -1,6 +1,7 @@
 package studio.magemonkey.fusion.queue;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -59,11 +60,22 @@ public class CraftingQueue {
     }
 
     public void addRecipe(Recipe recipe) {
-        int queueLimit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
-        if(queue.size() == queueLimit) {
-            MessageUtil.sendMessage("fusion.queue.full", player, new MessageData("limit", queueLimit));
+        int[] limits = PConfigManager.getPlayerConfig(player).getQueueSizes(profession, category.getName());
+        int categoryLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + "." + category.getName() + ".limit");
+        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
+        int limit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+
+        if(categoryLimit > 0 && limits[0] >= categoryLimit) {
+            MessageUtil.sendMessage("fusion.queue.fullCategory", player, new MessageData("limit", categoryLimit), new MessageData("category", category.getName()), new MessageData("profession", profession));
+            return;
+        } else if(professionLimit > 0 && limits[1] >= professionLimit) {
+            MessageUtil.sendMessage("fusion.queue.fullProfession", player, new MessageData("limit", professionLimit), new MessageData("profession", profession));
+            return;
+        } else if(limit > 0 && limits[2] >= limit) {
+            MessageUtil.sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
             return;
         }
+
         QueueItem item = new QueueItem(profession, category, recipe, System.currentTimeMillis());
         queue.add(item);
         PConfigManager.getPlayerConfig(player).addQueueItem(item);

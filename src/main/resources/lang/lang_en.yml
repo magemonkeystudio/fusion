@@ -58,7 +58,9 @@ fusion:
   level:
     format: "&7$<category>: &8Level &r$<level> &8($<experience>)"
   queue:
-    full: "&cYou have reached the maximum of your queue size."
+    fullGlobal: "&cYou have reached the global maximum of your queue size."
+    fullProfession: "&cYou have reached the profession maximum of your queue size. ($<profession>)"
+    fullCategory: "&cYou have reached the category maximum of your queue size. ($<category> of profession $<profession>)"
     finished: "&aYou have crafting items ready for pickup! ($<amount>)"
     cancelled: "&cYour crafting queue has been cancelled."
   help: |2-
