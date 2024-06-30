@@ -152,18 +152,18 @@ public class PlayerConfig {
     }
 
     /*
-        * Returns the amount of items in the queue for the given profession and category
-        * @param profession The profession to check
-        * @param category The category to check
-        * @return The amount of items in the queue for the given profession and category
+     * Returns the amount of items in the queue for the given profession and category
+     * @param profession The profession to check
+     * @param category The category to check
+     * @return The amount of items in the queue for the given profession and category
 
-        * sizes[0] = amount of items in the queue for the given profession and category
-        * sizes[1] = amount of items in the queue for the given profession
-        * sizes[2] = amount of items in the queue
+     * sizes[0] = amount of items in the queue for the given profession and category
+     * sizes[1] = amount of items in the queue for the given profession
+     * sizes[2] = amount of items in the queue
      */
     public int[] getQueueSizes(String profession, String category) {
         int[] sizes = new int[]{0, 0, 0};
-        if(!config.isSet("queue")) return sizes;
+        if (!config.isSet("queue")) return sizes;
         for (String prof : config.getConfigurationSection("queue").getKeys(false)) {
             for (String cat : config.getConfigurationSection("queue." + prof).getKeys(false)) {
                 for (String recipe : config.getConfigurationSection("queue." + prof + "." + cat).getKeys(false)) {
@@ -171,7 +171,7 @@ public class PlayerConfig {
                     if (prof.equals(profession) && cat.equals(category)) {
                         sizes[0] += recipeSize;
                     }
-                    if(profession.equals(prof)) {
+                    if (profession.equals(prof)) {
                         sizes[1] += recipeSize;
                     }
                     sizes[2] += recipeSize;
@@ -181,9 +181,13 @@ public class PlayerConfig {
         return sizes;
     }
 
-    public void clearQueue(String profession, Category category) {
+    public void clearQueue(String profession, Category category, boolean onlyUnfinished) {
         for (QueueItem item : getQueueItems(profession, category)) {
-            removeQueueItem(item);
+            if (onlyUnfinished || !item.isDone()) {
+                removeQueueItem(item);
+            } else {
+                removeQueueItem(item);
+            }
         }
     }
 

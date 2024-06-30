@@ -1,8 +1,8 @@
 package studio.magemonkey.fusion.queue;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import studio.magemonkey.codex.util.messages.MessageData;
@@ -11,7 +11,6 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
-import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
@@ -27,9 +26,6 @@ public class CraftingQueue {
     private final HashMap<Integer, QueueItem> queuedItems;
     private final BukkitTask queueTask;
 
-    private long lastTimestamp = 0;
-    private long passedSeconds = 0;
-
     public CraftingQueue(Player player, String profession, Category category) {
         this.player = player;
         this.profession = profession;
@@ -40,20 +36,7 @@ public class CraftingQueue {
         queueTask = new BukkitRunnable() {
             @Override
             public void run() {
-                List<QueueItem> removables = new ArrayList<>();
-                for (QueueItem item : queue) {
-                    item.update();
-
-                    if (item.isDone()) {
-                        // Here is potential to notify the player when his item is done (would require some time between the messages)
-                            removables.add(item);
-                        }
-                    }
-                passedSeconds = (int) ((System.currentTimeMillis() - lastTimestamp) / 1000);
-                if(passedSeconds >= Cfg.finishedMessageInterval && !removables.isEmpty()) {
-                    lastTimestamp = System.currentTimeMillis();
-                    player.sendMessage("Finished items: " + removables.size());
-                }
+                queue.forEach(QueueItem::update);
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);
     }
@@ -64,13 +47,13 @@ public class CraftingQueue {
         int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
         int limit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
 
-        if(categoryLimit > 0 && limits[0] >= categoryLimit) {
+        if (categoryLimit > 0 && limits[0] >= categoryLimit) {
             MessageUtil.sendMessage("fusion.queue.fullCategory", player, new MessageData("limit", categoryLimit), new MessageData("category", category.getName()), new MessageData("profession", profession));
             return;
-        } else if(professionLimit > 0 && limits[1] >= professionLimit) {
+        } else if (professionLimit > 0 && limits[1] >= professionLimit) {
             MessageUtil.sendMessage("fusion.queue.fullProfession", player, new MessageData("limit", professionLimit), new MessageData("profession", profession));
             return;
-        } else if(limit > 0 && limits[2] >= limit) {
+        } else if (limit > 0 && limits[2] >= limit) {
             MessageUtil.sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
             return;
         }
@@ -82,24 +65,30 @@ public class CraftingQueue {
 
 
     public void finishRecipe(QueueItem item) {
-        if(item.isDone()) {
-            RecipeItem result = item.getRecipe().getResult();
-            result.getItemStack().setAmount(result.getAmount());
+        if (item.isDone()) {
+            RecipeItem recipeItem = item.getRecipe().getResult();
+            ItemStack result = recipeItem.getItemStack();
+            result.setAmount(recipeItem.getAmount());
             // TODO Checks if the inventory is full to drop the items instead
-
-            PConfigManager.getPlayerConfig(player).removeQueueItem(item);
-            queue.remove(item);
-            for(Map.Entry<Integer, QueueItem> entry : queuedItems.entrySet()) {
-                if(entry.getValue().equals(item)) {
-                    queuedItems.remove(entry.getKey());
-                    break;
-                }
-            }
+            player.getInventory().addItem(result);
+            removeRecipe(item, false);
         }
     }
 
-    public void cancelQueue() {
-        queue.clear();
-        PConfigManager.getPlayerConfig(player).clearQueue(profession, category);
+    public void removeRecipe(QueueItem item, boolean refund) {
+        if (refund) {
+            Collection<ItemStack> refunds = item.getRecipe().getItemsToTake();
+            for (ItemStack refundItem : refunds) {
+                player.getInventory().addItem(refundItem);
+            }
+        }
+        PConfigManager.getPlayerConfig(player).removeQueueItem(item);
+        queue.remove(item);
+        for (Map.Entry<Integer, QueueItem> entry : queuedItems.entrySet()) {
+            if (entry.getValue().equals(item)) {
+                queuedItems.remove(entry.getKey());
+                break;
+            }
+        }
     }
 }
