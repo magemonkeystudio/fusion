@@ -57,6 +57,10 @@ fusion:
   levelup: "&3You leveled up! &7($<level>)"
   level:
     format: "&7$<category>: &8Level &r$<level> &8($<experience>)"
+  queue:
+    full: "&cYou have reached the maximum of your queue size."
+    finished: "&aYou have crafting items ready for pickup! ($<amount>)"
+    cancelled: "&cYour crafting queue has been cancelled."
   help: |2-
     You typed: &7$<text>&r
       Valid syntax:
