@@ -120,6 +120,7 @@ public class Fusion extends RisePlugin implements Listener {
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         getServer().getPluginManager().registerEvents(this, this);
+        runQueueTask();
     }
 
     public void closeAll() {
@@ -189,17 +190,23 @@ public class Fusion extends RisePlugin implements Listener {
         return num;
     }
 
+    private void notifyForQueue(Player player) {
+        PlayerConfig config = PConfigManager.getPlayerConfig(player);
+        int finishedQueueAmount = config.getFinishedQueueAmount();
+        if(finishedQueueAmount > 0) {
+            MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
+        }
+    }
+
+    private void runQueueTask() {
+        Bukkit.getScheduler().runTaskTimer(this,
+                () -> Bukkit.getOnlinePlayers().forEach(this::notifyForQueue), 0, Cfg.finishedMessageInterval * 20L);
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
         if (Cfg.craftingQueue) {
-            Bukkit.getConsoleSender().sendMessage("Player joined: " + player.getName());
-            PlayerConfig config = PConfigManager.getPlayerConfig(player);
-            int finishedQueueAmount = config.getFinishedQueueAmount();
-            if(finishedQueueAmount > 0) {
-                MessageUtil.sendMessage("fusion.queue.finished", Bukkit.getConsoleSender(), new MessageData("amount", finishedQueueAmount));
-                MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
-            }
+            notifyForQueue(event.getPlayer());
         }
     }
 }
