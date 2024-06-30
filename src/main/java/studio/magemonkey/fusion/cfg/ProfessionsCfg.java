@@ -99,11 +99,6 @@ public class ProfessionsCfg {
     }
 
     private static void addCraftingQueueDefs(FileConfiguration cfg) {
-        if (!cfg.isSet("queueSlot")) {
-            cfg.set("queueSlot.material", "GRAY_STAINED_GLASS_PANE");
-            cfg.set("queueSlot.name", "&cQueue Slot");
-            cfg.set("queueSlot.lore", List.of("&7This slot is empty."));
-        }
         if (!cfg.isSet("pattern.items.}")) {
             cfg.set("pattern.items.}.material", "BOOK");
             cfg.set("pattern.items.}.amount", 1);
@@ -124,28 +119,33 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.{.flags", List.of());
             cfg.set("pattern.items.{.enchants", Map.of());
         }
-        if (!cfg.isSet("pattern.items.-")) {
-            cfg.set("pattern.items.-.material", "PAPER");
-            cfg.set("pattern.items.-.amount", 1);
-            cfg.set("pattern.items.-.durability", 0);
-            cfg.set("pattern.items.-.unbreakable", false);
-            cfg.set("pattern.items.-.name", "%name%");
-            cfg.set("pattern.items.-.lore", List.of("&7&oThis item is in the crafting queue", " ", "&7Time left: &c%time%", " ", "&eClick to cancel"));
-            cfg.set("pattern.items.-.flags", List.of());
-            cfg.set("pattern.items.-.enchants", Map.of());
+        if (!cfg.isSet("queue.Slot")) {
+            cfg.set("queue.Slot.material", "GRAY_STAINED_GLASS_PANE");
+            cfg.set("queue.Slot.name", "&cQueue Slot");
+            cfg.set("queue.Slot.lore", List.of("&7This slot is empty."));
+        }
+        if (!cfg.isSet("queue.Unfinished")) {
+            cfg.set("queue.Unfinished.material", "%material%");
+            cfg.set("queue.Unfinished.amount", 1);
+            cfg.set("queue.Unfinished.lore", List.of("&7&oThis item is in the crafting queue", " ", "&7Time left: &c%time%", " ", "&eClick to cancel"));
+        }
+        if (!cfg.isSet("queue.Finished")) {
+            cfg.set("queue.Finished.material", "%material%");
+            cfg.set("queue.Finished.amount", 1);
+            cfg.set("queue.Finished.lore", List.of("&7&oThis item is in the crafting queue", " ", "&7The item is &afinished&7!", " ", "&eClick to obtain"));
         }
     }
 
     public static ItemStack getQueueSlot(String key) {
         FileConfiguration cfg = cfgs.get(key);
         if (!cfg.isSet("queueSlot")) {
-            Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue item. Using default.");
+            Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue slot. Using default.");
             return ItemBuilder.newItem(Material.GRAY_STAINED_GLASS_PANE).name("&cQueue Slot").lore(List.of("&7This slot is empty.")).build();
         }
-        Material material = Material.getMaterial(cfg.getString("queueSlot.material", "GRAY_STAINED_GLASS_PANE"));
+        Material material = Material.getMaterial(cfg.getString("queue.Slot.material", "GRAY_STAINED_GLASS_PANE"));
         return ItemBuilder.newItem(material)
-                .name(cfg.getString("queueSlot.name", "&cQueue Slot"))
-                .lore(cfg.getStringList("queueSlot.lore"))
+                .name(cfg.getString("queue.Slot.name", "&cQueue Slot"))
+                .lore(cfg.getStringList("queue.Slot.lore"))
                 .build();
     }
 
@@ -186,16 +186,17 @@ public class ProfessionsCfg {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
         FileConfiguration cfg = cfgs.get(key);
+        String path = item.isDone() ? "queue.Finished" : "queue.Unfinished";
 
 
-        if (!cfg.isSet("pattern.items.-")) {
-            Fusion.getInstance().getLogger().warning("Profession '" + key + "' does not have a queue item.");
+        if (!cfg.isSet(path)) {
+            Fusion.getInstance().getLogger().warning("Profession '" + key + "' is missing '" + path + "'.");
             return null;
         }
         ItemStack result = item.getRecipe().getResult().getItemStack();
-        Material material = Material.getMaterial(cfg.getString("pattern.items.-.material", "STONE").replace("%material%", result.getType().toString()).toUpperCase());
-        List<String> lore = cfg.getStringList("pattern.items.-.lore");
+        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE").replace("%material%", result.getType().toString()).toUpperCase());
+        List<String> lore = cfg.getStringList(path + ".lore");
         lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getRecipe().getCooldown() - item.getDifference())));
-        return ItemBuilder.newItem(result).lore(lore).build();
+        return ItemBuilder.newItem(result).material(material).lore(lore).build();
     }
 }
