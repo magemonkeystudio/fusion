@@ -5,13 +5,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
-import studio.magemonkey.fusion.RecipeItem;
+import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
@@ -66,11 +66,28 @@ public class CraftingQueue {
 
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
+            CodexEngine.get().getVault().take(this.player, item.getRecipe().getPrice());
+            //Commands
+            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getCommands());
+
+            //Experience
+            CraftingTable table = ProfessionsCfg.getTable(profession);
+
+            if (item.getRecipe().getXpGain() > 0) {
+                Fusion.getExperienceManager().getPlayerData(player).add(table, item.getRecipe().getXpGain());
+            }
+
             RecipeItem recipeItem = item.getRecipe().getResult();
             ItemStack result = recipeItem.getItemStack();
             result.setAmount(recipeItem.getAmount());
             // TODO Checks if the inventory is full to drop the items instead
-            player.getInventory().addItem(result);
+            // If there is no space in the inventory, drop the items
+            Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
+            if (!notAdded.isEmpty()) {
+                for (ItemStack _item : notAdded) {
+                    Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
+                }
+            }
             removeRecipe(item, false);
         }
     }
@@ -79,7 +96,12 @@ public class CraftingQueue {
         if (refund) {
             Collection<ItemStack> refunds = item.getRecipe().getItemsToTake();
             for (ItemStack refundItem : refunds) {
-                player.getInventory().addItem(refundItem);
+                Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
+                if (!notAdded.isEmpty()) {
+                    for (ItemStack _item : notAdded) {
+                        Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
+                    }
+                }
             }
         }
         PConfigManager.getPlayerConfig(player).removeQueueItem(item);
