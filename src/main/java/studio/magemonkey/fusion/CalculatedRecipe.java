@@ -164,7 +164,9 @@ public class CalculatedRecipe {
             int eqAmount = 0;
             for (Map.Entry<ItemStack, Integer> entry : eqItems.entrySet()) {
                 ItemStack item = entry.getKey().clone();
-                if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+                if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType().isInstance(item)) {
+                    eqAmount = entry.getValue();
+                } else if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
                     item = item.clone();
 //                    ItemMeta meta = item.getItemMeta();
 //                    List<String> itemLore = meta.getLore();
