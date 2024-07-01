@@ -58,30 +58,10 @@ public final class Cfg {
     }
 
     public static void init() {
-        File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
-        FileConfiguration cfg = new YamlConfiguration();
-
-        if (!file.exists()) {
-            addDefs(cfg);
-            file.getAbsoluteFile().getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't create config file: " + file + ":" + e.getMessage());
-            }
-            cfg.options().copyDefaults(true);
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                Fusion.getInstance().getLogger().warning("Can't save config file: " + file + ":" + e.getMessage());
-            }
-        } else {
-            try {
-                reload(cfg, file);
-            } catch (Exception e) {
-                Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
-                return;
-            }
+        FileConfiguration cfg = getConfig();
+        if(cfg == null) {
+            Fusion.getInstance().getLogger().warning("Can't load config file!");
+            return;
         }
 
         recursive = cfg.getString("recursive_level_formula");

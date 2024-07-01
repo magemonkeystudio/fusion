@@ -23,7 +23,7 @@ public class PConfigManager {
         return pConfig.get(player.getUniqueId());
     }
 
-    public static void resetPlayerConfigs() {
+    public static void clearPConfigCache() {
         pConfig.clear();
     }
 }
