@@ -1,12 +1,14 @@
 package studio.magemonkey.fusion;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.CodexItemException;
 import studio.magemonkey.codex.items.providers.VanillaProvider;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
-import org.bukkit.Material;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,12 +16,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Category implements ConfigurationSerializable {
-    private final String             name;
-    private final ItemType           iconItem;
-    private final Collection<Recipe> recipes     = new ArrayList<>();
-    private       InventoryPattern   pattern;
-    private final int                order;
-    private       boolean            hasPrevious = true;
+    @Getter
+    private final String name;
+    @Getter
+    private final ItemType iconItem;
+    @Getter
+    private final Collection<Recipe> recipes = new ArrayList<>();
+    @Setter
+    @Getter
+    private InventoryPattern pattern;
+    @Getter
+    private final int order;
+    private boolean hasPrevious = true;
 
     public Category(String name) {
         this.name = name;
@@ -53,35 +61,20 @@ public class Category implements ConfigurationSerializable {
         return map;
     }
 
-    public InventoryPattern getPattern() {
-        return pattern;
-    }
-
-    public void setPattern(InventoryPattern pattern) {
-        this.pattern = pattern;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Collection<Recipe> getRecipes() {
-        return recipes;
-    }
-
-    public ItemType getIconItem() {
-        return iconItem;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
     public void hasPrevious(boolean b) {
         this.hasPrevious = b;
     }
 
     public boolean hasPrevious() {
         return hasPrevious;
+    }
+
+    public Recipe getRecipe(String name) {
+        for (Recipe recipe : recipes) {
+            if (recipe.getName().equals(name)) {
+                return recipe;
+            }
+        }
+        return null;
     }
 }

@@ -6,6 +6,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.PlayerConfig;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.gui.PlayerInitialGUI;
@@ -31,7 +32,7 @@ public class Commands implements CommandExecutor {
                 if (!Utils.hasCraftingUsePermission(sender, null)) {
                     return true;
                 }
-                CustomGUI eq = Cfg.getGuiMap().get(args[1]);
+                CustomGUI eq = ProfessionsCfg.getGuiMap().get(args[1]);
                 if (eq == null) {
                     MessageUtil.sendMessage("fusion.notACrafting",
                             sender,
@@ -88,7 +89,7 @@ public class Commands implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player        player  = (Player) sender;
                     String        guiName = args[1];
-                    CraftingTable table   = Cfg.getTable(guiName);
+                    CraftingTable table   = ProfessionsCfg.getTable(guiName);
                     if (table == null) {
                         MessageUtil.sendMessage("fusion.notACrafting",
                                 sender,
@@ -134,7 +135,7 @@ public class Commands implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("forget")) {
                 if (sender instanceof Player) {
                     Player        player = (Player) sender;
-                    CraftingTable table  = Cfg.getTable(args[1]);
+                    CraftingTable table  = ProfessionsCfg.getTable(args[1]);
                     if (table == null) {
                         MessageUtil.sendMessage("fusion.notACrafting",
                                 sender,
@@ -181,7 +182,7 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                for (Map.Entry<String, CraftingTable> entry : Cfg.getMap().entrySet()) {
+                for (Map.Entry<String, CraftingTable> entry : ProfessionsCfg.getMap().entrySet()) {
                     MessageUtil.sendMessage("fusion.level.format", sender,
                             new MessageData("category", entry.getValue().getName()),
                             new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
@@ -193,6 +194,10 @@ public class Commands implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("auto")) {
                 if (!(sender instanceof Player)) {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    return true;
+                }
+                if(Cfg.craftingQueue) {
+                    MessageUtil.sendMessage("fusion.error.autoDisabled", sender);
                     return true;
                 }
                 if (!instance.checkPermission(sender, "fusion.auto")) {

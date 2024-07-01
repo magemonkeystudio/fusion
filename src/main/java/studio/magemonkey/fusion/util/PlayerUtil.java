@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.util;
 
+import org.bukkit.Bukkit;
 import studio.magemonkey.fusion.Fusion;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -19,7 +20,7 @@ public class PlayerUtil {
         int ret = 0;
         for (PermissionAttachmentInfo perm : player.getEffectivePermissions()) {
             String ps = perm.getPermission();
-            if (ps.startsWith(permission)) {
+            if (ps.startsWith(permission.toLowerCase())) {
                 String end = ps.substring(ps.lastIndexOf('.') + 1);
                 try {
                     ret = Math.max(ret, Integer.parseInt(end));

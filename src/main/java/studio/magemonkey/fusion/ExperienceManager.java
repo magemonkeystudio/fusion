@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public final class ExperienceManager {
         public PlayerData(Map<String, Object> map) {
             uuid = UUID.fromString((String) map.get("uuid"));
             //noinspection unchecked
-            ((Map<String, Object>) map.get("data")).forEach((key, value) -> data.put(Cfg.getTable(key),
+            ((Map<String, Object>) map.get("data")).forEach((key, value) -> data.put(ProfessionsCfg.getTable(key),
                     (Integer) value));
         }
 
@@ -88,7 +89,7 @@ public final class ExperienceManager {
         }
 
         public void remove(String craftingTable) {
-            data.remove(Cfg.getTable(craftingTable));
+            data.remove(ProfessionsCfg.getTable(craftingTable));
 
             try {
                 Fusion.getExperienceManager().save();

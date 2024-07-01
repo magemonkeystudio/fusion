@@ -1,9 +1,5 @@
 package studio.magemonkey.fusion.gui;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.fusion.*;
-import studio.magemonkey.fusion.cfg.Cfg;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,18 +8,23 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI              gui;
+    private final CustomGUI gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
-    private       boolean                isBase  = false;
+    private boolean isBase = false;
 
-    private final Category masterCat = new Category("master");
+    private final Category masterCat;
 
     private PlayerInitialGUI(CustomGUI gui, Player player, Inventory inventory) {
         super(gui, player, inventory, null);
+        masterCat = new Category("master");
         this.gui = gui;
     }
 
@@ -40,20 +41,20 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
             inv = Bukkit.createInventory(player,
                     gui.slots.length,
                     ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            int                           k               = -1;
-            HashMap<Character, ItemStack> items           = gui.pattern.getItems();
-            PlayerInitialGUI              playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
+            int k = -1;
+            HashMap<Character, ItemStack> items = gui.pattern.getItems();
+            PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
             playerCustomGUI.isBase = true;
-            CraftingTable table = Cfg.getTable(gui.name);
+            CraftingTable table = ProfessionsCfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
                     .values()
                     .stream()
                     .sorted(Comparator.comparingInt(Category::getOrder))
                     .iterator();
 
-            gui.resetBlockedSlots(player, inv, 0, table.getCategories().size(),
+            gui.resetBlockedSlots(player, inv, 0, 0, table.getCategories().size(), 0,
                     new MessageData[]{
-                            new MessageData("level", LevelFunction.getLevel(player, Cfg.getTable(gui.name))),
+                            new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(gui.name))),
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
                             new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
@@ -71,7 +72,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     //Slots
                     if (c == 'o' && categoryIterator.hasNext()) {
                         List<Recipe> recipes;
-                        Category     category;
+                        Category category;
                         do {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());
@@ -88,7 +89,6 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                             if (recipes.isEmpty() && !categoryIterator.hasNext()) {
                                 continue charLoop;
                             }
-
                         } while (recipes.isEmpty());
 
                         inv.setItem(k, category.getIconItem().create());

@@ -1,18 +1,17 @@
 package studio.magemonkey.fusion;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
-import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
+import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.BrowseConfig;
-import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.*;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.sapphire.Sapphire;
-import studio.magemonkey.sapphire.SapphireItemProvider;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -59,6 +58,7 @@ public class Fusion extends RisePlugin implements Listener {
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
         Cfg.init();
+        ProfessionsCfg.init();
         if (experienceManager != null) {
             try {
                 experienceManager.save();
@@ -70,6 +70,7 @@ public class Fusion extends RisePlugin implements Listener {
         experienceManager = new ExperienceManager();
         experienceManager.load();
         BrowseConfig.load();
+        PConfigManager.clearPConfigCache();
         runSaveTask();
     }
 
@@ -89,7 +90,7 @@ public class Fusion extends RisePlugin implements Listener {
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        if (!Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
                     ItemUtils.ITEM_TYPE,
                     i -> {
@@ -114,10 +115,11 @@ public class Fusion extends RisePlugin implements Listener {
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         getServer().getPluginManager().registerEvents(this, this);
+        runQueueTask();
     }
 
     public void closeAll() {
-        Cfg.getGuiMap().values().forEach(CustomGUI::closeAll);
+        ProfessionsCfg.getGuiMap().values().forEach(CustomGUI::closeAll);
         BrowseGUI.closeAll();
     }
 
@@ -181,5 +183,25 @@ public class Fusion extends RisePlugin implements Listener {
         }
         cachedCooldowns.put(player.getUniqueId(), num);
         return num;
+    }
+
+    private void notifyForQueue(Player player) {
+        PlayerConfig config = PConfigManager.getPlayerConfig(player);
+        int finishedQueueAmount = config.getFinishedQueueAmount();
+        if(finishedQueueAmount > 0) {
+            MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
+        }
+    }
+
+    private void runQueueTask() {
+        Bukkit.getScheduler().runTaskTimer(this,
+                () -> Bukkit.getOnlinePlayers().forEach(this::notifyForQueue), 0, Cfg.finishedMessageInterval * 20L);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (Cfg.craftingQueue) {
+            notifyForQueue(event.getPlayer());
+        }
     }
 }
