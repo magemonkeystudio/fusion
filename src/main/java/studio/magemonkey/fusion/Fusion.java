@@ -94,13 +94,10 @@ public class Fusion extends RisePlugin implements Listener {
 
         if (Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
-                    Sapphire.RISE_ITEM,
+                    ItemUtils.ITEM_TYPE,
                     i -> {
                         if (i instanceof RecipeEconomyItem) {
-                            ItemType itemType = ((RecipeEconomyItem) i).asItemType();
-                            if (itemType instanceof SapphireItemProvider.SapphireItemType) {
-                                return ((SapphireItemProvider.SapphireItemType) itemType).getRiseItem();
-                            }
+                            return ((RecipeEconomyItem) i).asItemType();
                         }
                         return null;
                     });
