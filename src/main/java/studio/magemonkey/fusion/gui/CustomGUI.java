@@ -119,12 +119,9 @@ public class CustomGUI implements Listener {
                 if (item != null && (c != '-')) {
                     inv.setItem(k, item.clone());
                 } else if (item != null) {
-                    Bukkit.getConsoleSender().sendMessage("Setting item for category: " + item);
                     if (queue != null && queue.getQueuedItems().containsKey(k)) {
-                        Bukkit.getConsoleSender().sendMessage("Existent queue item");
                         inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
-                        Bukkit.getConsoleSender().sendMessage("Nothing existent");
                         inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
                     }
                 }

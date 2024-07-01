@@ -190,7 +190,6 @@ public class PlayerCustomGUI implements Listener {
                         }
 
                         if (!table.getUseCategories() || this.category.getName() != null) {
-                            Bukkit.getConsoleSender().sendMessage("Queue page: " + queuePage);
                             QueueItem[] queuedItems = new QueueItem[queuePageSize];
                             QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
                             Integer[] queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
