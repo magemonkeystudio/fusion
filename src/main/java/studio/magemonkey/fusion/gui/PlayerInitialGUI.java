@@ -58,7 +58,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
                             new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
-                    });
+                    }, table);
             for (String row : gui.pattern.getPattern()) {
                 charLoop:
                 for (char c : row.toCharArray()) {

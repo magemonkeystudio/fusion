@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.cfg;
 
+import lombok.Getter;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
@@ -22,8 +23,11 @@ public class BrowseConfig {
     private static final LinkedList<String>       professions = new LinkedList<>();
     private static final HashMap<String, Integer> profCosts   = new HashMap<>();
 
+    @Getter
     private static String           browseName = ChatColor.DARK_AQUA + "Browse";
+    @Getter
     private static ItemStack        browseFill;
+    @Getter
     private static InventoryPattern browsePattern;
 
     private BrowseConfig() {
@@ -72,7 +76,7 @@ public class BrowseConfig {
             config.set("name", conf.getString("browse.name"));
 
         if (conf.contains("browse.fillItem"))
-            config.set("fillItem", conf.get("browse.fillItem"));
+            config.set("pattern.items.fillItem", conf.get("browse.fillItem"));
 
         if (conf.contains("browse.pattern"))
             config.set("pattern", conf.get("browse.pattern"));
@@ -91,7 +95,7 @@ public class BrowseConfig {
     private static void setDefaults() {
         //Browse stuff -- Added in v1.01
         config.addDefault("name", "&3&lBrowse");
-        config.addDefault("fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
+        config.addDefault("pattern.items.fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
 
         HashMap<Character, ItemStack> browseItems = new HashMap<>();
         browseItems.put('0',
@@ -111,7 +115,7 @@ public class BrowseConfig {
         professions.clear();
         profCosts.clear();
         browseName = config.getString("name");
-        browseFill = config.getItemStack("fillItem");
+        browseFill = config.getItemStack("pattern.items.fillItem");
         browsePattern = new InventoryPattern(config.getConfigurationSection("pattern").getValues(false));
 
         for (String prof : config.getConfigurationSection("professions").getValues(false).keySet()) {
@@ -124,20 +128,8 @@ public class BrowseConfig {
         }
     }
 
-    public static String getBrowseName() {
-        return browseName;
-    }
-
-    public static ItemStack getBrowseFill() {
-        return browseFill;
-    }
-
-    public static InventoryPattern getBrowsePattern() {
-        return browsePattern;
-    }
-
     public static int getProfCost(String profession) {
-        return profCosts.containsKey(profession.toLowerCase()) ? profCosts.get(profession.toLowerCase()) : 0;
+        return profCosts.getOrDefault(profession.toLowerCase(), 0);
     }
 
     public void saveConfig() {

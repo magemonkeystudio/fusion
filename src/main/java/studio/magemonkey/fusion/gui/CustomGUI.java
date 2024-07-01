@@ -25,8 +25,10 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.queue.CraftingQueue;
@@ -63,10 +65,11 @@ public class CustomGUI implements Listener {
         Bukkit.getPluginManager().registerEvents(this, Fusion.getInstance());
     }
 
-    public void resetBlockedSlots(Player player, Inventory inv, int page, int queuedPage, int totalItems, int queuedTotalItems, MessageData[] data) {
-        resetBlockedSlots(player, inv, page, queuedPage, totalItems, queuedTotalItems, null, data, false, false);
+    public void resetBlockedSlots(Player player, Inventory inv, int page, int queuedPage, int totalItems, int queuedTotalItems, MessageData[] data, CraftingTable table) {
+        resetBlockedSlots(player, inv, page, queuedPage, totalItems, queuedTotalItems, null, data, false, table, false);
     }
 
+    // TODO might require a cleaner solution someday
     public void resetBlockedSlots(Player player,
                                   Inventory inv,
                                   int page,
@@ -75,14 +78,18 @@ public class CustomGUI implements Listener {
                                   int queuedTotalItems,
                                   CraftingQueue queue,
                                   MessageData[] data,
-                                  boolean includeBack, boolean isCategory) {
+                                  boolean includeBack, CraftingTable table, boolean isCategory) {
         int fullPages = totalItems / resultSlots.size();
         int rest = totalItems % resultSlots.size();
         int pages = (rest == 0) ? fullPages : (fullPages + 1);
 
-        int queuedFullPages = queuedTotalItems / queuedSlots.size();
-        int queuedRest = queuedTotalItems % queuedSlots.size();
-        int queuedPages = (queuedRest == 0) ? queuedFullPages : (queuedFullPages + 1);
+        int queuedPages = -1;
+
+        if(!queuedSlots.isEmpty()) {
+            int queuedFullPages = queuedTotalItems / queuedSlots.size();
+            int queuedRest = queuedTotalItems % queuedSlots.size();
+            queuedPages = (queuedRest == 0) ? queuedFullPages : (queuedFullPages + 1);
+        }
 
         int k = -1;
         HashMap<Character, ItemStack> items = pattern.getItems();
@@ -101,19 +108,23 @@ public class CustomGUI implements Listener {
                     leaveBlank.add(k);
                     continue;
                 }
-                if (c == '{' && queuedPage <= 0) {
+                if (c == '{' && (Cfg.craftingQueue && queuedPage <= 0)) {
                     fill.add(k);
                     continue;
                 }
-                if (c == '}' && queuedPage + 1 >= queuedPages) {
+                if (c == '}' && (Cfg.craftingQueue && ((queuedPages > -1) && (queuedPage + 1 >= queuedPages)))) {
                     fill.add(k);
                     continue;
                 }
-                if (item != null && (c != '-')) inv.setItem(k, item.clone());
-                else if (item != null && isCategory) {
-                    if(queue != null && queue.getQueuedItems().containsKey(k)) {
+                if (item != null && (c != '-')) {
+                    inv.setItem(k, item.clone());
+                } else if (item != null) {
+                    Bukkit.getConsoleSender().sendMessage("Setting item for category: " + item);
+                    if (queue != null && queue.getQueuedItems().containsKey(k)) {
+                        Bukkit.getConsoleSender().sendMessage("Existent queue item");
                         inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
+                        Bukkit.getConsoleSender().sendMessage("Nothing existent");
                         inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
                     }
                 }
@@ -126,7 +137,7 @@ public class CustomGUI implements Listener {
             else
                 inv.setItem(index, inv.getItem(index - 1));
         }
-        for(Integer index : fill) {
+        for (Integer index : fill) {
             inv.setItem(index, ProfessionsCfg.getFillItem(name));
         }
     }

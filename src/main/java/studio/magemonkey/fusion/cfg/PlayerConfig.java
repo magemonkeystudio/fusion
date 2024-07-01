@@ -193,6 +193,7 @@ public class PlayerConfig {
 
     public int getFinishedQueueAmount() {
         List<Long> entries = new ArrayList<>();
+        if(!config.isSet("queue")) return 0;
         for (String profession : config.getConfigurationSection("queue").getKeys(false)) {
             for (String category : config.getConfigurationSection("queue." + profession).getKeys(false)) {
                 for (String recipe : config.getConfigurationSection("queue." + profession + "." + category).getKeys(false)) {

@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion;
 
+import lombok.Getter;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.MissingItemException;
@@ -16,18 +17,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CraftingTable implements ConfigurationSerializable {
+    @Getter
     private final String                          name;
+    @Getter
     private final String                          inventoryName;
+    @Getter
     private final InventoryPattern                pattern;
     private final InventoryPattern                catPattern;
+    @Getter
     private final ItemStack                       fillItem;
+    @Getter
     private final Map<String, Recipe>             recipes;
+    @Getter
     private final ItemType                        iconItem;
     private       boolean                         useCategories = true;
     private final LinkedHashMap<String, Category> categories    = new LinkedHashMap<>();
 
     //Mastery!
+    @Getter
     private final int masteryUnlock;
+    @Getter
     private final int masteryFee;
 
     public CraftingTable(String name,
@@ -81,8 +90,8 @@ public class CraftingTable implements ConfigurationSerializable {
         this.masteryFee = dw.getInt("masteryFee");
         this.useCategories = dw.getBoolean("useCategories", true);
         this.iconItem = CodexEngine.get().getItemManager().getItemType(dw.getString("icon"));
-        if (dw.getSection("fillItem") != null)
-            this.fillItem = new ItemBuilder(dw.getSection("fillItem")).build();
+        if (dw.getSection("pattern.items.fillItem") != null)
+            this.fillItem = new ItemBuilder(dw.getSection("pattern.items.fillItem")).build();
         else
 //            this.fillItem = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
             this.fillItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -120,26 +129,6 @@ public class CraftingTable implements ConfigurationSerializable {
         }
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public String getInventoryName() {
-        return this.inventoryName;
-    }
-
-    public ItemType getIconItem() {
-        return iconItem;
-    }
-
-    public InventoryPattern getPattern() {
-        return this.pattern;
-    }
-
-    public Map<String, Recipe> getRecipes() {
-        return this.recipes;
-    }
-
     public Map<String, Category> getCategories() {
         return categories;
     }
@@ -148,20 +137,8 @@ public class CraftingTable implements ConfigurationSerializable {
         return this.recipes.get(str);
     }
 
-    public ItemStack getFillItem() {
-        return fillItem;
-    }
-
     public void addRecipe(Recipe recipe) {
         this.recipes.put(recipe.getName(), recipe);
-    }
-
-    public int getMasteryUnlock() {
-        return masteryUnlock;
-    }
-
-    public int getMasteryFee() {
-        return masteryFee;
     }
 
     public boolean getUseCategories() {
