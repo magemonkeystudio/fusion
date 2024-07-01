@@ -3,17 +3,15 @@ package studio.magemonkey.fusion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
-import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
+import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.*;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.sapphire.Sapphire;
-import studio.magemonkey.sapphire.SapphireItemProvider;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -94,13 +92,10 @@ public class Fusion extends RisePlugin implements Listener {
 
         if (Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
-                    Sapphire.RISE_ITEM,
+                    ItemUtils.ITEM_TYPE,
                     i -> {
                         if (i instanceof RecipeEconomyItem) {
-                            ItemType itemType = ((RecipeEconomyItem) i).asItemType();
-                            if (itemType instanceof SapphireItemProvider.SapphireItemType) {
-                                return ((SapphireItemProvider.SapphireItemType) itemType).getRiseItem();
-                            }
+                            return ((RecipeEconomyItem) i).asItemType();
                         }
                         return null;
                     });
