@@ -90,7 +90,7 @@ public class Fusion extends RisePlugin implements Listener {
         CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
         CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",
                     ItemUtils.ITEM_TYPE,
                     i -> {
