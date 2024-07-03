@@ -97,7 +97,7 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
                             new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
-                    });
+                    }, ProfessionsCfg.getTable(gui.name));
 //            int k = -1;
 //            HashMap<Character, ItemStack> items = gui.pattern.getItems();
 //            for (String row : gui.pattern.getPattern()) {
@@ -168,45 +168,49 @@ public class PlayerCustomGUI implements Listener {
             }
 
             /* Additionally, when crafting_queue: true */
-            this.queue.getQueuedItems().clear();
-            Collection<QueueItem> allQueuedItems = queue.getQueue();
-            int queueAllItemsCount = allQueuedItems.size();
-            if (!allQueuedItems.isEmpty()) {
-                int queuePageSize = this.gui.queuedSlots.size();
-                int j = 0;
-                int queuePage = this.queuePage;
+            int queueAllItemsCount = 0;
+            if(Cfg.craftingQueue) {
+                this.queue.getQueuedItems().clear();
+                Collection<QueueItem> allQueuedItems = queue.getQueue();
+                queueAllItemsCount = allQueuedItems.size();
+                if (!allQueuedItems.isEmpty()) {
+                    int queuePageSize = this.gui.queuedSlots.size();
+                    if (queuePageSize > 0) {
+                        int j = 0;
+                        int queuePage = this.queuePage;
 
-                int queueFullPages = queueAllItemsCount / queuePageSize;
-                int queueRest = queueAllItemsCount % queuePageSize;
-                int queuePages = (queueRest == 0) ? queueFullPages : (queueFullPages + 1);
-                if (queuePage >= queuePages) {
-                    if (queuePage > 0)
-                        this.queuePage = queuePages - 1;
-                    this.reloadRecipes();
-                    return;
-                }
+                        int queueFullPages = queueAllItemsCount / queuePageSize;
+                        int queueRest = queueAllItemsCount % queuePageSize;
+                        int queuePages = (queueRest == 0) ? queueFullPages : (queueFullPages + 1);
+                        if (queuePage >= queuePages) {
+                            if (queuePage > 0)
+                                this.queuePage = queuePages - 1;
+                            this.reloadRecipes();
+                            return;
+                        }
 
-                if (this.category.getName() != null) {
-                    QueueItem[] queuedItems = new QueueItem[queuePageSize];
-                    QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
-                    Integer[] queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
+                        if (!table.getUseCategories() || this.category.getName() != null) {
+                            QueueItem[] queuedItems = new QueueItem[queuePageSize];
+                            QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
+                            Integer[] queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
 
-                    for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
-                         (k < allQueueItemsArray.length) && (j < e);
-                         k++, j++) {
-                        QueueItem queueItem = allQueueItemsArray[k];
-                        int slot = queuedSlots[j];
-                        this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
-                        this.queue.getQueuedItems().get(slot).update();
-                        this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
+                            for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
+                                 (k < allQueueItemsArray.length) && (j < e);
+                                 k++, j++) {
+                                QueueItem queueItem = allQueueItemsArray[k];
+                                int slot = queuedSlots[j];
+                                this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
+                                this.queue.getQueuedItems().get(slot).update();
+                                this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
+                            }
+                        }
+                    }
+                    Integer[] _queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
+                    for (int slot : _queuedSlots) {
+                        this.inventory.setItem(slot, null);
                     }
                 }
             }
-            Integer[] _queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
-            for (int slot : _queuedSlots) {
-                this.inventory.setItem(slot, null);
-            }
-
 
             this.gui.resetBlockedSlots(this.player, this.inventory, page, queuePage, allRecipeCount, queueAllItemsCount, queue,
                     new MessageData[]{
@@ -215,7 +219,7 @@ public class PlayerCustomGUI implements Listener {
                             new MessageData("gui", gui.getName()),
                             new MessageData("player", player.getName()),
                             new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
-                    }, category.hasPrevious(), true);
+                    }, category.hasPrevious(), table, true);
 
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length);
                  (k < allRecipesArray.length) && (i < e);
@@ -233,12 +237,13 @@ public class PlayerCustomGUI implements Listener {
 
                 inventory.setItem(k, fill);
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             this.inventory.clear();
             this.player.closeInventory();
             throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(), e);
         } finally {
-            if (!queue.getQueuedItems().isEmpty()) {
+            if (Cfg.craftingQueue && !queue.getQueuedItems().isEmpty()) {
                 boolean requiresUpdate = false;
                 for (Map.Entry<Integer, QueueItem> entry : queue.getQueuedItems().entrySet()) {
                     if (!entry.getValue().isDone()) {

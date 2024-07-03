@@ -46,6 +46,8 @@ public class InventoryPattern implements ConfigurationSerializable {
                 closeOnClickSlots.add(entry.charAt(0));
             }
         }
+        if(dw.getSection("items.queue-items.-") != null)
+            this.items.put('-', new ItemBuilder(dw.getSection("items.queue-items.-")).build());
 
         final DeserializationWorker commandsTemp =
                 DeserializationWorker.start(dw.getSection("commands", new HashMap<>(2)));
