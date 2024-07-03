@@ -12,7 +12,7 @@
 
     <artifactId>fusion</artifactId>
     <name>Fusion</name>
-    <version>1.0.0-R0.3-SNAPSHOT</version>
+    <version>1.0.0-R0.4-SNAPSHOT</version>
 
     <properties>
         <codex.version>1.0.0-R0.20-SNAPSHOT</codex.version>
