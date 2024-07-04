@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.cfg;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
 
 import java.io.File;
@@ -16,6 +17,8 @@ public final class Cfg {
     public static double forgetPenalty = 0.2d;
     public static boolean craftingQueue = true;
     public static int finishedMessageInterval = 300;
+    public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
+    public static boolean updateQueueOffline = true;
 
     static FileConfiguration getConfig() {
         File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
@@ -54,7 +57,9 @@ public final class Cfg {
         if(!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
         if(!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
         if(!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
-        if(!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", 300);
+        if(!cfg.isSet("update_queue_offline")) cfg.set("update_queue_offline", updateQueueOffline);
+        if(!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
+        if(!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
     }
 
     public static void init() {
@@ -69,7 +74,9 @@ public final class Cfg {
         dataSaveInterval = cfg.getLong("data_save_interval");
         forgetPenalty = cfg.getDouble("forget.penalty");
         craftingQueue = cfg.getBoolean("crafting_queue");
+        updateQueueOffline = cfg.getBoolean("update_queue_offline");
         finishedMessageInterval = cfg.getInt("finished_message_interval");
+        finishMessage = cfg.getString("finished_message");
 
         migrateOldTypes(cfg);
     }
@@ -87,6 +94,11 @@ public final class Cfg {
             Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
         }
     }
+
+    public static void notifyForQueue(Player player, int amount) {
+        player.sendMessage(finishMessage.replace("$<amount>", String.valueOf(amount)));
+    }
+
     public static void migrateOldTypes(FileConfiguration cfg) {
         List<Map<?, ?>> typesSection = cfg.getMapList("types");
         if (typesSection.isEmpty()) return;

@@ -1,27 +1,31 @@
 package studio.magemonkey.fusion;
 
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.scheduler.BukkitTask;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
-import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.*;
+import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -29,21 +33,19 @@ import java.util.UUID;
  * © 2024 MageMonkeyStudio
  */
 public class Fusion extends RisePlugin implements Listener {
-    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        =
+    public static final PlaceholderType<RecipeItem> RECIPE_ITEM =
             PlaceholderType.create("recipeItem", RecipeItem.class);
-    public static final PlaceholderType<Recipe>           RECIPE             =
+    public static final PlaceholderType<Recipe> RECIPE =
             PlaceholderType.create("recipe", Recipe.class);
-    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     =
+    public static final PlaceholderType<CraftingTable> CRAFTING_TABLE =
             PlaceholderType.create("craftingTable", CraftingTable.class);
-    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  =
+    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE =
             PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
-    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY =
+    public static final PlaceholderType<CustomGUI> CRAFTING_INVENTORY =
             PlaceholderType.create("craftingInventory", CustomGUI.class);
 
     @Getter
-    private static Fusion            instance;
-    private static ExperienceManager experienceManager;
-
+    private static Fusion instance;
     private BukkitTask saveTask;
 
     {
@@ -59,16 +61,10 @@ public class Fusion extends RisePlugin implements Listener {
         MessageUtil.reload(lang, this);
         Cfg.init();
         ProfessionsCfg.init();
-        if (experienceManager != null) {
-            try {
-                experienceManager.save();
-            } catch (IOException e) {
-                log.warning("Error saving data.yml");
-                e.printStackTrace();
-            }
-        }
-        experienceManager = new ExperienceManager();
-        experienceManager.load();
+
+        SQLManager.init();
+        ExperienceManager.migrateIntoSQL();
+
         BrowseConfig.load();
         PConfigManager.clearPConfigCache();
         runSaveTask();
@@ -126,11 +122,7 @@ public class Fusion extends RisePlugin implements Listener {
     @Override
     public void onDisable() {
         super.onDisable();
-        try {
-            experienceManager.save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        PlayerLoader.clearCache();
         this.closeAll();
     }
 
@@ -139,25 +131,6 @@ public class Fusion extends RisePlugin implements Listener {
             saveTask.cancel();
 
         long period = Cfg.dataSaveInterval;
-
-        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-            try {
-                experienceManager.save();
-            } catch (IOException e) {
-                System.out.println("Could not save data files.");
-                e.printStackTrace();
-            }
-        }, period, period);
-        this.saveTask = task;
-    }
-
-    /**
-     * Gets the experience manager
-     *
-     * @return experience manager
-     */
-    public static ExperienceManager getExperienceManager() {
-        return experienceManager;
     }
 
     private final HashMap<UUID, Double> cachedCooldowns = new HashMap<>();
@@ -186,10 +159,9 @@ public class Fusion extends RisePlugin implements Listener {
     }
 
     private void notifyForQueue(Player player) {
-        PlayerConfig config = PConfigManager.getPlayerConfig(player);
-        int finishedQueueAmount = config.getFinishedQueueAmount();
-        if(finishedQueueAmount > 0) {
-            MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
+        int finishedQueueAmount = PlayerLoader.getPlayer(player.getUniqueId()).getFinishedSize();
+        if (finishedQueueAmount > 0) {
+            Cfg.notifyForQueue(player, finishedQueueAmount);
         }
     }
 
@@ -200,8 +172,14 @@ public class Fusion extends RisePlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        PlayerLoader.loadPlayer(event.getPlayer());
         if (Cfg.craftingQueue) {
             notifyForQueue(event.getPlayer());
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        PlayerLoader.unloadPlayer(event.getPlayer());
     }
 }

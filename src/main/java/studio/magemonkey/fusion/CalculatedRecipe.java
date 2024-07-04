@@ -10,6 +10,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 
 import java.util.*;
 
@@ -111,7 +112,7 @@ public class CalculatedRecipe {
 
         String xpLine = null;
         if (recipe.neededXp != 0) {
-            if (Fusion.getExperienceManager().getExperience(player, craftingTable) < recipe.neededXp) {
+            if (PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable) < recipe.neededXp) {
                 canCraft = false;
                 xpLine = MessageUtil.getMessageAsString("fusion.gui.xp.false",
                         "fusion.gui.xp.false",

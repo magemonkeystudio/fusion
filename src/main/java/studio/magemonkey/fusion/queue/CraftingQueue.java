@@ -10,8 +10,9 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.*;
-import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public class CraftingQueue {
         this.profession = profession;
         this.category = category;
         this.queuedItems = new HashMap<>(20);
-        queue.addAll(PConfigManager.getPlayerConfig(player).getQueueItems(profession, category));
+        queue.addAll(SQLManager.queues().getQueueItems(player, profession, category));
 
         queueTask = new BukkitRunnable() {
             @Override
@@ -42,7 +43,7 @@ public class CraftingQueue {
     }
 
     public void addRecipe(Recipe recipe) {
-        int[] limits = PConfigManager.getPlayerConfig(player).getQueueSizes(profession, category.getName());
+        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(profession, category);
         int categoryLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + "." + category.getName() + ".limit");
         int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
         int limit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
@@ -58,9 +59,8 @@ public class CraftingQueue {
             return;
         }
 
-        QueueItem item = new QueueItem(profession, category, recipe, System.currentTimeMillis());
+        QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
         queue.add(item);
-        PConfigManager.getPlayerConfig(player).addQueueItem(item);
     }
 
 
@@ -80,7 +80,6 @@ public class CraftingQueue {
             RecipeItem recipeItem = item.getRecipe().getResult();
             ItemStack result = recipeItem.getItemStack();
             result.setAmount(recipeItem.getAmount());
-            // TODO Checks if the inventory is full to drop the items instead
             // If there is no space in the inventory, drop the items
             Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
             if (!notAdded.isEmpty()) {
@@ -104,7 +103,6 @@ public class CraftingQueue {
                 }
             }
         }
-        PConfigManager.getPlayerConfig(player).removeQueueItem(item);
         queue.remove(item);
         for (Map.Entry<Integer, QueueItem> entry : queuedItems.entrySet()) {
             if (entry.getValue().equals(item)) {
@@ -112,5 +110,10 @@ public class CraftingQueue {
                 break;
             }
         }
+        SQLManager.queues().removeQueueItem(item);
+    }
+
+    public void cancelTask() {
+        queueTask.cancel();
     }
 }

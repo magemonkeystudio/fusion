@@ -30,6 +30,7 @@ import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
@@ -602,7 +603,7 @@ public class PlayerCustomGUI implements Listener {
                     CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
 
                     if (recipe.getXpGain() > 0) {
-                        Fusion.getExperienceManager().getPlayerData(player).add(table, recipe.getXpGain());
+                        PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(recipe.getXpGain());
                     }
 
                     //Restart the crafting sequence if auto-crafting is enabled

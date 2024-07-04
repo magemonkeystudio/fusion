@@ -7,6 +7,7 @@ import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.PlayerConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.gui.PlayerInitialGUI;
@@ -187,7 +188,7 @@ public class Commands implements CommandExecutor {
                             new MessageData("category", entry.getValue().getName()),
                             new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
                             new MessageData("experience",
-                                    Fusion.getExperienceManager().getExperience((Player) sender, entry.getValue())));
+                                    PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getExperience(entry.getValue())));
                 }
 
                 return true;

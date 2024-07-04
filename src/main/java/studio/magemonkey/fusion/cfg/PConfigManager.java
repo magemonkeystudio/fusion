@@ -26,4 +26,8 @@ public class PConfigManager {
     public static void clearPConfigCache() {
         pConfig.clear();
     }
+
+    public static void migrateIntoSQL() {
+
+    }
 }

@@ -3,8 +3,6 @@ package studio.magemonkey.fusion;
 import org.bukkit.permissions.Permissible;
 
 public final class Utils {
-    private Utils() {
-    }
 
     public static boolean hasCraftingPermission(Permissible permissible, String item) {
         return permissible.hasPermission("fusion.recipe." + item) || permissible.hasPermission("fusion.recipes") ||
