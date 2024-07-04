@@ -24,12 +24,12 @@
 
 package studio.magemonkey.fusion.gui.slot;
 
-import studio.magemonkey.codex.CodexEngine;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
 
 
 /**

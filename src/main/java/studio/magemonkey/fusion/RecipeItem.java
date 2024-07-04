@@ -1,10 +1,10 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.items.ItemType;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
 
 import java.util.Map;
 

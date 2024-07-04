@@ -4,13 +4,15 @@ import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.queue.QueueItem;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PlayerConfig {
 

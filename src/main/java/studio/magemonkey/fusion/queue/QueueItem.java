@@ -1,12 +1,12 @@
 package studio.magemonkey.fusion.queue;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Recipe;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 

@@ -1,14 +1,14 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.InventoryPattern;
 
 import java.io.File;
 import java.io.IOException;

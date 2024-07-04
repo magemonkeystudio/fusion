@@ -1,10 +1,5 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.api.DelayedCommand;
-import studio.magemonkey.codex.util.SerializationBuilder;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -12,6 +7,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.api.DelayedCommand;
+import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.*;
 import java.util.Map.Entry;

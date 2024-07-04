@@ -1,9 +1,9 @@
 package studio.magemonkey.fusion;
 
+import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.util.Maths;
-import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;

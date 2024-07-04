@@ -1,6 +1,5 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
-import org.bukkit.OfflinePlayer;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;

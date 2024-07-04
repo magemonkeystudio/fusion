@@ -1,6 +1,10 @@
 package studio.magemonkey.fusion;
 
 import lombok.Getter;
+import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.MissingItemException;
@@ -8,10 +12,6 @@ import studio.magemonkey.codex.items.exception.MissingProviderException;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
-import org.bukkit.Material;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.stream.Collectors;

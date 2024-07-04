@@ -9,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.scheduler.BukkitTask;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;

@@ -9,7 +9,10 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")

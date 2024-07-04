@@ -1,23 +1,22 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
-import studio.magemonkey.fusion.cfg.PlayerConfig;
-import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.gui.BrowseGUI;
+import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 
 import java.util.HashMap;
 import java.util.Map;
