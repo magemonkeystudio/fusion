@@ -1,15 +1,5 @@
 package studio.magemonkey.fusion.gui;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Utils;
-import studio.magemonkey.fusion.cfg.*;
-import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,6 +16,19 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.Profession;
+import studio.magemonkey.fusion.Utils;
+import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +39,9 @@ public class BrowseGUI implements Listener {
 
     private static final HashMap<UUID, Inventory> map = new HashMap<>();
 
-    protected final String               inventoryName;
-    private final   Map<Integer, String> slotMap = new HashMap<>();
-    private final   UUID                 opener;
+    protected final String inventoryName;
+    private final Map<Integer, String> slotMap = new HashMap<>();
+    private final UUID opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -71,8 +74,8 @@ public class BrowseGUI implements Listener {
     }
 
     public static BrowseGUI open(Player player) {
-        Inventory inv   = null;
-        String    title = ChatColor.translateAlternateColorCodes('&', BrowseConfig.getBrowseName());
+        Inventory inv = null;
+        String title = ChatColor.translateAlternateColorCodes('&', BrowseConfig.getBrowseName());
         try {
             BrowseGUI gui = new BrowseGUI(title, player, null);
 
@@ -81,7 +84,7 @@ public class BrowseGUI implements Listener {
             int k = gui.slots.get(i);
 
             HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
-            int                           slot      = 0;
+            int slot = 0;
             for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
@@ -100,10 +103,10 @@ public class BrowseGUI implements Listener {
 
                 ItemStack item = table.getIconItem() != null ? table.getIconItem().create()
                         : ItemBuilder.newItem(Material.BEDROCK)
-                                .name(ChatColor.RED + table.getName())
-                                .newLoreLine(ChatColor.RED + "Missing icon in config.")
-                                .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
-                                .build();
+                        .name(ChatColor.RED + table.getName())
+                        .newLoreLine(ChatColor.RED + "Missing icon in config.")
+                        .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                        .build();
 
                 inv.setItem(k, item);
                 gui.slotMap.put(k, table.getName());
@@ -153,12 +156,11 @@ public class BrowseGUI implements Listener {
         CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
         if (guiToOpen == null) return;
 
-        String       profession = guiToOpen.getName();
-        PlayerConfig conf       = PConfigManager.getPlayerConfig(p);
+        String profession = guiToOpen.getName();
 
-        int unlocked = conf.getUnlockedProfessions().size();
-        int allowed  = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
-        int cost     = BrowseConfig.getProfCost(profession);
+        int unlocked = PlayerLoader.getPlayer(p).getUnlockedProfessions().size();
+        int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
+        int cost = BrowseConfig.getProfCost(profession);
 
         MessageData[] data = {
                 new MessageData("profession", profession),
@@ -168,7 +170,7 @@ public class BrowseGUI implements Listener {
                 new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };
 
-        if (conf.hasProfession(profession)) {
+        if (PlayerLoader.getPlayer(p).hasProfession(profession)) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             MessageUtil.sendMessage("fusion.error.profAlreadyUnlocked", p, data);
             return;
@@ -186,7 +188,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        conf.unlockProfession(profession);
+        PlayerLoader.getPlayer(p).addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
         if (cost > 0)
             CodexEngine.get().getVault().take(p, cost);
         data[1] = new MessageData("unlocked", unlocked + 1);

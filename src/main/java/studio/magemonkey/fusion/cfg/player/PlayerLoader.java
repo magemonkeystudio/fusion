@@ -17,6 +17,10 @@ public class PlayerLoader {
         return cachedPlayers.get(uuid);
     }
 
+    public static FusionPlayer getPlayer(Player player) {
+        return getPlayer(player.getUniqueId());
+    }
+
     public static void loadPlayer(Player player) {
         cachedPlayers.put(player.getUniqueId(), new FusionPlayer(player.getUniqueId()));
     }

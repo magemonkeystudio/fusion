@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.sql.tables.FusionPlayersSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionProfessionsSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionQueuesSQL;
 
@@ -19,6 +20,7 @@ public class SQLManager {
     private static String host, database, user, password;
     private static int port;
 
+    private static FusionPlayersSQL fusionPlayersSQL;
     private static FusionProfessionsSQL fusionProfessionsSQL;
     private static FusionQueuesSQL fusionQueuesSQL;
 
@@ -86,6 +88,13 @@ public class SQLManager {
             init();
             return dataSource != null ? connection() : null;
         }
+    }
+
+    public static FusionPlayersSQL players() {
+        if (fusionPlayersSQL == null) {
+            fusionPlayersSQL = new FusionPlayersSQL();
+        }
+        return fusionPlayersSQL;
     }
 
     public static FusionProfessionsSQL professions() {

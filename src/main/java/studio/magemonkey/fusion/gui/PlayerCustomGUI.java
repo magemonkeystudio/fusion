@@ -424,8 +424,7 @@ public class PlayerCustomGUI implements Listener {
 
     private boolean canCraft(CalculatedRecipe calculatedRecipe, int slot) {
         Recipe recipe = calculatedRecipe.getRecipe();
-        if (calculatedRecipe.getRecipe().isMastery() && !PConfigManager.hasMastery(player,
-                this.gui.getName())) {
+        if (calculatedRecipe.getRecipe().isMastery() && !PlayerLoader.getPlayer(player).hasMastered(this.gui.getName())) {
             MessageUtil.sendMessage("fusion.error.noMastery",
                     player,
                     new MessageData("craftingTable", ProfessionsCfg.getTable(gui.getName())));

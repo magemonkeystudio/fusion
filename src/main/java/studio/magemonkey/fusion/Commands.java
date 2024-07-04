@@ -8,6 +8,7 @@ import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.PlayerConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.gui.PlayerInitialGUI;
@@ -69,7 +70,7 @@ public class Commands implements CommandExecutor {
                             return true;
                         }
                         //Make sure they have unlocked this crafting menu
-                        if (!PConfigManager.getPlayerConfig((Player) sender).hasProfession(eq.getName())) {
+                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getName())) {
                             MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }
@@ -99,7 +100,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    if (PConfigManager.hasMastery(player, table.getName())) {
+                    if (PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasMastered(table.getName())) {
                         MessageUtil.sendMessage("fusion.error.alreadyMastered",
                                 sender,
                                 new MessageData("sender", sender),
@@ -123,7 +124,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    PConfigManager.getPlayerConfig(player).setHasMastery(table.getName(), true);
+                    PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
                     MessageUtil.sendMessage("fusion.mastered",
                             sender,
                             new MessageData("sender", sender),
@@ -145,8 +146,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
                     ConfirmationAction action = () -> {
-                        PlayerConfig conf = PConfigManager.getPlayerConfig(player);
-                        conf.removeProfession(table.getName());
+                        PlayerLoader.getPlayer(player.getUniqueId()).removeProfession(table.getName());
                         MessageUtil.sendMessage("fusion.forgotten",
                                 sender,
                                 new MessageData("sender", sender),
@@ -208,7 +208,7 @@ public class Commands implements CommandExecutor {
 
                 boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
 
-                PConfigManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
+                SQLManager.players().setAutoCrafting(player.getUniqueId(), (autoOn = !autoOn));
 
                 MessageUtil.sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
 

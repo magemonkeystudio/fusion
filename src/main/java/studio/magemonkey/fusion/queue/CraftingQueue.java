@@ -32,7 +32,7 @@ public class CraftingQueue {
         this.profession = profession;
         this.category = category;
         this.queuedItems = new HashMap<>(20);
-        queue.addAll(SQLManager.queues().getQueueItems(player, profession, category));
+        queue.addAll(SQLManager.queues().getQueueItems(player.getUniqueId(), profession, category));
 
         queueTask = new BukkitRunnable() {
             @Override
@@ -74,7 +74,7 @@ public class CraftingQueue {
             CraftingTable table = ProfessionsCfg.getTable(profession);
 
             if (item.getRecipe().getXpGain() > 0) {
-                Fusion.getExperienceManager().getPlayerData(player).add(table, item.getRecipe().getXpGain());
+                PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(item.getRecipe().getXpGain());
             }
 
             RecipeItem recipeItem = item.getRecipe().getResult();
@@ -110,7 +110,9 @@ public class CraftingQueue {
                 break;
             }
         }
-        SQLManager.queues().removeQueueItem(item);
+        if(!SQLManager.queues().removeQueueItem(item)) {
+            Fusion.getInstance().getLogger().warning("Failed to remove queue item from SQL");
+        }
     }
 
     public void cancelTask() {

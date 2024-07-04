@@ -9,9 +9,8 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class FusionPlayer {
@@ -89,6 +88,30 @@ public class FusionPlayer {
 
     public void addProfession(Profession profession) {
         professions.put(profession.getName(), profession);
+    }
+
+    public boolean hasProfession(String profession) {
+        return professions.containsKey(profession);
+    }
+
+    public boolean hasProfession(Profession profession) {
+        return hasProfession(profession.getName());
+    }
+
+    public boolean hasProfession(CraftingTable table) {
+        return hasProfession(table.getName());
+    }
+
+    public Collection<Profession> getUnlockedProfessions() {
+        return professions.values().stream().filter(Profession::isJoined).collect(Collectors.toList());
+    }
+
+    public Collection<Profession> getMasteredProfessions() {
+        return professions.values().stream().filter(Profession::isMastered).collect(Collectors.toList());
+    }
+
+    public Collection<Profession> getProfessions() {
+        return professions.values();
     }
 
     public boolean hasMastered(String profession) {

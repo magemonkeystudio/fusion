@@ -128,7 +128,7 @@ public class CalculatedRecipe {
 
         String masteryLine = null;
         if (recipe.mastery) {
-            if (!PConfigManager.hasMastery(player, craftingTable.getName())) {
+            if (!PlayerLoader.getPlayer(player).hasMastered(craftingTable.getName())) {
                 canCraft = false;
                 masteryLine = MessageUtil.getMessageAsString("fusion.gui.mastery.false",
                         "fusion.gui.mastery.false",

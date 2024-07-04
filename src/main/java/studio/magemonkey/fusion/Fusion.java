@@ -46,8 +46,6 @@ public class Fusion extends RisePlugin implements Listener {
 
     @Getter
     private static Fusion instance;
-    private BukkitTask saveTask;
-
     {
         instance = this;
     }
@@ -59,15 +57,15 @@ public class Fusion extends RisePlugin implements Listener {
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
+
         Cfg.init();
         ProfessionsCfg.init();
 
         SQLManager.init();
         ExperienceManager.migrateIntoSQL();
+        PConfigManager.migrateIntoSQL();
 
         BrowseConfig.load();
-        PConfigManager.clearPConfigCache();
-        runSaveTask();
     }
 
     @Override
@@ -124,13 +122,6 @@ public class Fusion extends RisePlugin implements Listener {
         super.onDisable();
         PlayerLoader.clearCache();
         this.closeAll();
-    }
-
-    private void runSaveTask() {
-        if (saveTask != null && !saveTask.isCancelled())
-            saveTask.cancel();
-
-        long period = Cfg.dataSaveInterval;
     }
 
     private final HashMap<UUID, Double> cachedCooldowns = new HashMap<>();

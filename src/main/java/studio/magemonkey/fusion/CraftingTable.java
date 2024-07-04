@@ -156,6 +156,10 @@ public class CraftingTable implements ConfigurationSerializable {
                 .collect(Collectors.toList());
     }
 
+    public Category getCategory(String name) {
+        return this.categories.get(name);
+    }
+
     @Override
     public Map<String, Object> serialize() {
         return SerializationBuilder.start(4)

@@ -222,7 +222,7 @@ public class ProfessionsCfg {
         ItemStack result = item.getRecipe().getResult().getItemStack();
         Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE").replace("%material%", result.getType().toString()).toUpperCase());
         List<String> lore = cfg.getStringList(path + ".lore");
-        lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getRecipe().getCooldown() - item.getDifference())));
+        lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getRecipe().getCooldown() - item.getSavedSeconds())));
         return ItemBuilder.newItem(result).material(material).lore(lore).build();
     }
 }
