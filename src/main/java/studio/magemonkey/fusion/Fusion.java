@@ -59,11 +59,7 @@ public class Fusion extends RisePlugin implements Listener {
 
         Cfg.init();
         ProfessionsCfg.init();
-
         SQLManager.init();
-        ExperienceManager.migrateIntoSQL();
-        PConfigManager.migrateIntoSQL();
-
         BrowseConfig.load();
     }
 
@@ -105,6 +101,12 @@ public class Fusion extends RisePlugin implements Listener {
     public void onEnable() {
         super.onEnable();
         this.reloadConfig();
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [ExperienceManager].");
+            ExperienceManager.migrateIntoSQL();
+            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [PConfigManager].");
+            PConfigManager.migrateIntoSQL();
+        });
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         getServer().getPluginManager().registerEvents(this, this);

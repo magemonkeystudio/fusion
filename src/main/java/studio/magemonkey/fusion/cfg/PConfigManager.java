@@ -42,38 +42,51 @@ public class PConfigManager {
 
                     // Logic for professions table
                     Map<String, Boolean> professionData = new HashMap<>();
-                    for(String profession : cfg.getStringList("professions")) {
-                        professionData.put(profession, false);
+                    if(cfg.contains("professions")) {
+                        for (String profession : cfg.getStringList("professions")) {
+                            professionData.put(profession, false);
+                        }
                     }
-                    for(String profession : cfg.getConfigurationSection("guis").getKeys(false)) {
-                        professionData.put(profession, cfg.getBoolean("guis." + profession));
+                    if(cfg.contains("guis")) {
+                        for (String profession : cfg.getConfigurationSection("guis").getKeys(false)) {
+                            professionData.put(profession, cfg.getBoolean("guis." + profession));
+                        }
                     }
-
 
                     List<Profession> professions = SQLManager.professions().getProfessions(uuid);
+                    List<String> joinedProfessions = cfg.getStringList("professions");
+                    // Existing data of old ExperienceManage will be updated
                     for(Profession profession : professions) {
                         if(professionData.containsKey(profession.getName())) {
                             profession.setMastered(professionData.get(profession.getName()));
-                            profession.setJoined(cfg.contains("professions." + profession.getName()));
+                            profession.setJoined(joinedProfessions.contains(profession.getName()));
                             SQLManager.professions().setProfession(uuid, profession);
+                            professionData.remove(profession.getName());
                         }
                     }
+                    // Remaining data of old PlayerConfig will be inserted
+                    professionData.forEach((name, mastered) -> {
+                        Profession profession = new Profession(-1, uuid, name, 0, mastered, joinedProfessions.contains(name));
+                        SQLManager.professions().setProfession(uuid, profession);
+                    });
 
                     // Logic for queues table
-                    List<QueueItem> entries = new ArrayList<>();
-                    for(String profession : cfg.getConfigurationSection("queues").getKeys(false)) {
-                        for(String category : cfg.getConfigurationSection("queues." + profession).getKeys(false)) {
-                            for(String recipe : cfg.getConfigurationSection("queues." + profession + "." + category).getKeys(false)) {
-                                List<Long> timestamps = cfg.getLongList("queues." + profession + "." + category + "." + recipe + ".timestamps");
-                                for(long timestamp : timestamps)
-                                    entries.add(new QueueItem(-1, profession, ProfessionsCfg.getTable(profession).getCategory(category), ProfessionsCfg.getTable(profession).getCategory(category).getRecipe(recipe), timestamp, 0));
+                    if(cfg.contains("queues")) {
+                        List<QueueItem> entries = new ArrayList<>();
+                        for (String profession : cfg.getConfigurationSection("queues").getKeys(false)) {
+                            for (String category : cfg.getConfigurationSection("queues." + profession).getKeys(false)) {
+                                for (String recipe : cfg.getConfigurationSection("queues." + profession + "." + category).getKeys(false)) {
+                                    List<Long> timestamps = cfg.getLongList("queues." + profession + "." + category + "." + recipe + ".timestamps");
+                                    for (long timestamp : timestamps)
+                                        entries.add(new QueueItem(-1, profession, ProfessionsCfg.getTable(profession).getCategory(category), ProfessionsCfg.getTable(profession).getCategory(category).getRecipe(recipe), timestamp, 0));
+                                }
                             }
                         }
+                        entries.forEach(e -> SQLManager.queues().setQueueItem(uuid, e));
                     }
-                    entries.forEach(e -> SQLManager.queues().setQueueItem(uuid, e));
 
                     // Deleting the file when done
-                    file.delete();
+                    //file.delete();
                     Fusion.getInstance().getLogger().info("Migrated player data for " + uuid + " into SQL.");
                 } catch (Exception e) {
                     Fusion.getInstance().getLogger().warning("Can't load player data file: " + file);

@@ -4,6 +4,7 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ public class FusionPlayersSQL {
                 + "AutoCrafting boolean)")) {
             create.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL:FusionPlayersSQL] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -31,7 +32,7 @@ public class FusionPlayersSQL {
             update.setString(2, uuid.toString());
             update.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL:setAutoCrafting] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -41,16 +42,18 @@ public class FusionPlayersSQL {
             insert.setBoolean(2, false);
             insert.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL:addPlayer] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
     public boolean hasPlayer(UUID uuid) {
         try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT AutoCrafting FROM " + Table + " WHERE UUID=?")) {
             select.setString(1, uuid.toString());
-            return select.executeQuery().getBoolean(1);
+            ResultSet result = select.executeQuery();
+            if(result.next())
+                return result.getBoolean("AutoCrafting");
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionPlayersSQL:hasPlayer] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return false;
     }

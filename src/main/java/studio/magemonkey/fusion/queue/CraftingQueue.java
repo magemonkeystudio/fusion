@@ -37,6 +37,10 @@ public class CraftingQueue {
         queueTask = new BukkitRunnable() {
             @Override
             public void run() {
+                if(!player.isOnline()) {
+                    cancel();
+                    return;
+                }
                 queue.forEach(QueueItem::update);
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);

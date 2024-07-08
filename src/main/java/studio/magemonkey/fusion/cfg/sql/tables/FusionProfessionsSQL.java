@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
+import org.bukkit.Bukkit;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -25,15 +26,18 @@ public class FusionProfessionsSQL {
                 + "Joined boolean)")) {
             create.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
     public long getNextId() {
-        try (PreparedStatement search = SQLManager.connection().prepareStatement("SELECT MAX(Id) FROM " + Table)) {
-            return search.executeQuery().getLong(1) + 1;
+        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT COUNT(*) FROM " + Table)) {
+            ResultSet result = select.executeQuery();
+            if (result.next()) {
+                return result.getLong(1);
+            }
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:getNextId] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return 0;
     }
@@ -56,7 +60,7 @@ public class FusionProfessionsSQL {
             insert.setBoolean(6, profession.isJoined());
             insert.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:addProfession] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -68,7 +72,7 @@ public class FusionProfessionsSQL {
             update.setLong(4, profession.getId());
             update.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:updateProfession] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -78,7 +82,7 @@ public class FusionProfessionsSQL {
             select.setString(2, profession);
             return select.executeQuery().next();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:hasProfession] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return false;
     }
@@ -89,7 +93,7 @@ public class FusionProfessionsSQL {
             delete.setString(2, profession);
             delete.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:removeProfession] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -104,7 +108,7 @@ public class FusionProfessionsSQL {
         List<Profession> entries = new ArrayList<>();
         try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT * FROM " + Table + " WHERE UUID=? AND Joined=?")) {
             select.setString(1, uuid.toString());
-            select.setBoolean(1, joined);
+            select.setBoolean(2, joined);
             ResultSet result = select.executeQuery();
             while (result.next()) {
                 long id = result.getLong("Id");
@@ -116,7 +120,7 @@ public class FusionProfessionsSQL {
             }
             return entries;
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionProfessionsSQL:getProfessions] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return entries;
     }

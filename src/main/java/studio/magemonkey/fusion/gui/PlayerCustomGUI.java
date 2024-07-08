@@ -38,6 +38,7 @@ import studio.magemonkey.fusion.queue.QueueItem;
 import java.util.*;
 
 public class PlayerCustomGUI implements Listener {
+    @Getter
     private final CustomGUI gui;
     private final Player player;
     private final Inventory inventory;
@@ -65,8 +66,9 @@ public class PlayerCustomGUI implements Listener {
         this.recipes = new HashMap<>(20);
         this.category = category;
         if (Cfg.craftingQueue && category != null) {
-            this.queue = new CraftingQueue(player, gui.name, category);
+            this.queue = PlayerLoader.getPlayer(player).getQueue(gui.getName(), category);
         }
+        //PlayerLoader.getPlayer(player).cacheGui(gui.getName(), this);
     }
 
     public static Collection<ItemStack> getPlayerItems(InventoryHolder player) {
@@ -152,7 +154,7 @@ public class PlayerCustomGUI implements Listener {
             int fullPages = allRecipeCount / pageSize;
             int rest = allRecipeCount % pageSize;
             int pages = (rest == 0) ? fullPages : (fullPages + 1);
-            if (page >= pages) {
+            if (player.isOnline() && page >= pages) {
                 if (page > 0)
                     this.page = pages - 1;
                 this.reloadRecipes();

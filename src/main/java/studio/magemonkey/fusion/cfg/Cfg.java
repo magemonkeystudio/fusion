@@ -4,6 +4,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,14 @@ public final class Cfg {
     public static int finishedMessageInterval = 300;
     public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
     public static boolean updateQueueOffline = true;
+
+    // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
+    private static final DatabaseType storageType = DatabaseType.LOCALE;
+    private static final String storageHost = "localhost";
+    private static final int storagePort = 3306;
+    private static final String storageDatabase = "database";
+    private static final String storageUser = "root";
+    private static final String storagePassword = "password";
 
     static FileConfiguration getConfig() {
         File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
@@ -60,6 +69,13 @@ public final class Cfg {
         if(!cfg.isSet("update_queue_offline")) cfg.set("update_queue_offline", updateQueueOffline);
         if(!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if(!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
+
+        if(!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
+        if(!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);
+        if(!cfg.isSet("storage.port")) cfg.set("storage.port", storagePort);
+        if(!cfg.isSet("storage.database")) cfg.set("storage.database", storageDatabase);
+        if(!cfg.isSet("storage.user")) cfg.set("storage.user", storageUser);
+        if(!cfg.isSet("storage.password")) cfg.set("storage.password", storagePassword);
     }
 
     public static void init() {

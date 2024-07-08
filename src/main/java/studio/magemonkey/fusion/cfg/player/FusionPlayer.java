@@ -6,6 +6,7 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.gui.PlayerCustomGUI;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 
@@ -22,6 +23,8 @@ public class FusionPlayer {
 
     private final Map<String, Profession> professions = new TreeMap<>();
     private final Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+
+    private final Map<String, PlayerCustomGUI> cachedGuis = new TreeMap<>();
 
     public FusionPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -41,6 +44,13 @@ public class FusionPlayer {
         return cachedQeues.get(profession);
     }
 
+    public void cacheGui(String id, PlayerCustomGUI gui) {
+        if(cachedGuis.containsKey(id)) {
+            cachedGuis.get(id).getGui().open(getPlayer(), cachedGuis.get(id));
+            return;
+        }
+        cachedGuis.put(id, gui);
+    }
 
     /*
      * Returns the amount of items in the queue for the given profession and category
@@ -284,5 +294,6 @@ public class FusionPlayer {
         for (CraftingQueue queue : cachedQeues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
         }
+        cachedGuis.clear();
     }
 }

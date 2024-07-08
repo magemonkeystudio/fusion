@@ -6,6 +6,7 @@ import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.fusion.Category;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -40,9 +41,9 @@ public class QueueItem {
     public void update() {
         // Get the difference of timestamp (long) and current time (long) in seconds (int)
         this.savedSeconds += (int) ((System.currentTimeMillis() - timestamp) / 1000);
-        this.timestamp = System.currentTimeMillis();
         this.done = savedSeconds >= recipe.getCooldown();
         this.icon = ProfessionsCfg.getQueueItem(profession, this);
+        Fusion.getInstance().getLogger().info("Queue item updated: " + getRecipePath() + " - " + savedSeconds + "s");
     }
 
     public String getRecipePath() {

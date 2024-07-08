@@ -7,6 +7,7 @@ import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,20 +23,23 @@ public class FusionQueuesSQL {
                 + "Id long,"
                 + "UUID varchar(36), "
                 + "RecipePath varchar(100),"
-                + "Timestamp numeric,"
+                + "Timestamp BIGINT,"
                 + "CraftingTime numeric,"
                 + "SavedSeconds numeric)")) {
             create.execute();
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
     public long getNextId() {
-        try (PreparedStatement search = SQLManager.connection().prepareStatement("SELECT MAX(Id) FROM " + Table)) {
-            return search.executeQuery().getLong(1) + 1;
+        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT Count(Id) FROM " + Table)) {
+            ResultSet result = select.executeQuery();
+            if (result.next()) {
+                return result.getLong(1);
+            }
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:getNextId] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return 0;
     }
@@ -53,7 +57,7 @@ public class FusionQueuesSQL {
                 insert.execute();
                 return true;
             } catch (SQLException e) {
-                Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+                Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:setQueueItem] Something went wrong with the sql-connection: " + e.getMessage());
             }
         } else {
             try (PreparedStatement update = SQLManager.connection().prepareStatement("UPDATE " + Table + " SET SavedSeconds=? WHERE Id=?")) {
@@ -62,7 +66,7 @@ public class FusionQueuesSQL {
                 update.execute();
                 return true;
             } catch (SQLException e) {
-                Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+                Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:setQueueItem] Something went wrong with the sql-connection: " + e.getMessage());
             }
         }
         return false;
@@ -74,7 +78,7 @@ public class FusionQueuesSQL {
             delete.execute();
             return true;
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:removeQueueItem] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return false;
     }
@@ -87,7 +91,7 @@ public class FusionQueuesSQL {
             select.execute();
             return entries;
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL] Something went wrong with the sql-connection: " + e.getMessage());
+            Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:getQueueItems] Something went wrong with the sql-connection: " + e.getMessage());
         }
         return null;
     }

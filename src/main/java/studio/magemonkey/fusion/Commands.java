@@ -5,7 +5,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
@@ -18,10 +21,13 @@ import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class Commands implements CommandExecutor {
+public class Commands implements CommandExecutor, TabCompleter {
 
     private final Map<String, ConfirmationAction> confirmation = new HashMap<>();
 
@@ -237,6 +243,46 @@ public class Commands implements CommandExecutor {
         MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
         return true;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        List<String> entries = new ArrayList<>();
+        if(args.length == 1) {
+            if("browse".startsWith(args[0])) entries.add("browse");
+            if("level".startsWith(args[0])) entries.add("level");
+            if("auto".startsWith(args[0])) entries.add("auto");
+            if("reload".startsWith(args[0])) entries.add("reload");
+            if("confirm".startsWith(args[0])) entries.add("confirm");
+            if("use".startsWith(args[0])) entries.add("use");
+            if("master".startsWith(args[0])) entries.add("master");
+            if("forget".startsWith(args[0])) entries.add("forget");
+        } else if(args.length == 2) {
+            List<Profession> professions = new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
+            if(args[0].equalsIgnoreCase("use")) {
+                for(String name : professions.stream().map(Profession::getName).collect(Collectors.toList())) {
+                    if(name.startsWith(args[1])) entries.add(name);
+                }
+            } else if(args[0].equalsIgnoreCase("master")) {
+                //CHeck if they are mastered
+
+                for(String name : professions.stream().filter(Profession::isMastered).map(Profession::getName).collect(Collectors.toList())) {
+                    if(name.startsWith(args[1])) entries.add(name);
+                }
+            } else if(args[0].equalsIgnoreCase("forget")) {
+                for(String name : ProfessionsCfg.getMap().keySet()) {
+                    if(name.startsWith(args[1])) entries.add(name);
+                }
+            }
+        } else if(args.length == 3) {
+            if(args[0].equalsIgnoreCase("use")) {
+                for(Player player : Bukkit.getOnlinePlayers()) {
+                    if(player.getName().startsWith(args[2])) entries.add(player.getName());
+                }
+            }
+        }
+        return entries;
     }
 
 

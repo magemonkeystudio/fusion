@@ -1,7 +1,5 @@
 package studio.magemonkey.fusion.cfg.sql;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import studio.magemonkey.fusion.Fusion;
@@ -9,16 +7,16 @@ import studio.magemonkey.fusion.cfg.sql.tables.FusionPlayersSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionProfessionsSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionQueuesSQL;
 
-import javax.sql.DataSource;
+import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SQLManager {
 
     @Getter
-    private static DataSource dataSource;
-    private static DatabaseType type;
-    private static String host, database, user, password;
-    private static int port;
+    private static volatile Connection connection;
 
     private static FusionPlayersSQL fusionPlayersSQL;
     private static FusionProfessionsSQL fusionProfessionsSQL;
@@ -26,68 +24,86 @@ public class SQLManager {
 
     public static void init() {
         FileConfiguration cfg = Fusion.getInstance().getConfig();
-        SQLManager.type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
-        SQLManager.host = cfg.getString("storage.host", "localhost");
-        SQLManager.port = cfg.getInt("storage.port", 3306);
-        SQLManager.database = cfg.getString("storage.database", "fusion");
-        SQLManager.user = cfg.getString("storage.user", "root");
-        SQLManager.password = cfg.getString("storage.password", "password");
+        DatabaseType type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
+        String host = cfg.getString("storage.host", "localhost");
+        int port = cfg.getInt("storage.port", 3306);
+        String database = cfg.getString("storage.database", "fusion");
+        String user = cfg.getString("storage.user", "root");
+        String password = cfg.getString("storage.password", "password");
+
+        Fusion.getInstance().getLogger().info("Initializing SQLManager with type: " + type);
 
         switch (type) {
             case LOCALE:
-                dataSource = getSQLiteDataSource(database);
+                connection = getSQLiteConnection();
                 break;
             case MYSQL:
-                dataSource = getMySQLDataSource(host, port, database, user, password);
+                connection = getMySQLConnection(host, port, database, user, password);
                 break;
             case MARIADB:
-                dataSource = getMariaDBDataSource(host, port, database, user, password);
+                connection = getMariaDBConnection(host, port, database, user, password);
                 break;
         }
-    }
-    private static DataSource getSQLiteDataSource(String dbPath) {
-        if (dataSource == null) {
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:sqlite:" + dbPath);
-            dataSource = new HikariDataSource(config);
+
+        if (connection == null) {
+            Fusion.getInstance().getLogger().severe("Failed to initialize the Connection.");
+        } else {
+            fusionPlayersSQL = new FusionPlayersSQL();
+            fusionProfessionsSQL = new FusionProfessionsSQL();
+            fusionQueuesSQL = new FusionQueuesSQL();
+            Fusion.getInstance().getLogger().info("Connection initialized successfully.");
         }
-        return dataSource;
     }
 
-    private static DataSource getMySQLDataSource(String host, int port, String database, String user, String password) {
-        if (dataSource == null) {
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
-            config.setUsername(user);
-            config.setPassword(password);
-            dataSource = new HikariDataSource(config);
+    private static Connection getSQLiteConnection() {
+        File databaseFile = new File(Fusion.getInstance().getDataFolder(), "database.db");
+        databaseFile.getParentFile().mkdirs(); // Ensure the parent directories exist
+        try {
+            String url = "jdbc:sqlite:" + databaseFile.getAbsolutePath();
+            Connection conn = DriverManager.getConnection(url);
+
+            Fusion.getInstance().getLogger().info("SQLite connection created at: " + databaseFile.getAbsolutePath());
+            return conn;
+        } catch (SQLException e) {
+            Fusion.getInstance().getLogger().severe("Error creating SQLite connection: " + e.getMessage());
         }
-        return dataSource;
+        return null;
     }
 
-    private static DataSource getMariaDBDataSource(String host, int port, String database, String user, String password) {
-        if (dataSource == null) {
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:mariadb://" + host + ":" + port + "/" + database);
-            config.setUsername(user);
-            config.setPassword(password);
-            dataSource = new HikariDataSource(config);
+    private static Connection getMySQLConnection(String host, int port, String database, String user, String password) {
+        try {
+            String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+            Connection conn = DriverManager.getConnection(url, user, password);
+            Fusion.getInstance().getLogger().info("MySQL connection created for database: " + database);
+            return conn;
+        } catch (SQLException e) {
+            Fusion.getInstance().getLogger().severe("Error creating MySQL connection: " + e.getMessage());
         }
-        return dataSource;
+        return null;
+    }
+
+    private static Connection getMariaDBConnection(String host, int port, String database, String user, String password) {
+        try {
+            String url = "jdbc:mariadb://" + host + ":" + port + "/" + database;
+            Connection conn = DriverManager.getConnection(url, user, password);
+            Fusion.getInstance().getLogger().info("MariaDB connection created for database: " + database);
+            return conn;
+        } catch (SQLException e) {
+            Fusion.getInstance().getLogger().severe("Error creating MariaDB connection: " + e.getMessage());
+        }
+        return null;
     }
 
     public static Connection connection() {
-        if (dataSource != null) {
-            try {
-                return dataSource.getConnection();
-            } catch (Exception e) {
-                Fusion.getInstance().getLogger().severe("Error while connecting to the database: " + e.getMessage());
-                return null;
-            }
-        } else {
+        if (connection == null) {
             init();
-            return dataSource != null ? connection() : null;
         }
+        if (connection != null) {
+            return connection;
+        } else {
+            Fusion.getInstance().getLogger().severe("Connection is still null after initialization attempt.");
+        }
+        return null;
     }
 
     public static FusionPlayersSQL players() {
