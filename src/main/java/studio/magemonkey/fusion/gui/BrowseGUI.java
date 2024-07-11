@@ -22,11 +22,14 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.PlayerConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.FusionPlayer;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
@@ -164,9 +167,9 @@ public class BrowseGUI implements Listener {
         if (guiToOpen == null) return;
 
         String profession = guiToOpen.getName();
-        PlayerConfig conf = PConfigManager.getPlayerConfig(p);
+        FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
-        int unlocked = conf.getUnlockedProfessions().size();
+        int unlocked = fusionPlayer.getUnlockedProfessions().size();
         int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
         int cost = BrowseConfig.getProfCost(profession);
 
@@ -178,7 +181,7 @@ public class BrowseGUI implements Listener {
                 new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };
 
-        if (conf.hasProfession(profession)) {
+        if (fusionPlayer.hasProfession(profession)) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             MessageUtil.sendMessage("fusion.error.profAlreadyUnlocked", p, data);
             return;
@@ -196,7 +199,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        conf.unlockProfession(profession);
+        fusionPlayer.addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
         if (cost > 0)
             CodexEngine.get().getVault().take(p, cost);
         data[1] = new MessageData("unlocked", unlocked + 1);
