@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
+import org.bukkit.Bukkit;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -85,15 +86,28 @@ public class FusionQueuesSQL {
 
     public List<QueueItem> getQueueItems(UUID uuid, String profession, Category category) {
         List<QueueItem> entries = new ArrayList<>();
-        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT * FROM " + Table + " WHERE UUID=? AND RecipePath LIKE ?")) {
+
+        String sql = "SELECT * FROM " + Table + " WHERE UUID=? AND RecipePath LIKE ?";
+
+        try (PreparedStatement select = SQLManager.connection().prepareStatement(sql)) {
             select.setString(1, uuid.toString());
             select.setString(2, "%" + profession + "." + category.getName() + "%");
-            select.execute();
-            return entries;
+            try (ResultSet result = select.executeQuery()) {
+                while (result.next()) {
+                    entries.add(new QueueItem(
+                            result.getInt("Id"),
+                            profession,
+                            category,
+                            category.getRecipe(result.getString("RecipePath").split("\\.")[2]),
+                            result.getLong("Timestamp"),
+                            result.getInt("SavedSeconds")
+                    ));
+                }
+            }
         } catch (SQLException e) {
             Fusion.getInstance().getLogger().warning("[SQL:FusionQueuesSQL:getQueueItems] Something went wrong with the sql-connection: " + e.getMessage());
         }
-        return null;
+        return entries;
     }
 
     public Map<String, CraftingQueue> getCraftingQueue(UUID uuid) {

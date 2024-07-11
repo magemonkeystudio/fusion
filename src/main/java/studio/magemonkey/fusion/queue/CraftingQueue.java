@@ -27,12 +27,16 @@ public class CraftingQueue {
     private final HashMap<Integer, QueueItem> queuedItems;
     private final BukkitTask queueTask;
 
+    @Getter
+    private int visualRemainingTotalTime = 0;
+
     public CraftingQueue(Player player, String profession, Category category) {
         this.player = player;
         this.profession = profession;
         this.category = category;
         this.queuedItems = new HashMap<>(20);
         queue.addAll(SQLManager.queues().getQueueItems(player.getUniqueId(), profession, category));
+        queue.forEach(entry -> entry.setCraftinQueue(this));
 
         queueTask = new BukkitRunnable() {
             @Override
@@ -41,7 +45,11 @@ public class CraftingQueue {
                     cancel();
                     return;
                 }
-                queue.forEach(QueueItem::update);
+                visualRemainingTotalTime = 0;
+                queue.forEach(item ->  {
+                    visualRemainingTotalTime += (item.getRecipe().getCooldown() - item.getSavedSeconds());
+                    item.update();
+                });
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);
     }
@@ -64,6 +72,7 @@ public class CraftingQueue {
         }
 
         QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
+        item.setCraftinQueue(this);
         queue.add(item);
     }
 

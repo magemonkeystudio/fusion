@@ -172,7 +172,7 @@ public class PlayerCustomGUI implements Listener {
 
             /* Additionally, when crafting_queue: true */
             int queueAllItemsCount = 0;
-            if(Cfg.craftingQueue) {
+            if (Cfg.craftingQueue) {
                 this.queue.getQueuedItems().clear();
                 Collection<QueueItem> allQueuedItems = queue.getQueue();
                 queueAllItemsCount = allQueuedItems.size();
@@ -203,7 +203,7 @@ public class PlayerCustomGUI implements Listener {
                                 QueueItem queueItem = allQueueItemsArray[k];
                                 int slot = queuedSlots[j];
                                 this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
-                                this.queue.getQueuedItems().get(slot).update();
+                                this.queue.getQueuedItems().get(slot).updateIcon();
                                 this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
                             }
                         }
