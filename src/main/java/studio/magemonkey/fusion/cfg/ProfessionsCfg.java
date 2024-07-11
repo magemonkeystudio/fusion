@@ -57,6 +57,7 @@ public class ProfessionsCfg {
             loadFrom("craft", b.serialize());
             return;
         }
+
         for (File file : Objects.requireNonNull(professionFolder.listFiles())) {
             if (file.getName().endsWith(".yml")) {
                 FileConfiguration cfg = new YamlConfiguration();
@@ -85,12 +86,12 @@ public class ProfessionsCfg {
     }
 
     public static CraftingTable getTable(String str) {
-        return map.get(str.toLowerCase().trim());
+        return map.get(str);
     }
 
     public static CustomGUI getGUI(String str) {
         if (str == null) return null;
-        return guiMap.get(str.toLowerCase().trim());
+        return guiMap.get(str);
     }
 
     private static void addCraftingQueueDefs(FileConfiguration cfg) {
