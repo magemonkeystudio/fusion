@@ -18,15 +18,16 @@ import java.util.LinkedList;
 public class BrowseConfig {
 
     private static FileConfiguration config;
-    private static File              file;
-
-    private static final LinkedList<String>       professions = new LinkedList<>();
-    private static final HashMap<String, Integer> profCosts   = new HashMap<>();
+    private static File file;
 
     @Getter
-    private static String           browseName = ChatColor.DARK_AQUA + "Browse";
+    private static final LinkedList<String> professions = new LinkedList<>();
+    private static final HashMap<String, Integer> profCosts = new HashMap<>();
+
     @Getter
-    private static ItemStack        browseFill;
+    private static String browseName = ChatColor.DARK_AQUA + "Browse";
+    @Getter
+    private static ItemStack browseFill;
     @Getter
     private static InventoryPattern browsePattern;
 
@@ -61,10 +62,6 @@ public class BrowseConfig {
             Fusion.getInstance().log.severe("Could not load browse.yml data");
             e.printStackTrace();
         }
-    }
-
-    public static LinkedList<String> getProfessions() {
-        return professions;
     }
 
     private static void attemptPort() {

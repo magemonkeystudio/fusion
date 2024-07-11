@@ -180,7 +180,6 @@ public class Commands implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 Player player = (Player) sender;
-
                 BrowseGUI.open(player);
                 return true;
             } else if (args[0].equalsIgnoreCase("level")) {

@@ -22,11 +22,11 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.PlayerConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
@@ -37,10 +37,13 @@ import java.util.UUID;
 
 public class BrowseGUI implements Listener {
 
-    private static final HashMap<UUID, Inventory> map = new HashMap<>();
+    private static final HashMap<UUID, BrowseGUI> map = new HashMap<>();
 
-    protected final String inventoryName;
+
+    private Inventory inventory;
     private final Map<Integer, String> slotMap = new HashMap<>();
+    protected final String inventoryName;
+    private final Player player;
     private final UUID opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
@@ -49,53 +52,60 @@ public class BrowseGUI implements Listener {
 
     public BrowseGUI(String inventoryName, Player player, ItemStack fill) {
         this.inventoryName = inventoryName;
+        this.player = player;
         this.opener = player.getUniqueId();
-
         if (fill == null)
             fill = BrowseConfig.getBrowseFill();
-
         this.fillItem = fill;
+        initialize(true);
+        Bukkit.getServer().getPluginManager().registerEvents(this, Fusion.getInstance());
+    }
 
-        int k = -1;
+    public static BrowseGUI open(Player player) {
+        BrowseGUI gui = map.get(player.getUniqueId());
+        if (gui == null) {
+            gui = new BrowseGUI(BrowseConfig.getBrowseName(), player, null);
+        } else {
+            player.openInventory(gui.inventory);
+        }
+        return gui;
+    }
 
+    private void initialize(boolean instantOpen) {
+        map.remove(player.getUniqueId());
+        int phSlot = -1;
         for (String row : BrowseConfig.getBrowsePattern().getPattern()) {
             for (char c : row.toCharArray()) {
-                k++;
+                phSlot++;
                 switch (c) {
                     case '=':
                     case 'o':
-                        this.slots.add(k);
+                        this.slots.add(phSlot);
                         break;
                 }
             }
         }
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, Fusion.getInstance());
-    }
-
-    public static BrowseGUI open(Player player) {
-        Inventory inv = null;
+        inventory = null;
         String title = ChatColor.translateAlternateColorCodes('&', BrowseConfig.getBrowseName());
         try {
-            BrowseGUI gui = new BrowseGUI(title, player, null);
-
-            inv = Bukkit.createInventory(player, BrowseConfig.getBrowsePattern().getPattern().length * 9, title);
+            inventory = Bukkit.createInventory(player, BrowseConfig.getBrowsePattern().getPattern().length * 9, title);
             int i = 0;
-            int k = gui.slots.get(i);
+            int k = this.slots.get(i);
 
             HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
             int slot = 0;
             for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
-                        inv.setItem(slot, specItems.get(c));
+                        inventory.setItem(slot, specItems.get(c));
                     slot++;
                 }
             }
 
 //            for (CraftingTable table : Cfg.getMap().values()) {
             for (String profession : BrowseConfig.getProfessions()) {
-                if (i >= gui.slots.size()) break;
+                if (i >= this.slots.size()) break;
                 CraftingTable table = ProfessionsCfg.getTable(profession);
                 // Removes items from the menu if the player doesn't have permission.
                 if (table == null || !Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
@@ -108,30 +118,29 @@ public class BrowseGUI implements Listener {
                         .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
                         .build();
 
-                inv.setItem(k, item);
-                gui.slotMap.put(k, table.getName());
+                inventory.setItem(k, item);
+                this.slotMap.put(k, table.getName());
 
-                k = gui.slots.get(++i);
+                k = this.slots.get(++i);
             }
 
-            for (int j = i; j < gui.slots.size(); j++) {
-                inv.setItem(gui.slots.get(j), gui.fillItem);
+            for (int j = i; j < this.slots.size(); j++) {
+                inventory.setItem(this.slots.get(j), this.fillItem);
             }
 
-            player.openInventory(inv);
-            map.put(player.getUniqueId(), inv);
+            map.put(player.getUniqueId(), this);
+            if(instantOpen)
+                player.openInventory(inventory);
 
-            return gui;
         } catch (Exception e) {
-            if (inv != null) {
-                inv.clear();
+            if (inventory != null) {
+                inventory.clear();
             }
             map.remove(player.getUniqueId());
             player.closeInventory();
             throw new RuntimeException("Exception was thrown on gui open for: " + player.getName(), e);
         }
     }
-
 
     private boolean isThis(InventoryView inv, Player player) {
         return inventoryName != null && inv.getTitle()
@@ -141,14 +150,12 @@ public class BrowseGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onClick(InventoryClickEvent e) {
-        Inventory inv = e.getView().getTopInventory();
+        Inventory clickedInv = e.getClickedInventory();
+        if(clickedInv == null) return;
+        if(!clickedInv.equals(inventory)) return;
         if (e.getRawSlot() < 0) {
             return;
         }
-
-        if ((inv == null) || (!(e.getWhoClicked() instanceof Player)) || !this.isThis(e.getView(),
-                (Player) e.getWhoClicked()))
-            return;
 
         Player p = (Player) e.getWhoClicked();
         e.setCancelled(true);
@@ -157,8 +164,9 @@ public class BrowseGUI implements Listener {
         if (guiToOpen == null) return;
 
         String profession = guiToOpen.getName();
+        PlayerConfig conf = PConfigManager.getPlayerConfig(p);
 
-        int unlocked = PlayerLoader.getPlayer(p).getUnlockedProfessions().size();
+        int unlocked = conf.getUnlockedProfessions().size();
         int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
         int cost = BrowseConfig.getProfCost(profession);
 
@@ -170,7 +178,7 @@ public class BrowseGUI implements Listener {
                 new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };
 
-        if (PlayerLoader.getPlayer(p).hasProfession(profession)) {
+        if (conf.hasProfession(profession)) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             MessageUtil.sendMessage("fusion.error.profAlreadyUnlocked", p, data);
             return;
@@ -188,7 +196,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        PlayerLoader.getPlayer(p).addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
+        conf.unlockProfession(profession);
         if (cost > 0)
             CodexEngine.get().getVault().take(p, cost);
         data[1] = new MessageData("unlocked", unlocked + 1);
@@ -208,7 +216,7 @@ public class BrowseGUI implements Listener {
         if (this.isThis(e.getView(), (Player) e.getWhoClicked())) {
             if (e.getOldCursor().getType() == Material.BARRIER)
                 e.setCancelled(true);
-            if (e.getRawSlots().stream().anyMatch(i -> (this.slots.contains(i)))) {
+            if (e.getRawSlots().stream().anyMatch(this.slots::contains)) {
                 e.setResult(Event.Result.DENY);
                 return;
             }
@@ -222,7 +230,8 @@ public class BrowseGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if (player.getOpenInventory() != null && isThis(player.getOpenInventory(), event.getPlayer())) {
+        player.getOpenInventory();
+        if (isThis(player.getOpenInventory(), event.getPlayer())) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();
