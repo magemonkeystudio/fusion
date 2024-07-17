@@ -12,8 +12,30 @@ import java.util.*;
 
 public class PConfigManager {
 
-    public static void migrateIntoSQL() {
+    public static boolean backup() {
         File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "players");
+        if (!parentFolder.exists()) return false;
+
+        File backupFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "backup" + File.separator + "players");
+        if (!backupFolder.exists()) backupFolder.mkdirs();
+
+        for(File file : parentFolder.listFiles()) {
+            if(file.getName().endsWith(".yml")) {
+                File backupFile = new File(backupFolder, file.getName());
+                try {
+                    file.renameTo(backupFile);
+                } catch (Exception e) {
+                    Fusion.getInstance().getLogger().warning("Can't backup player data file: " + file);
+                    e.printStackTrace();
+                }
+            }
+        }
+        Fusion.getInstance().getLogger().info("Backup of player data is done.");
+        return true;
+    }
+
+    public static void migrateIntoSQL() {
+        File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "backup" + File.separator + "players");
         if (!parentFolder.exists()) return;
         for(File file : parentFolder.listFiles()) {
             if(file.getName().endsWith(".yml")) {
@@ -70,9 +92,6 @@ public class PConfigManager {
                         }
                         entries.forEach(e -> SQLManager.queues().setQueueItem(uuid, e));
                     }
-
-                    // Deleting the file when done
-                    //file.delete();
                     Fusion.getInstance().getLogger().info("Migrated player data for " + uuid + " into SQL.");
                 } catch (Exception e) {
                     Fusion.getInstance().getLogger().warning("Can't load player data file: " + file);

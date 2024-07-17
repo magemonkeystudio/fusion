@@ -73,12 +73,22 @@ public final class ExperienceManager {
         } else {
             cfg.set("data", typesSection);
         }
+    }
+
+    public static boolean backup() {
+        if(!file.exists()) return false;
+
+        YamlConfiguration cfg = new YamlConfiguration();
         try {
-            cfg.save(file);
-        } catch (IOException e) {
-            Fusion.getInstance().getLogger().warning("Can't save exp data file: " + file);
+            cfg.load(file);
+            File backupFile = new File(Fusion.getInstance().getDataFolder(), "backup/data.yml");
+            cfg.save(backupFile);
+            Fusion.getInstance().getLogger().info("Backup saved to " + backupFile);
+        } catch (Exception e) {
+            Fusion.getInstance().getLogger().warning("Can't load exp data file: " + file);
             e.printStackTrace();
         }
+        return true;
     }
 
     // Stuff that can remain yet
