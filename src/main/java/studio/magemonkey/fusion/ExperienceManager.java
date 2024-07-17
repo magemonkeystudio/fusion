@@ -67,6 +67,7 @@ public final class ExperienceManager {
             }
         }
         if (typesSection.isEmpty()) {
+            backup();
             if (file.delete()) {
                 Fusion.getInstance().getLogger().info("Deleted data.yml");
             }

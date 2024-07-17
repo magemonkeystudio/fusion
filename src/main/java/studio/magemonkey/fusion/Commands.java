@@ -237,8 +237,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
                 boolean autoOn = PlayerLoader.getPlayer(player).isAutoCrafting();
 
-                SQLManager.players().setAutoCrafting(player.getUniqueId(), (autoOn = !autoOn));
-
+                PlayerLoader.getPlayer(player).setAutoCrafting((autoOn = !autoOn));
                 MessageUtil.sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
 
                 return true;

@@ -39,6 +39,7 @@ fusion:
     profNoFunds: "&cYou need &3$$<cost> to buy this!"
     limitReached: "&cYou have already unlocked &3$<unlocked>/$<limit> &cprofessions."
     notUnlocked: "&cYou haven't unlocked this profession yet. Use &3/craft browse &c to view all professions."
+    autoDisabled: "&cAuto-crafting is disabled."
     invalidStorage: "&cInvalid storage type: &3$<storage> (valid: &4locale, sql&c)"
     alreadyUsedStorage: "&cYou are already using this storage type. ($<storage>)"
   storageChanged: "&7You have swapped to &3$<storage> storage."

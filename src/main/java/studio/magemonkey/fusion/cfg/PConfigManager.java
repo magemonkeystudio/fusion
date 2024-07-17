@@ -35,7 +35,7 @@ public class PConfigManager {
     }
 
     public static void migrateIntoSQL() {
-        File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "backup" + File.separator + "players");
+        File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "players");
         if (!parentFolder.exists()) return;
         for(File file : parentFolder.listFiles()) {
             if(file.getName().endsWith(".yml")) {
@@ -47,7 +47,6 @@ public class PConfigManager {
                     // Logic for players table
                     boolean autoCraft = cfg.getBoolean("autoCraft", false);
                     SQLManager.players().setAutoCrafting(uuid, autoCraft);
-
                     // Logic for professions table
                     Map<String, Boolean> professionData = new HashMap<>();
                     if(cfg.contains("professions")) {
@@ -100,6 +99,7 @@ public class PConfigManager {
                 }
             }
         }
+        backup();
         if(parentFolder.listFiles().length == 0) {
             parentFolder.delete();
             Fusion.getInstance().getLogger().info("Players folder is not required anymore and will be deleted.");
