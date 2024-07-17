@@ -102,10 +102,16 @@ public class Fusion extends RisePlugin implements Listener {
         super.onEnable();
         this.reloadConfig();
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+
             Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [ExperienceManager].");
-            ExperienceManager.migrateIntoSQL();
+            if(ExperienceManager.backup()) {
+                ExperienceManager.migrateIntoSQL();
+            }
             Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [PConfigManager].");
-            PConfigManager.migrateIntoSQL();
+
+            if(PConfigManager.backup()) {
+                PConfigManager.migrateIntoSQL();
+            }
         });
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());

@@ -15,6 +15,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
@@ -171,6 +172,31 @@ public class Commands implements CommandExecutor, TabCompleter {
                     MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
+            } else if(args[0].equalsIgnoreCase("storage")) {
+                String storage = args[1];
+                DatabaseType type = DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
+                switch (storage.toLowerCase()) {
+                    case "locale":
+                        if(type == DatabaseType.LOCALE) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage", sender, new MessageData("storage", storage));
+                            return true;
+                        }
+                        SQLManager.swapToLocale();
+                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        break;
+                    case "sql":
+                        if(type == DatabaseType.MARIADB || type == DatabaseType.MYSQL) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage", sender, new MessageData("storage", storage));
+                            return true;
+                        }
+                        SQLManager.swapToSql();
+                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        break;
+                    default:
+                        MessageUtil.sendMessage("fusion.error.invalidStorage", sender, new MessageData("storage", storage));
+                        break;
+                }
+                return true;
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("browse")) {
@@ -254,6 +280,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             if("use".startsWith(args[0])) entries.add("use");
             if("master".startsWith(args[0])) entries.add("master");
             if("forget".startsWith(args[0])) entries.add("forget");
+            if(Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0])) entries.add("storage");
             if(Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0])) entries.add("auto");
             if(Fusion.getInstance().checkPermission(sender, "fusion.reload") && "reload".startsWith(args[0])) entries.add("reload");
         } else if(args.length == 2) {
@@ -263,8 +290,6 @@ public class Commands implements CommandExecutor, TabCompleter {
                     if(name.startsWith(args[1])) entries.add(name);
                 }
             } else if(args[0].equalsIgnoreCase("master")) {
-                //CHeck if they are mastered
-
                 for(String name : professions.stream().filter(Profession::isMastered).map(Profession::getName).collect(Collectors.toList())) {
                     if(name.startsWith(args[1])) entries.add(name);
                 }
@@ -272,6 +297,9 @@ public class Commands implements CommandExecutor, TabCompleter {
                 for(String name : ProfessionsCfg.getMap().keySet()) {
                     if(name.startsWith(args[1])) entries.add(name);
                 }
+            } else if(args[0].equalsIgnoreCase("storage") && Fusion.getInstance().checkPermission(sender, "fusion.admin")) {
+                if("locale".startsWith(args[1])) entries.add("locale");
+                if("sql".startsWith(args[1])) entries.add("sql");
             }
         } else if(args.length == 3) {
             if(Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && args[0].equalsIgnoreCase("use")) {

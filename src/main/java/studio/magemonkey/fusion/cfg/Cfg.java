@@ -29,7 +29,7 @@ public final class Cfg {
     private static final String storageUser = "root";
     private static final String storagePassword = "password";
 
-    static FileConfiguration getConfig() {
+    public static FileConfiguration getConfig() {
         File file = new File(Fusion.getInstance().getDataFolder(), "config.yml");
         FileConfiguration cfg = new YamlConfiguration();
 
@@ -128,6 +128,22 @@ public final class Cfg {
             cfg.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
         } catch (IOException e) {
             Fusion.getInstance().getLogger().warning("Can't save config file: " + e.getMessage());
+        }
+    }
+
+    public static boolean setDatabaseType(DatabaseType type) {
+        FileConfiguration cfg = getConfig();
+        if(cfg == null) {
+            Fusion.getInstance().getLogger().warning("Can't load config file!");
+            return false;
+        }
+        cfg.set("storage.type", type.name());
+        try {
+            cfg.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
+            return true;
+        } catch (IOException e) {
+            Fusion.getInstance().getLogger().warning("Can't save config file: " + e.getMessage());
+            return false;
         }
     }
 }
