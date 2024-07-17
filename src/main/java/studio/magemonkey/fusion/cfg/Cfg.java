@@ -112,7 +112,7 @@ public final class Cfg {
     }
 
     public static void notifyForQueue(Player player, int amount) {
-        player.sendMessage(finishMessage.replace("$<amount>", String.valueOf(amount)));
+        player.sendMessage(finishMessage.replace("$<amount>", String.valueOf(amount)).replace("&", "§"));
     }
 
     public static void migrateOldTypes(FileConfiguration cfg) {

@@ -13,7 +13,6 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -210,7 +209,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 }
                 Player player = (Player) sender;
 
-                boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
+                boolean autoOn = PlayerLoader.getPlayer(player).isAutoCrafting();
 
                 SQLManager.players().setAutoCrafting(player.getUniqueId(), (autoOn = !autoOn));
 
@@ -251,12 +250,12 @@ public class Commands implements CommandExecutor, TabCompleter {
         if(args.length == 1) {
             if("browse".startsWith(args[0])) entries.add("browse");
             if("level".startsWith(args[0])) entries.add("level");
-            if("auto".startsWith(args[0])) entries.add("auto");
-            if("reload".startsWith(args[0])) entries.add("reload");
             if("confirm".startsWith(args[0])) entries.add("confirm");
             if("use".startsWith(args[0])) entries.add("use");
             if("master".startsWith(args[0])) entries.add("master");
             if("forget".startsWith(args[0])) entries.add("forget");
+            if(Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0])) entries.add("auto");
+            if(Fusion.getInstance().checkPermission(sender, "fusion.reload") && "reload".startsWith(args[0])) entries.add("reload");
         } else if(args.length == 2) {
             List<Profession> professions = new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
             if(args[0].equalsIgnoreCase("use")) {
@@ -275,7 +274,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 }
             }
         } else if(args.length == 3) {
-            if(args[0].equalsIgnoreCase("use")) {
+            if(Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     if(player.getName().startsWith(args[2])) entries.add(player.getName());
                 }

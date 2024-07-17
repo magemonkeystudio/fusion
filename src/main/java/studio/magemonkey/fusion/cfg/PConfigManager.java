@@ -2,7 +2,6 @@ package studio.magemonkey.fusion.cfg;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -12,19 +11,6 @@ import java.io.File;
 import java.util.*;
 
 public class PConfigManager {
-
-    private static final HashMap<UUID, PlayerConfig> pConfig = new HashMap<>();
-
-    public static PlayerConfig getPlayerConfig(Player player) {
-        if (!pConfig.containsKey(player.getUniqueId()))
-            pConfig.put(player.getUniqueId(), new PlayerConfig(player));
-
-        return pConfig.get(player.getUniqueId());
-    }
-
-    public static void clearPConfigCache() {
-        pConfig.clear();
-    }
 
     public static void migrateIntoSQL() {
         File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "players");
@@ -78,7 +64,7 @@ public class PConfigManager {
                                 for (String recipe : cfg.getConfigurationSection("queues." + profession + "." + category).getKeys(false)) {
                                     List<Long> timestamps = cfg.getLongList("queues." + profession + "." + category + "." + recipe + ".timestamps");
                                     for (long timestamp : timestamps)
-                                        entries.add(new QueueItem(-1, profession, ProfessionsCfg.getTable(profession).getCategory(category), ProfessionsCfg.getTable(profession).getCategory(category).getRecipe(recipe), timestamp, 0));
+                                        entries.add(new QueueItem(-1, profession, ProfessionsCfg.getTable(profession).getCategory(category), ProfessionsCfg.getTable(profession).getCategory(category).getRecipe(recipe), timestamp, -1));
                                 }
                             }
                         }

@@ -1,5 +1,7 @@
 package studio.magemonkey.fusion.cfg.player;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Category;
@@ -22,15 +24,21 @@ public class FusionPlayer {
     private final UUID uuid;
 
     private final Map<String, Profession> professions = new TreeMap<>();
-    private final Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
 
     private final Map<String, PlayerCustomGUI> cachedGuis = new TreeMap<>();
 
+    @Getter
+    @Setter
+    private boolean autoCrafting;
+
     public FusionPlayer(UUID uuid) {
         this.uuid = uuid;
+        autoCrafting = SQLManager.players().isAutoCrafting(uuid);
         for (Profession profession : SQLManager.professions().getProfessions(uuid)) {
             professions.put(profession.getName(), profession);
         }
+        cachedQeues = SQLManager.queues().getCraftingQueues(getPlayer());
     }
 
     public Player getPlayer() {
@@ -265,12 +273,13 @@ public class FusionPlayer {
 
     public int[] getQueueSizes(String profession, Category category) {
         int[] limits = new int[]{0, 0, 0};
-        limits[0] = cachedQeues.get(profession).getQueue().size();
-        for (CraftingQueue queue : cachedQeues.values()) {
-            if (queue.getProfession().equals(profession)) {
-                limits[1] += queue.getQueue().size();
+        String path = profession + "." + category.getName();
+        limits[0] = cachedQeues.containsKey(path) ? cachedQeues.get(path).getQueue().size() : 0;
+        for (Map.Entry<String, CraftingQueue> queue : cachedQeues.entrySet()) {
+            if (queue.getKey().contains(profession + ".")) {
+                limits[1] += queue.getValue().getQueue().size();
             }
-            limits[2] += queue.getQueue().size();
+            limits[2] += queue.getValue().getQueue().size();
         }
         return limits;
     }
@@ -288,6 +297,7 @@ public class FusionPlayer {
     }
 
     public void save() {
+        SQLManager.players().setAutoCrafting(uuid, autoCrafting);
         for (Profession profession : professions.values()) {
             SQLManager.professions().setProfession(uuid, profession);
         }
@@ -295,5 +305,6 @@ public class FusionPlayer {
             SQLManager.queues().saveCraftingQueue(queue);
         }
         cachedGuis.clear();
+        cachedQeues.clear();
     }
 }

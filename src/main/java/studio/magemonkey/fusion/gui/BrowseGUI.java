@@ -25,8 +25,6 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
-import studio.magemonkey.fusion.cfg.PConfigManager;
-import studio.magemonkey.fusion.cfg.PlayerConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
@@ -60,7 +58,7 @@ public class BrowseGUI implements Listener {
         if (fill == null)
             fill = BrowseConfig.getBrowseFill();
         this.fillItem = fill;
-        initialize(true);
+        initialize();
         Bukkit.getServer().getPluginManager().registerEvents(this, Fusion.getInstance());
     }
 
@@ -74,7 +72,7 @@ public class BrowseGUI implements Listener {
         return gui;
     }
 
-    private void initialize(boolean instantOpen) {
+    private void initialize() {
         map.remove(player.getUniqueId());
         int phSlot = -1;
         for (String row : BrowseConfig.getBrowsePattern().getPattern()) {
@@ -132,7 +130,7 @@ public class BrowseGUI implements Listener {
             }
 
             map.put(player.getUniqueId(), this);
-            if(instantOpen)
+            if(true)
                 player.openInventory(inventory);
 
         } catch (Exception e) {
@@ -212,8 +210,7 @@ public class BrowseGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent e) {
-        Inventory inv = e.getView().getTopInventory();
-        if ((inv == null) || !(e.getWhoClicked() instanceof Player)) {
+        if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
         if (this.isThis(e.getView(), (Player) e.getWhoClicked())) {

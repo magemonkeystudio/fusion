@@ -28,7 +28,6 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.slot.Slot;
@@ -133,6 +132,7 @@ public class PlayerCustomGUI implements Listener {
     }
 
     public void reloadRecipes() {
+        if (!player.isOnline()) return;
         //isReloading = true;
         try {
             if (category.getPattern() != null)
@@ -208,10 +208,10 @@ public class PlayerCustomGUI implements Listener {
                             }
                         }
                     }
-                    Integer[] _queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
-                    for (int slot : _queuedSlots) {
-                        this.inventory.setItem(slot, null);
-                    }
+                }
+                Integer[] _queuedSlots = this.gui.queuedSlots.toArray(new Integer[0]);
+                for (int slot : _queuedSlots) {
+                    this.inventory.setItem(slot, ProfessionsCfg.getQueueSlot(this.gui.name));
                 }
             }
 
@@ -329,7 +329,7 @@ public class PlayerCustomGUI implements Listener {
                 if (item.isDone()) {
                     // Remove the item from the queue
                     queue.finishRecipe(item);
-                    this.reloadRecipesTask();
+                    this.reloadRecipes();
                 } else {
                     queue.removeRecipe(item, true);
                 }
@@ -608,7 +608,7 @@ public class PlayerCustomGUI implements Listener {
                     }
 
                     //Restart the crafting sequence if auto-crafting is enabled
-                    if (PConfigManager.getPlayerConfig(player).isAutoCraft()) {
+                    if (PlayerLoader.getPlayer(player).isAutoCrafting() && !this.recipes.isEmpty()) {
                         reloadRecipesTask();
                         boolean success = craft(slot, addToCursor); //Call this method again recursively
                         if (!success)
@@ -671,7 +671,7 @@ public class PlayerCustomGUI implements Listener {
                 bar = null;
             }
 
-            if (!craftingSuccess && PConfigManager.getPlayerConfig(player).isAutoCraft()) {
+            if (!craftingSuccess && PlayerLoader.getPlayer(player).isAutoCrafting()) {
                 MessageUtil.sendMessage("fusion.autoCancelled", player);
             }
 

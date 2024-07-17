@@ -1,6 +1,5 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
-import org.bukkit.Bukkit;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;

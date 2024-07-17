@@ -122,7 +122,11 @@ public class CustomGUI implements Listener {
                     if (queue != null && queue.getQueuedItems().containsKey(k)) {
                         inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
-                        inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        if(table.getUseCategories() && isCategory) {
+                            inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        } else if(!table.getUseCategories() && !isCategory) {
+                            inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        }
                     }
                 }
             }
@@ -208,10 +212,9 @@ public class CustomGUI implements Listener {
 
     public PlayerCustomGUI open(Player p, PlayerCustomGUI playerCustomGUI) {
         InventoryView iv = p.getOpenInventory();
-        if ((iv != null) && (iv.getTopInventory() != null)) {
-            this.map.remove(p);
-            p.closeInventory();
-        }
+        iv.getTopInventory();
+        this.map.remove(p);
+        p.closeInventory();
 
         if (playerCustomGUI != null) {
             this.map.put(p, playerCustomGUI);
@@ -313,9 +316,7 @@ public class CustomGUI implements Listener {
 
     private void onClose(Player p) {
         InventoryView v = p.getOpenInventory();
-        if (v != null) {
-            this.onClose(p, v.getTopInventory());
-        }
+        this.onClose(p, v.getTopInventory());
     }
 
     private void onClose(Player p, Inventory inv) {
@@ -361,7 +362,8 @@ public class CustomGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onClose(InventoryCloseEvent e) {
-        if (e.getPlayer() instanceof Player && e.getInventory() != null) {
+        if (e.getPlayer() instanceof Player) {
+            e.getInventory();
             this.onClose((Player) e.getPlayer(), e.getInventory());
         }
     }

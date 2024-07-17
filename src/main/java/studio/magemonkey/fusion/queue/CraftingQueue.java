@@ -47,8 +47,10 @@ public class CraftingQueue {
                 }
                 visualRemainingTotalTime = 0;
                 queue.forEach(item ->  {
-                    visualRemainingTotalTime += (item.getRecipe().getCooldown() - item.getSavedSeconds());
-                    item.update();
+                    if(!item.isDone() ) {
+                        visualRemainingTotalTime += (item.getRecipe().getCooldown() - item.getSavedSeconds());
+                        item.update();
+                    }
                 });
             }
         }.runTaskTimer(Fusion.getInstance(), 0, 20L);
@@ -82,7 +84,6 @@ public class CraftingQueue {
             CodexEngine.get().getVault().take(this.player, item.getRecipe().getPrice());
             //Commands
             DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getCommands());
-
             //Experience
             CraftingTable table = ProfessionsCfg.getTable(profession);
 

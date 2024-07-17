@@ -1,8 +1,10 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
-import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Category;
+import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
@@ -10,10 +12,7 @@ import studio.magemonkey.fusion.queue.QueueItem;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class FusionQueuesSQL {
 
@@ -110,8 +109,17 @@ public class FusionQueuesSQL {
         return entries;
     }
 
-    public Map<String, CraftingQueue> getCraftingQueue(UUID uuid) {
-        return null;
+    public Map<String, CraftingQueue> getCraftingQueues(Player player) {
+        Map<String, CraftingQueue> entries = new HashMap<>();
+        for(Map.Entry<String, CraftingTable> entry : ProfessionsCfg.getMap().entrySet()) {
+            String profession = entry.getKey();
+            for(Category category : entry.getValue().getCategories().values()) {
+                String path = profession + "." + category.getName();
+                if(entries.containsKey(path)) continue;
+                entries.putIfAbsent(path, new CraftingQueue(player, profession, category));
+            }
+        }
+        return entries;
     }
 
     public void saveCraftingQueue(CraftingQueue queue) {

@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -25,7 +24,7 @@ public class QueueItem {
     private boolean done;
     private int savedSeconds;
 
-    private boolean startUpdate = false;
+    private boolean isRunning = false;
     private CraftingQueue craftingQueue;
 
     @Getter
@@ -40,9 +39,16 @@ public class QueueItem {
         this.savedSeconds = savedSeconds;
         this.visualRemainingItemTime = (recipe.getCooldown() - savedSeconds);
         // If the queue item shall not be working when player is offline, just instantly override the timestamp
-        if (!Cfg.updateQueueOffline)
-            this.timestamp = System.currentTimeMillis();
-        update();
+        if (Cfg.updateQueueOffline) {
+            int diff = (int) ((System.currentTimeMillis() - timestamp) / 1000);
+            if (diff + savedSeconds > recipe.getCooldown()) {
+                this.savedSeconds = recipe.getCooldown();
+                this.done = true;
+            } else {
+                this.savedSeconds += diff;
+            }
+        }
+        this.timestamp = System.currentTimeMillis();
     }
 
     public void setCraftinQueue(CraftingQueue craftingQueue) {
@@ -50,18 +56,23 @@ public class QueueItem {
     }
 
     public void update() {
-        if(isDone()) return;
-        if(this.craftingQueue != null) {
+        if (isDone()) return;
+        if (this.craftingQueue != null) {
             this.visualRemainingItemTime = craftingQueue.getVisualRemainingTotalTime();
             int reconstructedCooldown = this.visualRemainingItemTime + savedSeconds;
-            Bukkit.getConsoleSender().sendMessage("Reconstructed Cooldown: " + reconstructedCooldown + " Recipe Cooldown: " + recipe.getCooldown());
-            Bukkit.getConsoleSender().sendMessage("Saved Seconds: " + savedSeconds + " Done: " + done);
-            Bukkit.getConsoleSender().sendMessage("Index: " + craftingQueue.getQueue().indexOf(this) + " Size: " + craftingQueue.getQueue().size());
 
+            if (visualRemainingItemTime == recipe.getCooldown() + 1) return;
             if (reconstructedCooldown <= recipe.getCooldown()) {
+                if (!isRunning) {
+                    isRunning = true;
+                    return;
+                }
                 this.savedSeconds++;
                 this.done = savedSeconds >= recipe.getCooldown();
                 this.icon = ProfessionsCfg.getQueueItem(profession, this);
+                if (this.savedSeconds > 0)
+                    this.visualRemainingItemTime--;
+                Bukkit.getConsoleSender().sendMessage(visualRemainingItemTime + " " + savedSeconds + " " + done);
             }
         } else {
             this.icon = ProfessionsCfg.getQueueItem(profession, this);
