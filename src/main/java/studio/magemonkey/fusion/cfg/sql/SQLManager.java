@@ -11,7 +11,6 @@ import studio.magemonkey.fusion.cfg.sql.tables.FusionQueuesSQL;
 
 import java.io.File;
 import java.sql.*;
-import java.util.Arrays;
 
 public class SQLManager {
 
@@ -22,7 +21,6 @@ public class SQLManager {
     private static FusionProfessionsSQL fusionProfessionsSQL;
     private static FusionQueuesSQL fusionQueuesSQL;
 
-    private static DatabaseType type;
     private static String host;
     private static int port;
     private static String database;
@@ -31,7 +29,7 @@ public class SQLManager {
 
     public static void init() {
         FileConfiguration cfg = Cfg.getConfig();
-        type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
+        DatabaseType type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
         host = cfg.getString("storage.host", "localhost");
         port = cfg.getInt("storage.port", 3306);
         database = cfg.getString("storage.database", "fusion");
@@ -175,15 +173,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement("INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)")) {
-                    while (resultProfessions.next()) {
-                        insertStatement.setLong(1, resultProfessions.getLong("Id"));
-                        insertStatement.setString(2, resultProfessions.getString("UUID"));
-                        insertStatement.setString(3, resultProfessions.getString("Profession"));
-                        insertStatement.setDouble(4, resultProfessions.getDouble("Experience"));
-                        insertStatement.setBoolean(5, resultProfessions.getBoolean("Mastered"));
-                        insertStatement.setBoolean(6, resultProfessions.getBoolean("Joined"));
-                        insertStatement.executeUpdate();
-                    }
+                    insertProfession(resultProfessions, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance().getLogger().severe("Error while inserting data into locale database: " + e.getMessage());
                     return;
@@ -195,15 +185,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement("INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)")) {
-                    while (resultQueues.next()) {
-                        insertStatement.setLong(1, resultQueues.getLong("Id"));
-                        insertStatement.setString(2, resultQueues.getString("UUID"));
-                        insertStatement.setString(3, resultQueues.getString("RecipePath"));
-                        insertStatement.setLong(4, resultQueues.getLong("Timestamp"));
-                        insertStatement.setDouble(5, resultQueues.getDouble("CraftingTime"));
-                        insertStatement.setDouble(6, resultQueues.getDouble("SavedSeconds"));
-                        insertStatement.executeUpdate();
-                    }
+                    insertQueue(resultQueues, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance().getLogger().severe("Error while inserting data into locale database: " + e.getMessage());
                 }
@@ -275,30 +257,38 @@ public class SQLManager {
     private static void insertProfessions(Connection connection, ResultSet resultSet) throws SQLException {
         String insertQuery = "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            while (resultSet.next()) {
-                preparedStatement.setLong(1, resultSet.getLong("Id"));
-                preparedStatement.setString(2, resultSet.getString("UUID"));
-                preparedStatement.setString(3, resultSet.getString("Profession"));
-                preparedStatement.setDouble(4, resultSet.getDouble("Experience"));
-                preparedStatement.setBoolean(5, resultSet.getBoolean("Mastered"));
-                preparedStatement.setBoolean(6, resultSet.getBoolean("Joined"));
-                preparedStatement.executeUpdate();
-            }
+            insertProfession(resultSet, preparedStatement);
         }
     }
 
     private static void insertQueues(Connection connection, ResultSet resultSet) throws SQLException {
         String insertQuery = "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            while (resultSet.next()) {
-                preparedStatement.setLong(1, resultSet.getLong("Id"));
-                preparedStatement.setString(2, resultSet.getString("UUID"));
-                preparedStatement.setString(3, resultSet.getString("RecipePath"));
-                preparedStatement.setLong(4, resultSet.getLong("Timestamp"));
-                preparedStatement.setDouble(5, resultSet.getDouble("CraftingTime"));
-                preparedStatement.setDouble(6, resultSet.getDouble("SavedSeconds"));
-                preparedStatement.executeUpdate();
-            }
+            insertQueue(resultSet, preparedStatement);
+        }
+    }
+
+    private static void insertQueue(ResultSet resultQueues, PreparedStatement insertStatement) throws SQLException {
+        while (resultQueues.next()) {
+            insertStatement.setLong(1, resultQueues.getLong("Id"));
+            insertStatement.setString(2, resultQueues.getString("UUID"));
+            insertStatement.setString(3, resultQueues.getString("RecipePath"));
+            insertStatement.setLong(4, resultQueues.getLong("Timestamp"));
+            insertStatement.setDouble(5, resultQueues.getDouble("CraftingTime"));
+            insertStatement.setDouble(6, resultQueues.getDouble("SavedSeconds"));
+            insertStatement.executeUpdate();
+        }
+    }
+
+    private static void insertProfession(ResultSet resultProfessions, PreparedStatement insertStatement) throws SQLException {
+        while (resultProfessions.next()) {
+            insertStatement.setLong(1, resultProfessions.getLong("Id"));
+            insertStatement.setString(2, resultProfessions.getString("UUID"));
+            insertStatement.setString(3, resultProfessions.getString("Profession"));
+            insertStatement.setDouble(4, resultProfessions.getDouble("Experience"));
+            insertStatement.setBoolean(5, resultProfessions.getBoolean("Mastered"));
+            insertStatement.setBoolean(6, resultProfessions.getBoolean("Joined"));
+            insertStatement.executeUpdate();
         }
     }
 }

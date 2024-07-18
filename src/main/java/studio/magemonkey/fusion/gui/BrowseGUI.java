@@ -130,8 +130,7 @@ public class BrowseGUI implements Listener {
             }
 
             map.put(player.getUniqueId(), this);
-            if(true)
-                player.openInventory(inventory);
+            player.openInventory(inventory);
 
         } catch (Exception e) {
             if (inventory != null) {

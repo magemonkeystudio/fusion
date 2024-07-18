@@ -32,7 +32,7 @@ public class Commands implements CommandExecutor, TabCompleter {
     private final Map<String, ConfirmationAction> confirmation = new HashMap<>();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         Fusion instance = Fusion.getInstance();
         if ((args.length == 2) || (args.length == 3)) {
             if (args[0].equalsIgnoreCase("use")) {

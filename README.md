@@ -23,5 +23,5 @@ or snapshots through Sonatype.
 ### A huge thanks to our contributors
 
 <a href="https://github.com/promcteam/fusion/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=promcteam/fusion" />
+<img src="https://contrib.rocks/image?repo=promcteam/fusion"  alt=""/>
 </a>

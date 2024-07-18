@@ -566,7 +566,7 @@ public class PlayerCustomGUI implements Listener {
                 if (recipe.getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
-                        if (cursor != null && cursor.isSimilar(recipe.getResult().getItemStack())) {
+                        if (cursor.isSimilar(recipe.getResult().getItemStack())) {
                             if (cursor.getAmount() < cursor.getMaxStackSize()
                                     && cursor.getAmount() + recipe.getResult().getAmount() <= cursor.getMaxStackSize()) {
                                 cursor.setAmount(cursor.getAmount() + recipe.getResult().getAmount());

@@ -41,8 +41,8 @@ public class CustomGUI implements Listener {
     @Getter
     protected final String inventoryName;
     protected Slot[] slots;
-    protected transient ArrayList<Integer> resultSlots = new ArrayList<>(20);
-    protected transient ArrayList<Integer> blockedSlots = new ArrayList<>(20);
+    protected final ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    protected final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
     protected transient int nextPage;
     protected transient int prevPage;
     @Getter
@@ -50,7 +50,7 @@ public class CustomGUI implements Listener {
     protected final InventoryPattern defaultPattern;
 
     /* Specifics if crafting_queue: true */
-    protected transient ArrayList<Integer> queuedSlots = new ArrayList<>(20);
+    protected final ArrayList<Integer> queuedSlots = new ArrayList<>(20);
     protected transient int prevQueuePage;
     protected transient int nextQueuePage;
 
@@ -249,7 +249,7 @@ public class CustomGUI implements Listener {
             return;
         }
 //        System.out.println("CLICK(" + e.getRawSlot() + ")..." + (e.getRawSlot() >= this.slots.length ? "NOPE" : this.slots[e.getRawSlot()]) + ", " + e.getAction() + ", " + inv + ", " + this.isThis(inv));
-        if ((inv == null) || (!(e.getWhoClicked() instanceof Player)) || !this.isThis(e.getView())) {
+        if (!(e.getWhoClicked() instanceof Player) || !this.isThis(e.getView())) {
 //            System.out.println("Ugh, fail!");
             return;
         }
@@ -276,7 +276,7 @@ public class CustomGUI implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent e) {
         Inventory inv = e.getView().getTopInventory();
-        if ((inv == null) || !(e.getWhoClicked() instanceof Player)) {
+        if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
         if (this.isThis(e.getView())) {
@@ -300,7 +300,8 @@ public class CustomGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if (player.getOpenInventory() != null && isThis(player.getOpenInventory())) {
+        player.getOpenInventory();
+        if (isThis(player.getOpenInventory())) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();

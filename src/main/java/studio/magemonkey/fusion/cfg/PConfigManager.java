@@ -12,9 +12,9 @@ import java.util.*;
 
 public class PConfigManager {
 
-    public static boolean backup() {
+    public static void backup() {
         File parentFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "players");
-        if (!parentFolder.exists()) return false;
+        if (!parentFolder.exists()) return;
 
         File backupFolder = new File(Fusion.getInstance().getDataFolder() + File.separator + "backup" + File.separator + "players");
         if (!backupFolder.exists()) backupFolder.mkdirs();
@@ -31,7 +31,6 @@ public class PConfigManager {
             }
         }
         Fusion.getInstance().getLogger().info("Backup of player data is done.");
-        return true;
     }
 
     public static void migrateIntoSQL() {

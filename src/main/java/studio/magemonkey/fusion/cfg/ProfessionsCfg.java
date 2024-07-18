@@ -52,8 +52,6 @@ public class ProfessionsCfg {
                     item,
                     0,
                     0);
-            List<Map<String, Object>> list = new ArrayList<>(3);
-            list.add(b.serialize());
             loadFrom("craft", b.serialize());
             return;
         }

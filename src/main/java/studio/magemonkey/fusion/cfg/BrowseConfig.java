@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+@SuppressWarnings("all")
 public class BrowseConfig {
 
     private static FileConfiguration config;
@@ -59,8 +60,7 @@ public class BrowseConfig {
             readData();
             Fusion.getInstance().log.info("Successfully loaded browse.yml data");
         } catch (IOException e) {
-            Fusion.getInstance().log.severe("Could not load browse.yml data");
-            e.printStackTrace();
+            Fusion.getInstance().log.severe("Could not load browse.yml data: " + e.getMessage());
         }
     }
 
@@ -83,6 +83,7 @@ public class BrowseConfig {
             try {
                 conf.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
             } catch (IOException e) {
+                Fusion.getInstance().log.severe("Could not load browse.yml data: " + e.getMessage());
                 e.printStackTrace();
             }
             Fusion.getInstance().log.info("Successfully ported old browse info to new browse.yml");

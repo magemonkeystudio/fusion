@@ -319,8 +319,10 @@ public class CalculatedRecipe {
 
     public static void trimLore(ItemStack item) {
         ItemMeta meta = item.getItemMeta();
+        if(meta == null) return;
         List<String> itemLore = meta.getLore();
-        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().equals("")
+        if(itemLore == null) return;
+        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().isEmpty()
                 || org.apache.commons.lang3.StringUtils.contains(s, "Craft Requirements")
                 || org.apache.commons.lang3.StringUtils.contains(s, "Item")
                 || org.apache.commons.lang3.StringUtils.contains(s, "Level Needed")

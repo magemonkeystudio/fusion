@@ -7,7 +7,6 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
@@ -76,8 +75,8 @@ public final class ExperienceManager {
         }
     }
 
-    public static boolean backup() {
-        if(!file.exists()) return false;
+    public static void backup() {
+        if(!file.exists()) return;
 
         YamlConfiguration cfg = new YamlConfiguration();
         try {
@@ -89,7 +88,6 @@ public final class ExperienceManager {
             Fusion.getInstance().getLogger().warning("Can't load exp data file: " + file);
             e.printStackTrace();
         }
-        return true;
     }
 
     // Stuff that can remain yet
@@ -101,19 +99,19 @@ public final class ExperienceManager {
             experience = (int) Math.ceil(Math.pow(level, 2) + (6 * level));
             int requiredExperience = (2 * level) + 7;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         } else if ((level > 15) && (level <= 30)) {
             experience = (int) Math.ceil((((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360));
             int requiredExperience = (5 * level) - 38;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         } else {
             experience = (int) Math.ceil(((((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220)));
             int requiredExperience = (9 * level) - 158;
             double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         }
     }
