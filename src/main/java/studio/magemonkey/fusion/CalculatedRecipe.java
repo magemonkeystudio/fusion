@@ -82,12 +82,12 @@ public class CalculatedRecipe {
                 moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.false",
                         "fusion.gui.money.false",
                         new MessageData("recipe", recipe),
-                        new MessageData("player", player));
+                        new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
             } else {
                 moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.true",
                         "fusion.gui.money.true",
                         new MessageData("recipe", recipe),
-                        new MessageData("player", player));
+                        new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
             }
         }
 
