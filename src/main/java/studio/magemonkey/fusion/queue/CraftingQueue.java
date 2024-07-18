@@ -81,7 +81,6 @@ public class CraftingQueue {
 
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
-            CodexEngine.get().getVault().take(this.player, item.getRecipe().getPrice());
             //Commands
             DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getCommands());
             //Experience
@@ -107,6 +106,7 @@ public class CraftingQueue {
 
     public void removeRecipe(QueueItem item, boolean refund) {
         if (refund) {
+            CodexEngine.get().getVault().give(this.player, item.getRecipe().getPrice());
             Collection<ItemStack> refunds = item.getRecipe().getItemsToTake();
             for (ItemStack refundItem : refunds) {
                 Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();

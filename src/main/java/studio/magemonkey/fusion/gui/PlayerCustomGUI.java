@@ -619,6 +619,7 @@ public class PlayerCustomGUI implements Listener {
                 }
             });
         } else {
+            CodexEngine.get().getVault().take(this.player, recipe.getPrice());
             this.queue.addRecipe(this.recipes.get(slot).getRecipe());
         }
         return true;
