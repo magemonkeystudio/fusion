@@ -72,7 +72,6 @@ public class QueueItem {
                 this.icon = ProfessionsCfg.getQueueItem(profession, this);
                 if (this.savedSeconds > 0)
                     this.visualRemainingItemTime--;
-                Bukkit.getConsoleSender().sendMessage(visualRemainingItemTime + " " + savedSeconds + " " + done);
             }
         } else {
             this.icon = ProfessionsCfg.getQueueItem(profession, this);
