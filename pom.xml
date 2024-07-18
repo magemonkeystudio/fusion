@@ -66,6 +66,7 @@
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>codex</artifactId>
+            <version>1.0.0-R0.27-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>

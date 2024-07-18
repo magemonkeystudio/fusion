@@ -1,15 +1,5 @@
 package studio.magemonkey.fusion.gui;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Utils;
-import studio.magemonkey.fusion.cfg.*;
-import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,6 +16,20 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.InventoryUtil;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.Utils;
+import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.PlayerConfig;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,7 +142,7 @@ public class BrowseGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onClick(InventoryClickEvent e) {
-        Inventory inv = e.getView().getTopInventory();
+        Inventory inv = InventoryUtil.getTopInventory(e);
         if (e.getRawSlot() < 0) {
             return;
         }
@@ -199,7 +203,7 @@ public class BrowseGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent e) {
-        Inventory inv = e.getView().getTopInventory();
+        Inventory inv = InventoryUtil.getTopInventory(e);
         if ((inv == null) || !(e.getWhoClicked() instanceof Player)) {
             return;
         }
