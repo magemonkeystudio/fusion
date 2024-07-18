@@ -101,8 +101,8 @@ public class SQLManager {
         return null;
     }
 
-    public static Connection connection() {
-        if (connection == null) {
+    public static Connection connection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
             init();
         }
         if (connection != null) {
