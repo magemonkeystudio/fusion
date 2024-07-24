@@ -62,6 +62,7 @@ public class PlayerCustomGUI implements Listener {
         this.gui = gui;
         this.player = player;
         this.inventory = inventory;
+        gui.setInventory(inventory);
         this.recipes = new HashMap<>(20);
         this.category = category;
         if (Cfg.craftingQueue && category != null) {
@@ -115,7 +116,6 @@ public class PlayerCustomGUI implements Listener {
 //            }
             PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
             gui.open(player, playerCustomGUI);
-            gui.setInventory(inv);
             player.openInventory(inv);
             playerCustomGUI.reloadRecipesTask();
             return playerCustomGUI;

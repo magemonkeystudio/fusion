@@ -187,6 +187,7 @@ public class ProfessionsCfg {
             cfg.set("inventoryName", map.get("inventoryName"));
             cfg.set("useCategories", map.get("useCategories"));
             cfg.set("pattern", map.get("pattern"));
+            cfg.set("categoryPattern", map.get("categoryPattern"));
             cfg.set("masteryUnlock", map.get("masteryUnlock"));
             cfg.set("masteryFee", map.get("masteryFee"));
             cfg.set("categories", map.get("categories"));

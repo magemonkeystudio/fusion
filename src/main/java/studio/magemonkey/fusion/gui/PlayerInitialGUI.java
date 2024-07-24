@@ -121,6 +121,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
     @Override
     public void onClick(InventoryClickEvent e) {
+
         e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
 

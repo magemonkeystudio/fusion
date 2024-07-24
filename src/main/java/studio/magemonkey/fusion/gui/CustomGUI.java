@@ -300,7 +300,6 @@ public class CustomGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        player.getOpenInventory();
         if(this.getInventory().getViewers().contains(player)) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
@@ -316,7 +315,7 @@ public class CustomGUI implements Listener {
     }
 
     private void onClose(Player p) {
-        this.onClose(p, p.getOpenInventory().getTopInventory());
+        this.onClose(p, inventory);
     }
 
     private void onClose(Player p, Inventory inv) {
