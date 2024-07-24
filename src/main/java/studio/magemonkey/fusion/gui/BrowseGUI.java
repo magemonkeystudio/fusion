@@ -41,11 +41,11 @@ public class BrowseGUI implements Listener {
     private static final HashMap<UUID, BrowseGUI> map = new HashMap<>();
 
 
-    private Inventory inventory;
-    private final Map<Integer, String> slotMap = new HashMap<>();
-    protected final String inventoryName;
-    private final Player player;
-    private final UUID opener;
+    private         Inventory            inventory;
+    private final   Map<Integer, String> slotMap = new HashMap<>();
+    protected final String               inventoryName;
+    private final   Player               player;
+    private final   UUID                 opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -95,7 +95,7 @@ public class BrowseGUI implements Listener {
             int k = this.slots.get(i);
 
             HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
-            int slot = 0;
+            int                           slot      = 0;
             for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
@@ -114,10 +114,10 @@ public class BrowseGUI implements Listener {
 
                 ItemStack item = table.getIconItem() != null ? table.getIconItem().create()
                         : ItemBuilder.newItem(Material.BEDROCK)
-                        .name(ChatColor.RED + table.getName())
-                        .newLoreLine(ChatColor.RED + "Missing icon in config.")
-                        .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
-                        .build();
+                                .name(ChatColor.RED + table.getName())
+                                .newLoreLine(ChatColor.RED + "Missing icon in config.")
+                                .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                                .build();
 
                 inventory.setItem(k, item);
                 this.slotMap.put(k, table.getName());
@@ -151,8 +151,8 @@ public class BrowseGUI implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onClick(InventoryClickEvent e) {
         Inventory clickedInv = e.getClickedInventory();
-        if(clickedInv == null) return;
-        if(!clickedInv.equals(inventory)) return;
+        if (clickedInv == null) return;
+        if (!clickedInv.equals(inventory)) return;
         if (e.getRawSlot() < 0) {
             return;
         }
@@ -163,12 +163,12 @@ public class BrowseGUI implements Listener {
         CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
         if (guiToOpen == null) return;
 
-        String profession = guiToOpen.getName();
+        String       profession   = guiToOpen.getName();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
         int unlocked = fusionPlayer.getUnlockedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
-        int cost = BrowseConfig.getProfCost(profession);
+        int allowed  = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
+        int cost     = BrowseConfig.getProfCost(profession);
 
         MessageData[] data = {
                 new MessageData("profession", profession),

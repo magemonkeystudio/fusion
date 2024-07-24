@@ -16,9 +16,9 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI gui;
+    private final CustomGUI              gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
-    private boolean isBase = false;
+    private       boolean                isBase  = false;
 
     private final Category masterCat;
 
@@ -40,9 +40,9 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
             inv = Bukkit.createInventory(player,
                     gui.slots.length,
                     ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            int k = -1;
-            HashMap<Character, ItemStack> items = gui.pattern.getItems();
-            PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
+            int                           k               = -1;
+            HashMap<Character, ItemStack> items           = gui.pattern.getItems();
+            PlayerInitialGUI              playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
             playerCustomGUI.isBase = true;
             CraftingTable table = ProfessionsCfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
@@ -71,7 +71,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     //Slots
                     if (c == 'o' && categoryIterator.hasNext()) {
                         List<Recipe> recipes;
-                        Category category;
+                        Category     category;
                         do {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());

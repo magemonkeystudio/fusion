@@ -37,22 +37,22 @@ import java.util.*;
 
 public class CustomGUI implements Listener {
     @Getter
-    protected final String name;
+    protected final     String             name;
     @Getter
-    protected final String inventoryName;
-    protected Slot[] slots;
-    protected final ArrayList<Integer> resultSlots = new ArrayList<>(20);
-    protected final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
-    protected transient int nextPage;
-    protected transient int prevPage;
+    protected final     String             inventoryName;
+    protected           Slot[]             slots;
+    protected final     ArrayList<Integer> resultSlots  = new ArrayList<>(20);
+    protected final     ArrayList<Integer> blockedSlots = new ArrayList<>(20);
+    protected transient int                nextPage;
+    protected transient int                prevPage;
     @Getter
-    protected InventoryPattern pattern;
-    protected final InventoryPattern defaultPattern;
+    protected           InventoryPattern   pattern;
+    protected final     InventoryPattern   defaultPattern;
 
     /* Specifics if crafting_queue: true */
-    protected final ArrayList<Integer> queuedSlots = new ArrayList<>(20);
-    protected transient int prevQueuePage;
-    protected transient int nextQueuePage;
+    protected final     ArrayList<Integer> queuedSlots = new ArrayList<>(20);
+    protected transient int                prevQueuePage;
+    protected transient int                nextQueuePage;
 
     protected final LinkedHashMap<Player, PlayerCustomGUI> map = new LinkedHashMap<>(20);
 
@@ -65,7 +65,14 @@ public class CustomGUI implements Listener {
         Bukkit.getPluginManager().registerEvents(this, Fusion.getInstance());
     }
 
-    public void resetBlockedSlots(Player player, Inventory inv, int page, int queuedPage, int totalItems, int queuedTotalItems, MessageData[] data, CraftingTable table) {
+    public void resetBlockedSlots(Player player,
+                                  Inventory inv,
+                                  int page,
+                                  int queuedPage,
+                                  int totalItems,
+                                  int queuedTotalItems,
+                                  MessageData[] data,
+                                  CraftingTable table) {
         resetBlockedSlots(player, inv, page, queuedPage, totalItems, queuedTotalItems, null, data, false, table, false);
     }
 
@@ -80,22 +87,22 @@ public class CustomGUI implements Listener {
                                   MessageData[] data,
                                   boolean includeBack, CraftingTable table, boolean isCategory) {
         int fullPages = totalItems / resultSlots.size();
-        int rest = totalItems % resultSlots.size();
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = totalItems % resultSlots.size();
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
 
         int queuedPages = -1;
 
-        if(!queuedSlots.isEmpty()) {
+        if (!queuedSlots.isEmpty()) {
             int queuedFullPages = queuedTotalItems / queuedSlots.size();
-            int queuedRest = queuedTotalItems % queuedSlots.size();
+            int queuedRest      = queuedTotalItems % queuedSlots.size();
             queuedPages = (queuedRest == 0) ? queuedFullPages : (queuedFullPages + 1);
         }
 
-        int k = -1;
+        int                           k     = -1;
         HashMap<Character, ItemStack> items = pattern.getItems();
 
         ArrayList<Integer> leaveBlank = new ArrayList<>();
-        ArrayList<Integer> fill = new ArrayList<>();
+        ArrayList<Integer> fill       = new ArrayList<>();
         for (String row : pattern.getPattern()) {
             for (char c : row.toCharArray()) {
                 k++;
@@ -122,9 +129,9 @@ public class CustomGUI implements Listener {
                     if (queue != null && queue.getQueuedItems().containsKey(k)) {
                         inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
-                        if(table.getUseCategories() && isCategory) {
+                        if (table.getUseCategories() && isCategory) {
                             inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
-                        } else if(!table.getUseCategories() && !isCategory) {
+                        } else if (!table.getUseCategories() && !isCategory) {
                             inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
                         }
                     }
@@ -147,8 +154,8 @@ public class CustomGUI implements Listener {
         this.resultSlots.clear();
         this.queuedSlots.clear();
         this.slots = new Slot[pattern.getPattern().length * 9];
-        int k = -1;
-        int prevPage = -1, nextPage = -1;
+        int k             = -1;
+        int prevPage      = -1, nextPage = -1;
         int prevQueuePage = -1, nextQueuePage = -1;
         for (String row : this.pattern.getPattern()) {
             for (char c : row.toCharArray()) {
@@ -253,7 +260,7 @@ public class CustomGUI implements Listener {
 //            System.out.println("Ugh, fail!");
             return;
         }
-        Player p = (Player) e.getWhoClicked();
+        Player          p               = (Player) e.getWhoClicked();
         PlayerCustomGUI playerCustomGUI = this.map.get(p);
         if (playerCustomGUI == null) {
             return;
@@ -327,7 +334,8 @@ public class CustomGUI implements Listener {
         Inventory pInventory = p.getInventory();
         if (this.isThis(p.getOpenInventory())) {
             for (int i = 0; i < this.slots.length; i++) {
-                if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT) || this.slots[i].equals(Slot.QUEUED_SLOT)) {
+                if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT)
+                        || this.slots[i].equals(Slot.QUEUED_SLOT)) {
                     continue;
                 }
                 ItemStack it = inv.getItem(i);

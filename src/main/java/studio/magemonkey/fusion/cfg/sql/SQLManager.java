@@ -17,19 +17,19 @@ public class SQLManager {
     @Getter
     private static volatile Connection connection;
 
-    private static FusionPlayersSQL fusionPlayersSQL;
+    private static FusionPlayersSQL     fusionPlayersSQL;
     private static FusionProfessionsSQL fusionProfessionsSQL;
-    private static FusionQueuesSQL fusionQueuesSQL;
+    private static FusionQueuesSQL      fusionQueuesSQL;
 
     private static String host;
-    private static int port;
+    private static int    port;
     private static String database;
     private static String user;
     private static String password;
 
     public static void init() {
-        FileConfiguration cfg = Cfg.getConfig();
-        DatabaseType type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
+        FileConfiguration cfg  = Cfg.getConfig();
+        DatabaseType      type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
         host = cfg.getString("storage.host", "localhost");
         port = cfg.getInt("storage.port", 3306);
         database = cfg.getString("storage.database", "fusion");
@@ -64,7 +64,7 @@ public class SQLManager {
         File databaseFile = new File(Fusion.getInstance().getDataFolder(), "database.db");
         databaseFile.getParentFile().mkdirs(); // Ensure the parent directories exist
         try {
-            String url = "jdbc:sqlite:" + databaseFile.getAbsolutePath();
+            String     url  = "jdbc:sqlite:" + databaseFile.getAbsolutePath();
             Connection conn = DriverManager.getConnection(url);
 
             Fusion.getInstance().getLogger().info("SQLite connection created at: " + databaseFile.getAbsolutePath());
@@ -77,7 +77,7 @@ public class SQLManager {
 
     private static Connection getMySQLConnection(String host, int port, String database, String user, String password) {
         try {
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+            String     url  = "jdbc:mysql://" + host + ":" + port + "/" + database;
             Connection conn = DriverManager.getConnection(url, user, password);
             Fusion.getInstance().getLogger().info("MySQL connection created for database: " + database);
             return conn;
@@ -87,9 +87,13 @@ public class SQLManager {
         return null;
     }
 
-    private static Connection getMariaDBConnection(String host, int port, String database, String user, String password) {
+    private static Connection getMariaDBConnection(String host,
+                                                   int port,
+                                                   String database,
+                                                   String user,
+                                                   String password) {
         try {
-            String url = "jdbc:mariadb://" + host + ":" + port + "/" + database;
+            String     url  = "jdbc:mariadb://" + host + ":" + port + "/" + database;
             Connection conn = DriverManager.getConnection(url, user, password);
             Fusion.getInstance().getLogger().info("MariaDB connection created for database: " + database);
             return conn;
@@ -141,8 +145,10 @@ public class SQLManager {
             statement.execute("DROP TABLE IF EXISTS fusion_professions");
             statement.execute("DROP TABLE IF EXISTS fusion_queues");
             statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
-            statement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            statement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            statement.execute(
+                    "CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
+            statement.execute(
+                    "CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
 
         } catch (SQLException e) {
             Fusion.getInstance().getLogger().severe("Error while dropping tables: " + e.getMessage());
@@ -156,14 +162,17 @@ public class SQLManager {
                  ResultSet resultPlayers = statement.executeQuery("SELECT * FROM fusion_players")) {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
-                     PreparedStatement insertStatement = sqliteConnection.prepareStatement("INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)")) {
+                     PreparedStatement insertStatement = sqliteConnection.prepareStatement(
+                             "INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)")) {
                     while (resultPlayers.next()) {
                         insertStatement.setString(1, resultPlayers.getString("UUID"));
                         insertStatement.setBoolean(2, resultPlayers.getBoolean("AutoCrafting"));
                         insertStatement.executeUpdate();
                     }
                 } catch (SQLException e) {
-                    Fusion.getInstance().getLogger().severe("Error while inserting data into locale database: " + e.getMessage());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .severe("Error while inserting data into locale database: " + e.getMessage());
                     return;
                 }
             }
@@ -172,10 +181,13 @@ public class SQLManager {
                  ResultSet resultProfessions = statement.executeQuery("SELECT * FROM fusion_professions")) {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
-                     PreparedStatement insertStatement = sqliteConnection.prepareStatement("INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)")) {
+                     PreparedStatement insertStatement = sqliteConnection.prepareStatement(
+                             "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)")) {
                     insertProfession(resultProfessions, insertStatement);
                 } catch (SQLException e) {
-                    Fusion.getInstance().getLogger().severe("Error while inserting data into locale database: " + e.getMessage());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .severe("Error while inserting data into locale database: " + e.getMessage());
                     return;
                 }
             }
@@ -184,14 +196,19 @@ public class SQLManager {
                  ResultSet resultQueues = statement.executeQuery("SELECT * FROM fusion_queues")) {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
-                     PreparedStatement insertStatement = sqliteConnection.prepareStatement("INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)")) {
+                     PreparedStatement insertStatement = sqliteConnection.prepareStatement(
+                             "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)")) {
                     insertQueue(resultQueues, insertStatement);
                 } catch (SQLException e) {
-                    Fusion.getInstance().getLogger().severe("Error while inserting data into locale database: " + e.getMessage());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .severe("Error while inserting data into locale database: " + e.getMessage());
                 }
             }
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().severe("Error while retrieving data from current database: " + e.getMessage());
+            Fusion.getInstance()
+                    .getLogger()
+                    .severe("Error while retrieving data from current database: " + e.getMessage());
             return;
         }
 
@@ -209,8 +226,10 @@ public class SQLManager {
             // Delete all content of the current database and recreate tables
             sqlStatement.execute("DROP TABLE IF EXISTS fusion_players, fusion_professions, fusion_queues");
             sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
-            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            sqlStatement.execute(
+                    "CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
+            sqlStatement.execute(
+                    "CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
 
             // Get all data from the local database
             try (Connection sqliteConnection = getSQLiteConnection();
@@ -227,12 +246,16 @@ public class SQLManager {
                 insertQueues(sqlConnection, resultQueues);
 
             } catch (SQLException e) {
-                Fusion.getInstance().getLogger().severe("Error while retrieving data from local database: " + e.getMessage());
+                Fusion.getInstance()
+                        .getLogger()
+                        .severe("Error while retrieving data from local database: " + e.getMessage());
                 return;
             }
 
         } catch (SQLException e) {
-            Fusion.getInstance().getLogger().severe("Error while managing SQL connection or executing statements: " + e.getMessage());
+            Fusion.getInstance()
+                    .getLogger()
+                    .severe("Error while managing SQL connection or executing statements: " + e.getMessage());
             return;
         }
 
@@ -255,14 +278,16 @@ public class SQLManager {
     }
 
     private static void insertProfessions(Connection connection, ResultSet resultSet) throws SQLException {
-        String insertQuery = "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery =
+                "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             insertProfession(resultSet, preparedStatement);
         }
     }
 
     private static void insertQueues(Connection connection, ResultSet resultSet) throws SQLException {
-        String insertQuery = "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery =
+                "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             insertQueue(resultSet, preparedStatement);
         }
@@ -280,7 +305,8 @@ public class SQLManager {
         }
     }
 
-    private static void insertProfession(ResultSet resultProfessions, PreparedStatement insertStatement) throws SQLException {
+    private static void insertProfession(ResultSet resultProfessions, PreparedStatement insertStatement) throws
+            SQLException {
         while (resultProfessions.next()) {
             insertStatement.setLong(1, resultProfessions.getLong("Id"));
             insertStatement.setString(2, resultProfessions.getString("UUID"));

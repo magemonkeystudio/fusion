@@ -17,9 +17,9 @@ public final class Utils {
     }
 
     public static String getFormattedTime(int seconds) {
-        int hours = seconds / 3600;
+        int hours   = seconds / 3600;
         int minutes = (seconds % 3600) / 60;
-        int secs = seconds % 60;
+        int secs    = seconds % 60;
 
         // format it properly so when hours are 0 it just show minutes and seconds. If minutes are 0 it just shows seconds
         if (hours == 0) {

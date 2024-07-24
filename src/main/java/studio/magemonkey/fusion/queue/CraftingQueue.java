@@ -20,12 +20,12 @@ import java.util.*;
 @Getter
 public class CraftingQueue {
 
-    private final Player player;
-    private final String profession;
-    private final Category category;
-    private final List<QueueItem> queue = new ArrayList<>();
+    private final Player                      player;
+    private final String                      profession;
+    private final Category                    category;
+    private final List<QueueItem>             queue = new ArrayList<>();
     private final HashMap<Integer, QueueItem> queuedItems;
-    private final BukkitTask queueTask;
+    private final BukkitTask                  queueTask;
 
     @Getter
     private int visualRemainingTotalTime = 0;
@@ -41,13 +41,13 @@ public class CraftingQueue {
         queueTask = new BukkitRunnable() {
             @Override
             public void run() {
-                if(!player.isOnline()) {
+                if (!player.isOnline()) {
                     cancel();
                     return;
                 }
                 visualRemainingTotalTime = 0;
-                queue.forEach(item ->  {
-                    if(!item.isDone() ) {
+                queue.forEach(item -> {
+                    if (!item.isDone()) {
                         visualRemainingTotalTime += (item.getRecipe().getCooldown() - item.getSavedSeconds());
                         item.update();
                     }
@@ -57,16 +57,24 @@ public class CraftingQueue {
     }
 
     public void addRecipe(Recipe recipe) {
-        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(profession, category);
-        int categoryLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + "." + category.getName() + ".limit");
-        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
-        int limit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+        int[] limits          = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(profession, category);
+        int   categoryLimit   =
+                PlayerUtil.getPermOption(player, "fusion.queue." + profession + "." + category.getName() + ".limit");
+        int   professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
+        int   limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
 
         if (categoryLimit > 0 && limits[0] >= categoryLimit) {
-            MessageUtil.sendMessage("fusion.queue.fullCategory", player, new MessageData("limit", categoryLimit), new MessageData("category", category.getName()), new MessageData("profession", profession));
+            MessageUtil.sendMessage("fusion.queue.fullCategory",
+                    player,
+                    new MessageData("limit", categoryLimit),
+                    new MessageData("category", category.getName()),
+                    new MessageData("profession", profession));
             return;
         } else if (professionLimit > 0 && limits[1] >= professionLimit) {
-            MessageUtil.sendMessage("fusion.queue.fullProfession", player, new MessageData("limit", professionLimit), new MessageData("profession", profession));
+            MessageUtil.sendMessage("fusion.queue.fullProfession",
+                    player,
+                    new MessageData("limit", professionLimit),
+                    new MessageData("profession", profession));
             return;
         } else if (limit > 0 && limits[2] >= limit) {
             MessageUtil.sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
@@ -91,13 +99,14 @@ public class CraftingQueue {
             }
 
             RecipeItem recipeItem = item.getRecipe().getResult();
-            ItemStack result = recipeItem.getItemStack();
+            ItemStack  result     = recipeItem.getItemStack();
             result.setAmount(recipeItem.getAmount());
             // If there is no space in the inventory, drop the items
             Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
             if (!notAdded.isEmpty()) {
                 for (ItemStack _item : notAdded) {
-                    Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
+                    Objects.requireNonNull(player.getLocation().getWorld())
+                            .dropItemNaturally(player.getLocation(), _item);
                 }
             }
             removeRecipe(item, false);
@@ -112,7 +121,8 @@ public class CraftingQueue {
                 Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
                 if (!notAdded.isEmpty()) {
                     for (ItemStack _item : notAdded) {
-                        Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
+                        Objects.requireNonNull(player.getLocation().getWorld())
+                                .dropItemNaturally(player.getLocation(), _item);
                     }
                 }
             }
@@ -124,7 +134,7 @@ public class CraftingQueue {
                 break;
             }
         }
-        if(!SQLManager.queues().removeQueueItem(item)) {
+        if (!SQLManager.queues().removeQueueItem(item)) {
             Fusion.getInstance().getLogger().warning("Failed to remove queue item from SQL");
         }
     }

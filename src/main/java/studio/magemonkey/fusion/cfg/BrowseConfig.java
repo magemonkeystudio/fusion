@@ -19,16 +19,16 @@ import java.util.LinkedList;
 public class BrowseConfig {
 
     private static FileConfiguration config;
-    private static File file;
+    private static File              file;
 
     @Getter
-    private static final LinkedList<String> professions = new LinkedList<>();
-    private static final HashMap<String, Integer> profCosts = new HashMap<>();
+    private static final LinkedList<String>       professions = new LinkedList<>();
+    private static final HashMap<String, Integer> profCosts   = new HashMap<>();
 
     @Getter
-    private static String browseName = ChatColor.DARK_AQUA + "Browse";
+    private static String           browseName = ChatColor.DARK_AQUA + "Browse";
     @Getter
-    private static ItemStack browseFill;
+    private static ItemStack        browseFill;
     @Getter
     private static InventoryPattern browsePattern;
 
@@ -93,7 +93,8 @@ public class BrowseConfig {
     private static void setDefaults() {
         //Browse stuff -- Added in v1.01
         config.addDefault("name", "&3&lBrowse");
-        config.addDefault("pattern.items.fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
+        config.addDefault("pattern.items.fillItem",
+                ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
 
         HashMap<Character, ItemStack> browseItems = new HashMap<>();
         browseItems.put('0',

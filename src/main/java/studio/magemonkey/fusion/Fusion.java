@@ -32,15 +32,15 @@ import java.util.UUID;
  * © 2024 MageMonkeyStudio
  */
 public class Fusion extends RisePlugin implements Listener {
-    public static final PlaceholderType<RecipeItem> RECIPE_ITEM =
+    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        =
             PlaceholderType.create("recipeItem", RecipeItem.class);
-    public static final PlaceholderType<Recipe> RECIPE =
+    public static final PlaceholderType<Recipe>           RECIPE             =
             PlaceholderType.create("recipe", Recipe.class);
-    public static final PlaceholderType<CraftingTable> CRAFTING_TABLE =
+    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     =
             PlaceholderType.create("craftingTable", CraftingTable.class);
-    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE =
+    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  =
             PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
-    public static final PlaceholderType<CustomGUI> CRAFTING_INVENTORY =
+    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY =
             PlaceholderType.create("craftingInventory", CustomGUI.class);
 
     @Getter

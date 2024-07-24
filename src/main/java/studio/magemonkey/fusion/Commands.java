@@ -32,7 +32,10 @@ public class Commands implements CommandExecutor, TabCompleter {
     private final Map<String, ConfirmationAction> confirmation = new HashMap<>();
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             String[] args) {
         Fusion instance = Fusion.getInstance();
         if ((args.length == 2) || (args.length == 3)) {
             if (args[0].equalsIgnoreCase("use")) {
@@ -172,28 +175,35 @@ public class Commands implements CommandExecutor, TabCompleter {
                     MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
-            } else if(args[0].equalsIgnoreCase("storage")) {
-                String storage = args[1];
-                DatabaseType type = DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
+            } else if (args[0].equalsIgnoreCase("storage")) {
+                String       storage = args[1];
+                DatabaseType type    =
+                        DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
                 switch (storage.toLowerCase()) {
                     case "locale":
-                        if(type == DatabaseType.LOCALE) {
-                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage", sender, new MessageData("storage", storage));
+                        if (type == DatabaseType.LOCALE) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                                    sender,
+                                    new MessageData("storage", storage));
                             return true;
                         }
                         SQLManager.swapToLocale();
                         MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
                         break;
                     case "sql":
-                        if(type == DatabaseType.MARIADB || type == DatabaseType.MYSQL) {
-                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage", sender, new MessageData("storage", storage));
+                        if (type == DatabaseType.MARIADB || type == DatabaseType.MYSQL) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                                    sender,
+                                    new MessageData("storage", storage));
                             return true;
                         }
                         SQLManager.swapToSql();
                         MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
                         break;
                     default:
-                        MessageUtil.sendMessage("fusion.error.invalidStorage", sender, new MessageData("storage", storage));
+                        MessageUtil.sendMessage("fusion.error.invalidStorage",
+                                sender,
+                                new MessageData("storage", storage));
                         break;
                 }
                 return true;
@@ -217,7 +227,8 @@ public class Commands implements CommandExecutor, TabCompleter {
                             new MessageData("category", entry.getValue().getName()),
                             new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
                             new MessageData("experience",
-                                    PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getExperience(entry.getValue())));
+                                    PlayerLoader.getPlayer(((Player) sender).getUniqueId())
+                                            .getExperience(entry.getValue())));
                 }
 
                 return true;
@@ -226,7 +237,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                if(Cfg.craftingQueue) {
+                if (Cfg.craftingQueue) {
                     MessageUtil.sendMessage("fusion.error.autoDisabled", sender);
                     return true;
                 }
@@ -270,40 +281,51 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender,
+                                      @NotNull Command command,
+                                      @NotNull String label,
+                                      @NotNull String[] args) {
         List<String> entries = new ArrayList<>();
-        if(args.length == 1) {
-            if("browse".startsWith(args[0])) entries.add("browse");
-            if("level".startsWith(args[0])) entries.add("level");
-            if("confirm".startsWith(args[0])) entries.add("confirm");
-            if("use".startsWith(args[0])) entries.add("use");
-            if("master".startsWith(args[0])) entries.add("master");
-            if("forget".startsWith(args[0])) entries.add("forget");
-            if(Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0])) entries.add("storage");
-            if(Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0])) entries.add("auto");
-            if(Fusion.getInstance().checkPermission(sender, "fusion.reload") && "reload".startsWith(args[0])) entries.add("reload");
-        } else if(args.length == 2) {
-            List<Profession> professions = new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
-            if(args[0].equalsIgnoreCase("use")) {
-                for(String name : professions.stream().map(Profession::getName).collect(Collectors.toList())) {
-                    if(name.startsWith(args[1])) entries.add(name);
+        if (args.length == 1) {
+            if ("browse".startsWith(args[0])) entries.add("browse");
+            if ("level".startsWith(args[0])) entries.add("level");
+            if ("confirm".startsWith(args[0])) entries.add("confirm");
+            if ("use".startsWith(args[0])) entries.add("use");
+            if ("master".startsWith(args[0])) entries.add("master");
+            if ("forget".startsWith(args[0])) entries.add("forget");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0]))
+                entries.add("storage");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0]))
+                entries.add("auto");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.reload") && "reload".startsWith(args[0]))
+                entries.add("reload");
+        } else if (args.length == 2) {
+            List<Profession> professions =
+                    new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
+            if (args[0].equalsIgnoreCase("use")) {
+                for (String name : professions.stream().map(Profession::getName).collect(Collectors.toList())) {
+                    if (name.startsWith(args[1])) entries.add(name);
                 }
-            } else if(args[0].equalsIgnoreCase("master")) {
-                for(String name : professions.stream().filter(Profession::isMastered).map(Profession::getName).collect(Collectors.toList())) {
-                    if(name.startsWith(args[1])) entries.add(name);
+            } else if (args[0].equalsIgnoreCase("master")) {
+                for (String name : professions.stream()
+                        .filter(Profession::isMastered)
+                        .map(Profession::getName)
+                        .collect(Collectors.toList())) {
+                    if (name.startsWith(args[1])) entries.add(name);
                 }
-            } else if(args[0].equalsIgnoreCase("forget")) {
-                for(String name : ProfessionsCfg.getMap().keySet()) {
-                    if(name.startsWith(args[1])) entries.add(name);
+            } else if (args[0].equalsIgnoreCase("forget")) {
+                for (String name : ProfessionsCfg.getMap().keySet()) {
+                    if (name.startsWith(args[1])) entries.add(name);
                 }
-            } else if(args[0].equalsIgnoreCase("storage") && Fusion.getInstance().checkPermission(sender, "fusion.admin")) {
-                if("locale".startsWith(args[1])) entries.add("locale");
-                if("sql".startsWith(args[1])) entries.add("sql");
+            } else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
+                    .checkPermission(sender, "fusion.admin")) {
+                if ("locale".startsWith(args[1])) entries.add("locale");
+                if ("sql".startsWith(args[1])) entries.add("sql");
             }
-        } else if(args.length == 3) {
-            if(Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
-                for(Player player : Bukkit.getOnlinePlayers()) {
-                    if(player.getName().startsWith(args[2])) entries.add(player.getName());
+        } else if (args.length == 3) {
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getName().startsWith(args[2])) entries.add(player.getName());
                 }
             }
         }

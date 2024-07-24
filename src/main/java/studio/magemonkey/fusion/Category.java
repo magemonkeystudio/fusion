@@ -18,17 +18,17 @@ import java.util.Map;
 
 public class Category implements ConfigurationSerializable {
     @Getter
-    private final String name;
+    private final String             name;
     @Getter
-    private final ItemType iconItem;
+    private final ItemType           iconItem;
     @Getter
-    private final Collection<Recipe> recipes = new ArrayList<>();
+    private final Collection<Recipe> recipes     = new ArrayList<>();
     @Setter
     @Getter
-    private InventoryPattern pattern;
+    private       InventoryPattern   pattern;
     @Getter
-    private final int order;
-    private boolean hasPrevious = true;
+    private final int                order;
+    private       boolean            hasPrevious = true;
 
     public Category(String name) {
         this.name = name;

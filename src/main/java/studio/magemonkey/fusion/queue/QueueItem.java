@@ -14,22 +14,27 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 @AllArgsConstructor
 public class QueueItem {
 
-    private long id;
-    private String profession;
-    private Category category;
-    private @NonNull Recipe recipe;
-    private ItemStack icon;
-    private long timestamp;
-    private boolean done;
-    private int savedSeconds;
+    private          long      id;
+    private          String    profession;
+    private          Category  category;
+    private @NonNull Recipe    recipe;
+    private          ItemStack icon;
+    private          long      timestamp;
+    private          boolean   done;
+    private          int       savedSeconds;
 
-    private boolean isRunning = false;
+    private boolean       isRunning = false;
     private CraftingQueue craftingQueue;
 
     @Getter
     private int visualRemainingItemTime;
 
-    public QueueItem(int id, String profession, Category category, @NotNull Recipe recipe, long timestamp, int savedSeconds) {
+    public QueueItem(int id,
+                     String profession,
+                     Category category,
+                     @NotNull Recipe recipe,
+                     long timestamp,
+                     int savedSeconds) {
         this.id = id;
         this.profession = profession;
         this.category = category;

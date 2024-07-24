@@ -10,15 +10,15 @@ import java.util.UUID;
 
 public class Profession {
 
-    private final long id;
-    private final UUID uuid;
-    private final String name;
+    private final long    id;
+    private final UUID    uuid;
+    private final String  name;
     @Setter
-    private double exp;
+    private       double  exp;
     @Setter
-    private boolean mastered;
+    private       boolean mastered;
     @Setter
-    private boolean joined;
+    private       boolean joined;
 
     public Profession(long id, UUID uuid, String name, double exp, boolean mastered, boolean joined) {
         this.id = id;

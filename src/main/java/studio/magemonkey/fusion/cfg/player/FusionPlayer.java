@@ -23,8 +23,8 @@ public class FusionPlayer {
 
     private final UUID uuid;
 
-    private final Map<String, Profession> professions = new TreeMap<>();
-    private Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private final Map<String, Profession>    professions = new TreeMap<>();
+    private       Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
 
     private final Map<String, PlayerCustomGUI> cachedGuis = new TreeMap<>();
 
@@ -53,7 +53,7 @@ public class FusionPlayer {
     }
 
     public void cacheGui(String id, PlayerCustomGUI gui) {
-        if(cachedGuis.containsKey(id)) {
+        if (cachedGuis.containsKey(id)) {
             cachedGuis.get(id).getGui().open(getPlayer(), cachedGuis.get(id));
             return;
         }
@@ -272,8 +272,8 @@ public class FusionPlayer {
     }
 
     public int[] getQueueSizes(String profession, Category category) {
-        int[] limits = new int[]{0, 0, 0};
-        String path = profession + "." + category.getName();
+        int[]  limits = new int[]{0, 0, 0};
+        String path   = profession + "." + category.getName();
         limits[0] = cachedQeues.containsKey(path) ? cachedQeues.get(path).getQueue().size() : 0;
         for (Map.Entry<String, CraftingQueue> queue : cachedQeues.entrySet()) {
             if (queue.getKey().contains(profession + ".")) {

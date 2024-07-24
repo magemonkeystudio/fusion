@@ -78,7 +78,7 @@ public abstract class Slot {
             return null;
         }
     };
-    public static final Slot QUEUED_SLOT          = new Slot(SlotType.RESULT) {
+    public static final Slot QUEUED_SLOT           = new Slot(SlotType.RESULT) {
         @Override
         public ItemStack canHoldItem(ItemStack item) {
             return null;
