@@ -115,6 +115,7 @@ public class PlayerCustomGUI implements Listener {
 //            }
             PlayerCustomGUI playerCustomGUI = new PlayerCustomGUI(gui, player, inv, category);
             gui.open(player, playerCustomGUI);
+            gui.setInventory(inv);
             player.openInventory(inv);
             playerCustomGUI.reloadRecipesTask();
             return playerCustomGUI;

@@ -7,12 +7,12 @@
     <parent>
         <groupId>studio.magemonkey</groupId>
         <artifactId>magemonkey-parent</artifactId>
-        <version>1.20.6-SNAPSHOT</version>
+        <version>1.21-SNAPSHOT</version>
     </parent>
 
     <artifactId>fusion</artifactId>
     <name>Fusion</name>
-    <version>1.0.0-R0.4-SNAPSHOT</version>
+    <version>1.0.0-R0.5-SNAPSHOT</version>
 
     <properties>
         <codex.version>1.0.0-R0.20-SNAPSHOT</codex.version>
@@ -66,6 +66,7 @@
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>codex</artifactId>
+            <version>1.0.0-R0.27-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>

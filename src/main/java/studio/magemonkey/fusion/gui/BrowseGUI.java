@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
@@ -41,11 +40,11 @@ public class BrowseGUI implements Listener {
     private static final HashMap<UUID, BrowseGUI> map = new HashMap<>();
 
 
-    private         Inventory            inventory;
-    private final   Map<Integer, String> slotMap = new HashMap<>();
-    protected final String               inventoryName;
-    private final   Player               player;
-    private final   UUID                 opener;
+    private Inventory inventory;
+    private final Map<Integer, String> slotMap = new HashMap<>();
+    protected final String inventoryName;
+    private final Player player;
+    private final UUID opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -95,7 +94,7 @@ public class BrowseGUI implements Listener {
             int k = this.slots.get(i);
 
             HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
-            int                           slot      = 0;
+            int slot = 0;
             for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
@@ -114,10 +113,10 @@ public class BrowseGUI implements Listener {
 
                 ItemStack item = table.getIconItem() != null ? table.getIconItem().create()
                         : ItemBuilder.newItem(Material.BEDROCK)
-                                .name(ChatColor.RED + table.getName())
-                                .newLoreLine(ChatColor.RED + "Missing icon in config.")
-                                .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
-                                .build();
+                        .name(ChatColor.RED + table.getName())
+                        .newLoreLine(ChatColor.RED + "Missing icon in config.")
+                        .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                        .build();
 
                 inventory.setItem(k, item);
                 this.slotMap.put(k, table.getName());
@@ -142,12 +141,6 @@ public class BrowseGUI implements Listener {
         }
     }
 
-    private boolean isThis(InventoryView inv, Player player) {
-        return inventoryName != null && inv.getTitle()
-                .equals(ChatColor.translateAlternateColorCodes('&', this.inventoryName)) &&
-                this.opener != null && this.opener.equals(player.getUniqueId());
-    }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onClick(InventoryClickEvent e) {
         Inventory clickedInv = e.getClickedInventory();
@@ -163,12 +156,12 @@ public class BrowseGUI implements Listener {
         CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
         if (guiToOpen == null) return;
 
-        String       profession   = guiToOpen.getName();
+        String profession = guiToOpen.getName();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
         int unlocked = fusionPlayer.getUnlockedProfessions().size();
-        int allowed  = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
-        int cost     = BrowseConfig.getProfCost(profession);
+        int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
+        int cost = BrowseConfig.getProfCost(profession);
 
         MessageData[] data = {
                 new MessageData("profession", profession),
@@ -212,7 +205,7 @@ public class BrowseGUI implements Listener {
         if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
-        if (this.isThis(e.getView(), (Player) e.getWhoClicked())) {
+        if (e.getInventory().equals(inventory)) {
             if (e.getOldCursor().getType() == Material.BARRIER)
                 e.setCancelled(true);
             if (e.getRawSlots().stream().anyMatch(this.slots::contains)) {
@@ -229,8 +222,7 @@ public class BrowseGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        player.getOpenInventory();
-        if (isThis(player.getOpenInventory(), event.getPlayer())) {
+        if (this.inventory.getViewers().contains(player)) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();
@@ -244,7 +236,7 @@ public class BrowseGUI implements Listener {
 
     @EventHandler
     public void close(InventoryCloseEvent event) {
-        if (isThis(event.getView(), (Player) event.getPlayer()))
+        if (event.getInventory().equals(inventory))
             map.remove(event.getPlayer().getUniqueId());
     }
 
