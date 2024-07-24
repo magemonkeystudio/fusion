@@ -1,7 +1,7 @@
 package studio.magemonkey.fusion.cfg.sql;
 
 public enum DatabaseType {
-    LOCALE,
+    LOCAL,
     MYSQL,
     MARIADB,
 }

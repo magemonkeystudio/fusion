@@ -29,7 +29,7 @@ public class SQLManager {
 
     public static void init() {
         FileConfiguration cfg  = Cfg.getConfig();
-        DatabaseType      type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCALE").toUpperCase());
+        DatabaseType      type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCAL").toUpperCase());
         host = cfg.getString("storage.host", "localhost");
         port = cfg.getInt("storage.port", 3306);
         database = cfg.getString("storage.database", "fusion");
@@ -39,7 +39,7 @@ public class SQLManager {
         Fusion.getInstance().getLogger().info("Initializing SQLManager with type: " + type);
 
         switch (type) {
-            case LOCALE:
+            case LOCAL:
                 connection = getSQLiteConnection();
                 break;
             case MYSQL:
@@ -136,7 +136,7 @@ public class SQLManager {
         return fusionQueuesSQL;
     }
 
-    public static void swapToLocale() {
+    public static void swapToLocal() {
         // Delete all content of the local database
         try (Connection sqliteConnection = getSQLiteConnection();
              Statement statement = sqliteConnection.createStatement()) {
@@ -212,7 +212,7 @@ public class SQLManager {
             return;
         }
 
-        if (Cfg.setDatabaseType(DatabaseType.LOCALE)) {
+        if (Cfg.setDatabaseType(DatabaseType.LOCAL)) {
             Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), SQLManager::init, 30L);
         }
         Fusion.getInstance().getLogger().info("Swapped to LOCALE database successfully.");

@@ -180,14 +180,14 @@ public class Commands implements CommandExecutor, TabCompleter {
                 DatabaseType type    =
                         DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
                 switch (storage.toLowerCase()) {
-                    case "locale":
-                        if (type == DatabaseType.LOCALE) {
+                    case "local":
+                        if (type == DatabaseType.LOCAL) {
                             MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
                                     sender,
                                     new MessageData("storage", storage));
                             return true;
                         }
-                        SQLManager.swapToLocale();
+                        SQLManager.swapToLocal();
                         MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
                         break;
                     case "sql":

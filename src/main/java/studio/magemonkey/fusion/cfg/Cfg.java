@@ -22,7 +22,7 @@ public final class Cfg {
     public static boolean updateQueueOffline      = true;
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
-    private static final DatabaseType storageType     = DatabaseType.LOCALE;
+    private static final DatabaseType storageType     = DatabaseType.LOCAL;
     private static final String       storageHost     = "localhost";
     private static final int          storagePort     = 3306;
     private static final String       storageDatabase = "database";
