@@ -1,9 +1,9 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
 
 public class RecipeCustomItem implements RecipeItem {
     private final ItemStack item;

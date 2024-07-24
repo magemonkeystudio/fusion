@@ -1,9 +1,8 @@
 package studio.magemonkey.fusion.util;
 
-import org.bukkit.Bukkit;
-import studio.magemonkey.fusion.Fusion;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import studio.magemonkey.fusion.Fusion;
 
 public class PlayerUtil {
 

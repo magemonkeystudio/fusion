@@ -1,8 +1,9 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.util.Maths;
 import org.bukkit.entity.Player;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.util.Maths;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class LevelFunction {
     }
 
     public static int getLevel(Player player, CraftingTable craftingTable) {
-        return getLevel(Fusion.getExperienceManager().getExperience(player, craftingTable));
+        return getLevel(PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable));
     }
 
     public static void generate(int levels) {

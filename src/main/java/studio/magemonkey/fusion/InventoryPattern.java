@@ -1,14 +1,15 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.api.DelayedCommand;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.util.SerializationBuilder;
-import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import studio.magemonkey.codex.api.DelayedCommand;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -46,7 +47,7 @@ public class InventoryPattern implements ConfigurationSerializable {
                 closeOnClickSlots.add(entry.charAt(0));
             }
         }
-        if(dw.getSection("items.queue-items.-") != null)
+        if (dw.getSection("items.queue-items.-") != null)
             this.items.put('-', new ItemBuilder(dw.getSection("items.queue-items.-")).build());
 
         final DeserializationWorker commandsTemp =
@@ -76,8 +77,8 @@ public class InventoryPattern implements ConfigurationSerializable {
     }
 
     @Override
-    public Map<String, Object> serialize() {
-        //noinspection Convert2MethodRef,RedundantCast eclipse...,
+    public @NotNull Map<String, Object> serialize() {
+        // noinspection RedundantCast eclipse...
         return SerializationBuilder.start(2)
                 .append("pattern", this.pattern)
                 .appendMap("commands", this.commands)

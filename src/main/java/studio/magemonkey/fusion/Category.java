@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.CodexItemException;
@@ -17,17 +18,17 @@ import java.util.Map;
 
 public class Category implements ConfigurationSerializable {
     @Getter
-    private final String name;
+    private final String             name;
     @Getter
-    private final ItemType iconItem;
+    private final ItemType           iconItem;
     @Getter
-    private final Collection<Recipe> recipes = new ArrayList<>();
+    private final Collection<Recipe> recipes     = new ArrayList<>();
     @Setter
     @Getter
-    private InventoryPattern pattern;
+    private       InventoryPattern   pattern;
     @Getter
-    private final int order;
-    private boolean hasPrevious = true;
+    private final int                order;
+    private       boolean            hasPrevious = true;
 
     public Category(String name) {
         this.name = name;
@@ -53,7 +54,7 @@ public class Category implements ConfigurationSerializable {
     }
 
     @Override
-    public Map<String, Object> serialize() {
+    public @NotNull Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         if (pattern != null)

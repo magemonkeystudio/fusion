@@ -3,8 +3,6 @@ package studio.magemonkey.fusion;
 import org.bukkit.permissions.Permissible;
 
 public final class Utils {
-    private Utils() {
-    }
 
     public static boolean hasCraftingPermission(Permissible permissible, String item) {
         return permissible.hasPermission("fusion.recipe." + item) || permissible.hasPermission("fusion.recipes") ||
@@ -19,9 +17,9 @@ public final class Utils {
     }
 
     public static String getFormattedTime(int seconds) {
-        int hours = seconds / 3600;
+        int hours   = seconds / 3600;
         int minutes = (seconds % 3600) / 60;
-        int secs = seconds % 60;
+        int secs    = seconds % 60;
 
         // format it properly so when hours are 0 it just show minutes and seconds. If minutes are 0 it just shows seconds
         if (hours == 0) {

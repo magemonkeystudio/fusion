@@ -1,27 +1,30 @@
 package studio.magemonkey.fusion;
 
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
-import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.*;
+import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
-import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -41,10 +44,7 @@ public class Fusion extends RisePlugin implements Listener {
             PlaceholderType.create("craftingInventory", CustomGUI.class);
 
     @Getter
-    private static Fusion            instance;
-    private static ExperienceManager experienceManager;
-
-    private BukkitTask saveTask;
+    private static Fusion instance;
 
     {
         instance = this;
@@ -57,21 +57,11 @@ public class Fusion extends RisePlugin implements Listener {
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
+
         Cfg.init();
         ProfessionsCfg.init();
-        if (experienceManager != null) {
-            try {
-                experienceManager.save();
-            } catch (IOException e) {
-                log.warning("Error saving data.yml");
-                e.printStackTrace();
-            }
-        }
-        experienceManager = new ExperienceManager();
-        experienceManager.load();
+        SQLManager.init();
         BrowseConfig.load();
-        PConfigManager.clearPConfigCache();
-        runSaveTask();
     }
 
     @Override
@@ -112,6 +102,12 @@ public class Fusion extends RisePlugin implements Listener {
     public void onEnable() {
         super.onEnable();
         this.reloadConfig();
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [ExperienceManager].");
+            ExperienceManager.migrateIntoSQL();
+            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [PConfigManager].");
+            PConfigManager.migrateIntoSQL();
+        });
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         getServer().getPluginManager().registerEvents(this, this);
@@ -126,38 +122,8 @@ public class Fusion extends RisePlugin implements Listener {
     @Override
     public void onDisable() {
         super.onDisable();
-        try {
-            experienceManager.save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        PlayerLoader.clearCache();
         this.closeAll();
-    }
-
-    private void runSaveTask() {
-        if (saveTask != null && !saveTask.isCancelled())
-            saveTask.cancel();
-
-        long period = Cfg.dataSaveInterval;
-
-        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-            try {
-                experienceManager.save();
-            } catch (IOException e) {
-                System.out.println("Could not save data files.");
-                e.printStackTrace();
-            }
-        }, period, period);
-        this.saveTask = task;
-    }
-
-    /**
-     * Gets the experience manager
-     *
-     * @return experience manager
-     */
-    public static ExperienceManager getExperienceManager() {
-        return experienceManager;
     }
 
     private final HashMap<UUID, Double> cachedCooldowns = new HashMap<>();
@@ -186,10 +152,9 @@ public class Fusion extends RisePlugin implements Listener {
     }
 
     private void notifyForQueue(Player player) {
-        PlayerConfig config = PConfigManager.getPlayerConfig(player);
-        int finishedQueueAmount = config.getFinishedQueueAmount();
-        if(finishedQueueAmount > 0) {
-            MessageUtil.sendMessage("fusion.queue.finished", player, new MessageData("amount", finishedQueueAmount));
+        int finishedQueueAmount = PlayerLoader.getPlayer(player.getUniqueId()).getFinishedSize();
+        if (finishedQueueAmount > 0) {
+            Cfg.notifyForQueue(player, finishedQueueAmount);
         }
     }
 
@@ -200,8 +165,14 @@ public class Fusion extends RisePlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        PlayerLoader.loadPlayer(event.getPlayer());
         if (Cfg.craftingQueue) {
             notifyForQueue(event.getPlayer());
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        PlayerLoader.unloadPlayer(event.getPlayer());
     }
 }

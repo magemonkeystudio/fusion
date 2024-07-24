@@ -1,31 +1,26 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.Cfg;
-import org.apache.commons.lang3.Validate;
-import org.bukkit.Bukkit;
+import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public final class ExperienceManager {
-    public static class PlayerData implements ConfigurationSerializable {
+
+    public static class PlayerData {
+        @Getter
         private final UUID                        uuid;
         private final Map<CraftingTable, Integer> data = new HashMap<>();
 
-        /**
-         * The constructor
-         *
-         * @param map serialized data
-         */
         public PlayerData(Map<String, Object> map) {
             uuid = UUID.fromString((String) map.get("uuid"));
             //noinspection unchecked
@@ -33,176 +28,78 @@ public final class ExperienceManager {
                     (Integer) value));
         }
 
-        /**
-         * The constructor
-         *
-         * @param uuid player uuid
-         */
-        public PlayerData(UUID uuid) {
-            this.uuid = uuid;
-        }
-
-        /**
-         * Gets player uuid
-         *
-         * @return uuid
-         */
-        public UUID getUuid() {
-            return uuid;
-        }
-
-        /**
-         * Gets data map
-         *
-         * @return data map
-         */
-        public Map<CraftingTable, Integer> getMap() {
-            return data;
-        }
-
-        /**
-         * Gets experience
-         *
-         * @param craftingTable table
-         * @return experience
-         */
         public Integer getExperience(CraftingTable craftingTable) {
             return data.getOrDefault(craftingTable, 0);
         }
 
-        /**
-         * Adds experience
-         *
-         * @param craftingTable table
-         * @param experience    experience
-         */
-        public void add(CraftingTable craftingTable, Integer experience) {
-            int previousXp    = data.getOrDefault(craftingTable, 0);
-            int previousLevel = LevelFunction.getLevel(previousXp);
-            data.put(craftingTable, previousXp + experience);
-            int newLevel = LevelFunction.getLevel(previousXp + experience);
-            if (newLevel > previousLevel)
-                MessageUtil.sendMessage("fusion.levelup",
-                        Bukkit.getPlayer(uuid),
-                        new MessageData("level", newLevel),
-                        new MessageData("experience", previousXp + experience));
-        }
-
         public void remove(String craftingTable) {
             data.remove(ProfessionsCfg.getTable(craftingTable));
-
-            try {
-                Fusion.getExperienceManager().save();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public Map<String, Object> serialize() {
-            final Map<String, Object> map = new HashMap<>();
-
-            map.put("uuid", uuid.toString());
-            Map<String, Object> dataMap = new HashMap<>();
-            data.forEach((key, value) -> dataMap.put(key.getName(), value));
-            map.put("data", dataMap);
-
-            return map;
         }
     }
 
-    private final Collection<PlayerData> playerDataSet = new HashSet<>();
-    private final File                   file          = new File(Fusion.getInstance().getDataFolder(), "data.yml");
+    private static final File file = new File(Fusion.getInstance().getDataFolder(), "data.yml");
 
-    /**
-     * Loads data
-     */
-    public void load() {
+    // TODO Migration into sql
+    public static void migrateIntoSQL() {
+        if (!file.exists()) return;
+
+        YamlConfiguration cfg = new YamlConfiguration();
         try {
-            if (!file.exists() && !file.createNewFile()) {
-                Fusion.getInstance().getLogger().severe("Failed to create exp data file");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        YamlConfiguration configuration = new YamlConfiguration();
-
-        try {
-            configuration.load(file);
+            cfg.load(file);
         } catch (Exception e) {
             Fusion.getInstance().getLogger().warning("Can't load exp data file: " + file);
             e.printStackTrace();
             return;
         }
 
-        List<Map<?, ?>> typesSection = configuration.getMapList("data");
+        List<Map<?, ?>> typesSection = cfg.getMapList("data");
         for (Map<?, ?> typeData : typesSection) {
             //noinspection unchecked
             PlayerData playerData = new PlayerData((Map<String, Object>) typeData);
-            if (playerDataSet.stream().filter(data -> data.getUuid().equals(playerData.getUuid())).count() == 0)
-                this.playerDataSet.add(playerData);
-        }
-    }
-
-    /**
-     * Saves all the data
-     *
-     * @throws IOException when something goes wrong
-     */
-    public void save() throws IOException {
-        YamlConfiguration         configuration = new YamlConfiguration();
-        List<Map<String, Object>> list          = new ArrayList<>();
-
-        this.playerDataSet.forEach(playerData -> list.add(playerData.serialize()));
-
-        configuration.set("data", list);
-        configuration.save(file);
-    }
-
-    /**
-     * Gets player experience
-     *
-     * @param player        player
-     * @param craftingTable table
-     * @return experience as int
-     */
-    public int getExperience(Player player, CraftingTable craftingTable) {
-        Validate.notNull(player);
-        Validate.notNull(craftingTable);
-        PlayerData playerData = getPlayerData(player);
-        Validate.notNull(playerData);
-        return playerData.getExperience(craftingTable);
-    }
-
-    /**
-     * Gets player data
-     *
-     * @param player player
-     * @return player data object
-     */
-    public PlayerData getPlayerData(Player player) {
-        for (PlayerData data : playerDataSet) {
-            if (data.getUuid().equals(player.getUniqueId())) {
-                return data;
+            for (Map.Entry<CraftingTable, Integer> table : playerData.data.entrySet()) {
+                SQLManager.professions()
+                        .setProfession(playerData.uuid,
+                                new Profession(-1,
+                                        playerData.getUuid(),
+                                        table.getKey().getName(),
+                                        playerData.getExperience(table.getKey()),
+                                        false,
+                                        false));
+                //playerData.remove(table.getKey().getName());
+                Fusion.getInstance()
+                        .getLogger()
+                        .info("Migrated " + playerData.getUuid() + " with " + table.getKey().getName());
+            }
+            if (playerData.data.isEmpty()) {
+                typesSection.remove(typeData);
             }
         }
-
-        return createPlayerData(player);
+        if (typesSection.isEmpty()) {
+            backup();
+            if (file.delete()) {
+                Fusion.getInstance().getLogger().info("Deleted data.yml");
+            }
+        } else {
+            cfg.set("data", typesSection);
+        }
     }
 
-    /**
-     * Creates player data
-     *
-     * @param player player
-     * @return player data object
-     */
-    public PlayerData createPlayerData(Player player) {
-        PlayerData playerData = new PlayerData(player.getUniqueId());
-        playerDataSet.add(playerData);
-        return playerData;
+    public static void backup() {
+        if (!file.exists()) return;
+
+        YamlConfiguration cfg = new YamlConfiguration();
+        try {
+            cfg.load(file);
+            File backupFile = new File(Fusion.getInstance().getDataFolder(), "backup/data.yml");
+            cfg.save(backupFile);
+            Fusion.getInstance().getLogger().info("Backup saved to " + backupFile);
+        } catch (Exception e) {
+            Fusion.getInstance().getLogger().warning("Can't load exp data file: " + file);
+            e.printStackTrace();
+        }
     }
 
+    // Stuff that can remain yet
     @Deprecated
     public static int getTotalExperience(Player player) {
         int experience;
@@ -211,19 +108,19 @@ public final class ExperienceManager {
             experience = (int) Math.ceil(Math.pow(level, 2) + (6 * level));
             int    requiredExperience = (2 * level) + 7;
             double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         } else if ((level > 15) && (level <= 30)) {
             experience = (int) Math.ceil((((2.5 * Math.pow(level, 2)) - (40.5 * level)) + 360));
             int    requiredExperience = (5 * level) - 38;
             double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         } else {
             experience = (int) Math.ceil(((((4.5 * Math.pow(level, 2)) - (162.5 * level)) + 2220)));
             int    requiredExperience = (9 * level) - 158;
             double currentExp         = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
+            experience += (int) Math.ceil(currentExp * requiredExperience);
             return experience;
         }
     }

@@ -1,31 +1,41 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
-import studio.magemonkey.fusion.cfg.PlayerConfig;
-import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.sql.DatabaseType;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.gui.BrowseGUI;
+import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class Commands implements CommandExecutor {
+public class Commands implements CommandExecutor, TabCompleter {
 
     private final Map<String, ConfirmationAction> confirmation = new HashMap<>();
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,
+                             @NotNull Command command,
+                             @NotNull String label,
+                             String[] args) {
         Fusion instance = Fusion.getInstance();
         if ((args.length == 2) || (args.length == 3)) {
             if (args[0].equalsIgnoreCase("use")) {
@@ -68,7 +78,7 @@ public class Commands implements CommandExecutor {
                             return true;
                         }
                         //Make sure they have unlocked this crafting menu
-                        if (!PConfigManager.getPlayerConfig((Player) sender).hasProfession(eq.getName())) {
+                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getName())) {
                             MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }
@@ -98,7 +108,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    if (PConfigManager.hasMastery(player, table.getName())) {
+                    if (PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasMastered(table.getName())) {
                         MessageUtil.sendMessage("fusion.error.alreadyMastered",
                                 sender,
                                 new MessageData("sender", sender),
@@ -122,7 +132,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
 
-                    PConfigManager.getPlayerConfig(player).setHasMastery(table.getName(), true);
+                    PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
                     MessageUtil.sendMessage("fusion.mastered",
                             sender,
                             new MessageData("sender", sender),
@@ -144,8 +154,7 @@ public class Commands implements CommandExecutor {
                         return true;
                     }
                     ConfirmationAction action = () -> {
-                        PlayerConfig conf = PConfigManager.getPlayerConfig(player);
-                        conf.removeProfession(table.getName());
+                        PlayerLoader.getPlayer(player.getUniqueId()).removeProfession(table.getName());
                         MessageUtil.sendMessage("fusion.forgotten",
                                 sender,
                                 new MessageData("sender", sender),
@@ -166,6 +175,38 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
+            } else if (args[0].equalsIgnoreCase("storage")) {
+                String       storage = args[1];
+                DatabaseType type    =
+                        DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
+                switch (storage.toLowerCase()) {
+                    case "local":
+                        if (type == DatabaseType.LOCAL) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                                    sender,
+                                    new MessageData("storage", storage));
+                            return true;
+                        }
+                        SQLManager.swapToLocal();
+                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        break;
+                    case "sql":
+                        if (type == DatabaseType.MARIADB || type == DatabaseType.MYSQL) {
+                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                                    sender,
+                                    new MessageData("storage", storage));
+                            return true;
+                        }
+                        SQLManager.swapToSql();
+                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        break;
+                    default:
+                        MessageUtil.sendMessage("fusion.error.invalidStorage",
+                                sender,
+                                new MessageData("storage", storage));
+                        break;
+                }
+                return true;
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("browse")) {
@@ -174,7 +215,6 @@ public class Commands implements CommandExecutor {
                     return true;
                 }
                 Player player = (Player) sender;
-
                 BrowseGUI.open(player);
                 return true;
             } else if (args[0].equalsIgnoreCase("level")) {
@@ -187,7 +227,8 @@ public class Commands implements CommandExecutor {
                             new MessageData("category", entry.getValue().getName()),
                             new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
                             new MessageData("experience",
-                                    Fusion.getExperienceManager().getExperience((Player) sender, entry.getValue())));
+                                    PlayerLoader.getPlayer(((Player) sender).getUniqueId())
+                                            .getExperience(entry.getValue())));
                 }
 
                 return true;
@@ -196,7 +237,7 @@ public class Commands implements CommandExecutor {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                if(Cfg.craftingQueue) {
+                if (Cfg.craftingQueue) {
                     MessageUtil.sendMessage("fusion.error.autoDisabled", sender);
                     return true;
                 }
@@ -205,10 +246,9 @@ public class Commands implements CommandExecutor {
                 }
                 Player player = (Player) sender;
 
-                boolean autoOn = PConfigManager.getPlayerConfig(player).isAutoCraft();
+                boolean autoOn = PlayerLoader.getPlayer(player).isAutoCrafting();
 
-                PConfigManager.getPlayerConfig(player).setAutoCraft((autoOn = !autoOn));
-
+                PlayerLoader.getPlayer(player).setAutoCrafting((autoOn = !autoOn));
                 MessageUtil.sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
 
                 return true;
@@ -237,6 +277,59 @@ public class Commands implements CommandExecutor {
         MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
         return true;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender,
+                                      @NotNull Command command,
+                                      @NotNull String label,
+                                      @NotNull String[] args) {
+        List<String> entries = new ArrayList<>();
+        if (args.length == 1) {
+            if ("browse".startsWith(args[0])) entries.add("browse");
+            if ("level".startsWith(args[0])) entries.add("level");
+            if ("confirm".startsWith(args[0])) entries.add("confirm");
+            if ("use".startsWith(args[0])) entries.add("use");
+            if ("master".startsWith(args[0])) entries.add("master");
+            if ("forget".startsWith(args[0])) entries.add("forget");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0]))
+                entries.add("storage");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0]))
+                entries.add("auto");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.reload") && "reload".startsWith(args[0]))
+                entries.add("reload");
+        } else if (args.length == 2) {
+            List<Profession> professions =
+                    new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
+            if (args[0].equalsIgnoreCase("use")) {
+                for (String name : professions.stream().map(Profession::getName).collect(Collectors.toList())) {
+                    if (name.startsWith(args[1])) entries.add(name);
+                }
+            } else if (args[0].equalsIgnoreCase("master")) {
+                for (String name : professions.stream()
+                        .filter(Profession::isMastered)
+                        .map(Profession::getName)
+                        .collect(Collectors.toList())) {
+                    if (name.startsWith(args[1])) entries.add(name);
+                }
+            } else if (args[0].equalsIgnoreCase("forget")) {
+                for (String name : ProfessionsCfg.getMap().keySet()) {
+                    if (name.startsWith(args[1])) entries.add(name);
+                }
+            } else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
+                    .checkPermission(sender, "fusion.admin")) {
+                if ("locale".startsWith(args[1])) entries.add("locale");
+                if ("sql".startsWith(args[1])) entries.add("sql");
+            }
+        } else if (args.length == 3) {
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getName().startsWith(args[2])) entries.add(player.getName());
+                }
+            }
+        }
+        return entries;
     }
 
 

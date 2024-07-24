@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
@@ -16,9 +15,9 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI gui;
+    private final CustomGUI              gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
-    private boolean isBase = false;
+    private       boolean                isBase  = false;
 
     private final Category masterCat;
 
@@ -30,20 +29,17 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
     public static PlayerInitialGUI open(CustomGUI gui, Player player) {
         gui.resetPattern();
-        InventoryView iv = player.getOpenInventory();
-        if ((iv != null) && (iv.getTopInventory() != null)) {
-            gui.map.remove(player);
-            player.closeInventory();
-        }
+        gui.map.remove(player);
+        player.closeInventory();
 
         Inventory inv = null;
         try {
             inv = Bukkit.createInventory(player,
                     gui.slots.length,
                     ChatColor.translateAlternateColorCodes('&', gui.inventoryName));
-            int k = -1;
-            HashMap<Character, ItemStack> items = gui.pattern.getItems();
-            PlayerInitialGUI playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
+            int                           k               = -1;
+            HashMap<Character, ItemStack> items           = gui.pattern.getItems();
+            PlayerInitialGUI              playerCustomGUI = new PlayerInitialGUI(gui, player, inv);
             playerCustomGUI.isBase = true;
             CraftingTable table = ProfessionsCfg.getTable(gui.name);
             Iterator<Category> categoryIterator = table.getCategories()
@@ -72,7 +68,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
                     //Slots
                     if (c == 'o' && categoryIterator.hasNext()) {
                         List<Recipe> recipes;
-                        Category category;
+                        Category     category;
                         do {
                             category = categoryIterator.next();
                             recipes = new ArrayList<>(category.getRecipes());
@@ -125,6 +121,7 @@ public class PlayerInitialGUI extends PlayerCustomGUI {
 
     @Override
     public void onClick(InventoryClickEvent e) {
+
         e.setCancelled(true);
         Category category = slotMap.get(e.getSlot());
 

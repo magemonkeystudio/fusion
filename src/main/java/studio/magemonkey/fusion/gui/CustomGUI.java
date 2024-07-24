@@ -1,6 +1,7 @@
 package studio.magemonkey.fusion.gui;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Bukkit;
@@ -19,11 +20,10 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
+
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
-import studio.magemonkey.codex.util.InventoryUtil;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.CraftingTable;
@@ -41,9 +41,12 @@ public class CustomGUI implements Listener {
     protected final     String             name;
     @Getter
     protected final     String             inventoryName;
+    @Getter
+    @Setter
+    protected Inventory inventory;
     protected           Slot[]             slots;
-    protected transient ArrayList<Integer> resultSlots  = new ArrayList<>(20);
-    protected transient ArrayList<Integer> blockedSlots = new ArrayList<>(20);
+    protected final     ArrayList<Integer> resultSlots  = new ArrayList<>(20);
+    protected final     ArrayList<Integer> blockedSlots = new ArrayList<>(20);
     protected transient int                nextPage;
     protected transient int                prevPage;
     @Getter
@@ -51,7 +54,7 @@ public class CustomGUI implements Listener {
     protected final     InventoryPattern   defaultPattern;
 
     /* Specifics if crafting_queue: true */
-    protected transient ArrayList<Integer> queuedSlots = new ArrayList<>(20);
+    protected final     ArrayList<Integer> queuedSlots = new ArrayList<>(20);
     protected transient int                prevQueuePage;
     protected transient int                nextQueuePage;
 
@@ -130,7 +133,11 @@ public class CustomGUI implements Listener {
                     if (queue != null && queue.getQueuedItems().containsKey(k)) {
                         inv.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
-                        inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        if (table.getUseCategories() && isCategory) {
+                            inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        } else if (!table.getUseCategories() && !isCategory) {
+                            inv.setItem(k, ProfessionsCfg.getQueueSlot(name));
+                        }
                     }
                 }
             }
@@ -215,11 +222,8 @@ public class CustomGUI implements Listener {
     }
 
     public PlayerCustomGUI open(Player p, PlayerCustomGUI playerCustomGUI) {
-        InventoryView iv = p.getOpenInventory();
-        if ((iv != null) && (iv.getTopInventory() != null)) {
-            this.map.remove(p);
-            p.closeInventory();
-        }
+        this.map.remove(p);
+        p.closeInventory();
 
         if (playerCustomGUI != null) {
             this.map.put(p, playerCustomGUI);
@@ -242,20 +246,12 @@ public class CustomGUI implements Listener {
         }
     }
 
-    private boolean isThis(InventoryView inv) {
-        return inventoryName != null && inv.getTitle()
-                .equals(ChatColor.translateAlternateColorCodes('&', this.inventoryName));
-    }
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onClick(InventoryClickEvent e) {
-        Inventory inv = InventoryUtil.getTopInventory(e);
-        if (e.getRawSlot() < 0) {
+        if (inventory == null || !(e.getWhoClicked() instanceof Player) || !e.getInventory().equals(this.inventory)) {
             return;
         }
-//        System.out.println("CLICK(" + e.getRawSlot() + ")..." + (e.getRawSlot() >= this.slots.length ? "NOPE" : this.slots[e.getRawSlot()]) + ", " + e.getAction() + ", " + inv + ", " + this.isThis(inv));
-        if ((inv == null) || (!(e.getWhoClicked() instanceof Player)) || !this.isThis(e.getView())) {
-//            System.out.println("Ugh, fail!");
+        if (e.getRawSlot() < 0) {
             return;
         }
         Player          p               = (Player) e.getWhoClicked();
@@ -280,11 +276,10 @@ public class CustomGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent e) {
-        Inventory inv = InventoryUtil.getTopInventory(e);
-        if ((inv == null) || !(e.getWhoClicked() instanceof Player)) {
+        if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
-        if (this.isThis(e.getView())) {
+        if(e.getInventory().equals(this.inventory)) {
             if (e.getOldCursor().getType() == Material.BARRIER)
                 e.setCancelled(true);
             if (e.getRawSlots()
@@ -305,7 +300,7 @@ public class CustomGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if (player.getOpenInventory() != null && isThis(player.getOpenInventory())) {
+        if(this.getInventory().getViewers().contains(player)) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();
@@ -320,10 +315,7 @@ public class CustomGUI implements Listener {
     }
 
     private void onClose(Player p) {
-        InventoryView v = p.getOpenInventory();
-        if (v != null) {
-            this.onClose(p, v.getTopInventory());
-        }
+        this.onClose(p, inventory);
     }
 
     private void onClose(Player p, Inventory inv) {
@@ -331,7 +323,7 @@ public class CustomGUI implements Listener {
             return;
         }
         Inventory pInventory = p.getInventory();
-        if (this.isThis(p.getOpenInventory())) {
+        if(inv.equals(this.inventory)) {
             for (int i = 0; i < this.slots.length; i++) {
                 if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT)
                         || this.slots[i].equals(Slot.QUEUED_SLOT)) {
@@ -370,7 +362,8 @@ public class CustomGUI implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onClose(InventoryCloseEvent e) {
-        if (e.getPlayer() instanceof Player && e.getInventory() != null) {
+        if (e.getPlayer() instanceof Player) {
+            e.getInventory();
             this.onClose((Player) e.getPlayer(), e.getInventory());
         }
     }

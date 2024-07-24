@@ -23,5 +23,5 @@ or snapshots through Sonatype.
 ### A huge thanks to our contributors
 
 <a href="https://github.com/promcteam/${project.artifactId}/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=promcteam/${project.artifactId}" />
+<img src="https://contrib.rocks/image?repo=promcteam/${project.artifactId}"  alt=""/>
 </a>

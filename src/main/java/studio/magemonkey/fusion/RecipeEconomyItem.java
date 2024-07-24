@@ -1,23 +1,21 @@
 package studio.magemonkey.fusion;
 
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.codex.items.exception.CodexItemException;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.items.ItemType;
+import studio.magemonkey.codex.items.exception.CodexItemException;
 
 public class RecipeEconomyItem implements RecipeItem {
+    @Getter
     private final String itemName;
     private final int    amount;
 
     public RecipeEconomyItem(String itemName, int amount) {
         this.itemName = itemName;
         this.amount = amount;
-    }
-
-    public String getItemName() {
-        return this.itemName;
     }
 
     @Override

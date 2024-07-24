@@ -1,6 +1,11 @@
 package studio.magemonkey.fusion;
 
 import lombok.Getter;
+import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.MissingItemException;
@@ -8,10 +13,6 @@ import studio.magemonkey.codex.items.exception.MissingProviderException;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
-import org.bukkit.Material;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,8 +157,12 @@ public class CraftingTable implements ConfigurationSerializable {
                 .collect(Collectors.toList());
     }
 
+    public Category getCategory(String name) {
+        return this.categories.get(name);
+    }
+
     @Override
-    public Map<String, Object> serialize() {
+    public @NotNull Map<String, Object> serialize() {
         return SerializationBuilder.start(4)
                 .append("name", this.name)
                 .append("icon", this.iconItem.getNamespacedID())

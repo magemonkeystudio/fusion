@@ -24,18 +24,20 @@
 
 package studio.magemonkey.fusion.gui.slot;
 
-import studio.magemonkey.codex.CodexEngine;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.CodexEngine;
 
 
 /**
  * Represent slot properties, multiple inventory slots may use this same instance of slot object as it don't
  * represent some slot, but properties of it.
  */
+@Getter
 public abstract class Slot {
     public static final Slot BASE_CONTAINER_SLOT   = new Slot(SlotType.CONTAINER) {
         @Override
@@ -76,7 +78,7 @@ public abstract class Slot {
             return null;
         }
     };
-    public static final Slot QUEUED_SLOT          = new Slot(SlotType.RESULT) {
+    public static final Slot QUEUED_SLOT           = new Slot(SlotType.RESULT) {
         @Override
         public ItemStack canHoldItem(ItemStack item) {
             return null;
@@ -89,19 +91,15 @@ public abstract class Slot {
         }
     };
 
+    /**
+     * -- GETTER --
+     *  Returns base slot type.
+     *
+     */
     protected final SlotType slotType;
 
     public Slot(SlotType slotType) {
         this.slotType = slotType;
-    }
-
-    /**
-     * Returns base slot type.
-     *
-     * @return base slot type.
-     */
-    public SlotType getSlotType() {
-        return this.slotType;
     }
 
     /**

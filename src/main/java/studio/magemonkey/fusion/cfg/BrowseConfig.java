@@ -1,25 +1,27 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.InventoryPattern;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+@SuppressWarnings("all")
 public class BrowseConfig {
 
     private static FileConfiguration config;
     private static File              file;
 
+    @Getter
     private static final LinkedList<String>       professions = new LinkedList<>();
     private static final HashMap<String, Integer> profCosts   = new HashMap<>();
 
@@ -58,13 +60,8 @@ public class BrowseConfig {
             readData();
             Fusion.getInstance().log.info("Successfully loaded browse.yml data");
         } catch (IOException e) {
-            Fusion.getInstance().log.severe("Could not load browse.yml data");
-            e.printStackTrace();
+            Fusion.getInstance().log.severe("Could not load browse.yml data: " + e.getMessage());
         }
-    }
-
-    public static LinkedList<String> getProfessions() {
-        return professions;
     }
 
     private static void attemptPort() {
@@ -86,6 +83,7 @@ public class BrowseConfig {
             try {
                 conf.save(new File(Fusion.getInstance().getDataFolder(), "config.yml"));
             } catch (IOException e) {
+                Fusion.getInstance().log.severe("Could not load browse.yml data: " + e.getMessage());
                 e.printStackTrace();
             }
             Fusion.getInstance().log.info("Successfully ported old browse info to new browse.yml");
@@ -95,7 +93,8 @@ public class BrowseConfig {
     private static void setDefaults() {
         //Browse stuff -- Added in v1.01
         config.addDefault("name", "&3&lBrowse");
-        config.addDefault("pattern.items.fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
+        config.addDefault("pattern.items.fillItem",
+                ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
 
         HashMap<Character, ItemStack> browseItems = new HashMap<>();
         browseItems.put('0',

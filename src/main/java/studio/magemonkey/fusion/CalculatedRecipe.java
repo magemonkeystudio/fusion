@@ -9,12 +9,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 
 import java.util.*;
 
 public class CalculatedRecipe {
-    private final Recipe recipe;
+    private final Recipe    recipe;
     private final ItemStack icon;
 
     private final boolean canCraft;
@@ -43,9 +43,9 @@ public class CalculatedRecipe {
                                           CraftingTable craftingTable) {
         Fusion pl = Fusion.getInstance();
 
-        StringBuilder lore = new StringBuilder(512);
-        ItemStack result = recipe.getResult().getItemStack();
-        List<String> resultLore = result.getItemMeta().getLore();
+        StringBuilder lore       = new StringBuilder(512);
+        ItemStack     result     = recipe.getResult().getItemStack();
+        List<String>  resultLore = result.getItemMeta().getLore();
 
         if ((resultLore != null) && !resultLore.isEmpty()) {
             resultLore.forEach((str) -> lore.append(str).append('\n'));
@@ -82,12 +82,12 @@ public class CalculatedRecipe {
                 moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.false",
                         "fusion.gui.money.false",
                         new MessageData("recipe", recipe),
-                        new MessageData("player", player));
+                        new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
             } else {
                 moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.true",
                         "fusion.gui.money.true",
                         new MessageData("recipe", recipe),
-                        new MessageData("player", player));
+                        new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
             }
         }
 
@@ -111,7 +111,7 @@ public class CalculatedRecipe {
 
         String xpLine = null;
         if (recipe.neededXp != 0) {
-            if (Fusion.getExperienceManager().getExperience(player, craftingTable) < recipe.neededXp) {
+            if (PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable) < recipe.neededXp) {
                 canCraft = false;
                 xpLine = MessageUtil.getMessageAsString("fusion.gui.xp.false",
                         "fusion.gui.xp.false",
@@ -127,7 +127,7 @@ public class CalculatedRecipe {
 
         String masteryLine = null;
         if (recipe.mastery) {
-            if (!PConfigManager.hasMastery(player, craftingTable.getName())) {
+            if (!PlayerLoader.getPlayer(player).hasMastered(craftingTable.getName())) {
                 canCraft = false;
                 masteryLine = MessageUtil.getMessageAsString("fusion.gui.mastery.false",
                         "fusion.gui.mastery.false",
@@ -157,14 +157,15 @@ public class CalculatedRecipe {
 //        }
         Collection<RecipeItem> localPattern = new HashSet<>(recipe.pattern);
         for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
-            RecipeItem recipeItem = it.next();
-            ItemStack recipeItemStack = recipeItem.getItemStack();
-            ItemStack recipeItemStackOne = recipeItemStack.clone();
+            RecipeItem recipeItem         = it.next();
+            ItemStack  recipeItemStack    = recipeItem.getItemStack();
+            ItemStack  recipeItemStackOne = recipeItemStack.clone();
             recipeItemStackOne.setAmount(1);
             int eqAmount = 0;
             for (Map.Entry<ItemStack, Integer> entry : eqItems.entrySet()) {
                 ItemStack item = entry.getKey().clone();
-                if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType().isInstance(item)) {
+                if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType()
+                        .isInstance(item)) {
                     eqAmount = entry.getValue();
                 } else if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
                     item = item.clone();
@@ -262,8 +263,8 @@ public class CalculatedRecipe {
             lore.append('\n').append(canCraftLine);
         }
 
-        ItemStack icon = result.clone();
-        ItemMeta itemMeta = icon.getItemMeta();
+        ItemStack icon     = result.clone();
+        ItemMeta  itemMeta = icon.getItemMeta();
         itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
         icon.setItemMeta(itemMeta);
 
@@ -319,8 +320,10 @@ public class CalculatedRecipe {
 
     public static void trimLore(ItemStack item) {
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
         List<String> itemLore = meta.getLore();
-        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().equals("")
+        if (itemLore == null) return;
+        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().isEmpty()
                 || org.apache.commons.lang3.StringUtils.contains(s, "Craft Requirements")
                 || org.apache.commons.lang3.StringUtils.contains(s, "Item")
                 || org.apache.commons.lang3.StringUtils.contains(s, "Level Needed")

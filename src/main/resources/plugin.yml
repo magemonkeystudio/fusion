@@ -2,6 +2,7 @@ name: ${project.name}
 main: studio.magemonkey.fusion.Fusion
 authors: [ Travja, goflish ]
 version: ${project.version}
+libraries: [ com.mysql:mysql-connector-j:${mysql.version}, org.apache.commons:commons-lang3:${apache.version} ]
 depend:
   - Codex
 softdepend:
