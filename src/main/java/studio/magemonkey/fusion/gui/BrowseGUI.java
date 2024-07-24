@@ -20,13 +20,15 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.ExperienceManager;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Profession;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
@@ -44,7 +46,6 @@ public class BrowseGUI implements Listener {
     private final Map<Integer, String> slotMap = new HashMap<>();
     protected final String inventoryName;
     private final Player player;
-    private final UUID opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -53,7 +54,6 @@ public class BrowseGUI implements Listener {
     public BrowseGUI(String inventoryName, Player player, ItemStack fill) {
         this.inventoryName = inventoryName;
         this.player = player;
-        this.opener = player.getUniqueId();
         if (fill == null)
             fill = BrowseConfig.getBrowseFill();
         this.fillItem = fill;
@@ -159,45 +159,38 @@ public class BrowseGUI implements Listener {
         String profession = guiToOpen.getName();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
-        int unlocked = fusionPlayer.getUnlockedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
-        int cost = BrowseConfig.getProfCost(profession);
+        ProfessionCondition condition = BrowseConfig.getProfessionConditions(profession);
+
+        if(condition == null) {
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("fusion.error.profNotAvailable", p, new MessageData("profession", profession));
+            return;
+        }
+
+        if (!condition.isValid(fusionPlayer))
+            return;
+
+        double moneyCost = condition.getMoneyCost();
+        int expCost = condition.getExpCost();
+
+        fusionPlayer.addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
+        if (moneyCost > 0)
+            CodexEngine.get().getVault().take(p, moneyCost);
+        if(expCost > 0)
+            ExperienceManager.setTotalExperience(p, (ExperienceManager.getTotalExperience(p) - expCost));
 
         MessageData[] data = {
                 new MessageData("profession", profession),
-                new MessageData("unlocked", unlocked),
-                new MessageData("limit", allowed),
-                new MessageData("cost", cost),
+                new MessageData("cost.money", moneyCost),
+                new MessageData("cost.experience", expCost),
+                new MessageData("profession", profession),
+                new MessageData("unlocked", fusionPlayer.getUnlockedProfessions().size()),
+                new MessageData("limit", PlayerUtil.getPermOption(player, "fusion.limit")),
                 new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };
 
-        if (fusionPlayer.hasProfession(profession)) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profAlreadyUnlocked", p, data);
-            return;
-        }
-
-        if (unlocked >= allowed) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.limitReached", p, data);
-            return;
-        }
-
-        if (cost > 0 && !CodexEngine.get().getVault().canPay(p, cost)) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profNoFunds", p, data);
-            return;
-        }
-
-        fusionPlayer.addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
-        if (cost > 0)
-            CodexEngine.get().getVault().take(p, cost);
-        data[1] = new MessageData("unlocked", unlocked + 1);
         MessageUtil.sendMessage("fusion.unlockedProfession", p, data);
         p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-
-//
-//        PlayerInitialGUI.open(guiToOpen, p);
     }
 
     @EventHandler(ignoreCancelled = true)

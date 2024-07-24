@@ -26,6 +26,20 @@ fusion:
       'false': '&cYou can''t craft this item.'
     rank:
       epic: '&cEpic rank needed to craft this item!'
+  browse:
+    alreadyUnlocked: "&cYou have already unlocked this profession!"
+    noFundsMoney: "&cYou need &3$$<cost.money> to buy this!"
+    noFundsExperience: "&cYou need &3$$<cost.experience> to buy this!"
+    noConditionLevel: "&cYou need to be at least level &a$<condition.level> &bin &a $<condition.name> &bto unlock this!"
+    conditionFormatting:
+      profession: "&3Profession &a$<profession>"
+      fabled: "&3Fabled &a$<class>"
+      mcmmo: "&3McMMO &a$<skill>"
+      jobs: "&3Job &a$<job>"
+      auraAbility: "&3Aura Ability &a$<ability>"
+      auraManaAbility: "&3Aura Mana Ability &a$<ability>"
+      auraSkill: "&3Aura Skill &a$<skill>"
+      auraStats: "&3Aura Stat &a$<stat>"
   error:
     alreadyMastered: "&cYou have already mastered this!"
     noMasteryLevel: "&cYou must be at least level $<craftingTable.masteryUnlock> to unlock this!"
@@ -35,8 +49,6 @@ fusion:
     noXP: "&cYou need $<recipe.neededXp> to craft this."
     noFunds: "&cYou need $$<recipe.price> to craft this"
     insufficientItems: "&cYou lack some of the required items for this!"
-    profAlreadyUnlocked: "&cYou have already unlocked this profession!"
-    profNoFunds: "&cYou need &3$$<cost> to buy this!"
     limitReached: "&cYou have already unlocked &3$<unlocked>/$<limit> &cprofessions."
     notUnlocked: "&cYou haven't unlocked this profession yet. Use &3/craft browse &c to view all professions."
     autoDisabled: "&cAuto-crafting is disabled."

@@ -15,6 +15,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;

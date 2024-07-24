@@ -60,6 +60,17 @@
             <id>sonatype</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
+
+        <!-- McMMO -->
+        <repository>
+            <id>neetgames</id>
+            <url>https://nexus.neetgames.com/repository/maven-releases/</url>
+        </repository>
+        <!-- Zrips Jobs -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -72,6 +83,30 @@
             <groupId>studio.magemonkey</groupId>
             <artifactId>sapphire</artifactId>
             <version>1.0.0-R0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>studio.magemonkey</groupId>
+            <artifactId>fabled</artifactId>
+            <version>1.0.0-R0.52-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.gmail.nossr50.mcMMO</groupId>
+            <artifactId>mcMMO</artifactId>
+            <version>2.2.004</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Zrips</groupId>
+            <artifactId>Jobs</artifactId>
+            <version>b537ec4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.aurelium</groupId>
+            <artifactId>auraskills-api-bukkit</artifactId>
+            <version>2.1.4</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -240,9 +240,12 @@ public class PlayerCustomGUI implements Listener {
                  k++, i++) {
                 Recipe           recipe           = allRecipesArray[k];
                 int              slot             = slots[i];
-                CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
-                this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
-                this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
+                try {
+                    CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
+                    this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
+                    this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
+                } catch (InvalidPatternItemException ignored) {
+                }
             }
 
             for (int k = 0; k < inventory.getSize(); k++) {

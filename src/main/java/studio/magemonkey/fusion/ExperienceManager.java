@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.io.File;

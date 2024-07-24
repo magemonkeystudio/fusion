@@ -19,6 +19,7 @@ import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
@@ -45,10 +46,12 @@ public class Fusion extends RisePlugin implements Listener {
 
     @Getter
     private static Fusion instance;
-
     {
         instance = this;
     }
+
+    @Getter
+    private static HookManager hookManager;
 
     @Override
     public void reloadConfig() {
@@ -57,6 +60,7 @@ public class Fusion extends RisePlugin implements Listener {
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
+        hookManager = new HookManager();
 
         Cfg.init();
         ProfessionsCfg.init();

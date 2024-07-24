@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
+import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,16 +20,16 @@ import java.util.LinkedList;
 public class BrowseConfig {
 
     private static FileConfiguration config;
-    private static File              file;
+    private static File file;
 
     @Getter
-    private static final LinkedList<String>       professions = new LinkedList<>();
-    private static final HashMap<String, Integer> profCosts   = new HashMap<>();
+    private static final LinkedList<String> professions = new LinkedList<>();
+    private static final HashMap<String, ProfessionCondition> professionConditions = new HashMap<>();
 
     @Getter
-    private static String           browseName = ChatColor.DARK_AQUA + "Browse";
+    private static String browseName = ChatColor.DARK_AQUA + "Browse";
     @Getter
-    private static ItemStack        browseFill;
+    private static ItemStack browseFill;
     @Getter
     private static InventoryPattern browsePattern;
 
@@ -112,23 +113,20 @@ public class BrowseConfig {
 
     private static void readData() {
         professions.clear();
-        profCosts.clear();
+        professionConditions.clear();
         browseName = config.getString("name");
         browseFill = config.getItemStack("pattern.items.fillItem");
         browsePattern = new InventoryPattern(config.getConfigurationSection("pattern").getValues(false));
 
         for (String prof : config.getConfigurationSection("professions").getValues(false).keySet()) {
             professions.add(prof.toLowerCase());
-
-            if (config.contains("professions." + prof + ".cost"))
-                profCosts.put(prof.toLowerCase(), config.getInt("professions." + prof + ".cost"));
-
+            professionConditions.put(prof.toLowerCase(), new ProfessionCondition(prof, config.getConfigurationSection("professions." + prof)));
             Fusion.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }
 
-    public static int getProfCost(String profession) {
-        return profCosts.getOrDefault(profession.toLowerCase(), 0);
+    public static ProfessionCondition getProfessionConditions(String profession) {
+        return professionConditions.getOrDefault(profession.toLowerCase(), null);
     }
 
     public void saveConfig() {

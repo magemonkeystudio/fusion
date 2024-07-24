@@ -1,7 +1,8 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.cfg.professions;
 
 import lombok.Getter;
 import lombok.Setter;
+import studio.magemonkey.fusion.LevelFunction;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.util.UUID;
@@ -57,5 +58,9 @@ public class Profession {
 
     public void update() {
         SQLManager.professions().setProfession(uuid, this);
+    }
+
+    public int getLevel() {
+        return LevelFunction.getLevel(exp);
     }
 }

@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.Profession;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.PlayerCustomGUI;
 import studio.magemonkey.fusion.queue.CraftingQueue;

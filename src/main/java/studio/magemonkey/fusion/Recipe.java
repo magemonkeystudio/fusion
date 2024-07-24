@@ -43,15 +43,22 @@ public class Recipe implements ConfigurationSerializable {
     @Getter
     protected final int cooldown;
 
+    @Getter
+    protected final String resultName;
+    @Getter
+    protected final List<String> patternItemNames = new ArrayList<>();
+
     public Recipe(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
         this.result = RecipeItem.fromConfig(map.get("result"));
+        this.resultName = dw.getString("result");
 //        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
         this.pattern = dw.getStringList("pattern")
                 .stream()
                 .map(RecipeItem::fromConfig)
                 .collect(Collectors.toCollection(LinkedList::new));
+        this.patternItemNames.addAll(dw.getStringList("pattern"));
         this.price = dw.getDouble("price", 0);
         this.neededLevels = dw.getInt("neededLevels", 0);
         this.neededXp = dw.getInt("neededXp", 0);
@@ -78,6 +85,7 @@ public class Recipe implements ConfigurationSerializable {
         this.price = price;
         this.neededLevels = neededLevels;
         this.neededXp = neededXp;
+        this.resultName = result.getItemName();
         this.xpGain = 0;
         this.mastery = false;
         this.rank = "";
