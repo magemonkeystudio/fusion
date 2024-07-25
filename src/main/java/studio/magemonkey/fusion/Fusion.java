@@ -19,6 +19,7 @@ import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -64,6 +65,7 @@ public class Fusion extends RisePlugin implements Listener {
 
         Cfg.init();
         ProfessionsCfg.init();
+        EditorRegistry.reload();
         SQLManager.init();
         BrowseConfig.load();
     }
@@ -178,5 +180,9 @@ public class Fusion extends RisePlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         PlayerLoader.unloadPlayer(event.getPlayer());
+    }
+
+    public static void registerListener(Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, Fusion.getInstance());
     }
 }

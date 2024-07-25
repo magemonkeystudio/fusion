@@ -1,6 +1,7 @@
 package studio.magemonkey.fusion;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -17,33 +18,29 @@ import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class CraftingTable implements ConfigurationSerializable {
-    @Getter
-    private final String                          name;
-    @Getter
-    private final String                          inventoryName;
-    @Getter
-    private final InventoryPattern                pattern;
-    private final InventoryPattern                catPattern;
-    @Getter
-    private final ItemStack                       fillItem;
-    @Getter
-    private final Map<String, Recipe>             recipes;
-    @Getter
-    private final ItemType                        iconItem;
-    private       boolean                         useCategories = true;
-    private final LinkedHashMap<String, Category> categories    = new LinkedHashMap<>();
+    private String                          name;
+    private String                          inventoryName;
+    private InventoryPattern                pattern;
+    private InventoryPattern                catPattern;
+    private ItemStack                       fillItem;
+    private Map<String, Recipe>             recipes;
+    private ItemType                        iconItem;
+    private boolean                         useCategories = true;
+    private LinkedHashMap<String, Category> categories    = new LinkedHashMap<>();
 
     //Mastery!
-    @Getter
-    private final int masteryUnlock;
-    @Getter
-    private final int masteryFee;
+    private int masteryUnlock;
+    private int masteryFee;
 
     public CraftingTable(String name,
                          String inventoryName,
                          ItemType iconItem,
                          InventoryPattern pattern,
+                         InventoryPattern catPattern,
+                         boolean useCategories,
                          ItemStack fillItem,
                          int masteryUnlock,
                          int masteryFee,
@@ -52,7 +49,8 @@ public class CraftingTable implements ConfigurationSerializable {
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
         this.pattern = pattern;
-        this.catPattern = null;
+        this.catPattern = catPattern;
+        this.useCategories = useCategories;
         this.recipes = recipes;
         this.fillItem = fillItem;
         this.masteryUnlock = masteryUnlock;
@@ -175,5 +173,17 @@ public class CraftingTable implements ConfigurationSerializable {
                 .append("useCategories", useCategories)
                 .append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList()))
                 .build();
+    }
+
+    public void save() {
+        // TODO implement
+
+    }
+
+    // Static method to copy contents from one CraftingTable instance to another
+    public static CraftingTable copy(CraftingTable source) {
+        return new CraftingTable(source.getName(), source.getInventoryName(), source.getIconItem(),
+                InventoryPattern.copy(source.getPattern()), InventoryPattern.copy(source.getCatPattern()), source.getUseCategories(), source.getFillItem(), source.getMasteryUnlock(), source.getMasteryFee(),
+                new LinkedHashMap<>(source.getRecipes()));
     }
 }

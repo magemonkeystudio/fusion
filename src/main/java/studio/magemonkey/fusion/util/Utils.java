@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.util;
 
 import org.bukkit.permissions.Permissible;
 

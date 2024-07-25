@@ -23,7 +23,7 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.ExperienceManager;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.professions.Profession;
-import studio.magemonkey.fusion.Utils;
+import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;

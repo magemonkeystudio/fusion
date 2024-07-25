@@ -91,4 +91,12 @@ public class InventoryPattern implements ConfigurationSerializable {
                                         (stringMapSimpleEntry1) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry1).getValue())))
                 .build();
     }
+
+    public static InventoryPattern copy(InventoryPattern pattern) {
+        if(pattern == null) return null;
+        InventoryPattern _pattern = new InventoryPattern(pattern.pattern, new HashMap<>(pattern.items));
+        _pattern.commands.putAll(pattern.commands);
+        _pattern.closeOnClickSlots.addAll(pattern.closeOnClickSlots);
+        return _pattern;
+    }
 }

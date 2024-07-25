@@ -1,0 +1,59 @@
+title: '&2Recipes'
+icons:
+  add:
+    material: GRAY_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aAdd Recipe Item'
+    lore:
+      - '&7Click on an item from your inventory'
+      - '&7to add it to the recipes'
+      - '&8-------------------'
+      - '&eYou will then need to configure the recipe.'
+    flags: []
+    enchants: {}
+  undo:
+    material: RED_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cUndo'
+    lore:
+      - '&7Click to undo the last action.'
+    flags: []
+    enchants: {}
+  redo:
+    material: LIME_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aRedo'
+    lore:
+      - '&7Click to redo the last action.'
+    flags: []
+    enchants: {}
+  recipeItem:
+    material: '$<material>'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9$<id>'
+    lore:
+      - '&7Used Item: &a$<item>'
+      - '&7The pattern item for the crafting menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to configure'
+      - '&aRight click &7to remove'
+    flags: []
+    enchants: {}
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }

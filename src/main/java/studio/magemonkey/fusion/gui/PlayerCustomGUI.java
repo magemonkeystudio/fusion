@@ -33,6 +33,7 @@ import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 

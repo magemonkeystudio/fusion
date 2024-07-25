@@ -11,7 +11,7 @@ import studio.magemonkey.codex.legacy.item.ItemColors;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.Utils;
+import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.queue.QueueItem;
 
