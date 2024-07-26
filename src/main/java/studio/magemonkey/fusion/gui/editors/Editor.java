@@ -7,26 +7,30 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Getter
 public class Editor {
 
+    private final Editor parentEditor;
     private final String title;
     private final int size;
     @Setter
     private Map<String, ItemStack> icons;
 
-    @Setter
-    private InventoryCallback inventoryCallback;
-
     private final Inventory inventory;
+    @Setter
+    private List<Inventory> nestedInventories;
 
-    public Editor(String title, int size) {
+    public Editor(Editor parentEditor, String title, int size) {
+        this.parentEditor = parentEditor;
         this.title = title;
         this.size = size;
 
         this.inventory = Bukkit.createInventory(null, size, title);
+        this.nestedInventories = new ArrayList<>();
     }
 
     public void setItem(int slot, ItemStack item) {
@@ -35,5 +39,11 @@ public class Editor {
 
     public void open(Player player) {
         player.openInventory(inventory);
+    }
+
+    public void openParent(Player player) {
+        if (parentEditor != null) {
+            parentEditor.open(player);
+        }
     }
 }

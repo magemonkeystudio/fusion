@@ -291,4 +291,17 @@ public class ProfessionCondition {
         }
         return true;
     }
+
+    public Map<String, Map<String, Integer>> getFullConditions() {
+        Map<String, Map<String, Integer>> conditions = new TreeMap<>();
+        conditions.put("profession", professionConditions);
+        conditions.put("fabled", fabledClassConditions);
+        conditions.put("mcmmo", mcMMOConditions);
+        conditions.put("jobs", jobsConditions);
+        conditions.put("auraAbility", auraAbilityConditions);
+        conditions.put("auraManaAbility", auraManaAbilityConditions);
+        conditions.put("auraSkill", auraSkillsConditions);
+        conditions.put("auraStats", auraStatsConditions);
+        return conditions;
+    }
 }

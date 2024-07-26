@@ -11,7 +11,10 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.gui.editors.subeditors.CategoryEditor;
+import studio.magemonkey.fusion.gui.editors.subeditors.PatternEditor;
 import studio.magemonkey.fusion.gui.editors.subeditors.PatternItemEditor;
+import studio.magemonkey.fusion.gui.editors.subeditors.RecipeEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 @Getter
@@ -22,10 +25,14 @@ public class ProfessionEditor extends Editor implements Listener {
     private final CraftingTable table;
 
     private PatternItemEditor patternItemEditor;
+    private PatternEditor patternEditor;
     private PatternItemEditor categoryPatternItemEditor;
+    private PatternEditor categoryPatternEditor;
+    private CategoryEditor categoryEditor;
+    private RecipeEditor recipeEditor;
 
     public ProfessionEditor(Player player, String profession) {
-        super(EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);
+        super(null, EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);
         this.player = player;
         this.profession = profession;
         // Copy the table to prevent changes to the original table while people do crafting
@@ -37,7 +44,7 @@ public class ProfessionEditor extends Editor implements Listener {
     }
 
     private void initialize() {
-        InventoryUtils.fillInventory(getInventory(), new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
         setItem(10, getIcons().get("name"));
         setItem(11, getIcons().get("masteryUnlock"));
         setItem(12, getIcons().get("masteryCost"));
@@ -84,7 +91,10 @@ public class ProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 17 -> {
+            case 16 -> {
+                if (recipeEditor == null)
+                    recipeEditor = new RecipeEditor(this, player, table);
+                recipeEditor.open(player);
             }
             case 28 -> {
                 table.setUseCategories(!table.getUseCategories());
@@ -92,24 +102,39 @@ public class ProfessionEditor extends Editor implements Listener {
             }
             case 29 -> {
                 if (patternItemEditor == null)
-                    patternItemEditor = new PatternItemEditor(player, table, false);
+                    patternItemEditor = new PatternItemEditor(this, player, table, false);
                 patternItemEditor.open(player);
             }
             case 30 -> {
-            }
-            case 31 -> {
+                if (patternEditor == null)
+                    patternEditor = new PatternEditor(this, player, table, false);
+                patternEditor.open(player);
             }
             case 32 -> {
+                if (categoryEditor == null)
+                    categoryEditor = new CategoryEditor(this, player, table);
+                categoryEditor.open(player);
             }
             case 33 -> {
-            }
-            case 34 -> {
-
                 if (categoryPatternItemEditor == null)
-                    categoryPatternItemEditor = new PatternItemEditor(player, table, true);
+                    categoryPatternItemEditor = new PatternItemEditor(this, player, table, true);
                 categoryPatternItemEditor.open(player);
             }
-            case 44 -> player.closeInventory();
+            case 34 -> {
+                if(event.isLeftClick()) {
+                    if (categoryPatternEditor == null)
+                        categoryPatternEditor = new PatternEditor(this, player, table, true);
+                    categoryPatternEditor.open(player);
+                } else if(event.isRightClick()) {
+                    if(table.getCatPattern() != null) {
+                        table.getCatPattern().clear();
+                    }
+                }
+            }
+            case 53 -> {
+                player.closeInventory();
+                hasChanges = true;
+            }
         }
 
         if (hasChanges) {

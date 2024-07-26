@@ -1,0 +1,25 @@
+title: '&2Pattern Simulation: $<category>'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: [ ]
+    flags: [ ]
+    enchants: { }
+  recipeSlot:
+    material: 'LIGHT_GRAY_STAINED_GLASS_PANE'
+    name: '&7Recipe Slot'
+    lore:
+      - '&7Recipes will be displayed here'
+  patternItem:
+    name: '&9$<id>'
+    lore:
+      - '&7Used Item: &a$<pattern.name>'
+      - '$<pattern.lore>'
+      - '&8--------------------'
+      - '&aLeft click &7to cycle forward'
+      - '&aRight click &7to cycle backward'
+      - '&aESC &7to exit and save'

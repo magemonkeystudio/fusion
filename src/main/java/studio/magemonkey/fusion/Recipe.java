@@ -12,6 +12,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
 import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
@@ -27,11 +28,7 @@ public class Recipe implements ConfigurationSerializable {
     @Getter
     protected final RecipeItem                 result;
     @Getter
-    protected final double                     price;
-    @Getter
     protected final int                        neededLevels;
-    @Getter
-    protected final int                        neededXp;
     @Getter
     protected final int                        xpGain;
     @Getter
@@ -42,16 +39,21 @@ public class Recipe implements ConfigurationSerializable {
     protected final String                     rank;
 
     @Getter
-    protected final int cooldown;
+    protected final int craftingTime;
 
+    @Getter
+    protected final String category;
     @Getter
     protected final String resultName;
     @Getter
     protected final List<String> patternItemNames = new ArrayList<>();
+    @Getter
+    protected final ProfessionCondition conditions;
 
     public Recipe(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
+        this.category = dw.getString("category");
         this.result = RecipeItem.fromConfig(map.get("result"));
         this.resultName = dw.getString("result");
 //        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
@@ -60,15 +62,13 @@ public class Recipe implements ConfigurationSerializable {
                 .map(RecipeItem::fromConfig)
                 .collect(Collectors.toCollection(LinkedList::new));
         this.patternItemNames.addAll(dw.getStringList("pattern"));
-        this.price = dw.getDouble("price", 0);
         this.neededLevels = dw.getInt("neededLevels", 0);
-        this.neededXp = dw.getInt("neededXp", 0);
         this.xpGain = dw.getInt("xpGain", 0);
         this.mastery = dw.getBoolean("mastery");
         this.rank = dw.getString("rank");
-        this.cooldown = dw.getInt("cooldown");
+        this.craftingTime = dw.getInt("cooldown");
         dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
-
+        this.conditions = null;
         if (result == null) {
             throw new IllegalArgumentException("Invalid result: " + map.get("result"));
         }
@@ -77,20 +77,21 @@ public class Recipe implements ConfigurationSerializable {
     public Recipe(String name,
                   Collection<RecipeItem> pattern,
                   RecipeEconomyItem result,
-                  double price,
+                  double moneyCost,
                   int neededLevels,
-                  int neededXp) {
+                  int experienceCost,
+                  String category, ProfessionCondition conditions) {
         this.name = name;
         this.pattern = new LinkedList<>(pattern);
         this.result = result;
-        this.price = price;
         this.neededLevels = neededLevels;
-        this.neededXp = neededXp;
         this.resultName = result.getItemName();
+        this.category = category;
+        this.conditions = conditions;
         this.xpGain = 0;
         this.mastery = false;
         this.rank = "";
-        this.cooldown = 0;
+        this.craftingTime = 0;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
@@ -130,10 +131,10 @@ public class Recipe implements ConfigurationSerializable {
             if (LevelFunction.getLevel(p, craftingTable) < this.neededLevels) {
                 return false;
             }
-            if (PlayerLoader.getPlayer(p.getUniqueId()).getExperience(craftingTable) < this.neededXp) {
+            if (PlayerLoader.getPlayer(p.getUniqueId()).getExperience(craftingTable) < this.conditions.getExpCost()) {
                 return false;
             }
-            if (!CodexEngine.get().getVault().canPay(p, this.price)) {
+            if (!CodexEngine.get().getVault().canPay(p, this.conditions.getMoneyCost())) {
                 return false;
             }
         }
@@ -172,10 +173,11 @@ public class Recipe implements ConfigurationSerializable {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString())
                 .append("name", this.name)
-                .append("price", this.price)
+                .append("costs.money", this.conditions.getMoneyCost())
+                .append("costs.experience", this.conditions.getExpCost())
                 .append("pattern", this.pattern)
                 .append("result", this.result)
-                .append("cooldown", this.cooldown)
+                .append("craftingTime", this.craftingTime)
                 .toString();
     }
 
@@ -184,13 +186,20 @@ public class Recipe implements ConfigurationSerializable {
         return SerializationBuilder.start(6)
                 .append("name", this.name)
                 .append("result", this.result.toConfig())
-                .append("price", this.price)
-                .append("neededXp", this.neededXp)
+                .append("costs.money", this.conditions.getMoneyCost())
+                .append("costs.experience", this.conditions.getExpCost())
                 .append("neededLevels", this.neededLevels)
                 .append("xpGain", this.xpGain)
                 .append("pattern", this.pattern.stream().map(RecipeItem::toConfig).collect(Collectors.toList()))
-                .append("cooldown", this.cooldown)
+                .append("craftingTime", this.craftingTime)
                 .append("commands", this.commands)
                 .build();
     }
+
+    /* TODO: Refactoring and Auto-Migration
+    - price -> costs.money
+    - neededXp -> costs.experience
+    - cooldown -> craftingTime
+     */
+
 }

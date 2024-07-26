@@ -56,6 +56,9 @@ public class InventoryPattern implements ConfigurationSerializable {
             this.commands.put(entry.charAt(0),
                     commandsTemp.deserializeCollection(new ArrayList<>(5), entry, DelayedCommand.class));
         }
+
+        // Required for editor purposes
+        items.put('o', null);
     }
 
     public Collection<DelayedCommand> getCommands(char c) {
@@ -66,6 +69,40 @@ public class InventoryPattern implements ConfigurationSerializable {
         if (slot / 9 >= pattern.length)
             return ' ';
         return pattern[slot / 9].charAt(slot % 9);
+    }
+
+    public void replaceSlot(int slot, char c) {
+        if (slot / 9 >= pattern.length)
+            return;
+        StringBuilder sb = new StringBuilder(pattern[slot / 9]);
+        sb.setCharAt(slot % 9, c);
+        pattern[slot / 9] = sb.toString();
+    }
+
+    public Character getCycledCharacter(char c, boolean forward) {
+        List<Map.Entry<Character, ItemStack>> entries = getItemsAsList();
+        int size = entries.size();
+
+        for (int i = 0; i < size; i++) {
+            if (entries.get(i).getKey() == c) {
+                if (forward) {
+                    return entries.get((i + 1) % size).getKey();
+                } else {
+                    return entries.get((i - 1 + size) % size).getKey();
+                }
+            }
+        }
+
+        // If character 'c' is not found, return the first or last item based on 'forward' flag
+        return forward ? entries.get(0).getKey() : entries.get(size - 1).getKey();
+    }
+
+    public int getInventorySize() {
+        return pattern.length * 9;
+    }
+
+    public List<Map.Entry<Character, ItemStack>> getItemsAsList() {
+        return items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey(), e.getValue())).collect(Collectors.toList());
     }
 
     @Override
@@ -90,6 +127,20 @@ public class InventoryPattern implements ConfigurationSerializable {
                                 .collect(Collectors.toMap((stringMapSimpleEntry) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry).getKey(),
                                         (stringMapSimpleEntry1) -> ((SimpleEntry<String, Map<String, Object>>) stringMapSimpleEntry1).getValue())))
                 .build();
+    }
+
+    public void clear() {
+        // Replace all items that are not 'o', '-', '<', '>', '{', '}', 'f' with 'f'
+        for(int i = 0; i < pattern.length; i++) {
+            StringBuilder sb = new StringBuilder(pattern[i]);
+            for(int j = 0; j < sb.length(); j++) {
+                char c = sb.charAt(j);
+                if(c != 'o' && c != '-' && c != '<' && c != '>' && c != '{' && c != '}' && c != 'f') {
+                    sb.setCharAt(j, 'f');
+                }
+            }
+            pattern[i] = sb.toString();
+        }
     }
 
     public static InventoryPattern copy(InventoryPattern pattern) {

@@ -1,6 +1,5 @@
 package studio.magemonkey.fusion.cfg.editors.subeditors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -66,17 +65,32 @@ public class PatternItemEditorCfg {
                 .build();
     }
 
-    public ItemStack getPatternItemIcon(char c, ItemStack patternItem) {
-        Material material = Material.valueOf(config.getString("icons.patternItem.material", "STONE").replace(MessageUtil.getReplacement("material"), patternItem.getType().name().toUpperCase()).toUpperCase());
+    public ItemStack getPatternItemIcon(char c, ItemStack item) {
+        String itemName = item.hasItemMeta() ? item.getItemMeta().getItemName() : item.getType().name();
+        Material material = Material.valueOf(config.getString("icons.patternItem.material", "STONE").replace(MessageUtil.getReplacement("material"), item.getType().name().toUpperCase()).toUpperCase());
         int amount = config.getInt("icons.patternItem.amount", 1);
         int durability = config.getInt("icons.patternItem.durability", 0);
         boolean unbreakable = config.getBoolean("icon.patternItem.unbreakable", false);
-        String name = config.getString("icons.patternItem.name", "$<id>").replace(MessageUtil.getReplacement("id"), String.valueOf(c));
+        String name = config.getString("icons.patternItem.name", "$<id>")
+                .replace(MessageUtil.getReplacement("id"), String.valueOf(c))
+                .replace(MessageUtil.getReplacement("pattern.name"), itemName);
         List<String> lore = config.getStringList("icons.patternItem.lore");
+
         for(int i = 0; i < lore.size(); i++) {
+            if(lore.get(i).contains(MessageUtil.getReplacement("pattern.lore"))) {
+                lore.remove(i);
+                if(item.getItemMeta() == null || item.getItemMeta().getLore() == null) continue;
+                int newLines = 1;
+                for(String line : item.getItemMeta().getLore()) {
+                    lore.add(i - 1 + newLines, ChatUT.hexString(line));
+                    newLines++;
+                }
+                i += newLines;
+                continue;
+            }
             lore.set(i, ChatUT.hexString(lore.get(i)
-                    .replace(MessageUtil.getReplacement("item"), patternItem.getType().name().toLowerCase())
-                    .replace(MessageUtil.getReplacement("id"), String.valueOf(c))));
+                    .replace(MessageUtil.getReplacement("pattern.name"), itemName)
+                    .replace(MessageUtil.getReplacement("pattern.id"), String.valueOf(c))));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons.patternItem.enchants");
         List<ItemFlag> flags = config.getItemFlags("icons.patternItem.flags");

@@ -1,5 +1,14 @@
 title: '&2Profession &a$<profession>'
 icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: []
+    flags: []
+    enchants: {}
   name:
     material: NAME_TAG
     amount: 1
@@ -37,7 +46,7 @@ icons:
     unbreakable: false
     name: '&9Mastery Cost'
     lore:
-      - '&7Current: &a$<masteryCost>'
+      - '&7Current: &a$$<masteryCost>'
       - '&7The cost to unlock'
       - '&7mastery for this profession.'
       - '&8--------------------'

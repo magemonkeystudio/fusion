@@ -27,18 +27,17 @@ public class PatternItemEditor extends Editor implements Listener {
     List<Map.Entry<Boolean, Map.Entry<Character, ItemStack>>> clipboardUndo = new ArrayList<>();
     List<Map.Entry<Boolean, Map.Entry<Character, ItemStack>>> clipboardRedo = new ArrayList<>();
 
-    public PatternItemEditor(Player player, CraftingTable table, boolean isCategoryPattern) {
-        super(EditorRegistry.getPatternItemEditorCfg().getTitle(), 54);
+    public PatternItemEditor(Editor parentEditor, Player player, CraftingTable table, boolean isCategoryPattern) {
+        super(parentEditor, EditorRegistry.getPatternItemEditorCfg().getTitle(), 54);
         this.player = player;
         this.table = table;
         setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
         this.pattern = isCategoryPattern ? table.getCatPattern() : table.getPattern();
         if(this.pattern == null) {
             // TODO Translation
-            this.pattern = table.getPattern();
-            table.setPattern(this.pattern);
+            table.setCatPattern(InventoryPattern.copy(table.getPattern()));
+            this.pattern = table.getCatPattern();
             player.sendMessage("§cNo category pattern found. Using default pattern as reference.");
-            return;
         }
 
         initialize();
@@ -49,13 +48,13 @@ public class PatternItemEditor extends Editor implements Listener {
         slots.clear();
         visualPatternItems.clear();
 
-        InventoryUtils.fillInventory(getInventory(), new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+        InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
 
         // Create a list to hold the visual pattern items for sorting
         List<Map.Entry<Character, ItemStack>> visualPatternItemsList = new ArrayList<>();
 
         for (Map.Entry<Character, ItemStack> entry : pattern.getItems().entrySet()) {
-            if (entry.getValue().getType().isAir()) continue;
+            if (entry.getValue() == null || entry.getValue().getType().isAir()) continue;
             visualPatternItems.put(entry.getKey(), EditorRegistry.getPatternItemEditorCfg().getPatternItemIcon(entry.getKey(), entry.getValue()));
             visualPatternItemsList.add(Map.entry(entry.getKey(), visualPatternItems.get(entry.getKey())));
         }
@@ -116,7 +115,7 @@ public class PatternItemEditor extends Editor implements Listener {
                     clipboardRedo.remove(0);
                     hasChanges = true;
                 }
-                case 53 -> player.closeInventory();
+                case 53 -> openParent(player);
                 default -> {
                     if (slots.containsKey(event.getSlot())) {
                         if (event.isLeftClick()) {

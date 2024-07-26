@@ -1,0 +1,46 @@
+title: '&2Categories'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: [ ]
+    flags: [ ]
+    enchants: { }
+  add:
+    material: GRAY_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aAdd Item'
+    lore:
+      - '&7Click here to add a new category.'
+      - '&7You will cast a command to add a new category.'
+    flags: []
+    enchants: {}
+  categoryItem:
+    material: 'PAPER'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9$<category>'
+    lore:
+      - '&7Used Icon-Item: &a$<icon.name>'
+      - '$<icon.lore>'
+      - '&8--------------------'
+      - '&aLeft click &7to modify'
+      - '&aRight click &7to remove'
+    flags: []
+    enchants: {}
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }
