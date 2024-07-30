@@ -11,24 +11,21 @@ import studio.magemonkey.codex.legacy.item.ItemColors;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ProfessionsCfg {
 
     @Getter
-    private static final Map<String, CraftingTable>     map    = new HashMap<>(4);
+    private static final Map<String, CraftingTable> map = new HashMap<>(4);
     @Getter
-    private static final Map<String, CustomGUI>         guiMap = new HashMap<>(4);
+    private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
     @Getter
-    private static final Map<String, FileConfiguration> cfgs   = new HashMap<>(4);
+    private static final Map<String, FileConfiguration> cfgs = new HashMap<>(4);
 
     public static void init() {
         map.clear();
@@ -70,7 +67,7 @@ public class ProfessionsCfg {
                     cfg.load(file);
                     // Get the YAMLs whole content as a map
                     Map<String, Object> _map = cfg.getValues(true);
-                    CraftingTable       ct   = new CraftingTable(_map);
+                    CraftingTable ct = new CraftingTable(_map);
                     map.put(ct.getName(), ct);
                     cfgs.put(ct.getName(), cfg);
                 } catch (Exception e) {
@@ -81,7 +78,7 @@ public class ProfessionsCfg {
         }
 
         for (Map.Entry<String, CraftingTable> entry : map.entrySet()) {
-            String        key   = entry.getKey();
+            String key = entry.getKey();
             CraftingTable value = entry.getValue();
             guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
         }
@@ -167,6 +164,97 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.fillItem.flags", List.of());
             cfg.set("pattern.items.fillItem.enchants", Map.of());
         }
+        if (cfg.isSet("recipes")) {
+            // Retrieve the list of recipes
+            List<Map<?, ?>> recipesSection = cfg.getMapList("recipes");
+
+            // Ensure recipesSection is not null
+            if (recipesSection != null) {
+                // Create a new list to hold the modified recipes
+                List<Map<String, Object>> modifiedRecipes = new ArrayList<>();
+
+                // Iterate and modify recipes
+                for (Map<?, ?> recipeData : recipesSection) {
+                    try {
+                        // Create a mutable copy of the recipe data
+                        Map<String, Object> mutableRecipeData = (Map<String, Object>) new LinkedHashMap<>(recipeData);
+
+                        Map<String, Object> costs = (Map<String, Object>) mutableRecipeData.getOrDefault("costs", new HashMap<>());
+                        Map<String, Object> results = (Map<String, Object>) mutableRecipeData.getOrDefault("results", new HashMap<>());
+                        Map<String, Object> conditions = (Map<String, Object>) mutableRecipeData.getOrDefault("conditions", new HashMap<>());
+
+
+                        if (mutableRecipeData.containsKey("cooldown")) {
+                            int craftingTime = (int) mutableRecipeData.getOrDefault("cooldown", 0);
+                            mutableRecipeData.remove("cooldown");
+                            mutableRecipeData.put("craftingTime", craftingTime);
+                        }
+
+                        // Costs
+                        if (mutableRecipeData.containsKey("price")) {
+                            costs.put("money", (mutableRecipeData.get("price") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("price")).doubleValue() : 0.0);
+                            mutableRecipeData.remove("price");
+                        }
+                        if (mutableRecipeData.containsKey("costs") && mutableRecipeData.get("costs") instanceof Number) {
+                            costs.put("exp", ((mutableRecipeData.get("costs") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("costs")).doubleValue() : 0.0));
+                        }
+                        if(mutableRecipeData.containsKey("pattern")) {
+                            List<String> pattern = (List<String>) mutableRecipeData.get("pattern");
+                            mutableRecipeData.remove("pattern");
+                            costs.put("items", pattern);
+                        }
+
+                        // Conditions
+                        if (mutableRecipeData.containsKey("mastery")) {
+                            boolean mastery = (boolean) mutableRecipeData.getOrDefault("mastery", false);
+                            mutableRecipeData.remove("mastery");
+                            conditions.put("mastery", mastery);
+                        }
+                        if (mutableRecipeData.containsKey("neededLevels")) {
+                            int neededLevels = (int) mutableRecipeData.getOrDefault("neededLevels", 0);
+                            mutableRecipeData.remove("neededLevels");
+                            conditions.put("professionLevel", neededLevels);
+                        }
+
+                        // Results
+                        if(mutableRecipeData.containsKey("result")) {
+                            String item = mutableRecipeData.get("result").toString();
+                            mutableRecipeData.remove("result");
+                            results.put("item", item);
+                        }
+                        if (mutableRecipeData.containsKey("xpGain")) {
+                            results.put("professionExp", ((mutableRecipeData.get("xpGain") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("xpGain")).intValue() : 0));
+                            mutableRecipeData.remove("xpGain");
+                        }
+                        if(mutableRecipeData.containsKey("commands")) {
+                            List<String> commands = (List<String>) mutableRecipeData.get("commands");
+                            mutableRecipeData.remove("commands");
+                            results.put("commands", commands);
+                        }
+
+
+                        mutableRecipeData.put("results", results);
+                        mutableRecipeData.put("conditions", conditions);
+                        mutableRecipeData.put("costs", costs);
+                        // Add the modified recipe to the new list
+                        modifiedRecipes.add(mutableRecipeData);
+                    } catch (Exception e) {
+                        Fusion.getInstance()
+                                .error("Exception when reading config, Invalid entry in config of " + recipeData
+                                        + " crafting table. Value: " + recipeData);
+                        e.printStackTrace();
+                    }
+                }
+
+                // Set the modified recipes back to the config
+                cfg.set("recipes", modifiedRecipes);
+            } else {
+                Fusion.getInstance().error("Recipes section is null in the config.");
+            }
+        }
     }
 
     public static boolean loadFrom(String key, Map<String, Object> map) {
@@ -203,9 +291,9 @@ public class ProfessionsCfg {
     }
 
     public static ItemStack getFillItem(String key) {
-        String       name     = cfgs.get(key).getString("pattern.items.fillItem.name", " ");
-        List<String> lore     = cfgs.get(key).getStringList("pattern.items.fillItem.lore");
-        Material     material = Material.getMaterial(cfgs.get(key)
+        String name = cfgs.get(key).getString("pattern.items.fillItem.name", " ");
+        List<String> lore = cfgs.get(key).getStringList("pattern.items.fillItem.lore");
+        Material material = Material.getMaterial(cfgs.get(key)
                 .getString("pattern.items.fillItem.material", "BLACK_STAINED_GLASS_PANE"));
         return ItemBuilder.newItem(material).name(name).lore(lore).build();
     }
@@ -232,8 +320,8 @@ public class ProfessionsCfg {
     public static ItemStack getQueueItem(String key, QueueItem item) {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
-        FileConfiguration cfg  = cfgs.get(key);
-        String            path =
+        FileConfiguration cfg = cfgs.get(key);
+        String path =
                 item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
 
 
@@ -241,11 +329,11 @@ public class ProfessionsCfg {
             Fusion.getInstance().getLogger().warning("Profession '" + key + "' is missing '" + path + "'.");
             return null;
         }
-        ItemStack    result   = item.getRecipe().getResult().getItemStack();
-        Material     material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
+        ItemStack result = item.getRecipe().getResults().getResultItem().getItemStack();
+        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())
                 .toUpperCase());
-        List<String> lore     = cfg.getStringList(path + ".lore");
+        List<String> lore = cfg.getStringList(path + ".lore");
         lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime())));
         return ItemBuilder.newItem(result).material(material).lore(lore).build();
     }

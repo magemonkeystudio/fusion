@@ -15,7 +15,7 @@ import studio.magemonkey.fusion.util.Utils;
 import java.util.*;
 
 public class CalculatedRecipe {
-    private final Recipe    recipe;
+    private final Recipe recipe;
     private final ItemStack icon;
 
     private final boolean canCraft;
@@ -46,7 +46,7 @@ public class CalculatedRecipe {
             Fusion pl = Fusion.getInstance();
 
             StringBuilder lore = new StringBuilder(512);
-            ItemStack result = recipe.getResult().getItemStack();
+            ItemStack result = recipe.getResults().getResultItem().getItemStack();
             List<String> resultLore = result.getItemMeta().getLore();
 
             if ((resultLore != null) && !resultLore.isEmpty()) {
@@ -78,57 +78,67 @@ public class CalculatedRecipe {
             }
 
             String moneyLine = null;
-            if (recipe.price != 0) {
-                if (!CodexEngine.get().getVault().canPay(player, recipe.price)) {
+            if (recipe.getConditions().getMoneyCost() != 0) {
+                if (!CodexEngine.get().getVault().canPay(player, recipe.getConditions().getMoneyCost())) {
                     canCraft = false;
                     moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.false",
                             "fusion.gui.money.false",
                             new MessageData("recipe", recipe),
+                            new MessageData("price", recipe.getConditions().getMoneyCost()),
+                            new MessageData("costs.money", recipe.getConditions().getMoneyCost()),
                             new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
                 } else {
                     moneyLine = MessageUtil.getMessageAsString("fusion.gui.money.true",
                             "fusion.gui.money.true",
                             new MessageData("recipe", recipe),
+                            new MessageData("price", recipe.getConditions().getMoneyCost()),
+                            new MessageData("costs.money", recipe.getConditions().getMoneyCost()),
                             new MessageData("player.money", CodexEngine.get().getVault().getBalance(player)));
                 }
             }
 
-            String levelsLine = null;
-            if (recipe.neededLevels != 0) {
-                if (LevelFunction.getLevel(player, craftingTable) < recipe.neededLevels) {
-                    canCraft = false;
-                    levelsLine = MessageUtil.getMessageAsString("fusion.gui.xpLevels.false",
-                            "fusion.gui.xpLevels.false",
-                            new MessageData("recipe", recipe),
-                            new MessageData("player", player),
-                            new MessageData("level", LevelFunction.getLevel(player, craftingTable)));
-                } else {
-                    levelsLine = MessageUtil.getMessageAsString("fusion.gui.xpLevels.true",
-                            "fusion.gui.xpLevels.true",
-                            new MessageData("recipe", recipe),
-                            new MessageData("player", player),
-                            new MessageData("level", LevelFunction.getLevel(player, craftingTable)));
-                }
-            }
-
             String xpLine = null;
-            if (recipe.neededXp != 0) {
-                if (PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable) < recipe.neededXp) {
+            if (recipe.getConditions().getExpCost() != 0) {
+                if (PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable) < recipe.getConditions().getExpCost()) {
                     canCraft = false;
                     xpLine = MessageUtil.getMessageAsString("fusion.gui.xp.false",
-                            "fusion.gui.xp.false",
+                            "fusion.gui.exp.false",
                             new MessageData("recipe", recipe),
+                            new MessageData("exp", recipe.getConditions().getExpCost()),
+                            new MessageData("costs.exp", recipe.getConditions().getExpCost()),
                             new MessageData("player", player));
                 } else {
                     xpLine = MessageUtil.getMessageAsString("fusion.gui.xp.true",
-                            "fusion.gui.xp.true",
+                            "fusion.gui.exp.true",
                             new MessageData("recipe", recipe),
+                            new MessageData("exp", recipe.getConditions().getExpCost()),
+                            new MessageData("costs.exp", recipe.getConditions().getExpCost()),
                             new MessageData("player", player));
+                }
+            }
+
+            String levelsLine = null;
+            if (recipe.getConditions().getProfessionLevel() != 0) {
+                if (LevelFunction.getLevel(player, craftingTable) < recipe.getConditions().getProfessionLevel()) {
+                    canCraft = false;
+                    levelsLine = MessageUtil.getMessageAsString("fusion.gui.professionLevel.false",
+                            "fusion.gui.professionLevel.false",
+                            new MessageData("recipe", recipe),
+                            new MessageData("player", player),
+                            new MessageData("level", LevelFunction.getLevel(player, craftingTable)),
+                            new MessageData("conditions.professionLevel", LevelFunction.getLevel(player, craftingTable)));
+                } else {
+                    levelsLine = MessageUtil.getMessageAsString("fusion.gui.professionLevel.true",
+                            "fusion.gui.professionLevel.true",
+                            new MessageData("recipe", recipe),
+                            new MessageData("player", player),
+                            new MessageData("level", LevelFunction.getLevel(player, craftingTable)),
+                            new MessageData("conditions.professionLevel", LevelFunction.getLevel(player, craftingTable)));
                 }
             }
 
             String masteryLine = null;
-            if (recipe.mastery) {
+            if (recipe.getConditions().isMastery()) {
                 if (!PlayerLoader.getPlayer(player).hasMastered(craftingTable.getName())) {
                     canCraft = false;
                     masteryLine = MessageUtil.getMessageAsString("fusion.gui.mastery.false",
@@ -143,7 +153,13 @@ public class CalculatedRecipe {
                 }
             }
 
-
+            List<Map.Entry<Boolean, String>> conditionLines = recipe.getConditions().getConditionLines(player, craftingTable);
+            for (Map.Entry<Boolean, String> entry : conditionLines) {
+                if (!entry.getKey()) {
+                    canCraft = false;
+                    break;
+                }
+            }
             Map<ItemStack, Integer> eqItems = Recipe.getItems(items);
 
 
@@ -157,7 +173,7 @@ public class CalculatedRecipe {
 //            }
 //            eqItems.put(riseItem.getId().toLowerCase(), new SimpleEntry<>(riseItem, item.getAmount()));
 //        }
-            Collection<RecipeItem> localPattern = new HashSet<>(recipe.pattern);
+            Collection<RecipeItem> localPattern = new HashSet<>(recipe.getConditions().getRequiredItems());
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem recipeItem = it.next();
                 ItemStack recipeItemStack = recipeItem.getItemStack();
@@ -255,7 +271,15 @@ public class CalculatedRecipe {
             if (masteryLine != null) {
                 lore.append(masteryLine).append('\n');
             }
-            lore.append(permissionLine);
+
+            if(!conditionLines.isEmpty())
+            {
+                for (Map.Entry<Boolean, String> entry : conditionLines) {
+                    lore.append('\n').append(entry.getValue());
+                }
+            }
+
+            lore.append("\n").append(permissionLine);
 
             if (rankLine != null) {
                 lore.append('\n').append(rankLine);
@@ -270,14 +294,12 @@ public class CalculatedRecipe {
             itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
             icon.setItemMeta(itemMeta);
 
-            return new
-
-                    CalculatedRecipe(recipe, icon, canCraft);
+            return new CalculatedRecipe(recipe, icon, canCraft);
         } catch (Exception e) {
             Fusion.getInstance().error("The recipe-item seems not to be recognized. Please check your setup on the following recipe '" + recipe.getName() + "':");
-            Fusion.getInstance().error("Result: " + recipe.resultName);
+            Fusion.getInstance().error("Result: " + recipe.getResults().getResultName());
             Fusion.getInstance().error("Pattern Items: ");
-            for(String patternItem : recipe.patternItemNames) {
+            for (String patternItem : recipe.getConditions().getRequiredItemNames()) {
                 Fusion.getInstance().error("- " + patternItem);
             }
             Fusion.getInstance().error("Error on creating CalculatedRecipe: " + e.getMessage());

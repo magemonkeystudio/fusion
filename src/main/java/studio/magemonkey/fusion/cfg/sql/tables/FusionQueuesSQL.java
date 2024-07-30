@@ -61,7 +61,7 @@ public class FusionQueuesSQL {
                 insert.setString(2, uuid.toString());
                 insert.setString(3, item.getRecipePath());
                 insert.setLong(4, item.getTimestamp());
-                insert.setLong(5, item.getRecipe().getCooldown());
+                insert.setLong(5, item.getRecipe().getCraftingTime());
                 insert.setLong(6, item.getSavedSeconds());
                 insert.execute();
                 return true;

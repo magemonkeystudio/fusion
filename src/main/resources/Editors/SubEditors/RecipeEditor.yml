@@ -89,7 +89,7 @@ subEditor:
     resultItem:
       name: '&9Result Item'
       lore:
-        - '&7Result: &a$<result.name>'
+        - '&7Result: &a$<results.resultName>'
         - '$<result.lore>'
         - '&8--------------------'
         - '&aLeft click &7to modify the result.'
@@ -145,7 +145,7 @@ subEditor:
         unbreakable: false
         name: '&9Mastery'
         lore:
-            - '&7Current: &a$<mastery>'
+            - '&7Current: &a$<conditions.mastery>'
             - '&7Rather you need to master this'
             - '&7recipe to craft it.'
             - '&8--------------------'
@@ -159,7 +159,7 @@ subEditor:
         unbreakable: false
         name: '&9Needed Levels'
         lore:
-            - '&7Current: &a$<neededLevels>'
+            - '&7Current: &a$<conditions.professionLevel>'
             - '&7The amount of levels needed to'
             - '&7craft this recipe.'
             - '&8--------------------'

@@ -8,11 +8,11 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.cfg.professions.ProfessionResults;
 import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
@@ -24,15 +24,6 @@ import java.util.stream.Collectors;
 public class Recipe implements ConfigurationSerializable {
     @Getter
     protected final String                     name;
-    protected final LinkedList<RecipeItem>     pattern;
-    @Getter
-    protected final RecipeItem                 result;
-    @Getter
-    protected final int                        neededLevels;
-    @Getter
-    protected final int                        xpGain;
-    @Getter
-    protected final boolean                    mastery;
     @Getter
     protected final Collection<DelayedCommand> commands = new ArrayList<>();
     @Getter
@@ -44,34 +35,20 @@ public class Recipe implements ConfigurationSerializable {
     @Getter
     protected final String category;
     @Getter
-    protected final String resultName;
+    protected final ProfessionResults results;
     @Getter
-    protected final List<String> patternItemNames = new ArrayList<>();
-    @Getter
-    protected final ProfessionCondition conditions;
+    protected final ProfessionConditions conditions;
 
     public Recipe(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
         this.category = dw.getString("category");
-        this.result = RecipeItem.fromConfig(map.get("result"));
-        this.resultName = dw.getString("result");
-//        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
-        this.pattern = dw.getStringList("pattern")
-                .stream()
-                .map(RecipeItem::fromConfig)
-                .collect(Collectors.toCollection(LinkedList::new));
-        this.patternItemNames.addAll(dw.getStringList("pattern"));
-        this.neededLevels = dw.getInt("neededLevels", 0);
-        this.xpGain = dw.getInt("xpGain", 0);
-        this.mastery = dw.getBoolean("mastery");
+
         this.rank = dw.getString("rank");
-        this.craftingTime = dw.getInt("cooldown");
+        this.craftingTime = dw.getInt("craftingTime");
         dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
-        this.conditions = null;
-        if (result == null) {
-            throw new IllegalArgumentException("Invalid result: " + map.get("result"));
-        }
+        this.results = new ProfessionResults(name, dw);
+        this.conditions = new ProfessionConditions(name, dw);
     }
 
     public Recipe(String name,
@@ -80,16 +57,11 @@ public class Recipe implements ConfigurationSerializable {
                   double moneyCost,
                   int neededLevels,
                   int experienceCost,
-                  String category, ProfessionCondition conditions) {
+                  String category, ProfessionResults results, ProfessionConditions conditions) {
         this.name = name;
-        this.pattern = new LinkedList<>(pattern);
-        this.result = result;
-        this.neededLevels = neededLevels;
-        this.resultName = result.getItemName();
         this.category = category;
+        this.results = results;
         this.conditions = conditions;
-        this.xpGain = 0;
-        this.mastery = false;
         this.rank = "";
         this.craftingTime = 0;
     }
@@ -128,18 +100,15 @@ public class Recipe implements ConfigurationSerializable {
             if (!Utils.hasCraftingPermission(p, this.name)) {
                 return false;
             }
-            if (LevelFunction.getLevel(p, craftingTable) < this.neededLevels) {
+            if (LevelFunction.getLevel(p, craftingTable) < this.conditions.getProfessionLevel()) {
                 return false;
             }
-            if (PlayerLoader.getPlayer(p.getUniqueId()).getExperience(craftingTable) < this.conditions.getExpCost()) {
-                return false;
-            }
-            if (!CodexEngine.get().getVault().canPay(p, this.conditions.getMoneyCost())) {
+            if(!this.conditions.isValid(PlayerLoader.getPlayer(p))) {
                 return false;
             }
         }
         Map<ItemStack, Integer> eqItems      = getItems(items);
-        Map<ItemStack, Integer> localPattern = getPattern(this.pattern);
+        Map<ItemStack, Integer> localPattern = getPattern(this.conditions.getRequiredItems());
         for (Iterator<Entry<ItemStack, Integer>> iterator = localPattern.entrySet().iterator(); iterator.hasNext(); ) {
             Entry<ItemStack, Integer> patternEntry = iterator.next();
             int                       eqAmount     = eqItems.getOrDefault(patternEntry.getKey(), -1);
@@ -161,12 +130,16 @@ public class Recipe implements ConfigurationSerializable {
         return localPattern.isEmpty();
     }
 
-    public Collection<RecipeItem> getPattern() {
-        return this.pattern;
+    public Collection<ItemStack> getItemsToTake() {
+        return this.conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
     }
 
-    public Collection<ItemStack> getItemsToTake() {
-        return this.pattern.stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
+    public double getMoneyCost() {
+        return this.conditions.getMoneyCost();
+    }
+
+    public int getExpCost() {
+        return this.conditions.getExpCost();
     }
 
     @Override
@@ -175,8 +148,11 @@ public class Recipe implements ConfigurationSerializable {
                 .append("name", this.name)
                 .append("costs.money", this.conditions.getMoneyCost())
                 .append("costs.experience", this.conditions.getExpCost())
-                .append("pattern", this.pattern)
-                .append("result", this.result)
+                .append("costs.items", this.conditions.getRequiredItemNames())
+                .append("results.item", this.getResults().getResultItem())
+                .append("results.professionExp", this.getResults().getProfessionExp())
+                .append("results.vanillaExp", this.getResults().getVanillaExp())
+                .append("results.commands", this.getResults().getCommands())
                 .append("craftingTime", this.craftingTime)
                 .toString();
     }
@@ -185,14 +161,16 @@ public class Recipe implements ConfigurationSerializable {
     public @NotNull Map<String, Object> serialize() {
         return SerializationBuilder.start(6)
                 .append("name", this.name)
-                .append("result", this.result.toConfig())
+                .append("craftingTime", this.craftingTime)
+
+                .append("result.professionExp", this.results.getProfessionExp())
+                .append("result.vanillaExp", this.results.getVanillaExp())
+                .append("result.items", this.results.getResultItem().toConfig())
+                .append("result.commands", this.results.getCommands().stream().map(DelayedCommand::serialize).collect(Collectors.toList()))
+
                 .append("costs.money", this.conditions.getMoneyCost())
                 .append("costs.experience", this.conditions.getExpCost())
-                .append("neededLevels", this.neededLevels)
-                .append("xpGain", this.xpGain)
-                .append("pattern", this.pattern.stream().map(RecipeItem::toConfig).collect(Collectors.toList()))
-                .append("craftingTime", this.craftingTime)
-                .append("commands", this.commands)
+                .append("costs.items", this.conditions.getRequiredItems().stream().map(RecipeItem::toConfig).collect(Collectors.toList()))
                 .build();
     }
 

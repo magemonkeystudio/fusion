@@ -12,10 +12,9 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.YamlParser;
-import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.util.ChatUT;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,7 @@ public class RecipeEditorCfg {
     }
 
     public ItemStack getRecipeIcon(Recipe recipe) {
-        ItemStack result = recipe.getResult().getItemStack();
+        ItemStack result = recipe.getResults().getResultItem().getItemStack();
         String name = config.getString("icons.recipeItem.name", "&9$<recipe.name>").replace(MessageUtil.getReplacement("recipe.name"), recipe.getName());
         List<String> lore = config.getStringList("icons.recipeItem.lore");
 
@@ -117,16 +116,16 @@ public class RecipeEditorCfg {
     }
 
     public ItemStack getSubIcon(Recipe recipe, String icon) {
-        ItemStack result = recipe.getResult().getItemStack();
-        String resultName = recipe.getResultName();
-        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "&9Result Item").replace(MessageUtil.getReplacement("material"), recipe.getResult().getItemStack().getType().name()).toUpperCase());
+        ItemStack result = recipe.getResults().getResultItem().getItemStack();
+        String resultName = recipe.getResults().getResultName();
+        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "&9Result Item").replace(MessageUtil.getReplacement("material"), recipe.getResults().getResultItem().getItemStack().getType().name()).toUpperCase());
         int amount = config.getInt("subEditor.icons." + icon + ".amount", 1);
         int durability = config.getInt("subEditor.icons." + icon + ".durability", 0);
         boolean unbreakable = config.getBoolean("subEditor.icon." + icon + ".unbreakable", false);
         String name = config.getString("subEditor.icons." + icon + ".name", "&cInvalid Item: &4" + icon);
         List<String> lore = config.getStringList("subEditor.icons." + icon + ".lore");
 
-        ProfessionCondition conditions = recipe.getConditions();
+        ProfessionConditions conditions = recipe.getConditions();
 
         for(int i = 0; i < lore.size(); i++) {
             if(lore.get(i).contains(MessageUtil.getReplacement("result.lore"))) {
@@ -152,7 +151,7 @@ public class RecipeEditorCfg {
             } else if(lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
                 lore.remove(i);
                 int newLines = 1;
-                for(RecipeItem item : recipe.getPattern()) {
+                for(RecipeItem item : recipe.getConditions().getRequiredItems()) {
                     ItemStack patternItem = item.getItemStack();
                     String itemName = patternItem.hasItemMeta() ? patternItem.getItemMeta().getDisplayName() : patternItem.getType().name();
                     lore.add(i - 1 + newLines, config.getString("ingredients.ingredientPrefix", "&7- &2$<ingredient.amount> t&a$<ingredient.name>")
@@ -178,20 +177,22 @@ public class RecipeEditorCfg {
             }
 
             lore.set(i, ChatUT.hexString(lore.get(i)
-                    .replace(MessageUtil.getReplacement("result.name"), resultName)
                     .replace(MessageUtil.getReplacement("name"), recipe.getName())
-                    .replace(MessageUtil.getReplacement("xpGain"), String.valueOf(recipe.getXpGain()))
+                    .replace(MessageUtil.getReplacement("results.name"), resultName)
+                    .replace(MessageUtil.getReplacement("results.professionExp"), String.valueOf(recipe.getResults().getProfessionExp()))
+                    .replace(MessageUtil.getReplacement("results.vanillaExp"), String.valueOf(recipe.getResults().getVanillaExp()))
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.experience"), String.valueOf(conditions.getExpCost()))
                     .replace(MessageUtil.getReplacement("craftingTime"), String.valueOf(recipe.getCraftingTime()))
-                    .replace(MessageUtil.getReplacement("neededLevels"), String.valueOf(recipe.getNeededLevels()))
+                    .replace(MessageUtil.getReplacement("conditions.professionLevel"), String.valueOf(recipe.getConditions().getProfessionLevel()))
+                    .replace(MessageUtil.getReplacement("conditions.mastery"), String.valueOf(recipe.getConditions().isMastery()))
                     .replace(MessageUtil.getReplacement("category"), recipe.getCategory())));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");
         List<ItemFlag> flags = config.getItemFlags("subEditor.icons." + icon + ".flags");
         ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
-                .amount(icon.equals("resultItem") ? recipe.getResult().getAmount() : amount)
+                .amount(icon.equals("resultItem") ? recipe.getResults().getResultItem().getAmount() : amount)
                 .durability(durability)
                 .unbreakable(unbreakable)
                 .name(ChatUT.hexString(name))

@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.cfg.professions.ProfessionCondition;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class BrowseConfig {
 
     @Getter
     private static final LinkedList<String> professions = new LinkedList<>();
-    private static final HashMap<String, ProfessionCondition> professionConditions = new HashMap<>();
+    private static final HashMap<String, ProfessionConditions> professionConditions = new HashMap<>();
 
     @Getter
     private static String browseName = ChatColor.DARK_AQUA + "Browse";
@@ -120,12 +120,12 @@ public class BrowseConfig {
 
         for (String prof : config.getConfigurationSection("professions").getValues(false).keySet()) {
             professions.add(prof.toLowerCase());
-            professionConditions.put(prof.toLowerCase(), new ProfessionCondition(prof, config.getConfigurationSection("professions." + prof)));
+            professionConditions.put(prof.toLowerCase(), new ProfessionConditions(prof, config.getConfigurationSection("professions." + prof)));
             Fusion.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }
 
-    public static ProfessionCondition getProfessionConditions(String profession) {
+    public static ProfessionConditions getProfessionConditions(String profession) {
         return professionConditions.getOrDefault(profession.toLowerCase(), null);
     }
 

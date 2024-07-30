@@ -76,9 +76,11 @@ public class Fusion extends RisePlugin implements Listener {
         RECIPE_ITEM.registerItem("itemName",
                 i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).getItemName() : null);
         RECIPE.registerItem("name", Recipe::getName);
-        RECIPE.registerItem("price", Recipe::getPrice);
-        RECIPE.registerItem("neededLevels", Recipe::getNeededLevels);
-        RECIPE.registerItem("neededXp", Recipe::getNeededXp);
+        RECIPE.registerItem("costs.money", Recipe::getMoneyCost);
+        RECIPE.registerItem("costs.exp", Recipe::getExpCost);
+        RECIPE.registerItem("results", Recipe::getResults);
+        RECIPE.registerItem("professionLevel", entry -> entry.getConditions().getProfessionLevel());
+        RECIPE.registerItem("conditions", Recipe::getConditions);
         CRAFTING_TABLE.registerItem("name", CraftingTable::getName);
         CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
         CRAFTING_TABLE.registerItem("masteryUnlock", CraftingTable::getMasteryUnlock);
@@ -97,7 +99,7 @@ public class Fusion extends RisePlugin implements Listener {
                     });
         }
         RECIPE_ITEM.registerChild("item", PlaceholderRegistry.ITEM, RecipeItem::getItemStack);
-        RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
+        RECIPE.registerChild("results", RECIPE_ITEM, entry -> entry.getResults().getResultItem());
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
         CALCULATED_RECIPE.registerChild("icon", PlaceholderRegistry.ITEM, CalculatedRecipe::getIcon);
 

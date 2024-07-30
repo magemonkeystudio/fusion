@@ -10,17 +10,20 @@ fusion:
       'true': "&6- &a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
       'false': "&6- &c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
     money:
-      'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<recipe.price>&7)"
-      'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<recipe.price>&7)"
-    xpLevels:
-      'true': '&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.neededLevels>&7)'
-      'false': '&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.neededLevels>&7)'
-    xp:
-      'true': '&3Cost: &a$<player.totalExperience>&8/&7$<recipe.neededXp>&3xp.'
-      'false': '&3Cost: &c$<player.totalExperience>&8/&7$<recipe.neededXp>&3xp.'
+      'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
+      'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"
+    exp:
+      'true': '&6- &eExperience: &7(&a$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp.'
+      'false': '&6- &eExperience: &7(&c$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp.'
+    professionLevel:
+      'true': '&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.professionLevel>&7)'
+      'false': '&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.professionLevel>&7)'
     mastery:
       'true': '&6- &eMastery: &7(Unlocked)'
       'false': '&6- &eMastery: &8(locked)'
+    condition:
+      'true': '&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)'
+      'false': '&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)'
     canCraft:
       'true': '&aYou can craft this item.'
       'false': '&cYou can''t craft this item.'
@@ -28,26 +31,26 @@ fusion:
       epic: '&cEpic rank needed to craft this item!'
   browse:
     alreadyUnlocked: "&cYou have already unlocked this profession!"
-    noFundsMoney: "&cYou need &3$$<cost.money> to buy this!"
-    noFundsExperience: "&cYou need &3$$<cost.experience> to buy this!"
+    noFundsMoney: "&cYou need &3$$<costs.money> to buy this!"
+    noFundsExperience: "&cYou need &3$$<costs.experience> to buy this!"
     noConditionLevel: "&cYou need to be at least level &a$<condition.level> &bin &a $<condition.name> &bto unlock this!"
-    conditionFormatting:
-      profession: "&3Profession &a$<profession>"
-      fabled: "&3Fabled &a$<class>"
-      mcmmo: "&3McMMO &a$<skill>"
-      jobs: "&3Job &a$<job>"
-      auraAbility: "&3Aura Ability &a$<ability>"
-      auraManaAbility: "&3Aura Mana Ability &a$<ability>"
-      auraSkill: "&3Aura Skill &a$<skill>"
-      auraStats: "&3Aura Stat &a$<stat>"
+  conditionFormatting:
+    profession: "&3Profession &a$<profession>"
+    fabled: "&3Fabled &a$<class>"
+    mcmmo: "&3McMMO &a$<skill>"
+    jobs: "&3Job &a$<job>"
+    auraAbility: "&3Aura Ability &a$<ability>"
+    auraManaAbility: "&3Aura Mana Ability &a$<ability>"
+    auraSkill: "&3Aura Skill &a$<skill>"
+    auraStats: "&3Aura Stat &a$<stat>"
   error:
     alreadyMastered: "&cYou have already mastered this!"
     noMasteryLevel: "&cYou must be at least level $<craftingTable.masteryUnlock> to unlock this!"
     noMasteryFunds: "&cYou need $$<craftingTable.masteryFee> to unlock this!"
     noMastery: "&cYou have not mastered this skill yet. You need to reach level $<craftingTable.masteryUnlock> and pay the fee &7($$<craftingTable.masteryFee>)\n&5The fee can be paid using &7/craft master $<craftingTable.name>"
-    noLevel: "&cYou need to be $<recipe.neededLevels> to craft this!"
-    noXP: "&cYou need $<recipe.neededXp> to craft this."
-    noFunds: "&cYou need $$<recipe.price> to craft this"
+    noLevel: "&cYou need to be $<conditions.professionLevel> to craft this!"
+    noXP: "&cYou need $<costs.exp> to craft this."
+    noFunds: "&cYou need $$<costs.money> to craft this"
     insufficientItems: "&cYou lack some of the required items for this!"
     limitReached: "&cYou have already unlocked &3$<unlocked>/$<limit> &cprofessions."
     notUnlocked: "&cYou haven't unlocked this profession yet. Use &3/craft browse &c to view all professions."
