@@ -89,10 +89,42 @@ subEditor:
     resultItem:
       name: '&9Result Item'
       lore:
-        - '&7Result: &a$<results.resultName>'
+        - '&7Result: &a$<results.resultItem>'
         - '$<result.lore>'
         - '&8--------------------'
         - '&aLeft click &7to modify the result.'
+    professionExp:
+      material: EXPERIENCE_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Profession EXP Gain'
+      lore:
+        - '&7Current: &a$<results.professionExp>'
+        - '&7The profession exp gained for'
+        - '&7crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the xp.'
+        - '&aRight click &7to decrease the xp.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    vanillaExp:
+      material: EXPERIENCE_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Vanilla EXP Gain'
+      lore:
+        - '&7Current: &a$<results.vanillaExp>'
+        - '&7The vanilla exp gained for'
+        - '&7crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the xp.'
+        - '&aRight click &7to decrease the xp.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
     moneyCost:
       material: GREEN_CANDLE
       amount: 1
@@ -108,7 +140,7 @@ subEditor:
         - '&aShift click &7each to increase by 10.'
       flags: [ ]
       enchants: { }
-    experienceCost:
+    expCost:
         material: LIME_CANDLE
         amount: 1
         durability: 0
@@ -146,21 +178,21 @@ subEditor:
         name: '&9Mastery'
         lore:
             - '&7Current: &a$<conditions.mastery>'
-            - '&7Rather you need to master this'
-            - '&7recipe to craft it.'
+            - '&7Rather you need to master the'
+            - '&7profession to craft this.'
             - '&8--------------------'
             - '&aLeft click &7to toggle.'
         flags: [ ]
         enchants: { }
-    neededLevels:
+    professionLevel:
         material: EXPERIENCE_BOTTLE
         amount: 1
         durability: 0
         unbreakable: false
-        name: '&9Needed Levels'
+        name: '&9Needed Profession Level'
         lore:
             - '&7Current: &a$<conditions.professionLevel>'
-            - '&7The amount of levels needed to'
+            - '&7The required profession level to'
             - '&7craft this recipe.'
             - '&8--------------------'
             - '&aLeft click &7to increase the levels.'
@@ -185,7 +217,7 @@ subEditor:
         - '&aRight click &7to remove last ingredient.'
       flags: [ ]
       enchants: { }
-      ingredientPrefix: '&7- &2$<ingredient.amount> t&a$<ingredient.name>'
+      ingredientPrefix: '&7- &2$<ingredient.amount>x &a$<ingredient.name>'
     category:
       material: IRON_BARS
       amount: 1
@@ -195,22 +227,6 @@ subEditor:
       lore:
           - '&7Current: &a$<category>'
           - '&7Click to change the recipe''s category.'
-      flags: [ ]
-      enchants: { }
-    xpGain:
-      material: EXPERIENCE_BOTTLE
-      amount: 1
-      durability: 0
-      unbreakable: false
-      name: '&9XP Gain'
-      lore:
-        - '&7Current: &a$<xpGain>'
-        - '&7The profession exp gained for'
-        - '&7crafting this recipe.'
-        - '&8--------------------'
-        - '&aLeft click &7to increase the xp.'
-        - '&aRight click &7to decrease the xp.'
-        - '&aShift click &7each to increase by 10.'
       flags: [ ]
       enchants: { }
     commands:

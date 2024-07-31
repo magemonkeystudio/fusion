@@ -106,10 +106,6 @@ public class RecipeEditorCfg {
     public Map<String, ItemStack> getSubIcons(Recipe recipe) {
         Map<String, ItemStack> icons = new HashMap<>();
         for(String icon : config.getConfigurationSection("subEditor.icons").getKeys(false)) {
-            if(icon.equalsIgnoreCase("resultItem")) continue;
-            if(icon.equalsIgnoreCase("ingredients")) continue;
-            if(icon.equalsIgnoreCase("conditions")) continue;
-            if(icon.equalsIgnoreCase("commands")) continue;
             icons.put(icon, getSubIcon(recipe, icon));
         }
         return icons;
@@ -118,7 +114,7 @@ public class RecipeEditorCfg {
     public ItemStack getSubIcon(Recipe recipe, String icon) {
         ItemStack result = recipe.getResults().getResultItem().getItemStack();
         String resultName = recipe.getResults().getResultName();
-        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "&9Result Item").replace(MessageUtil.getReplacement("material"), recipe.getResults().getResultItem().getItemStack().getType().name()).toUpperCase());
+        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "$<material>").replace(MessageUtil.getReplacement("material"), recipe.getResults().getResultItem().getItemStack().getType().name()).toUpperCase());
         int amount = config.getInt("subEditor.icons." + icon + ".amount", 1);
         int durability = config.getInt("subEditor.icons." + icon + ".durability", 0);
         boolean unbreakable = config.getBoolean("subEditor.icon." + icon + ".unbreakable", false);
@@ -142,7 +138,7 @@ public class RecipeEditorCfg {
                 lore.remove(i);
                 int newLines = 1;
                 for(DelayedCommand line : recipe.getCommands()) {
-                    lore.add(i - 1 + newLines, config.getString("commands.commandPrefix", "&7- &a$<command>")
+                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.commands.commandPrefix", "&7- &a$<command>")
                             .replace(MessageUtil.getReplacement("command"), line.getCmd()));
                     newLines++;
                 }
@@ -154,7 +150,7 @@ public class RecipeEditorCfg {
                 for(RecipeItem item : recipe.getConditions().getRequiredItems()) {
                     ItemStack patternItem = item.getItemStack();
                     String itemName = patternItem.hasItemMeta() ? patternItem.getItemMeta().getDisplayName() : patternItem.getType().name();
-                    lore.add(i - 1 + newLines, config.getString("ingredients.ingredientPrefix", "&7- &2$<ingredient.amount> t&a$<ingredient.name>")
+                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.ingredients.ingredientPrefix", "&7- &2$<ingredient.amount>x &a$<ingredient.name>")
                             .replace(MessageUtil.getReplacement("ingredient.name"), itemName)
                             .replace(MessageUtil.getReplacement("ingredient.amount"), String.valueOf(item.getItemStack().getAmount())));
                     newLines++;
@@ -167,7 +163,7 @@ public class RecipeEditorCfg {
                 int newLines = 1;
                 for(Map.Entry<String, Map<String, Integer>> entry : conditions.getFullConditions().entrySet()) {
                     for(Map.Entry<String, Integer> condition : entry.getValue().entrySet()) {
-                        lore.add(i - 1 + newLines, config.getString("conditions.conditionPrefix", "&7- &a$<condition>")
+                        lore.add(i - 1 + newLines, config.getString("subEditor.icons.conditions.conditionPrefix", "&7- &a$<condition>")
                                 .replace(MessageUtil.getReplacement("condition"), getConditionFormat(entry.getKey(), condition.getKey(), condition.getValue())));
                         newLines++;
                     }
@@ -178,7 +174,7 @@ public class RecipeEditorCfg {
 
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), recipe.getName())
-                    .replace(MessageUtil.getReplacement("results.name"), resultName)
+                    .replace(MessageUtil.getReplacement("results.resultItem"), resultName)
                     .replace(MessageUtil.getReplacement("results.professionExp"), String.valueOf(recipe.getResults().getProfessionExp()))
                     .replace(MessageUtil.getReplacement("results.vanillaExp"), String.valueOf(recipe.getResults().getVanillaExp()))
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))

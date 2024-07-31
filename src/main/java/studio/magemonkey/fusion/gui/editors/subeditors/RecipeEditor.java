@@ -1,6 +1,5 @@
 package studio.magemonkey.fusion.gui.editors.subeditors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,6 +20,8 @@ public class RecipeEditor extends Editor implements Listener {
 
     private final Player player;
     private final CraftingTable table;
+
+    private RecipeItemEditor recipeItemEditor;
 
     private final HashMap<Inventory, HashMap<Integer, Recipe>> slots = new HashMap<>();
 
@@ -98,6 +99,8 @@ public class RecipeEditor extends Editor implements Listener {
                         Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
                         if(event.isLeftClick()) {
                             // TODO Configure recipe further
+                            recipeItemEditor = new RecipeItemEditor(this, player, entry);
+                            recipeItemEditor.open(player);
                         } else if(event.isRightClick()) {
                             table.getRecipes().remove(entry.getName());
                             hasChanges = true;
