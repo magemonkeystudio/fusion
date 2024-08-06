@@ -1,4 +1,4 @@
-crafting:
+fusion:
   gui:
     learned:
       'true': "&aYou have unlocked this recipe: &ayes"
@@ -39,6 +39,10 @@ crafting:
     profNoFunds: "&cYou need &3$$<cost> to buy this!"
     limitReached: "&cYou have already unlocked &3$<unlocked>/$<limit> &cprofessions."
     notUnlocked: "&cYou haven't unlocked this profession yet. Use &3/craft browse &c to view all professions."
+    autoDisabled: "&cAuto-crafting is disabled."
+    invalidStorage: "&cInvalid storage type: &3$<storage> (valid: &4locale, sql&c)"
+    alreadyUsedStorage: "&cYou are already using this storage type. ($<storage>)"
+  storageChanged: "&7You have swapped to &3$<storage> storage."
   unlockedProfession: "&aYou unlocked &3$<profession>. &7($<unlocked>/$<limit>)"
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"
   alreadyCrafting: "&cYou're already crafting something!"
@@ -49,6 +53,7 @@ crafting:
   reload: "&7Reloaded settings!"
   autoToggle: "&6Your auto-crafting has been turned $<state>."
   autoCancelled: "&cAuto-crafting cancelled."
+  autoDisabled: "&cAuto-crafting is disabled."
   confirm: "&ePlease type &d/craft confirm &eto confirm this action!"
   forget:
     confirm: "&eAre you sure you want to forget $<craftingTable.name>? Type &d/craft confirm &eto confirm this action!"
@@ -56,6 +61,12 @@ crafting:
   levelup: "&3You leveled up! &7($<level>)"
   level:
     format: "&7$<category>: &8Level &r$<level> &8($<experience>)"
+  queue:
+    fullGlobal: "&cYou have reached the global maximum of your queue size."
+    fullProfession: "&cYou have reached the profession maximum of your queue size. ($<profession>)"
+    fullCategory: "&cYou have reached the category maximum of your queue size. ($<category> of profession $<profession>)"
+    finished: "&aYou have crafting items ready for pickup! ($<amount>)"
+    cancelled: "&cYour crafting queue has been cancelled."
   help: |2-
     You typed: &7$<text>&r
       Valid syntax:

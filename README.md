@@ -1,20 +1,27 @@
-[![Build](https://github.com/promcteam/crafting/actions/workflows/release.yml/badge.svg?branch=main)](https://s01.oss.sonatype.org/content/repositories/releases/com/promcteam/crafting/1.2.3-R1)
-[![Build](https://github.com/promcteam/crafting/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://s01.oss.sonatype.org/content/repositories/snapshots/com/promcteam/crafting/1.2.3-R1)
+[![Build](https://github.com/promcteam/fusion/actions/workflows/release.yml/badge.svg?branch=main)](https://s01.oss.sonatype.org/content/repositories/releases/studio/magemonkey/fusion/1.0.0-R0.5-SNAPSHOT)
+[![Build](https://github.com/promcteam/fusion/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://s01.oss.sonatype.org/content/repositories/snapshots/studio/magemonkey/fusion/1.0.0-R0.5-SNAPSHOT)
+[![Discord](https://dcbadge.vercel.app/api/server/6UzkTe6RvW?style=flat)](https://discord.gg/6UzkTe6RvW)
 
-# ProRPGCrafting
+# Fusion
 
-If you wish to use ProRPGCrafting as a dependency in your projects, ProRPGCrafting is available through Maven Central
+If you wish to use Fusion as a dependency in your projects, Fusion is available through Maven Central
 or snapshots through Sonatype.
 
 ```xml
+<repository>
+    <id>sonatype</id>
+    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+</repository>
+...
 <dependency>
-    <groupId>com.promcteam</groupId>
-    <artifactId>crafting</artifactId>
-    <version>1.2.3-R1</version>
+    <groupId>studio.magemonkey</groupId>
+    <artifactId>fusion</artifactId>
+    <version>1.0.0-R0.5-SNAPSHOT</version>
 </dependency>
 ```
 
 ### A huge thanks to our contributors
-<a href="https://github.com/promcteam/prorpgcrafting/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=promcteam/prorpgcrafting" />
+
+<a href="https://github.com/promcteam/fusion/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=promcteam/fusion"  alt=""/>
 </a>
