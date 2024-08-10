@@ -1,17 +1,25 @@
 package studio.magemonkey.fusion.cfg.professions;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.DelayedCommand;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
-public class ProfessionResults {
+@Setter
+public class ProfessionResults implements ConfigurationSerializable {
 
     private final String profession;
 
@@ -29,8 +37,6 @@ public class ProfessionResults {
         this.vanillaExp = config.getInt("rewards.vanillaExp");
         this.resultItem = RecipeItem.fromConfig(config.get("rewards.item"));
         this.resultName = config.getString("rewards.item");
-
-
     }
 
     public ProfessionResults(String profession, DeserializationWorker dw) {
@@ -55,5 +61,14 @@ public class ProfessionResults {
             this.resultItem = RecipeItem.fromConfig(resultsSection.get("item"));
             this.resultName = (String) resultsSection.get("item");
         }
+    }
+
+    @Override
+    public @NotNull Map<String, Object> serialize() {
+        return SerializationBuilder.start(4)
+                .append("professionExp", this.professionExp)
+                .append("vanillaExp", this.vanillaExp)
+                .append("item", this.resultName)
+                .build();
     }
 }

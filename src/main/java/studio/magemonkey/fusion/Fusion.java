@@ -23,6 +23,8 @@ import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.commands.Commands;
+import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
 
@@ -118,6 +120,7 @@ public class Fusion extends RisePlugin implements Listener {
         });
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
+        this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
         getServer().getPluginManager().registerEvents(this, this);
         runQueueTask();
     }

@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.gui.editors.subeditors;
 
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +12,8 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.commands.EditorCriteria;
+import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
@@ -19,8 +22,10 @@ import java.util.*;
 public class RecipeEditor extends Editor implements Listener {
 
     private final Player player;
+    @Getter
     private final CraftingTable table;
 
+    @Getter
     private RecipeItemEditor recipeItemEditor;
 
     private final HashMap<Inventory, HashMap<Integer, Recipe>> slots = new HashMap<>();
@@ -91,6 +96,7 @@ public class RecipeEditor extends Editor implements Listener {
             hasChanges = true;
         } else {
             switch (event.getSlot()) {
+                case 4 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
                 case 48 -> open(player, (size + invdex - 1) % size);
                 case 50 -> open(player, (invdex + 1) % size);
                 case 53 -> openParent(player);
@@ -111,11 +117,15 @@ public class RecipeEditor extends Editor implements Listener {
         }
 
         if (hasChanges) {
-            table.save();
-            setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
-            initialize();
-            open(player);
+            reload(true);
         }
+    }
 
+    public void reload(boolean open) {
+        table.save();
+        setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
+        initialize();
+        if(open)
+            open(player);
     }
 }

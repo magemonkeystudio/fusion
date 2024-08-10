@@ -46,8 +46,12 @@ public class EditorRegistry {
     }
 
     public static Editor getProfessionEditor(Player player, String profession) {
-        if(!editors.containsKey(player.getUniqueId()))
+        if(!editors.containsKey(player.getUniqueId()) && profession != null)
             editors.put(player.getUniqueId(), new ProfessionEditor(player, profession));
+        return editors.get(player.getUniqueId());
+    }
+
+    public static Editor getCurrentEditor(Player player) {
         return editors.get(player.getUniqueId());
     }
 }

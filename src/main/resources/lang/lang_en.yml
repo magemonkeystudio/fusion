@@ -92,3 +92,21 @@ fusion:
         &8/&7craft &rmaster &8<&7profession&8>
         &8/&7craft &rforget &8<&7profession&8>
         &8/&7craft &rreload
+editor:
+  editorUsage: "&7Usage: '&8/fusion-editor &a$<syntax>&7'."
+  editorClick: "&7&nClick here to suggest the command"
+  noEditor: "&cYou are not using any editor yet."
+  invalidItem: "&cYou tried to parse an invalid item: &3$<item>"
+  invalidSyntax: "&cYou tried to parse an invalid syntax: &3$<syntax>"
+  invalidNumber: "&cYou tried to parse an invalid number: &3$<number>"
+  needMinimumOne: "&cYou need to have at least one item here."
+  professionRenamed: "&aYou renamed the profession &3$<oldName> &ato &3$<newName>"
+  categoryNotFound: "&cThe category &3$<category> &cdoes not exist."
+  categoryAdded: "&aYou added the category &3$<category> &ato the profession &3$<profession>"
+  categoryEdited: "&aYou edited the category &3$<category> &ain the profession &3$<profession>"
+  recipeAlreadyExists: "&cThe recipe &3$<recipe> &calready exists."
+  invalidRecipeCommand: "&cYou tried to parse an invalid recipe command: &3$<command>"
+  recipeRenamed: "&aYou renamed the recipe &3$<oldName> &ato &3$<newName>"
+  recipeAdded: "&aYou created the recipe &3$<recipe> &awith result &3$<result>"
+  resultEdited: "&aYou edited the recipe &3$<recipe> &awith result &3$<result>"
+

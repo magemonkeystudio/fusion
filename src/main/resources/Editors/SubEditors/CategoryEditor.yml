@@ -21,7 +21,7 @@ icons:
     flags: []
     enchants: {}
   categoryItem:
-    material: 'PAPER'
+    material: '$<material>'
     amount: 1
     durability: 0
     unbreakable: false

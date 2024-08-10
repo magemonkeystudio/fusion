@@ -137,9 +137,12 @@ public class RecipeEditorCfg {
             } else if(lore.get(i).contains(MessageUtil.getReplacement("commands"))) {
                 lore.remove(i);
                 int newLines = 1;
-                for(DelayedCommand line : recipe.getCommands()) {
+                for(DelayedCommand line : recipe.getResults().getCommands()) {
                     lore.add(i - 1 + newLines, config.getString("subEditor.icons.commands.commandPrefix", "&7- &a$<command>")
-                            .replace(MessageUtil.getReplacement("command"), line.getCmd()));
+                            .replace(MessageUtil.getReplacement("command"), line.getCmd())
+                            .replace(MessageUtil.getReplacement("delay"), String.valueOf(line.getDelay()))
+                            .replace(MessageUtil.getReplacement("caster"), line.getAs().name())
+                    );
                     newLines++;
                 }
                 i += newLines;
@@ -182,7 +185,7 @@ public class RecipeEditorCfg {
                     .replace(MessageUtil.getReplacement("craftingTime"), String.valueOf(recipe.getCraftingTime()))
                     .replace(MessageUtil.getReplacement("conditions.professionLevel"), String.valueOf(recipe.getConditions().getProfessionLevel()))
                     .replace(MessageUtil.getReplacement("conditions.mastery"), String.valueOf(recipe.getConditions().isMastery()))
-                    .replace(MessageUtil.getReplacement("category"), recipe.getCategory())));
+                    .replace(MessageUtil.getReplacement("category"), recipe.getCategory() == null ? "master" : recipe.getCategory())));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");
         List<ItemFlag> flags = config.getItemFlags("subEditor.icons." + icon + ".flags");

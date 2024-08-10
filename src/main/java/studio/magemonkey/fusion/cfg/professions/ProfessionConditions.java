@@ -14,18 +14,20 @@ import dev.aurelium.auraskills.api.skill.Skill;
 import dev.aurelium.auraskills.api.stat.Stat;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fabled.Fabled;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.ExperienceManager;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.RecipeItem;
+import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
@@ -40,17 +42,21 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 @Getter
-public class ProfessionConditions {
+public class ProfessionConditions implements ConfigurationSerializable  {
 
     private final String profession;
 
     // Costs
+    @Setter
     private double moneyCost;
+    @Setter
     private int expCost;
     protected LinkedList<RecipeItem> requiredItems = new LinkedList<>();
 
     // Conditions
+    @Setter
     private int professionLevel;
+    @Setter
     private boolean isMastery;
 
     private final Map<String, Integer> professionConditions = new TreeMap<>();
@@ -75,8 +81,8 @@ public class ProfessionConditions {
                 .collect(Collectors.toCollection(LinkedList::new));
         this.requiredItemNames = config.getStringList("costs.items");
 
-        this.professionLevel = 0;
-        this.isMastery = false;
+        this.professionLevel = config.getInt("conditions.professionLevel", 0);
+        this.isMastery = config.getBoolean("conditions.mastery", false);
 
         if (config.isSet("conditions.professions")) {
             for (String key : config.getConfigurationSection("conditions.professions").getKeys(false)) {
@@ -534,5 +540,42 @@ public class ProfessionConditions {
             }
         }
         return lines;
+    }
+
+    @Override
+    public @NotNull Map<String, Object> serialize() {
+        SerializationBuilder builder = SerializationBuilder.start(4)
+                .append("costs.money", this.moneyCost)
+                .append("costs.exp", this.expCost)
+                .append("costs.items", this.requiredItemNames)
+                .append("conditions.professionLevel", this.professionLevel)
+                .append("conditions.mastery", this.isMastery);
+
+        for(Map.Entry<String, Integer> entry : professionConditions.entrySet()) {
+            builder.append("conditions.professions." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : fabledClassConditions.entrySet()) {
+            builder.append("conditions.fabled." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : mcMMOConditions.entrySet()) {
+            builder.append("conditions.mcmmo." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : jobsConditions.entrySet()) {
+            builder.append("conditions.jobs." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : auraAbilityConditions.entrySet()) {
+            builder.append("conditions.aura_abilities." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : auraManaAbilityConditions.entrySet()) {
+            builder.append("conditions.aura_mana_abilities." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : auraSkillsConditions.entrySet()) {
+            builder.append("conditions.aura_skills." + entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Integer> entry : auraStatsConditions.entrySet()) {
+            builder.append("conditions.aura_stats." + entry.getKey(), entry.getValue());
+        }
+
+        return builder.build();
     }
 }

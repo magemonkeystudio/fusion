@@ -81,9 +81,8 @@ subEditor:
       name: '&9Name'
       lore:
         - '&7Current: &a$<name>'
-        - '&7Click to change your recipe name.'
         - '&8--------------------'
-        - '&aLeft click &7to rename.'
+        - '&aaClick &7to rename.'
       flags: [ ]
       enchants: { }
     resultItem:
@@ -181,7 +180,7 @@ subEditor:
             - '&7Rather you need to master the'
             - '&7profession to craft this.'
             - '&8--------------------'
-            - '&aLeft click &7to toggle.'
+            - '&aaClick &7to toggle.'
         flags: [ ]
         enchants: { }
     professionLevel:
@@ -246,7 +245,7 @@ subEditor:
         - '&aRight click &7to remove last command.'
       flags: [ ]
       enchants: { }
-      commandPrefix: '&7- &a$<command>'
+      commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
     conditions:
       material: CHEST
       amount: 1

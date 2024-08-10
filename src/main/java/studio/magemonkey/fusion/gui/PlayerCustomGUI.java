@@ -577,7 +577,7 @@ public class PlayerCustomGUI implements Listener {
             craftingRecipe = recipe;
             craftingTask = Fusion.getInstance().runTaskLater(cooldown, () -> {
                 craftingSuccess = true;
-                if (recipe.getCommands().isEmpty()) {
+                if (recipe.getResults().getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
                         if (cursor.isSimilar(recipe.getResults().getResultItem().getItemStack())) {
@@ -613,7 +613,7 @@ public class PlayerCustomGUI implements Listener {
                     cancel(false);
                     CodexEngine.get().getVault().take(this.player, recipe.getConditions().getMoneyCost());
                     //Commands
-                    DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getCommands());
+                    DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getResults().getCommands());
 
                     //Experience
                     CraftingTable table = ProfessionsCfg.getTable(this.gui.name);

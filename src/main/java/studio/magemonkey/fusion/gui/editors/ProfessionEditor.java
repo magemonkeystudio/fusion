@@ -11,6 +11,8 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.commands.EditorCriteria;
+import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.subeditors.CategoryEditor;
 import studio.magemonkey.fusion.gui.editors.subeditors.PatternEditor;
 import studio.magemonkey.fusion.gui.editors.subeditors.PatternItemEditor;
@@ -67,8 +69,7 @@ public class ProfessionEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 -> {
-            }
+            case 10 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Name, "/fusion-editor <newName>");
             case 11 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -138,10 +139,15 @@ public class ProfessionEditor extends Editor implements Listener {
         }
 
         if (hasChanges) {
-            table.save();
-            setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
-            initialize();
-            open(player);
+            reload(true);
         }
+    }
+
+    public void reload(boolean open) {
+        table.save();
+        setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
+        initialize();
+        if(open)
+            open(player);
     }
 }

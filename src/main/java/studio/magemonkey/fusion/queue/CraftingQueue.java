@@ -90,7 +90,7 @@ public class CraftingQueue {
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
             //Commands
-            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getCommands());
+            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
             //Experience
             CraftingTable table = ProfessionsCfg.getTable(profession);
 

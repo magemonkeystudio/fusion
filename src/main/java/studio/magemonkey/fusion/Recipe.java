@@ -2,6 +2,7 @@ package studio.magemonkey.fusion;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -20,23 +21,20 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+@Getter
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
-    @Getter
-    protected final String                     name;
-    @Getter
-    protected final Collection<DelayedCommand> commands = new ArrayList<>();
-    @Getter
-    protected final String                     rank;
+    @Setter
+    protected String                     name;
+    @Setter
+    protected String                     rank;
 
-    @Getter
-    protected final int craftingTime;
+    @Setter
+    protected int craftingTime;
+    @Setter
+    protected String category;
 
-    @Getter
-    protected final String category;
-    @Getter
     protected final ProfessionResults results;
-    @Getter
     protected final ProfessionConditions conditions;
 
     public Recipe(Map<String, Object> map) {
@@ -46,7 +44,6 @@ public class Recipe implements ConfigurationSerializable {
 
         this.rank = dw.getString("rank");
         this.craftingTime = dw.getInt("craftingTime");
-        dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
         this.results = new ProfessionResults(name, dw);
         this.conditions = new ProfessionConditions(name, dw);
     }
