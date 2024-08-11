@@ -1,12 +1,12 @@
 package studio.magemonkey.fusion.gui.editors;
 
 import lombok.Getter;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -14,8 +14,8 @@ import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.subeditors.CategoryEditor;
-import studio.magemonkey.fusion.gui.editors.subeditors.PatternEditor;
-import studio.magemonkey.fusion.gui.editors.subeditors.PatternItemEditor;
+import studio.magemonkey.fusion.gui.editors.subeditors.pattern.PatternEditor;
+import studio.magemonkey.fusion.gui.editors.subeditors.pattern.PatternItemsEditor;
 import studio.magemonkey.fusion.gui.editors.subeditors.RecipeEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
@@ -26,9 +26,9 @@ public class ProfessionEditor extends Editor implements Listener {
     private final String profession;
     private final CraftingTable table;
 
-    private PatternItemEditor patternItemEditor;
+    private PatternItemsEditor patternItemsEditor;
     private PatternEditor patternEditor;
-    private PatternItemEditor categoryPatternItemEditor;
+    private PatternItemsEditor categoryPatternItemEditor;
     private PatternEditor categoryPatternEditor;
     private CategoryEditor categoryEditor;
     private RecipeEditor recipeEditor;
@@ -58,6 +58,7 @@ public class ProfessionEditor extends Editor implements Listener {
         setItem(32, getIcons().get("categories"));
         setItem(33, getIcons().get("categoryPatternItems"));
         setItem(34, getIcons().get("categoryPattern"));
+        setItem(36, getIcons().get("save"));
         setItem(44, getIcons().get("back"));
     }
 
@@ -102,9 +103,9 @@ public class ProfessionEditor extends Editor implements Listener {
                 hasChanges = true;
             }
             case 29 -> {
-                if (patternItemEditor == null)
-                    patternItemEditor = new PatternItemEditor(this, player, table, false);
-                patternItemEditor.open(player);
+                if (patternItemsEditor == null)
+                    patternItemsEditor = new PatternItemsEditor(this, player, table, false);
+                patternItemsEditor.open(player);
             }
             case 30 -> {
                 if (patternEditor == null)
@@ -118,7 +119,7 @@ public class ProfessionEditor extends Editor implements Listener {
             }
             case 33 -> {
                 if (categoryPatternItemEditor == null)
-                    categoryPatternItemEditor = new PatternItemEditor(this, player, table, true);
+                    categoryPatternItemEditor = new PatternItemsEditor(this, player, table, true);
                 categoryPatternItemEditor.open(player);
             }
             case 34 -> {
@@ -132,7 +133,14 @@ public class ProfessionEditor extends Editor implements Listener {
                     }
                 }
             }
-            case 53 -> {
+            case 36 -> {
+                table.save();
+                player.closeInventory();
+                MessageUtil.sendMessage("editor.changesSaved", player, new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
+                EditorRegistry.removeCurrentEditor(player);
+                FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
+            }
+            case 44 -> {
                 player.closeInventory();
                 hasChanges = true;
             }
@@ -144,7 +152,6 @@ public class ProfessionEditor extends Editor implements Listener {
     }
 
     public void reload(boolean open) {
-        table.save();
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
         initialize();
         if(open)

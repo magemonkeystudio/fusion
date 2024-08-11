@@ -66,8 +66,24 @@ public class RecipeItemEditor extends Editor implements Listener {
             case 10 ->
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Name, "/fusion-editor <newName>");
             case 11 -> {
-                // TODO Cycle to the next category of the recipe from the table.
-
+                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
+                String currentCategory = recipe.getCategory();
+                int currentIndex = categories.indexOf(currentCategory);
+                if (event.isLeftClick()) {
+                    if(currentIndex == categories.size() - 1) {
+                        recipe.setCategory(categories.get(0));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex + 1));
+                    }
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (currentIndex == 0) {
+                        recipe.setCategory(categories.get(categories.size() - 1));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex - 1));
+                    }
+                    hasChanges = true;
+                }
             }
             case 12 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
@@ -169,14 +185,14 @@ public class RecipeItemEditor extends Editor implements Listener {
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getFullConditions().isEmpty())
                         return;
-                    // TODO Iterate over all from last to first to remove a condition
+                    recipe.getConditions().removeLastCondition();
                     hasChanges = true;
-                    recipe.getResults().getCommands().remove(recipe.getResults().getCommands().size() - 1);
                 }
             }
             case 53 -> {
-                openParent(player);
-                hasChanges = true;
+                reload(false);
+                ((RecipeEditor) getParentEditor()).reload(true);
+                return;
             }
         }
 
@@ -193,10 +209,10 @@ public class RecipeItemEditor extends Editor implements Listener {
     }
 
     public String getRecipeName() {
-        return recipe.getName().split(":")[0];
+        return recipe.getResults().getResultName().split(":")[0];
     }
 
     public int getRecipeAmount() {
-        return Integer.parseInt(recipe.getName().split(":")[1]);
+        return Integer.parseInt(recipe.getResults().getResultName().split(":")[1]);
     }
 }

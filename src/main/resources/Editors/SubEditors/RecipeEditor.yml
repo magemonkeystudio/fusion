@@ -225,7 +225,9 @@ subEditor:
       name: '&9Category'
       lore:
           - '&7Current: &a$<category>'
-          - '&7Click to change the recipe''s category.'
+          - "&8--------------------"
+          - "&aLeft click &7to cycle forward."
+          - "&aRight click &7to cycle backward."
       flags: [ ]
       enchants: { }
     commands:

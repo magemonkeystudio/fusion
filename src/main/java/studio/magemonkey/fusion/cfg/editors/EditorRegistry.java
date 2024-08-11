@@ -54,4 +54,8 @@ public class EditorRegistry {
     public static Editor getCurrentEditor(Player player) {
         return editors.get(player.getUniqueId());
     }
+
+    public static void removeCurrentEditor(Player player) {
+        editors.remove(player.getUniqueId());
+    }
 }

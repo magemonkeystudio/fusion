@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.subeditors;
+package studio.magemonkey.fusion.gui.editors.subeditors.pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
@@ -21,19 +22,21 @@ public class PatternEditor extends Editor implements Listener {
     private final CraftingTable table;
     private InventoryPattern pattern;
 
+    private boolean isCategoryPattern;
+
     private final Map<Integer, Character> slots = new HashMap<>();
 
     public PatternEditor(Editor parentEditor, Player player, CraftingTable table, boolean isCategoryPattern) {
         super(parentEditor, EditorRegistry.getPatternEditorCfg().getTitle(isCategoryPattern ? "Category" : "Master"), (isCategoryPattern && table.getCatPattern() != null) ? table.getCatPattern().getInventorySize() : table.getPattern().getInventorySize());
         this.player = player;
         this.table = table;
+        this.isCategoryPattern = isCategoryPattern;
         setIcons(EditorRegistry.getPatternEditorCfg().getIcons(table));
         this.pattern = isCategoryPattern ? table.getCatPattern() : table.getPattern();
-        if (this.pattern == null) {
-            // TODO Translation
+        if (isCategoryPattern && this.pattern == null) {
             table.setCatPattern(InventoryPattern.copy(table.getPattern()));
             this.pattern = table.getCatPattern();
-            player.sendMessage("§cNo category pattern found. Using default pattern as reference.");
+            MessageUtil.sendMessage("editor.defaultCategoryPattern", player);
         }
 
         initialize();
@@ -79,7 +82,6 @@ public class PatternEditor extends Editor implements Listener {
             }
         }
         if (hasChanges) {
-            table.save();
             setIcons(EditorRegistry.getPatternEditorCfg().getIcons(table));
             initialize();
         }
@@ -88,9 +90,6 @@ public class PatternEditor extends Editor implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getInventory() != getInventory()) return;
-        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> {
-            table.save();
-            openParent(player);
-        }, 1);
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> openParent(player), 1);
     }
 }

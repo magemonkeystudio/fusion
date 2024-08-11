@@ -1,13 +1,13 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.items.providers.VanillaProvider;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.legacy.item.ItemColors;
+import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
@@ -26,6 +26,8 @@ public class ProfessionsCfg {
     private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
     @Getter
     private static final Map<String, FileConfiguration> cfgs = new HashMap<>(4);
+    @Getter
+    private static final Map<String, File> files = new HashMap<>(4);
 
     public static void init() {
         map.clear();
@@ -35,25 +37,7 @@ public class ProfessionsCfg {
             professionFolder.mkdirs();
         }
         if (professionFolder.listFiles() == null) {
-            Fusion.getInstance().getLogger().warning("There are no professions registered to load.");
-            Fusion.getInstance().getLogger().warning("Initializing default profession 'craft'");
-            HashMap<Character, ItemStack> items = new HashMap<>();
-            items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
-            items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
-            items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-            InventoryPattern ip =
-                    new InventoryPattern(new String[]{"=========", "=========", "=========", "=========",
-                            Cfg.craftingQueue ? "{-------}" : "=========", "<0000000>"},
-                            items);
-            ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-            CraftingTable b = new CraftingTable("craft",
-                    "Craft inventory name",
-                    new VanillaProvider.VanillaItemType(Material.PAPER),
-                    ip,
-                    item,
-                    0,
-                    0);
-            loadFrom("craft", b.serialize());
+            // TODO generate default professions on fresh install
             return;
         }
 
@@ -61,8 +45,9 @@ public class ProfessionsCfg {
             if (file.getName().endsWith(".yml")) {
                 FileConfiguration cfg = new YamlConfiguration();
                 try {
+                    Bukkit.getConsoleSender().sendMessage("loading " + file.getName());
                     cfg.load(file);
-                    addCraftingQueueDefs(cfg);
+                    addDefs(cfg);
                     cfg.save(file);
                     cfg.load(file);
                     // Get the YAMLs whole content as a map
@@ -70,6 +55,7 @@ public class ProfessionsCfg {
                     CraftingTable ct = new CraftingTable(_map);
                     map.put(ct.getName(), ct);
                     cfgs.put(ct.getName(), cfg);
+                    files.put(ct.getName(), file);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
@@ -84,6 +70,48 @@ public class ProfessionsCfg {
         }
     }
 
+    public static boolean createNewProfession(String profession, String refProfession) {
+        FileConfiguration cfg = new YamlConfiguration();
+        try {
+            if(refProfession != null && files.containsKey(refProfession)) {
+                cfg = YamlConfiguration.loadConfiguration(files.get(refProfession));
+                files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
+                File file = files.get(profession);
+                if(!file.exists()) {
+                    file.createNewFile();
+                }
+                cfg.set("name", profession);
+                cfg.save(file);
+                Map<String, Object> _map = cfg.getValues(true);
+                CraftingTable ct = new CraftingTable(_map);
+                map.put(ct.getName(), ct);
+                cfgs.put(profession, cfg);
+                files.put(profession, file);
+                return true;
+            } else if(refProfession == null) {
+                files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
+                File file = files.get(profession);
+                if(!file.exists()) {
+                    file.createNewFile();
+                }
+                cfg.load(file);
+                cfg.set("name", profession);
+                addDefs(cfg);
+                cfg.save(file);
+                cfg.load(file);
+                Map<String, Object> _map = cfg.getValues(true);
+                CraftingTable ct = new CraftingTable(_map);
+                map.put(ct.getName(), ct);
+                files.put(profession, file);
+                cfgs.put(profession, cfg);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
+        }
+        return false;
+    }
     public static CraftingTable getTable(String str) {
         return map.get(str);
     }
@@ -93,7 +121,20 @@ public class ProfessionsCfg {
         return guiMap.get(str);
     }
 
-    private static void addCraftingQueueDefs(FileConfiguration cfg) {
+    private static void addDefs(FileConfiguration cfg) {
+        if(!cfg.isSet("icon")) {
+            cfg.set("icon", "STONE");
+        }
+        if(!cfg.isSet("inventoryName")) {
+            cfg.set("inventoryName", "Template Profession");
+        }
+        if(!cfg.isSet("useCategories")) {
+            cfg.set("useCategories", false);
+        }
+        if(!cfg.isSet("pattern.pattern")) {
+            List<String> pattern = new ArrayList<>(Arrays.asList("fffffffff", "fooooooof", "fooooooof", "ff-----ff", "f{<f0f>}f"));
+            cfg.set("pattern.pattern", pattern);
+        }
         if (!cfg.isSet("pattern.items.}")) {
             cfg.set("pattern.items.}.material", "LIME_DYE");
             cfg.set("pattern.items.}.amount", 1);
@@ -103,6 +144,26 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.}.lore", List.of());
             cfg.set("pattern.items.}.flags", List.of());
             cfg.set("pattern.items.}.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.>")) {
+            cfg.set("pattern.items.>.material", "GREEN_DYE");
+            cfg.set("pattern.items.>.amount", 1);
+            cfg.set("pattern.items.>.durability", 0);
+            cfg.set("pattern.items.>.unbreakable", false);
+            cfg.set("pattern.items.>.name", "Next recipes");
+            cfg.set("pattern.items.>.lore", List.of());
+            cfg.set("pattern.items.>.flags", List.of());
+            cfg.set("pattern.items.>.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.<")) {
+            cfg.set("pattern.items.<.material", "GREEN_DYE");
+            cfg.set("pattern.items.<.amount", 1);
+            cfg.set("pattern.items.<.durability", 0);
+            cfg.set("pattern.items.<.unbreakable", false);
+            cfg.set("pattern.items.<.name", "Previous recipes");
+            cfg.set("pattern.items.<.lore", List.of());
+            cfg.set("pattern.items.<.flags", List.of());
+            cfg.set("pattern.items.<.enchants", Map.of());
         }
         if (!cfg.isSet("pattern.items.{")) {
             cfg.set("pattern.items.{.material", "LIME_DYE");
@@ -163,6 +224,23 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.fillItem.lore", List.of());
             cfg.set("pattern.items.fillItem.flags", List.of());
             cfg.set("pattern.items.fillItem.enchants", Map.of());
+        }
+
+        // TODO correct serialization for catPattern without queue-items
+        if(cfg.isSet("categoryPattern")) {
+            if (!cfg.isSet("categoryPattern.items.queue-items.-")) {
+                cfg.set("categoryPattern.items.queue-items.-", cfg.getConfigurationSection("pattern.items.queue-items.-").getValues(false));
+            }
+            if (!cfg.isSet("categoryPattern.items.queue-items.Unfinished")) {
+                cfg.set("categoryPattern.items.queue-items.Unfinished", cfg.getConfigurationSection("pattern.items.queue-items.Unfinished").getValues(false));
+            }
+            if (!cfg.isSet("categoryPattern.items.queue-items.Finished")) {
+                cfg.set("categoryPattern.items.queue-items.Finished", cfg.getConfigurationSection("pattern.items.queue-items.Finished").getValues(false));
+            }
+        }
+
+        if(!cfg.isSet("categories")) {
+            cfg.set("categories", List.of(new Category("First Category").serialize()));
         }
         if (cfg.isSet("recipes")) {
             // Retrieve the list of recipes
@@ -254,6 +332,8 @@ public class ProfessionsCfg {
             } else {
                 Fusion.getInstance().error("Recipes section is null in the config.");
             }
+        } else {
+            cfg.set("recipes", new ArrayList<>());
         }
     }
 

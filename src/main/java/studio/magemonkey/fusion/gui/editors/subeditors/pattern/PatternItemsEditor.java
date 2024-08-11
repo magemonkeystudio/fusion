@@ -1,25 +1,32 @@
-package studio.magemonkey.fusion.gui.editors.subeditors;
+package studio.magemonkey.fusion.gui.editors.subeditors.pattern;
 
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.subeditors.RecipeEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.*;
 
-public class PatternItemEditor extends Editor implements Listener {
+public class PatternItemsEditor extends Editor implements Listener {
 
     private final Player player;
     private final CraftingTable table;
     private InventoryPattern pattern;
+    private boolean isCategoryPattern;
+
+    @Getter
+    private PatternItemEditor patternItemEditor;
 
     private final Map<Integer, Character> slots = new HashMap<>();
     private final Map<Character, ItemStack> visualPatternItems = new HashMap<>();
@@ -27,10 +34,11 @@ public class PatternItemEditor extends Editor implements Listener {
     List<Map.Entry<Boolean, Map.Entry<Character, ItemStack>>> clipboardUndo = new ArrayList<>();
     List<Map.Entry<Boolean, Map.Entry<Character, ItemStack>>> clipboardRedo = new ArrayList<>();
 
-    public PatternItemEditor(Editor parentEditor, Player player, CraftingTable table, boolean isCategoryPattern) {
+    public PatternItemsEditor(Editor parentEditor, Player player, CraftingTable table, boolean isCategoryPattern) {
         super(parentEditor, EditorRegistry.getPatternItemEditorCfg().getTitle(), 54);
         this.player = player;
         this.table = table;
+        this.isCategoryPattern = isCategoryPattern;
         setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
         this.pattern = isCategoryPattern ? table.getCatPattern() : table.getPattern();
         if(this.pattern == null) {
@@ -119,8 +127,9 @@ public class PatternItemEditor extends Editor implements Listener {
                 default -> {
                     if (slots.containsKey(event.getSlot())) {
                         if (event.isLeftClick()) {
-                            // TODO Edit pattern item
-                            hasChanges = true;
+                            if (patternItemEditor == null)
+                                patternItemEditor = new PatternItemEditor(this, player, table, slots.get(event.getSlot()), isCategoryPattern);
+                            patternItemEditor.open(player);
                         } else {
                             char c = slots.get(event.getSlot());
                             switch (c) {
@@ -154,11 +163,17 @@ public class PatternItemEditor extends Editor implements Listener {
         }
 
         if (hasChanges) {
-            table.save();
             setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
             initialize();
             open(player);
         }
+    }
+
+    public void reload(boolean open) {
+        setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
+        initialize();
+        if(open)
+            open(player);
     }
 
     private char getFreeChar() {

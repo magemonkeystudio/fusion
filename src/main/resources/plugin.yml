@@ -12,6 +12,7 @@ softdepend:
   - mcMMO
   - Jobs
   - AureliumSkills
+  - AuraSkills
 api-version: 1.13
 commands:
   craft:

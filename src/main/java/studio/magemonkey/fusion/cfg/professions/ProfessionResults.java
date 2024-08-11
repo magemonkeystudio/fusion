@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.cfg.professions;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
@@ -12,9 +13,7 @@ import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -31,12 +30,22 @@ public class ProfessionResults implements ConfigurationSerializable {
 
     private String resultName;
 
+    public ProfessionResults(String profession, String resultName, long professionExp, int vanillaExp, List<DelayedCommand> commands) {
+        this.profession = profession;
+        this.professionExp = professionExp;
+        this.vanillaExp = vanillaExp;
+        this.resultItem = RecipeItem.fromConfig(resultName);
+        this.resultName = resultName;
+        this.commands = commands;
+    }
+
     public ProfessionResults(String profession, ConfigurationSection config) {
         this.profession = profession;
         this.professionExp = config.getLong("rewards.professionExp");
         this.vanillaExp = config.getInt("rewards.vanillaExp");
         this.resultItem = RecipeItem.fromConfig(config.get("rewards.item"));
         this.resultName = config.getString("rewards.item");
+        //this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
     }
 
     public ProfessionResults(String profession, DeserializationWorker dw) {
@@ -60,15 +69,32 @@ public class ProfessionResults implements ConfigurationSerializable {
 
             this.resultItem = RecipeItem.fromConfig(resultsSection.get("item"));
             this.resultName = (String) resultsSection.get("item");
+
+            List<Map<String, Object>> commands = (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
+            if (commands != null) {
+                for(Map<String, Object> command : commands) {
+                    Bukkit.getConsoleSender().sendMessage("Value: " + command);
+                    this.commands.add(new DelayedCommand(command));
+                }
+            }
         }
     }
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        return SerializationBuilder.start(4)
-                .append("professionExp", this.professionExp)
-                .append("vanillaExp", this.vanillaExp)
-                .append("item", this.resultName)
-                .build();
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("professionExp", this.professionExp);
+        resultMap.put("vanillaExp", this.vanillaExp);
+        resultMap.put("item", this.resultName);
+        resultMap.put("commands", new ArrayList<>(this.commands.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
+        return SerializationBuilder.start(4).append("results", resultMap).build();
+    }
+
+    public static ProfessionResults copy(ProfessionResults results) {
+        List<DelayedCommand> cmds = new ArrayList<>();
+        for (DelayedCommand cmd : results.getCommands()) {
+            cmds.add(new DelayedCommand(cmd.getAs(), cmd.getCmd(), cmd.getDelay()));
+        }
+        return new ProfessionResults(results.getProfession(), results.getResultName(), results.getProfessionExp(), results.getVanillaExp(), cmds);
     }
 }

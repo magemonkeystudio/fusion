@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,10 @@ import studio.magemonkey.fusion.cfg.professions.ProfessionResults;
 import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -25,9 +29,9 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
     @Setter
-    protected String                     name;
+    protected String name;
     @Setter
-    protected String                     rank;
+    protected String rank;
 
     @Setter
     protected int craftingTime;
@@ -48,19 +52,13 @@ public class Recipe implements ConfigurationSerializable {
         this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(String name,
-                  Collection<RecipeItem> pattern,
-                  RecipeEconomyItem result,
-                  double moneyCost,
-                  int neededLevels,
-                  int experienceCost,
-                  String category, ProfessionResults results, ProfessionConditions conditions) {
+    public Recipe(String name, String category, String rank, int craftingTime, ProfessionResults results, ProfessionConditions conditions) {
         this.name = name;
         this.category = category;
+        this.rank = rank;
+        this.craftingTime = craftingTime;
         this.results = results;
         this.conditions = conditions;
-        this.rank = "";
-        this.craftingTime = 0;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
@@ -78,8 +76,8 @@ public class Recipe implements ConfigurationSerializable {
     public static Map<ItemStack, Integer> getPattern(Collection<RecipeItem> items) {
         Map<ItemStack, Integer> localPattern = new HashMap<>(20);
         for (RecipeItem recipeItem : items) {
-            ItemStack item  = recipeItem.getItemStack();
-            boolean   added = false;
+            ItemStack item = recipeItem.getItemStack();
+            boolean added = false;
 
             int itemAmount = item.getAmount();
             item.setAmount(1);
@@ -100,20 +98,20 @@ public class Recipe implements ConfigurationSerializable {
             if (LevelFunction.getLevel(p, craftingTable) < this.conditions.getProfessionLevel()) {
                 return false;
             }
-            if(!this.conditions.isValid(PlayerLoader.getPlayer(p))) {
+            if (!this.conditions.isValid(PlayerLoader.getPlayer(p))) {
                 return false;
             }
         }
-        Map<ItemStack, Integer> eqItems      = getItems(items);
+        Map<ItemStack, Integer> eqItems = getItems(items);
         Map<ItemStack, Integer> localPattern = getPattern(this.conditions.getRequiredItems());
         for (Iterator<Entry<ItemStack, Integer>> iterator = localPattern.entrySet().iterator(); iterator.hasNext(); ) {
             Entry<ItemStack, Integer> patternEntry = iterator.next();
-            int                       eqAmount     = eqItems.getOrDefault(patternEntry.getKey(), -1);
+            int eqAmount = eqItems.getOrDefault(patternEntry.getKey(), -1);
             if (eqAmount == -1) {
                 return false;
             }
-            ItemStack eqEntry       = patternEntry.getKey();
-            int       patternAmount = patternEntry.getValue();
+            ItemStack eqEntry = patternEntry.getKey();
+            int patternAmount = patternEntry.getValue();
             if (eqAmount < patternAmount) {
                 return false;
             }
@@ -156,25 +154,28 @@ public class Recipe implements ConfigurationSerializable {
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        return SerializationBuilder.start(6)
+        SerializationBuilder builder = SerializationBuilder.start(6)
                 .append("name", this.name)
-                .append("craftingTime", this.craftingTime)
+                .append("craftingTime", this.craftingTime);
 
-                .append("result.professionExp", this.results.getProfessionExp())
-                .append("result.vanillaExp", this.results.getVanillaExp())
-                .append("result.items", this.results.getResultItem().toConfig())
-                .append("result.commands", this.results.getCommands().stream().map(DelayedCommand::serialize).collect(Collectors.toList()))
+        if(category != null) {
+            builder.append("category", this.category);
+        }
+        if(rank != null) {
+            builder.append("rank", this.rank);
+        }
 
-                .append("costs.money", this.conditions.getMoneyCost())
-                .append("costs.experience", this.conditions.getExpCost())
-                .append("costs.items", this.conditions.getRequiredItems().stream().map(RecipeItem::toConfig).collect(Collectors.toList()))
-                .build();
+        for(Map.Entry<String, Object> entry : this.results.serialize().entrySet()) {
+            builder.append(entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Object> entry : this.conditions.serialize().entrySet()) {
+            builder.append(entry.getKey(), entry.getValue());
+        }
+        return builder.build();
     }
 
-    /* TODO: Refactoring and Auto-Migration
-    - price -> costs.money
-    - neededXp -> costs.experience
-    - cooldown -> craftingTime
-     */
+    public static Recipe copy(Recipe recipe) {
+        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getRank(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()));
+    }
 
 }

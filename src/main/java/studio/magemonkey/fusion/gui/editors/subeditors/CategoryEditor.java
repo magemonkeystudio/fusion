@@ -94,7 +94,6 @@ public class CategoryEditor extends Editor implements Listener {
     }
 
     public void reload(boolean open) {
-        table.save();
         setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
         initialize();
         if(open)

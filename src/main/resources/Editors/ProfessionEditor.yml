@@ -19,7 +19,7 @@ icons:
       - '&7Current: &a$<name>'
       - '&7Click to change your profession name.'
       - '&8--------------------'
-      - '&aLeft click &7to rename.'
+      - '&aClick &7to rename.'
     flags: []
     enchants: {}
   masteryUnlock:
@@ -155,6 +155,16 @@ icons:
       - '&7The recipes for the crafting menu.'
       - '&8--------------------'
       - '&aLeft click &7to setup recipes.'
+    flags: []
+    enchants: {}
+  save:
+    material: LIME_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aSave'
+    lore:
+      - '&7Save all changes into the config.'
     flags: []
     enchants: {}
   back:

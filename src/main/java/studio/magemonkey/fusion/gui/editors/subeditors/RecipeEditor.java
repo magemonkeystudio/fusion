@@ -1,13 +1,11 @@
 package studio.magemonkey.fusion.gui.editors.subeditors;
 
 import lombok.Getter;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
@@ -17,7 +15,10 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class RecipeEditor extends Editor implements Listener {
 
@@ -66,7 +67,14 @@ public class RecipeEditor extends Editor implements Listener {
             slots.put(inv, invSlots);
             invSlot++;
         }
-        inventories.add(inv == null ? InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill")) : inv);
+        if(inv == null) {
+            inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
+            inv.setItem(4, getIcons().get("add"));
+            inv.setItem(48, getIcons().get("previous"));
+            inv.setItem(50, getIcons().get("next"));
+            inv.setItem(53, getIcons().get("back"));
+        }
+        inventories.add(inv);
         setNestedInventories(inventories);
     }
 
@@ -88,29 +96,21 @@ public class RecipeEditor extends Editor implements Listener {
         int size = getNestedInventories().size();
         boolean hasChanges = false;
 
-        if (event.getClickedInventory() == player.getInventory()) {
-            ItemStack item = player.getInventory().getItem(event.getSlot());
-            if (item == null || item.getType() == Material.AIR) return;
-
-            // TODO setup a RecipeItemEditor
-            hasChanges = true;
-        } else {
-            switch (event.getSlot()) {
-                case 4 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
-                case 48 -> open(player, (size + invdex - 1) % size);
-                case 50 -> open(player, (invdex + 1) % size);
-                case 53 -> openParent(player);
-                default -> {
-                    if (slots.get(getNestedInventories().get(invdex)).get(slot) != null) {
-                        Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
-                        if(event.isLeftClick()) {
-                            // TODO Configure recipe further
-                            recipeItemEditor = new RecipeItemEditor(this, player, entry);
-                            recipeItemEditor.open(player);
-                        } else if(event.isRightClick()) {
-                            table.getRecipes().remove(entry.getName());
-                            hasChanges = true;
-                        }
+        switch (event.getSlot()) {
+            case 4 ->
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
+            case 48 -> open(player, (size + invdex - 1) % size);
+            case 50 -> open(player, (invdex + 1) % size);
+            case 53 -> openParent(player);
+            default -> {
+                if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
+                    Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
+                    if (event.isLeftClick()) {
+                        recipeItemEditor = new RecipeItemEditor(this, player, entry);
+                        recipeItemEditor.open(player);
+                    } else if (event.isRightClick()) {
+                        table.getRecipes().remove(entry.getName());
+                        hasChanges = true;
                     }
                 }
             }
@@ -122,10 +122,9 @@ public class RecipeEditor extends Editor implements Listener {
     }
 
     public void reload(boolean open) {
-        table.save();
-        setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
+        setIcons(EditorRegistry.getRecipeEditorCfg().getIcons(table));
         initialize();
-        if(open)
+        if (open)
             open(player);
     }
 }

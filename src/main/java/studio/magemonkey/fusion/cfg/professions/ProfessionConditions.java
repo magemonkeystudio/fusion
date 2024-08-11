@@ -59,17 +59,48 @@ public class ProfessionConditions implements ConfigurationSerializable  {
     @Setter
     private boolean isMastery;
 
-    private final Map<String, Integer> professionConditions = new TreeMap<>();
-    private final Map<String, Integer> fabledClassConditions = new TreeMap<>();
-    private final Map<String, Integer> mcMMOConditions = new TreeMap<>();
-    private final Map<String, Integer> jobsConditions = new TreeMap<>();
-    private final Map<String, Integer> auraAbilityConditions = new TreeMap<>();
-    private final Map<String, Integer> auraManaAbilityConditions = new TreeMap<>();
-    private final Map<String, Integer> auraSkillsConditions = new TreeMap<>();
-    private final Map<String, Integer> auraStatsConditions = new TreeMap<>();
+    private final Map<String, Integer> professionConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> fabledClassConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> mcMMOConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> jobsConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> auraAbilityConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> auraManaAbilityConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> auraSkillsConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> auraStatsConditions = new LinkedHashMap<>();
 
     @Getter
     protected List<String> requiredItemNames;
+
+    public ProfessionConditions(String profession,
+                                double moneyCost,
+                                int expCost,
+                                LinkedList<String> requiredItemNames,
+                                int professionLevel,
+                                boolean isMastery,
+                                Map<String, Integer> professionConditions,
+                                Map<String, Integer> fabledClassConditions,
+                                Map<String, Integer> mcMMOConditions,
+                                Map<String, Integer> jobsConditions,
+                                Map<String, Integer> auraAbilityConditions,
+                                Map<String, Integer> auraManaAbilityConditions,
+                                Map<String, Integer> auraSkillsConditions,
+                                Map<String, Integer> auraStatsConditions) {
+        this.profession = profession;
+        this.moneyCost = moneyCost;
+        this.expCost = expCost;
+        this.requiredItemNames = requiredItemNames;
+        this.requiredItems = requiredItems.stream().map(RecipeItem::fromConfig).collect(Collectors.toCollection(LinkedList::new));
+        this.professionLevel = professionLevel;
+        this.isMastery = isMastery;
+        this.professionConditions.putAll(professionConditions);
+        this.fabledClassConditions.putAll(fabledClassConditions);
+        this.mcMMOConditions.putAll(mcMMOConditions);
+        this.jobsConditions.putAll(jobsConditions);
+        this.auraAbilityConditions.putAll(auraAbilityConditions);
+        this.auraManaAbilityConditions.putAll(auraManaAbilityConditions);
+        this.auraSkillsConditions.putAll(auraSkillsConditions);
+        this.auraStatsConditions.putAll(auraStatsConditions);
+    }
 
     public ProfessionConditions(String profession, ConfigurationSection config) {
         this.profession = profession;
@@ -544,38 +575,86 @@ public class ProfessionConditions implements ConfigurationSerializable  {
 
     @Override
     public @NotNull Map<String, Object> serialize() {
+        Map<String, Object> costsMap = new LinkedHashMap<>();
+        costsMap.put("money", this.moneyCost);
+        costsMap.put("exp", this.expCost);
+        costsMap.put("items", this.requiredItemNames);
+
+        Map<String, Object> conditionsMap = new LinkedHashMap<>();
+        conditionsMap.put("professionLevel", this.professionLevel);
+        conditionsMap.put("mastery", this.isMastery);
+        if(!professionConditions.isEmpty())
+            conditionsMap.put("professions", this.professionConditions);
+        if(!fabledClassConditions.isEmpty())
+            conditionsMap.put("fabled", this.fabledClassConditions);
+        if(!mcMMOConditions.isEmpty())
+            conditionsMap.put("mcmmo", this.mcMMOConditions);
+        if(!jobsConditions.isEmpty())
+            conditionsMap.put("jobs", this.jobsConditions);
+        if(!auraAbilityConditions.isEmpty())
+            conditionsMap.put("aura_abilities", this.auraAbilityConditions);
+        if(!auraManaAbilityConditions.isEmpty())
+            conditionsMap.put("aura_mana_abilities", this.auraManaAbilityConditions);
+        if(!auraSkillsConditions.isEmpty())
+            conditionsMap.put("aura_skills", this.auraSkillsConditions);
+        if(!auraStatsConditions.isEmpty())
+            conditionsMap.put("aura_stats", this.auraStatsConditions);
+
         SerializationBuilder builder = SerializationBuilder.start(4)
-                .append("costs.money", this.moneyCost)
-                .append("costs.exp", this.expCost)
-                .append("costs.items", this.requiredItemNames)
-                .append("conditions.professionLevel", this.professionLevel)
-                .append("conditions.mastery", this.isMastery);
-
-        for(Map.Entry<String, Integer> entry : professionConditions.entrySet()) {
-            builder.append("conditions.professions." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : fabledClassConditions.entrySet()) {
-            builder.append("conditions.fabled." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : mcMMOConditions.entrySet()) {
-            builder.append("conditions.mcmmo." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : jobsConditions.entrySet()) {
-            builder.append("conditions.jobs." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : auraAbilityConditions.entrySet()) {
-            builder.append("conditions.aura_abilities." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : auraManaAbilityConditions.entrySet()) {
-            builder.append("conditions.aura_mana_abilities." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : auraSkillsConditions.entrySet()) {
-            builder.append("conditions.aura_skills." + entry.getKey(), entry.getValue());
-        }
-        for(Map.Entry<String, Integer> entry : auraStatsConditions.entrySet()) {
-            builder.append("conditions.aura_stats." + entry.getKey(), entry.getValue());
-        }
-
+                .append("costs", costsMap)
+                .append("conditions", conditionsMap);
         return builder.build();
+    }
+
+    public void removeLastCondition() {
+        // Remove the last index of the condition
+        Map.Entry<String, Integer> lastEntry = null;
+
+        if(checkRemoveFromMap(lastEntry, auraStatsConditions)) return;
+        if(checkRemoveFromMap(lastEntry, auraSkillsConditions)) return;
+        if(checkRemoveFromMap(lastEntry, auraManaAbilityConditions)) return;
+        if(checkRemoveFromMap(lastEntry, auraAbilityConditions)) return;
+        if(checkRemoveFromMap(lastEntry, jobsConditions)) return;
+        if(checkRemoveFromMap(lastEntry, mcMMOConditions)) return;
+        if(checkRemoveFromMap(lastEntry, fabledClassConditions)) return;
+        checkRemoveFromMap(lastEntry, professionConditions);
+    }
+
+    private boolean checkRemoveFromMap(Map.Entry<String, Integer> entry, Map<String, Integer> map) {
+        for (Map.Entry<String, Integer> _entry : map.entrySet()) {
+            entry = _entry;
+        }
+        if(entry != null) {
+            map.remove(entry.getKey());
+            return true;
+        }
+        return false;
+    }
+
+    public static ProfessionConditions copy(ProfessionConditions conditions) {
+        Map<String, Integer> professionConditions = new LinkedHashMap<>(conditions.getProfessionConditions());
+        Map<String, Integer> fabledClassConditions = new LinkedHashMap<>(conditions.getFabledClassConditions());
+        Map<String, Integer> mcMMOConditions = new LinkedHashMap<>(conditions.getMcMMOConditions());
+        Map<String, Integer> jobsConditions = new LinkedHashMap<>(conditions.getJobsConditions());
+        Map<String, Integer> auraAbilityConditions = new LinkedHashMap<>(conditions.getAuraAbilityConditions());
+        Map<String, Integer> auraManaAbilityConditions = new LinkedHashMap<>(conditions.getAuraManaAbilityConditions());
+        Map<String, Integer> auraSkillsConditions = new LinkedHashMap<>(conditions.getAuraSkillsConditions());
+        Map<String, Integer> auraStatsConditions = new LinkedHashMap<>(conditions.getAuraStatsConditions());
+
+
+        return new ProfessionConditions(conditions.getProfession(),
+                conditions.getMoneyCost(),
+                conditions.getExpCost(),
+                new LinkedList<>(conditions.getRequiredItemNames()),
+                conditions.getProfessionLevel(),
+                conditions.isMastery(),
+                professionConditions,
+                fabledClassConditions,
+                mcMMOConditions,
+                jobsConditions,
+                auraAbilityConditions,
+                auraManaAbilityConditions,
+                auraSkillsConditions,
+                auraStatsConditions);
     }
 }

@@ -18,8 +18,8 @@ icons:
     lore:
       - '&7Click on an item from your inventory'
       - '&7to add it to the pattern items.'
-    flags: []
-    enchants: {}
+    flags: [ ]
+    enchants: { }
   undo:
     material: RED_DYE
     amount: 1
@@ -28,8 +28,8 @@ icons:
     name: '&cUndo'
     lore:
       - '&7Click to undo the last action.'
-    flags: []
-    enchants: {}
+    flags: [ ]
+    enchants: { }
   redo:
     material: LIME_DYE
     amount: 1
@@ -38,8 +38,8 @@ icons:
     name: '&aRedo'
     lore:
       - '&7Click to redo the last action.'
-    flags: []
-    enchants: {}
+    flags: [ ]
+    enchants: { }
   patternItem:
     material: '$<material>'
     amount: 1
@@ -52,8 +52,8 @@ icons:
       - '&8--------------------'
       - '&aLeft click &7to configure'
       - '&aRight click &7to remove'
-    flags: []
-    enchants: {}
+    flags: [ ]
+    enchants: { }
   back:
     material: BARRIER
     amount: 1
@@ -64,3 +64,100 @@ icons:
       - '&7Go back to the previous page.'
     flags: [ ]
     enchants: { }
+
+subEditor:
+  title: '&2Pattern Item &a$<id>'
+  icons:
+    fill:
+      material: 'GRAY_STAINED_GLASS_PANE'
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
+    name:
+      material: NAME_TAG
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Name'
+      lore:
+        - '&7Current: &a$<name>'
+        - '&7Click to change your pattern item name.'
+        - '&8--------------------'
+        - '&aClick &7to change name.'
+      flags: [ ]
+      enchants: { }
+    lore:
+      material: WRITABLE_BOOK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Lore'
+      lore:
+        - '&7Click to configure the lore.'
+        - '&7You will cast commands to add lore.'
+        - '&8--------------------'
+        - '&bLore:'
+        - '$<lore>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an lore.'
+        - '&aRight click &7to remove last lore.'
+      flags: [ ]
+      enchants: { }
+    patternItem:
+      material: '$<material>'
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9$<id>'
+      lore:
+        - '&7Material: &a$<material>'
+        - '&7Amount: &a$<amount>'
+        - '&7Name: &a$<name>'
+        - '$<lore>'
+        - '&8--------------------'
+        - '&aClick &7to change material and amount'
+      flags: [ ]
+      enchants: { }
+    glowing:
+      material: GLOWSTONE_DUST
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Glowing'
+      lore:
+        - '&7Current: &a$<glowing>'
+        - '&7Click to toggle glowing.'
+      flags: [ ]
+      enchants: { }
+    commands:
+      material: COMMAND_BLOCK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Commands'
+      lore:
+        - '&7Click to configure the commands.'
+        - '&7You will cast commands to add commands.'
+        - '&8--------------------'
+        - '&bList of Commands:'
+        - '$<commands>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an command.'
+        - '&aRight click &7to remove last command.'
+      flags: [ ]
+      enchants: { }
+      commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
+    back:
+      material: BARRIER
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&cBack'
+      lore:
+        - '&7Go back to the previous page.'
+      flags: [ ]
+      enchants: { }
