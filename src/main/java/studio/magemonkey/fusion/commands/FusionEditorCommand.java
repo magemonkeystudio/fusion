@@ -31,11 +31,13 @@ import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.TabCacher;
+import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.*;
 
@@ -131,6 +133,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             BrowseEditor browseEditor = (BrowseEditor) editor;
             switch (criteria) {
                 case Browse_Edit_Name -> updateBrowseName(browseEditor, args);
+                case Browse_Add_Profession -> addNewProfession(browseEditor, args);
                 case Pattern_Edit_Name -> updatePatternItemName(browseEditor, args);
                 case Pattern_Edit_Lore -> addPatternItemLore(browseEditor, args);
                 case Pattern_Edit_Pattern -> updatePatternItem(browseEditor, args);
@@ -169,6 +172,10 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
             EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
+                case Browse_Add_Profession:
+                    if(args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(player.getUniqueId(), "professions", args[0]));
+                    }
                 case Profession_Edit_Name:
                 case Pattern_Edit_Name:
                 case Browse_Edit_Name:
@@ -211,6 +218,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Edit_ResultItem:
                 case Profession_Recipe_Add_Ingredients:
                 case Profession_Recipe_Edit_Ingredients:
+                case Browse_Profession_Add_Ingredients:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
                     } else if (args.length == 2) {
@@ -238,10 +246,14 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("<delay>");
                     } else if (args.length == 3) {
                         entries.add("<command without / >");
+
+                    }
+                    if(args.length >= 3) {
                         entries.add("{player}");
                     }
                     break;
                 case Profession_Recipe_Add_Conditions:
+                case Browse_Profession_Add_Conditions:
                     if (args.length == 1) {
                         entries.add("<conditionKey>");
                         if ("professions".startsWith(args[0].toLowerCase())) entries.add("professions");
@@ -293,6 +305,64 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("25");
                         entries.add("50");
                         entries.add("100");
+                    }
+                    break;
+                case Pattern_Edit_Lore:
+                    if (args.length == 1) {
+                        entries.add("<lore>");
+                    }
+                    break;
+            }
+        } else if(editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
+            switch (criteria) {
+                case Browse_Edit_Name:
+                    if (args.length == 1) {
+                        entries.add("<newName>");
+                        entries.add(browseEditor.getName());
+                    }
+                    break;
+                case Browse_Add_Profession:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[0]));
+                    }
+                    break;
+                case Pattern_Edit_Name:
+                    if (args.length == 1) {
+                        entries.add("<newName>");
+                        entries.add(browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getName());
+                    }
+                    break;
+                case Pattern_Edit_Lore:
+                    if (args.length == 1) {
+                        entries.add("<lore>");
+                    }
+                    break;
+                case Pattern_Edit_Pattern:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
+                    } else if (args.length == 2) {
+                        entries.add("<amount>");
+                        entries.add("1");
+                        entries.add("5");
+                        entries.add("32");
+                        entries.add("64");
+                    }
+                    break;
+                case Pattern_Add_Commands:
+                    if (args.length == 1) {
+                        if ("console".startsWith(args[0].toUpperCase())) entries.add("console");
+                        if ("player".startsWith(args[0].toUpperCase())) entries.add("player");
+                        if ("op".startsWith(args[0].toUpperCase())) entries.add("op");
+                    } else if (args.length == 2) {
+                        entries.add("0");
+                        entries.add("<delay>");
+                    } else if (args.length == 3) {
+                        entries.add("<command without / >");
+                    }
+                    if(args.length >= 3) {
+                        entries.add("{player}");
                     }
                     break;
             }
@@ -351,13 +421,18 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 break;
             case Profession_Recipe_Add_Ingredients:
             case Profession_Recipe_Edit_Ingredients:
+            case Browse_Profession_Add_Ingredients:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<ingredient> <amount>"));
                 break;
             case Profession_Recipe_Add_Commands:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<caster> <delay> <command without />"));
                 break;
             case Profession_Recipe_Add_Conditions:
+            case Browse_Profession_Add_Conditions:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
+                break;
+            case Browse_Add_Profession:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<professionName>"));
                 break;
         }
         sendSuggestMessage(player, suggestCommand);
@@ -826,6 +901,26 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         browseEditor.setName(name);
         MessageUtil.sendMessage("editor.browserRenamed", player, new MessageData("oldName", oldName), new MessageData("newName", name));
         browseEditor.reload(true);
+    }
+
+    private void addNewProfession(BrowseEditor browseEditor, String[] args) {
+        String professionName = args[0];
+        Player player = browseEditor.getPlayer();
+        if (!ProfessionsCfg.getMap().containsKey(professionName)) {
+            MessageUtil.sendMessage("editor.invalidProfession", player, new MessageData("profession", professionName));
+            return;
+        }
+        if(browseEditor.getProfessions().contains(professionName)) {
+            MessageUtil.sendMessage("editor.professionAlreadyExists", player, new MessageData("profession", professionName));
+            return;
+        }
+        browseEditor.getProfessions().add(professionName);
+        Map<String, Object> conditionsMaps = new LinkedHashMap<>();
+        conditionsMaps.put("costs", Map.of("money", 0.0, "exp", 0, "items", new ArrayList<>()));
+        conditionsMaps.put("conditions", Map.of());
+        browseEditor.getProfessionConditions().put(professionName, new ProfessionConditions(professionName, DeserializationWorker.start(conditionsMaps)));
+        MessageUtil.sendMessage("editor.addedProfessionToBrowse", player, new MessageData("profession", professionName));
+        browseEditor.getBrowseProfessionsEditor().reload(true);
     }
 
     public static void removeEditorCriteria(UUID uuid) {

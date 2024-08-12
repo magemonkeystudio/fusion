@@ -77,7 +77,7 @@ icons:
     enchants: { }
 
 subEditor:
-  title: '&2Profession &a$<name>'
+  title: '&2Profession &a$<profession>'
   icons:
     fill:
       material: 'GRAY_STAINED_GLASS_PANE'
@@ -88,16 +88,6 @@ subEditor:
       lore: [ ]
       flags: [ ]
       enchants: { }
-    professionItem:
-      name: '&9$<id>'
-      lore:
-        - '&7Name: &a$<name>'
-        - '&8--------------------'
-        - '&7Costs:'
-        - '&7- &eMoney: &a$<costs.money>'
-        - '&7- &eExperience: &a$<costs.exp>'
-        - '&7Conditions:'
-        - '&7- $<conditions>'
     moneyCost:
       material: GREEN_CANDLE
       amount: 1
@@ -120,7 +110,7 @@ subEditor:
       unbreakable: false
       name: '&9Experience Cost'
       lore:
-        - '&7Current: &a$<costs.experience> Exp'
+        - '&7Current: &a$<costs.exp> Exp'
         - '&7The experience cost for crafting this recipe.'
         - '&8--------------------'
         - '&aLeft click &7to increase the cost.'
@@ -128,6 +118,24 @@ subEditor:
         - '&aShift click &7each to increase by 10.'
       flags: [ ]
       enchants: { }
+    ingredients:
+      material: GLASS_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Ingredients'
+      lore:
+        - '&7Click to configure the ingredients.'
+        - '&7You will cast commands to add ingredients.'
+        - '&8--------------------'
+        - '&bList of Ingredients:'
+        - '$<ingredients>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an ingredient.'
+        - '&aRight click &7to remove last ingredient.'
+      flags: [ ]
+      enchants: { }
+      ingredientPrefix: '&7- &2$<ingredient.amount>x &a$<ingredient.name>'
     conditions:
       material: CHEST
       amount: 1
@@ -155,3 +163,13 @@ subEditor:
         auraManaAbility: '&3Aura Mana Ability &2$<condition.name>&7: &a$<condition.amount>'
         auraSkill: '&3Aura Skill &2$<condition.name>&7: &a$<condition.amount>'
         auraStats: '&3Aura Stat &2$<condition.name>&7: &a$<condition.amount>'
+    back:
+      material: BARRIER
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&cBack'
+      lore:
+        - '&7Go back to the previous page.'
+      flags: [ ]
+      enchants: { }

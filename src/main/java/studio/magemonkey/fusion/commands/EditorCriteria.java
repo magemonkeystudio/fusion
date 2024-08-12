@@ -27,4 +27,7 @@ public enum EditorCriteria {
 
     /* Browse */
     Browse_Edit_Name,
+    Browse_Add_Profession,
+    Browse_Profession_Add_Ingredients,
+    Browse_Profession_Add_Conditions
 }

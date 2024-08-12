@@ -123,7 +123,8 @@ editor:
   patternItemRenamed: "&aYou renamed the pattern item &3$<oldName> &ato &3$<newName>"
   patternItemLoreAdded: "&aYou added a new lore line to the pattern item"
   patternItemUpdated: "&aYou updated the pattern item &3$<item> with amount &3$<amount>"
-  browserRenamed: "&aYou renamed the browser from &3$<oldName> &ato &3$<newName>"
   professionIconChanged: "&aYou changed the profession icon from &3$<oldIcon> &ato &3$<newIcon>"
+  browserRenamed: "&aYou renamed the browser from &3$<oldName> &ato &3$<newName>"
+  addedProfessionToBrowse: "&aYou added the profession &3$<profession> &ato the browser"
 
 

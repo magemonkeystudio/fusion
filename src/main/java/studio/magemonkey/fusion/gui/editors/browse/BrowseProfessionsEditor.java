@@ -101,8 +101,7 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 4 -> {}
-                 //TODO   FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
+            case 4 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Add_Profession, "/fusion-editor ");
             case 48 -> open(player, (size + invdex - 1) % size);
             case 50 -> open(player, (invdex + 1) % size);
             case 53 -> openParent(player);
@@ -110,7 +109,7 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
                 if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
                     ProfessionConditions entry = slots.get(getNestedInventories().get(invdex)).get(slot);
                     if (event.isLeftClick()) {
-                        browseProfessionEditor = new BrowseProfessionEditor(this);
+                        browseProfessionEditor = new BrowseProfessionEditor(this, player, entry);
                         browseProfessionEditor.open(player);
                     } else if (event.isRightClick()) {
                         browseEditor.getProfessions().remove(entry.getProfession());
