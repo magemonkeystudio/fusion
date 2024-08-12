@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.cfg.editors.subeditors;
+package studio.magemonkey.fusion.cfg.editors.professions;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -21,7 +21,7 @@ public class CategoryEditorCfg {
     private final YamlParser config;
 
     public CategoryEditorCfg() {
-        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "/Editors/SubEditors/CategoryEditor.yml");
+        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "Editors/professions/CategoryEditor.yml");
     }
 
     public String getTitle() {

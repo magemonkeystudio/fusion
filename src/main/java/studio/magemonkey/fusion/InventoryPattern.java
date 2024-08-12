@@ -29,6 +29,7 @@ public class InventoryPattern implements ConfigurationSerializable {
     public InventoryPattern(String[] pattern, HashMap<Character, ItemStack> items) {
         this.pattern = pattern;
         this.items = items;
+        this.items.put('o', null);
     }
 
     public InventoryPattern(Map<String, Object> map) {

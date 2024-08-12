@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors;
+package studio.magemonkey.fusion.gui.editors.professions;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -13,10 +13,9 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
-import studio.magemonkey.fusion.gui.editors.subeditors.CategoryEditor;
-import studio.magemonkey.fusion.gui.editors.subeditors.pattern.PatternEditor;
-import studio.magemonkey.fusion.gui.editors.subeditors.pattern.PatternItemsEditor;
-import studio.magemonkey.fusion.gui.editors.subeditors.RecipeEditor;
+import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.pattern.PatternEditor;
+import studio.magemonkey.fusion.gui.editors.pattern.PatternItemsEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 @Getter
@@ -41,15 +40,16 @@ public class ProfessionEditor extends Editor implements Listener {
         this.table = CraftingTable.copy(ProfessionsCfg.getTable(profession));
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
 
-        Fusion.registerListener(this);
         initialize();
+        Fusion.registerListener(this);
     }
 
     private void initialize() {
         InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
         setItem(10, getIcons().get("name"));
-        setItem(11, getIcons().get("masteryUnlock"));
-        setItem(12, getIcons().get("masteryCost"));
+        setItem(11, getIcons().get("icon"));
+        setItem(12, getIcons().get("masteryUnlock"));
+        setItem(13, getIcons().get("masteryCost"));
         setItem(16, getIcons().get("recipes"));
         setItem(28, getIcons().get("useCategories"));
         setItem(29, getIcons().get("patternItems"));
@@ -70,8 +70,9 @@ public class ProfessionEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Name, "/fusion-editor <newName>");
-            case 11 -> {
+            case 10 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Name, "/fusion-editor " + table.getName());
+            case 11 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Icon, "/fusion-editor DIVINITY_" + table.getIconItem().getID());
+            case 12 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     table.setMasteryUnlock(table.getMasteryUnlock() + amount);
@@ -82,7 +83,7 @@ public class ProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 12 -> {
+            case 13 -> {
                 int amount = event.isShiftClick() ? 100 : 1;
                 if (event.isLeftClick()) {
                     table.setMasteryFee(table.getMasteryFee() + amount);

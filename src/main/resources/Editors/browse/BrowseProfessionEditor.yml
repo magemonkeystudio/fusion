@@ -1,0 +1,157 @@
+title: '&2Professions in browse gui'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: [ ]
+    flags: [ ]
+    enchants: { }
+  add:
+    material: GRAY_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aAdd Profession'
+    lore:
+      - '&7Click here to add a profession'
+      - '&7You will cast a command to add a profession'
+      - '&8-------------------'
+      - '&eYou will then need to configure the profession.'
+    flags: []
+    enchants: {}
+  next:
+    material: ARROW
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aNext'
+    lore:
+      - '&7Go to the next page.'
+    flags: []
+    enchants: {}
+  previous:
+    material: ARROW
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aPrevious'
+    lore:
+      - '&7Go to the previous page.'
+    flags: []
+    enchants: {}
+  professionItem:
+    name: '&9$<id>'
+    lore:
+      - '&7Name: &a$<name>'
+      - '&8--------------------'
+      - '&7Costs:'
+      - '&7- &eMoney: &a$<costs.money>'
+      - '&7- &eExperience: &a$<costs.exp>'
+      - '&7Conditions:'
+      - '&7- $<conditions>'
+      - '&8--------------------'
+      - '&aLeft click &7to configure'
+      - '&aRight click &7to remove'
+    conditionPrefix: '&7- $<condition>'
+    conditionFormatting:
+      profession: '&3Profession &2$<condition.name>&7: &a$<condition.amount>'
+      fabled: '&3Fabled &2$<condition.name>&7: &a$<condition.amount>'
+      mcmmo: '&3McMMO &2$<condition.name>&7: &a$<condition.amount>'
+      jobs: '&3Job &2$<condition.name>&7: &a$<condition.amount>'
+      auraAbility: '&3Aura Ability &2$<condition.name>: &a$<condition.amount>'
+      auraManaAbility: '&3Aura Mana Ability &2$<condition.name>&7: &a$<condition.amount>'
+      auraSkill: '&3Aura Skill &2$<condition.name>&7: &a$<condition.amount>'
+      auraStats: '&3Aura Stat &2$<condition.name>&7: &a$<condition.amount>'
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }
+
+subEditor:
+  title: '&2Profession &a$<name>'
+  icons:
+    fill:
+      material: 'GRAY_STAINED_GLASS_PANE'
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
+    professionItem:
+      name: '&9$<id>'
+      lore:
+        - '&7Name: &a$<name>'
+        - '&8--------------------'
+        - '&7Costs:'
+        - '&7- &eMoney: &a$<costs.money>'
+        - '&7- &eExperience: &a$<costs.exp>'
+        - '&7Conditions:'
+        - '&7- $<conditions>'
+    moneyCost:
+      material: GREEN_CANDLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Money Cost'
+      lore:
+        - '&7Current: &a$$<costs.money>'
+        - '&7The cost for crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the cost.'
+        - '&aRight click &7to decrease the cost.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    expCost:
+      material: LIME_CANDLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Experience Cost'
+      lore:
+        - '&7Current: &a$<costs.experience> Exp'
+        - '&7The experience cost for crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the cost.'
+        - '&aRight click &7to decrease the cost.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    conditions:
+      material: CHEST
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Conditions'
+      lore:
+        - '&7Click to configure the conditions.'
+        - '&7You will cast commands to add conditions.'
+        - '&8--------------------'
+        - '&bList of Conditions:'
+        - '$<conditions>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an condition.'
+        - '&aRight click &7to remove last condition.'
+      flags: [ ]
+      enchants: { }
+      conditionPrefix: '&7- $<condition>'
+      conditionFormatting:
+        profession: '&3Profession &2$<condition.name>&7: &a$<condition.amount>'
+        fabled: '&3Fabled &2$<condition.name>&7: &a$<condition.amount>'
+        mcmmo: '&3McMMO &2$<condition.name>&7: &a$<condition.amount>'
+        jobs: '&3Job &2$<condition.name>&7: &a$<condition.amount>'
+        auraAbility: '&3Aura Ability &2$<condition.name>: &a$<condition.amount>'
+        auraManaAbility: '&3Aura Mana Ability &2$<condition.name>&7: &a$<condition.amount>'
+        auraSkill: '&3Aura Skill &2$<condition.name>&7: &a$<condition.amount>'
+        auraStats: '&3Aura Stat &2$<condition.name>&7: &a$<condition.amount>'

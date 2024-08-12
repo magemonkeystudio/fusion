@@ -73,7 +73,6 @@ public class ProfessionResults implements ConfigurationSerializable {
             List<Map<String, Object>> commands = (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
             if (commands != null) {
                 for(Map<String, Object> command : commands) {
-                    Bukkit.getConsoleSender().sendMessage("Value: " + command);
                     this.commands.add(new DelayedCommand(command));
                 }
             }

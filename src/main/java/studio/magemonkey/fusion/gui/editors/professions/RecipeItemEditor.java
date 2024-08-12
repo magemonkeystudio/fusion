@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.subeditors;
+package studio.magemonkey.fusion.gui.editors.professions;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -6,8 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
@@ -17,8 +15,6 @@ import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class RecipeItemEditor extends Editor implements Listener {
 

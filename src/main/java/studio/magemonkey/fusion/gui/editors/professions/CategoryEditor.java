@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.subeditors;
+package studio.magemonkey.fusion.gui.editors.professions;
 
 import lombok.Getter;
 import org.bukkit.Material;

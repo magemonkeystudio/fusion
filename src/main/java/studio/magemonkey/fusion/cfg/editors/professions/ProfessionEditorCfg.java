@@ -1,5 +1,4 @@
-package studio.magemonkey.fusion.cfg.editors;
-import org.bukkit.Bukkit;
+package studio.magemonkey.fusion.cfg.editors.professions;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -8,7 +7,6 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.util.ChatUT;
 
@@ -22,7 +20,7 @@ public class ProfessionEditorCfg {
     private final YamlParser config;
 
     public ProfessionEditorCfg() {
-        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "/Editors/ProfessionEditor.yml");
+        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "Editors/professions/ProfessionEditor.yml");
     }
 
     public String getTitle(String profession) {
@@ -40,7 +38,7 @@ public class ProfessionEditorCfg {
     }
 
     public ItemStack getIcon(CraftingTable table, String icon) {
-        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE"));
+        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE").replace(MessageUtil.getReplacement("material"), table.getIconItem().create().getType().name()).toUpperCase());
         int amount = config.getInt("icons." + icon + ".amount", 1);
         int durability = config.getInt("icons." + icon + ".durability", 0);
         boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
@@ -49,6 +47,7 @@ public class ProfessionEditorCfg {
         for(int i = 0; i < lore.size(); i++) {
             lore.set(i, ChatUT.hexString(lore.get(i)
                 .replace(MessageUtil.getReplacement("name"), table.getInventoryName())
+                .replace(MessageUtil.getReplacement("icon"), table.getIconItem().getID())
                 .replace(MessageUtil.getReplacement("profession"), table.getName())
                 .replace(MessageUtil.getReplacement("masteryUnlock"), String.valueOf(table.getMasteryUnlock()))
                 .replace(MessageUtil.getReplacement("masteryCost"), String.valueOf(table.getMasteryFee()))

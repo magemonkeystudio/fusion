@@ -14,6 +14,11 @@ icons:
     name: '&7Recipe Slot'
     lore:
       - '&7Recipes will be displayed here'
+  browseSlot:
+    material: 'LIGHT_GRAY_STAINED_GLASS_PANE'
+    name: '&7Browse Slot'
+    lore:
+      - '&7Professions will be displayed here'
   patternItem:
     name: '&9$<id>'
     lore:

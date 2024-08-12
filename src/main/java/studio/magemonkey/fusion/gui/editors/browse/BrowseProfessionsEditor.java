@@ -1,18 +1,19 @@
-package studio.magemonkey.fusion.gui.editors.subeditors;
+package studio.magemonkey.fusion.gui.editors.browse;
 
-import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.commands.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.professions.RecipeItemEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
@@ -20,22 +21,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-public class RecipeEditor extends Editor implements Listener {
+public class BrowseProfessionsEditor extends Editor implements Listener {
 
     private final Player player;
-    @Getter
-    private final CraftingTable table;
+    private final BrowseEditor browseEditor;
 
-    @Getter
-    private RecipeItemEditor recipeItemEditor;
+    private BrowseProfessionEditor browseProfessionEditor;
 
-    private final HashMap<Inventory, HashMap<Integer, Recipe>> slots = new HashMap<>();
+    private final HashMap<Inventory, HashMap<Integer, ProfessionConditions>> slots = new HashMap<>();
 
-    public RecipeEditor(Editor parentEditor, Player player, CraftingTable table) {
-        super(parentEditor, EditorRegistry.getRecipeEditorCfg().getTitle(), 54);
+    public BrowseProfessionsEditor(BrowseEditor browseEditor, Player player) {
+        super(browseEditor, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54);
         this.player = player;
-        this.table = table;
-        setIcons(EditorRegistry.getRecipeEditorCfg().getIcons(table));
+        this.browseEditor = browseEditor;
+        setIcons(EditorRegistry.getBrowseProfessionCfg().getIcons(browseEditor));
 
         initialize();
         Fusion.registerListener(this);
@@ -45,30 +44,35 @@ public class RecipeEditor extends Editor implements Listener {
         slots.clear();
         getNestedInventories().clear();
 
-        HashMap<Integer, Recipe> invSlots = new HashMap<>();
+        HashMap<Integer, ProfessionConditions> invSlots = new HashMap<>();
         List<Inventory> inventories = new ArrayList<>();
         Inventory inv = null;
         int invSlot = 0;
-        Collection<Recipe> recipes = table.getRecipes().values();
-        for (Recipe entry : recipes) {
+        Collection<ProfessionConditions> professions = browseEditor.getProfessionConditions().values();
+        for (ProfessionConditions entry : professions) {
+            if(!ProfessionsCfg.getMap().containsKey(entry.getProfession())) {
+                Fusion.getInstance().getLogger().warning("Profession " + entry.getProfession() + " not found for BrowseEditor. You might want to remove it from browse.yml to avoid problems.");
+                Fusion.getInstance().getLogger().warning("Skipping profession: " + entry.getProfession());
+                continue;
+            }
             int invDex = invSlot % 36 + 9;
             if (invDex == 9) {
                 if (inv != null)
                     inventories.add(inv);
-                inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
+                inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54, getIcons().get("fill"));
                 inv.setItem(4, getIcons().get("add"));
                 inv.setItem(48, getIcons().get("previous"));
                 inv.setItem(50, getIcons().get("next"));
                 inv.setItem(53, getIcons().get("back"));
                 invSlots = new HashMap<>();
             }
-            inv.setItem(invDex, EditorRegistry.getRecipeEditorCfg().getRecipeIcon(entry));
+            inv.setItem(invDex, EditorRegistry.getBrowseProfessionCfg().getProfessionIcon(entry));
             invSlots.put(invDex, entry);
             slots.put(inv, invSlots);
             invSlot++;
         }
         if(inv == null) {
-            inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
+            inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54, getIcons().get("fill"));
             inv.setItem(4, getIcons().get("add"));
             inv.setItem(48, getIcons().get("previous"));
             inv.setItem(50, getIcons().get("next"));
@@ -97,19 +101,20 @@ public class RecipeEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 4 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
+            case 4 -> {}
+                 //TODO   FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
             case 48 -> open(player, (size + invdex - 1) % size);
             case 50 -> open(player, (invdex + 1) % size);
             case 53 -> openParent(player);
             default -> {
                 if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
-                    Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
+                    ProfessionConditions entry = slots.get(getNestedInventories().get(invdex)).get(slot);
                     if (event.isLeftClick()) {
-                        recipeItemEditor = new RecipeItemEditor(this, player, entry);
-                        recipeItemEditor.open(player);
+                        browseProfessionEditor = new BrowseProfessionEditor(this);
+                        browseProfessionEditor.open(player);
                     } else if (event.isRightClick()) {
-                        table.getRecipes().remove(entry.getName());
+                        browseEditor.getProfessions().remove(entry.getProfession());
+                        browseEditor.getProfessionConditions().remove(entry.getProfession());
                         hasChanges = true;
                     }
                 }
@@ -122,7 +127,7 @@ public class RecipeEditor extends Editor implements Listener {
     }
 
     public void reload(boolean open) {
-        setIcons(EditorRegistry.getRecipeEditorCfg().getIcons(table));
+        setIcons(EditorRegistry.getBrowseProfessionCfg().getIcons(browseEditor));
         initialize();
         if (open)
             open(player);

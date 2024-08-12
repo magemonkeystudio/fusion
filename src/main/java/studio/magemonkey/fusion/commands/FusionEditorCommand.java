@@ -31,9 +31,9 @@ import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.gui.editors.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.Editor;
-import studio.magemonkey.fusion.gui.editors.ProfessionEditor;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.TabCacher;
 
@@ -98,6 +98,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case "browse":
+                    EditorRegistry.getBrowseEditor(player).open(player);
                     break;
             }
             return true;
@@ -108,14 +109,15 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
             switch (criteria) {
                 case Profession_Edit_Name -> updateProfessionName(professionEditor, args);
+                case Profession_Edit_Icon -> updateProfessionIcon(professionEditor, args);
 
                 case Profession_Category_Add, Profession_Category_Edit ->
                         updateCategory(professionEditor, args, criteria);
 
-                case Profession_Pattern_Edit_Name -> updatePatternItemName(professionEditor, args);
-                case Profession_Pattern_Edit_Lore -> addPatternItemLore(professionEditor, args);
-                case Profession_Pattern_Edit_Pattern -> updatePatternItem(professionEditor, args);
-                case Profession_Pattern_Add_Commands -> addPatternItemCommand(professionEditor, args);
+                case Pattern_Edit_Name -> updatePatternItemName(professionEditor, args);
+                case Pattern_Edit_Lore -> addPatternItemLore(professionEditor, args);
+                case Pattern_Edit_Pattern -> updatePatternItem(professionEditor, args);
+                case Pattern_Add_Commands -> addPatternItemCommand(professionEditor, args);
 
                 case Profession_Recipe_Edit_Name -> updateRecipeName(professionEditor, args);
                 case Profession_Recipe_Add_Commands -> addRecipeCommand(professionEditor, args);
@@ -123,11 +125,18 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Edit_ResultItem, Profession_Recipe_Add_Ingredients,
                         Profession_Recipe_Edit_Ingredients -> updateRecipeItems(professionEditor, args, criteria);
                 case Profession_Recipe_Add_Conditions -> addRecipeConditions(professionEditor, args);
-
                 default -> editor.open(player);
             }
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
+            switch (criteria) {
+                case Browse_Edit_Name -> updateBrowseName(browseEditor, args);
+                case Pattern_Edit_Name -> updatePatternItemName(browseEditor, args);
+                case Pattern_Edit_Lore -> addPatternItemLore(browseEditor, args);
+                case Pattern_Edit_Pattern -> updatePatternItem(browseEditor, args);
+                case Pattern_Add_Commands -> addPatternItemCommand(browseEditor, args);
+                default -> editor.open(player);
+            }
         }
         return true;
     }
@@ -161,10 +170,16 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
                 case Profession_Edit_Name:
-                case Profession_Pattern_Edit_Name:
+                case Pattern_Edit_Name:
+                case Browse_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newName>");
                         entries.add(professionEditor.getTable().getInventoryName());
+                    }
+                    break;
+                case Profession_Edit_Icon:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
                     }
                     break;
                 case Profession_Category_Add:
@@ -192,7 +207,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("64");
                     }
                     break;
-                case Profession_Pattern_Edit_Pattern:
+                case Pattern_Edit_Pattern:
                 case Profession_Recipe_Edit_ResultItem:
                 case Profession_Recipe_Add_Ingredients:
                 case Profession_Recipe_Edit_Ingredients:
@@ -213,7 +228,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case Profession_Recipe_Add_Commands:
-                case Profession_Pattern_Add_Commands:
+                case Pattern_Add_Commands:
                     if (args.length == 1) {
                         if ("console".startsWith(args[0].toUpperCase())) entries.add("console");
                         if ("player".startsWith(args[0].toUpperCase())) entries.add("player");
@@ -304,28 +319,27 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         if (criteria == null) return;
         editorCriteria.put(player.getUniqueId(), criteria);
         switch (criteria) {
-            /* Profession */
             case Profession_Edit_Name:
+            case Pattern_Edit_Name:
+            case Browse_Edit_Name:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<newName>"));
                 break;
-            /* Categories */
+            case Profession_Edit_Icon:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<icon>"));
+                break;
             case Profession_Category_Add:
             case Profession_Category_Edit:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<categoryName> <categoryIcon>"));
                 break;
-            /* Patterns */
-            case Profession_Pattern_Edit_Name:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<name>"));
-                break;
-            case Profession_Pattern_Edit_Pattern:
+            case Pattern_Edit_Pattern:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<item> <amount>"));
-            case Profession_Pattern_Edit_Lore:
+                break;
+            case Pattern_Edit_Lore:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<lore>"));
                 break;
-            case Profession_Pattern_Add_Commands:
+            case Pattern_Add_Commands:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<caster> <delay> <command without />"));
                 break;
-            /* Recipes */
             case Profession_Recipe_Add:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<recipeName> <resultItem> <amount>"));
                 break;
@@ -373,6 +387,24 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         professionEditor.reload(true);
     }
 
+    private void updateProfessionIcon(ProfessionEditor professionEditor, String[] args) {
+        String icon = args[0];
+        String oldIcon = professionEditor.getTable().getIconItem().getID();
+        Player player = professionEditor.getPlayer();
+        if (!isValidItem(icon)) {
+            MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
+            return;
+        }
+        try {
+            professionEditor.getTable().setIconItem(CodexEngine.get().getItemManager().getItemType(icon));
+        } catch (CodexItemException e) {
+            MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
+            return;
+        }
+        MessageUtil.sendMessage("editor.professionIconChanged", player, new MessageData("oldIcon", oldIcon), new MessageData("newIcon", icon));
+        professionEditor.reload(true);
+    }
+
     /* Categories */
     private void updateCategory(ProfessionEditor professionEditor, String[] args, EditorCriteria criteria) {
         if (args.length < 2) {
@@ -411,77 +443,154 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     }
 
     /* Patterns */
-    private void updatePatternItemName(ProfessionEditor professionEditor, String[] args) {
+    private void updatePatternItemName(Editor editor, String[] args) {
         StringBuilder builder = new StringBuilder();
         for (String arg : args) {
             builder.append(arg).append(" ");
         }
-        String professionName = builder.toString().trim();
-        String oldName = professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getName();
-        Player player = professionEditor.getPlayer();
-        professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().name(professionName);
-        MessageUtil.sendMessage("editor.patternItemRenamed", player, new MessageData("oldName", oldName), new MessageData("newName", professionName));
-        professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
-    }
-
-    private void updatePatternItem(ProfessionEditor professionEditor, String[] args) {
-        Player player = professionEditor.getPlayer();
-        if (args.length < 2) {
-            MessageUtil.sendMessage("editor.invalidSyntax", professionEditor.getPlayer(), new MessageData("syntax", "<item> <amount>"));
-            return;
-        }
-        try {
-            Material material = Material.valueOf(args[0].toUpperCase());
-            int amount = Integer.parseInt(args[1]);
-
-            professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().material(material);
-            professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().amount(amount);
+        String name = builder.toString().trim();
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            String oldName = professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getName();
+            Player player = professionEditor.getPlayer();
+            professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().name(name);
+            MessageUtil.sendMessage("editor.patternItemRenamed", player, new MessageData("oldName", oldName), new MessageData("newName", name));
             professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
-            MessageUtil.sendMessage("editor.patternItemUpdated", player, new MessageData("item", args[0]), new MessageData("amount", amount));
-        } catch (Exception e) {
-            MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", args[0]));
-            MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            String oldName = browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getName();
+            Player player = browseEditor.getPlayer();
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().name(name);
+            MessageUtil.sendMessage("editor.patternItemRenamed", player, new MessageData("oldName", oldName), new MessageData("newName", name));
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
         }
     }
 
-    private void addPatternItemLore(ProfessionEditor professionEditor, String[] args) {
-        Player player = professionEditor.getPlayer();
-        if (args.length < 1) {
-            MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", args));
-            return;
-        }
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < args.length; i++) {
-            builder.append(args[i]);
-            if (i < args.length - 1)
-                builder.append(" ");
-        }
-        professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().newLoreLine(builder.toString());
-        professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
-        MessageUtil.sendMessage("editor.patternItemLoreAdded", player, new MessageData("lore", ChatUT.hexString(builder.toString())));
-    }
-
-    private void addPatternItemCommand(ProfessionEditor professionEditor, String[] args) {
-        Player player = professionEditor.getPlayer();
-        if (args.length < 3) {
-            MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args));
-            return;
-        }
-        StringBuilder commandBuilder = new StringBuilder();
-        try {
-            CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
-            int delay = Integer.parseInt(args[1]);
-            commandBuilder = new StringBuilder();
-            for (int i = 2; i < args.length; i++) {
-                commandBuilder.append(args[i]);
-                if (i < args.length - 1)
-                    commandBuilder.append(" ");
+    private void updatePatternItem(Editor editor, String[] args) {
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            Player player = professionEditor.getPlayer();
+            if (args.length < 2) {
+                MessageUtil.sendMessage("editor.invalidSyntax", professionEditor.getPlayer(), new MessageData("syntax", "<item> <amount>"));
+                return;
             }
-            professionEditor.getPatternItemsEditor().getPatternItemEditor().addCommand(new DelayedCommand(Map.of("delay", delay, "as", commandType.name(), "cmd", commandBuilder.toString())));
+            try {
+                Material material = Material.valueOf(args[0].toUpperCase());
+                int amount = Integer.parseInt(args[1]);
+
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().material(material);
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().amount(amount);
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+                MessageUtil.sendMessage("editor.patternItemUpdated", player, new MessageData("item", args[0]), new MessageData("amount", amount));
+            } catch (Exception e) {
+                MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", args[0]));
+                MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+            }
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            Player player = browseEditor.getPlayer();
+            if (args.length < 2) {
+                MessageUtil.sendMessage("editor.invalidSyntax", browseEditor.getPlayer(), new MessageData("syntax", "<item> <amount>"));
+                return;
+            }
+            try {
+                Material material = Material.valueOf(args[0].toUpperCase());
+                int amount = Integer.parseInt(args[1]);
+
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().material(material);
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().amount(amount);
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+                MessageUtil.sendMessage("editor.patternItemUpdated", player, new MessageData("item", args[0]), new MessageData("amount", amount));
+            } catch (Exception e) {
+                MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", args[0]));
+                MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+            }
+        }
+    }
+
+    private void addPatternItemLore(Editor editor, String[] args) {
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            Player player = professionEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", args));
+                return;
+            }
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                builder.append(args[i]);
+                if (i < args.length - 1)
+                    builder.append(" ");
+            }
+            professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().newLoreLine(builder.toString());
             professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args[0] + " " + args[1] + " " + commandBuilder));
+            MessageUtil.sendMessage("editor.patternItemLoreAdded", player, new MessageData("lore", ChatUT.hexString(builder.toString())));
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            Player player = browseEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", args));
+                return;
+            }
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < args.length; i++) {
+                builder.append(args[i]);
+                if (i < args.length - 1)
+                    builder.append(" ");
+            }
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().newLoreLine(builder.toString());
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+            MessageUtil.sendMessage("editor.patternItemLoreAdded", player, new MessageData("lore", ChatUT.hexString(builder.toString())));
+        }
+    }
+
+    private void addPatternItemCommand(Editor editor, String[] args) {
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            Player player = professionEditor.getPlayer();
+            if (args.length < 3) {
+                MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args));
+                return;
+            }
+            StringBuilder commandBuilder = new StringBuilder();
+            try {
+                CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
+                int delay = Integer.parseInt(args[1]);
+                commandBuilder = new StringBuilder();
+                for (int i = 2; i < args.length; i++) {
+                    commandBuilder.append(args[i]);
+                    if (i < args.length - 1)
+                        commandBuilder.append(" ");
+                }
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().addCommand(new DelayedCommand(Map.of("delay", delay, "as", commandType.name(), "cmd", commandBuilder.toString())));
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args[0] + " " + args[1] + " " + commandBuilder));
+            }
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            Player player = browseEditor.getPlayer();
+            if (args.length < 3) {
+                MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args));
+                return;
+            }
+            StringBuilder commandBuilder = new StringBuilder();
+            try {
+                CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
+                int delay = Integer.parseInt(args[1]);
+                commandBuilder = new StringBuilder();
+                for (int i = 2; i < args.length; i++) {
+                    commandBuilder.append(args[i]);
+                    if (i < args.length - 1)
+                        commandBuilder.append(" ");
+                }
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().addCommand(new DelayedCommand(Map.of("delay", delay, "as", commandType.name(), "cmd", commandBuilder.toString())));
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args[0] + " " + args[1] + " " + commandBuilder));
+            }
         }
     }
 
@@ -704,6 +813,19 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         MessageUtil.sendMessage("editor.conditionAdded", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
         professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+    }
+
+    private void updateBrowseName(BrowseEditor browseEditor, String[] args) {
+        StringBuilder builder = new StringBuilder();
+        for (String arg : args) {
+            builder.append(arg).append(" ");
+        }
+        String name = builder.toString().trim();
+        String oldName = browseEditor.getName();
+        Player player = browseEditor.getPlayer();
+        browseEditor.setName(name);
+        MessageUtil.sendMessage("editor.browserRenamed", player, new MessageData("oldName", oldName), new MessageData("newName", name));
+        browseEditor.reload(true);
     }
 
     public static void removeEditorCriteria(UUID uuid) {

@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.subeditors.pattern;
+package studio.magemonkey.fusion.gui.editors.pattern;
 
 import lombok.Getter;
 import org.bukkit.enchantments.Enchantment;
@@ -16,19 +16,25 @@ import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class PatternItemEditor extends Editor implements Listener {
 
+    // Globally used variabled
     private final Player player;
-    private final CraftingTable table;
     private final InventoryPattern pattern;
     private final char c;
+
+    // Profession only
+    private final CraftingTable table;
     private final boolean isCategoryPattern;
+
+    // Browse only
+    private final BrowseEditor browseEditor;
 
     @Getter
     private ItemBuilder builder;
@@ -40,6 +46,24 @@ public class PatternItemEditor extends Editor implements Listener {
         this.c = c;
         this.isCategoryPattern = isCategoryPattern;
         this.pattern = isCategoryPattern ? table.getCatPattern() : table.getPattern();
+        this.browseEditor = null;
+
+        ItemStack item = pattern.getItems().get(c);
+        builder = ItemBuilder.newItem(item);
+        setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
+        initialize();
+        Fusion.registerListener(this);
+    }
+
+    public PatternItemEditor(Editor editor, BrowseEditor browseEditor, Player player, char c) {
+        super(editor, EditorRegistry.getPatternItemEditorCfg().getSubTitle(c), 27);
+        this.player = player;
+        this.browseEditor = browseEditor;
+        this.c = c;
+        this.table = null;
+        this.isCategoryPattern = false;
+
+        this.pattern = browseEditor.getBrowsePattern();
         ItemStack item = pattern.getItems().get(c);
         builder = ItemBuilder.newItem(item);
         setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
@@ -66,19 +90,20 @@ public class PatternItemEditor extends Editor implements Listener {
 
         switch (event.getSlot()) {
             case 10 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Pattern_Edit_Name, "/fusion-editor " + builder.getName());
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Name, "/fusion-editor " + builder.getName());
             case 11 -> {
                 if(event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Pattern_Edit_Lore, "/fusion-editor <lore>");
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Lore, "/fusion-editor <lore>");
                 } else {
                     if(builder.getLore().isEmpty()) {
                         return;
                     }
                     builder.getLore().remove(builder.getLore().size() - 1);
+                    hasChanges = true;
                 }
             }
             case 13 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Pattern_Edit_Pattern, "/fusion-editor " + builder.getMaterial().name() + " " + builder.getAmount() + " " + builder.getAmount());
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Pattern, "/fusion-editor " + builder.getMaterial().name() + " " + builder.getAmount());
             case 15 -> {
                 if (!builder.getEnchants().isEmpty()) {
                     builder.clearEnchants();
@@ -91,13 +116,14 @@ public class PatternItemEditor extends Editor implements Listener {
             }
             case 16 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Pattern_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
                 } else {
                     if(pattern.getCommands(c).isEmpty()) {
                         return;
                     }
                     DelayedCommand command = new ArrayList<>(pattern.getCommands(c)).get(pattern.getCommands(c).size() - 1);
                     pattern.getCommands(c).remove(command);
+                    hasChanges = true;
                 }
             }
             case 26 -> {
@@ -113,12 +139,16 @@ public class PatternItemEditor extends Editor implements Listener {
     }
 
     public void reload(boolean open) {
-        setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
-        if (isCategoryPattern) {
-            table.getCatPattern().getItems().put(c, builder.build());
+        if(table != null) {
+            if (isCategoryPattern) {
+                table.getCatPattern().getItems().put(c, builder.build());
+            } else {
+                table.getPattern().getItems().put(c, builder.build());
+            }
         } else {
-            table.getPattern().getItems().put(c, builder.build());
+            browseEditor.getBrowsePattern().getItems().put(c, builder.build());
         }
+        setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
         initialize();
         if (open)
             open(player);

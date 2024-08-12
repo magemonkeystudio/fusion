@@ -17,11 +17,22 @@ icons:
     name: '&9Name'
     lore:
       - '&7Current: &a$<name>'
-      - '&7Click to change your profession name.'
+      - '&7Click to change the profession name.'
       - '&8--------------------'
       - '&aClick &7to rename.'
     flags: []
     enchants: {}
+  icon:
+    material: '$<material>'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Icon'
+    lore:
+      - '&7Current: &a$<icon>'
+      - '&7Click to change the icon item.'
+      - '&8--------------------'
+      - '&aClick &7to change.'
   masteryUnlock:
     material: DIAMOND
     amount: 1

@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.subeditors.pattern;
+package studio.magemonkey.fusion.gui.editors.pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -11,6 +11,7 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.Editor;
 
 import java.util.HashMap;
@@ -18,11 +19,16 @@ import java.util.Map;
 
 public class PatternEditor extends Editor implements Listener {
 
+    // Globally used variabled
     private final Player player;
-    private final CraftingTable table;
     private InventoryPattern pattern;
 
-    private boolean isCategoryPattern;
+    // Profession only
+    private final CraftingTable table;
+    private final boolean isCategoryPattern;
+
+    // Browse only
+    private final BrowseEditor browseEditor;
 
     private final Map<Integer, Character> slots = new HashMap<>();
 
@@ -31,6 +37,8 @@ public class PatternEditor extends Editor implements Listener {
         this.player = player;
         this.table = table;
         this.isCategoryPattern = isCategoryPattern;
+        this.browseEditor = null;
+
         setIcons(EditorRegistry.getPatternEditorCfg().getIcons(table));
         this.pattern = isCategoryPattern ? table.getCatPattern() : table.getPattern();
         if (isCategoryPattern && this.pattern == null) {
@@ -43,6 +51,19 @@ public class PatternEditor extends Editor implements Listener {
         Fusion.registerListener(this);
     }
 
+    public PatternEditor(BrowseEditor browseEditor, Player player) {
+        super(browseEditor, EditorRegistry.getPatternEditorCfg().getTitle("Browse"), browseEditor.getBrowsePattern().getInventorySize());
+        this.player = player;
+        this.browseEditor = browseEditor;
+        this.table = null;
+        this.isCategoryPattern = false;
+
+        setIcons(EditorRegistry.getPatternEditorCfg().getIcons(browseEditor));
+        this.pattern = browseEditor.getBrowsePattern();
+        initialize();
+        Fusion.registerListener(this);
+    }
+
     public void initialize() {
         slots.clear();
         int i = 0;
@@ -50,7 +71,10 @@ public class PatternEditor extends Editor implements Listener {
             for (char c : key.toCharArray()) {
                 slots.put(i, c);
                 if (c == 'o') {
-                    setItem(i, getIcons().get("recipeSlot"));
+                    if (table != null)
+                        setItem(i, getIcons().get("recipeSlot"));
+                    else if (browseEditor != null)
+                        setItem(i, getIcons().get("browseSlot"));
                     i++;
                     continue;
                 } else if (pattern.getItems().get(c) != null && !pattern.getItems().get(c).getType().isAir()) {
@@ -82,7 +106,10 @@ public class PatternEditor extends Editor implements Listener {
             }
         }
         if (hasChanges) {
-            setIcons(EditorRegistry.getPatternEditorCfg().getIcons(table));
+            if (table != null)
+                setIcons(EditorRegistry.getPatternEditorCfg().getIcons(table));
+            else
+                setIcons(EditorRegistry.getPatternEditorCfg().getIcons(browseEditor));
             initialize();
         }
     }

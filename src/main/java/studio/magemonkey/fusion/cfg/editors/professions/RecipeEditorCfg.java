@@ -1,6 +1,5 @@
-package studio.magemonkey.fusion.cfg.editors.subeditors;
+package studio.magemonkey.fusion.cfg.editors.professions;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -25,11 +24,11 @@ public class RecipeEditorCfg {
     private final YamlParser config;
 
     public RecipeEditorCfg() {
-        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "/Editors/SubEditors/RecipeEditor.yml");
+        this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "Editors/professions/RecipeEditor.yml");
     }
 
     public String getTitle() {
-        return ChatUT.hexString(config.getString("title", "&2Pattern Item Editor"));
+        return ChatUT.hexString(config.getString("title", "&2Recipes"));
     }
 
     public Map<String, ItemStack> getIcons(CraftingTable table) {
@@ -99,7 +98,7 @@ public class RecipeEditorCfg {
 
     /* SubEditor */
     public String getSubTitle(String recipeName) {
-        String title = config.getString("subEditor.title", "&2Recipe Item");
+        String title = config.getString("subEditor.title", "&2Recipe Item &a$<recipe.name>");
         title = title.replace(MessageUtil.getReplacement("recipe.name"), recipeName);
         return ChatUT.hexString(title);
     }

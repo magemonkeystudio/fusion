@@ -95,9 +95,14 @@ public class YamlParser extends YamlConfiguration implements IValuesReloadable {
             FileUT.create(file);
 
             try {
+                Bukkit.getConsoleSender().sendMessage("Extracting default configuration from resource: " + filePath);
                 InputStream input = plugin.getClass().getResourceAsStream(filePath);
-                if (input != null)
+                if (input != null) {
+                    logger.info("Extracting default configuration from resource: " + filePath);
                     FileUT.copy(input, file);
+                } else {
+                    logger.warning("Failed to find resource: " + filePath);
+                }
             } catch (Exception var4) {
                 logger.warning("The loading or extraction went wrong: " + var4.getMessage());
             }

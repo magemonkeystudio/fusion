@@ -1,12 +1,16 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
@@ -15,22 +19,29 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 @SuppressWarnings("all")
-public class BrowseConfig {
+public class BrowseConfig implements ConfigurationSerializable {
 
     private static FileConfiguration config;
     private static File file;
 
     @Getter
+    @Setter
     private static final LinkedList<String> professions = new LinkedList<>();
+    @Getter
+    @Setter
     private static final HashMap<String, ProfessionConditions> professionConditions = new HashMap<>();
 
     @Getter
+    @Setter
     private static String browseName = ChatColor.DARK_AQUA + "Browse";
     @Getter
+    @Setter
     private static ItemStack browseFill;
     @Getter
+    @Setter
     private static InventoryPattern browsePattern;
 
     private BrowseConfig() {
@@ -140,4 +151,13 @@ public class BrowseConfig {
         }
     }
 
+    @NotNull
+    @Override
+    public Map<String, Object> serialize() {
+        return SerializationBuilder.start(2)
+                .append("name", browseName)
+                .append("pattern", browsePattern.serialize())
+                .append("professions", professionConditions)
+                .build();
+    }
 }
