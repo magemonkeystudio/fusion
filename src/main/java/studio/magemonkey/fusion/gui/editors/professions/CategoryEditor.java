@@ -16,7 +16,8 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CategoryEditor extends Editor implements Listener {
 

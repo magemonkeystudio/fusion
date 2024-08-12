@@ -22,15 +22,15 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.ExperienceManager;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.cfg.professions.Profession;
-import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

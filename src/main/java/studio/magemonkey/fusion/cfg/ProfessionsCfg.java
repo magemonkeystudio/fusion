@@ -10,7 +10,6 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.queue.QueueItem;
 import studio.magemonkey.fusion.util.Utils;

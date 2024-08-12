@@ -6,16 +6,19 @@ import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.editors.browse.BrowseEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.browse.BrowseProfessionCfg;
-import studio.magemonkey.fusion.cfg.editors.professions.CategoryEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.pattern.PatternEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.pattern.PatternItemEditorCfg;
+import studio.magemonkey.fusion.cfg.editors.professions.CategoryEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.ProfessionEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.RecipeEditorCfg;
-import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 public class EditorRegistry {
 

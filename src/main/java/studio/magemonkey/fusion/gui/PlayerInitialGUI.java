@@ -9,7 +9,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Category;
+import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.LevelFunction;
+import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.util.Utils;
 

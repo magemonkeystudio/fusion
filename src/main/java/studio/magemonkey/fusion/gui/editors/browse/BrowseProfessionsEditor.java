@@ -6,14 +6,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.commands.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
-import studio.magemonkey.fusion.gui.editors.professions.RecipeItemEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
