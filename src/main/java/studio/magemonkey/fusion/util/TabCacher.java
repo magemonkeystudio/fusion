@@ -135,4 +135,61 @@ public class TabCacher {
         }
         return entries;
     }
+
+    public static List<String> getConditionsTabs(String[] args) {
+        List<String> entries = new ArrayList<>();
+        if (args.length == 1) {
+            entries.add("<conditionKey>");
+            if ("professions".startsWith(args[0].toLowerCase())) entries.add("professions");
+            if (Bukkit.getPluginManager().isPluginEnabled("Fabled") && "fabled".startsWith(args[0].toLowerCase()))
+                entries.add("fabled");
+            if (Bukkit.getPluginManager().isPluginEnabled("mcMMO") && "mcmmo".startsWith(args[0].toLowerCase()))
+                entries.add("mcmmo");
+            if (Bukkit.getPluginManager().isPluginEnabled("Jobs") && "jobs".startsWith(args[0].toLowerCase()))
+                entries.add("jobs");
+            if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager().isPluginEnabled("AureliumSkills")) {
+                if ("aura_abilities".startsWith(args[0].toLowerCase())) entries.add("aura_abilities");
+                if ("aura_mana_abilities".startsWith(args[0].toLowerCase()))
+                    entries.add("aura_mana_abilities");
+                if ("aura_skills".startsWith(args[0].toLowerCase())) entries.add("aura_skills");
+                if ("aura_stats".startsWith(args[0].toLowerCase())) entries.add("aura_stats");
+            }
+        } else if (args.length == 2) {
+            entries.add("<conditionValue>");
+            switch (args[0].toLowerCase()) {
+                case "professions":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[1]));
+                    break;
+                case "fabled":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "fabled", args[1]));
+                    break;
+                case "mcmmo":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "mcmmo", args[1]));
+                    break;
+                case "jobs":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "jobs", args[1]));
+                    break;
+                case "aura_abilities":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_abilities", args[1]));
+                    break;
+                case "aura_mana_abilities":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_mana_abilities", args[1]));
+                    break;
+                case "aura_skills":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_skills", args[1]));
+                    break;
+                case "aura_stats":
+                    entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_stats", args[1]));
+                    break;
+            }
+        } else if (args.length == 3) {
+            entries.add("<level>");
+            entries.add("1");
+            entries.add("10");
+            entries.add("25");
+            entries.add("50");
+            entries.add("100");
+        }
+        return entries;
+    }
 }

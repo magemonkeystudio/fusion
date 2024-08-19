@@ -50,6 +50,8 @@ icons:
       - '&8--------------------'
       - '&aLeft click &7to configure'
       - '&aRight click &7to remove'
+      - '&aShift + Left click &7to change order to left'
+      - '&aShift + Right click &7to change order to right'
   back:
     material: BARRIER
     amount: 1

@@ -11,7 +11,7 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.commands.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
@@ -76,13 +76,44 @@ public class CategoryEditor extends Editor implements Listener {
                 case 53 -> openParent(player);
                 default -> {
                     if (slots.containsKey(event.getSlot())) {
-                        if (event.isLeftClick()) {
-                            lastEditedCategoryName = slots.get(event.getSlot()).getName();
-                            FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Category_Edit, "/fusion-editor " + slots.get(event.getSlot()).getName() + " <categoryIcon>");
-                            hasChanges = true;
-                        } else if(event.isRightClick()) {
-                            table.getCategories().remove(slots.get(event.getSlot()).getName());
-                            hasChanges = true;
+                        if(!event.isShiftClick()) {
+                            if (event.isLeftClick()) {
+                                lastEditedCategoryName = slots.get(event.getSlot()).getName();
+                                FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Category_Edit, "/fusion-editor " + slots.get(event.getSlot()).getName() + " <categoryIcon>");
+                            } else if (event.isRightClick()) {
+                                table.getCategories().remove(slots.get(event.getSlot()).getName());
+                                hasChanges = true;
+                            }
+                        } else {
+                            if(event.isLeftClick()) {
+                                // Decrease the order by 1, increase everyone elses order by 1 if needed (in the LinkedHashMap)
+                                int order = slots.get(event.getSlot()).getOrder();
+                                if(order > 0) {
+                                    for (Category category : table.getCategories().values()) {
+                                        if (category.getOrder() == order - 1) {
+                                            category.setOrder(order);
+                                            table.getCategories().get(slots.get(event.getSlot()).getName()).setOrder(order - 1);
+                                            table.updateCategoryOrder();
+                                            hasChanges = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            } else if(event.isRightClick()) {
+                                // Increase the order by 1, increase everyone elses order by 1 if needed (in the LinkedHashMap)
+                                int order = slots.get(event.getSlot()).getOrder();
+                                if(order <= table.getCategories().size() - 1) {
+                                    for (Category category : table.getCategories().values()) {
+                                        if (category.getOrder() == order + 1) {
+                                            category.setOrder(order);
+                                            table.getCategories().get(slots.get(event.getSlot()).getName()).setOrder(order + 1);
+                                            table.updateCategoryOrder();
+                                            hasChanges = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

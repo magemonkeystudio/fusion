@@ -75,11 +75,11 @@ public class CategoryEditorCfg {
         boolean unbreakable = config.getBoolean("icon.categoryItem.unbreakable", false);
         String name = config.getString("icons.categoryItem.name", "$<category>")
                 .replace(MessageUtil.getReplacement("category"), category.getName())
-                .replace(MessageUtil.getReplacement("icon.name"), itemName);
+                .replace(MessageUtil.getReplacement("item"), itemName);
         List<String> lore = config.getStringList("icons.categoryItem.lore");
 
         for(int i = 0; i < lore.size(); i++) {
-            if(lore.get(i).contains(MessageUtil.getReplacement("icon.lore"))) {
+            if(lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
                 lore.remove(i);
                 if(icon.getItemMeta() == null || icon.getItemMeta().getLore() == null) continue;
                 int newLines = 1;
@@ -91,8 +91,9 @@ public class CategoryEditorCfg {
                 continue;
             }
             lore.set(i, ChatUT.hexString(lore.get(i)
-                    .replace(MessageUtil.getReplacement("icon.name"), itemName)
-                    .replace(MessageUtil.getReplacement("category"), String.valueOf(category))));
+                    .replace(MessageUtil.getReplacement("category"), category.getName())
+                    .replace(MessageUtil.getReplacement("item"), itemName)
+                    .replace(MessageUtil.getReplacement("order"), String.valueOf(category.getOrder()))));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons.categoryItem.enchants");
         List<ItemFlag> flags = config.getItemFlags("icons.categoryItem.flags");

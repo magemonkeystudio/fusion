@@ -188,6 +188,15 @@ public class InventoryPattern implements ConfigurationSerializable {
         }
     }
 
+    public boolean isUsed(char c) {
+        for(String row : pattern) {
+            for(char ch : row.toCharArray()) {
+                if(ch == c) return true;
+            }
+        }
+        return false;
+    }
+
     public static InventoryPattern copy(InventoryPattern pattern) {
         if (pattern == null) return null;
         String[] patternCopy = new String[pattern.pattern.length];

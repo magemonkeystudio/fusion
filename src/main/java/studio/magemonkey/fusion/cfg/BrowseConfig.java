@@ -14,10 +14,12 @@ import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -151,13 +153,33 @@ public class BrowseConfig implements ConfigurationSerializable {
         }
     }
 
+    public static void save(BrowseEditor editor) {
+        Map<String, Object> professionsMap = new LinkedHashMap<>();
+        for (ProfessionConditions conditions : editor.getProfessionConditions().values()) {
+            professionsMap.put(conditions.getProfession(), conditions.serialize());
+        }
+        config.set("name", editor.getName());
+        config.set("pattern", editor.getBrowsePattern().serialize());
+        config.set("professions", professionsMap);
+        try {
+            config.save(file);
+            config = YamlConfiguration.loadConfiguration(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @NotNull
     @Override
     public Map<String, Object> serialize() {
+        Map<String, Object> professionsMap = new LinkedHashMap<>();
+        for (ProfessionConditions conditions : professionConditions.values()) {
+            professionsMap.put(conditions.getProfession(), conditions.serialize());
+        }
         return SerializationBuilder.start(2)
                 .append("name", browseName)
                 .append("pattern", browsePattern.serialize())
-                .append("professions", professionConditions)
+                .append("professions", professionsMap)
                 .build();
     }
 }

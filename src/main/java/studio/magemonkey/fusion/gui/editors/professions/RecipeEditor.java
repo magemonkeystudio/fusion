@@ -10,7 +10,7 @@ import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.commands.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
@@ -105,12 +105,25 @@ public class RecipeEditor extends Editor implements Listener {
             default -> {
                 if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
                     Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
-                    if (event.isLeftClick()) {
-                        recipeItemEditor = new RecipeItemEditor(this, player, entry);
-                        recipeItemEditor.open(player);
-                    } else if (event.isRightClick()) {
-                        table.getRecipes().remove(entry.getName());
-                        hasChanges = true;
+                    if(!event.isShiftClick()) {
+                        if (event.isLeftClick()) {
+                            recipeItemEditor = new RecipeItemEditor(this, player, entry);
+                            recipeItemEditor.open(player);
+                        } else if (event.isRightClick()) {
+                            table.getRecipes().remove(entry.getName());
+                            hasChanges = true;
+                        }
+                    } else {
+                        Recipe recipe = table.getRecipes().get(entry.getName());
+                        if(event.isLeftClick()) {
+                            // Put the Recipe one more to the left in the Map
+                            table.moveEntry(recipe, -1);
+                            hasChanges = true;
+                        } else if(event.isRightClick()) {
+                            // Put the Recipe one more to the right in the Map
+                            table.moveEntry(recipe, 1);
+                            hasChanges = true;
+                        }
                     }
                 }
             }

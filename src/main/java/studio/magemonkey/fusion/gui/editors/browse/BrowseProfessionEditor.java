@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.gui.editors.browse;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -7,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
-import studio.magemonkey.fusion.commands.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
@@ -16,6 +17,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
 
     private final Player player;
 
+    @Getter
     private ProfessionConditions conditions;
 
     public BrowseProfessionEditor(Editor editor, Player player, ProfessionConditions conditions) {
@@ -79,7 +81,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
         }
     }
 
-    private void reload(boolean open) {
+    public void reload(boolean open) {
         setIcons(EditorRegistry.getBrowseProfessionCfg().getSubIcons(conditions));
         initialize();
         if(open)

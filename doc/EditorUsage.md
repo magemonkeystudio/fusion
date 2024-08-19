@@ -17,8 +17,7 @@ pattern items, which is why you will get a detailed explanation of the **Profess
 ![Profession Editor GUI](../images/professions_gui.png)<br>
 The **Profession Editor** starts with a plain gui that allows to configure the following:
 
-- **Name**: The name of the profession
-  You will be forwarded to a click message in the chat in order to type in a new name for the profession.
+- **Name**: The name of the profession. You will be forwarded to a click message in the chat in order to type in a new name for the profession.
     - Shown as: Nametag
     - Usage: `/fusion-editor <name>`
       <br><br>
@@ -209,7 +208,8 @@ Here you will be able to manage the categories of your profession. The gui provi
     - Usage:
         - **Left Click**: Change the name and icon of the category
         - **Right Click**: Remove the category
-        - **Shift + Click**: Change the order of the category (WIP)
+      - **Shift + Left Click**: Change the order of the category to the left
+      - **Shift + Right Click**: Change the order of the category to the right
 ### Using Recipes Editor
 #### Recipes Editor
 ![Recipes Editor GUI](../images/recipes_gui.png)<br>
@@ -219,20 +219,23 @@ Here you will be able to manage the recipes of your profession. The gui provides
   (`/fusion-editor <recipeName> <recipeIcon> <amount>`)
     - Shown as: **Gray Dye**
     - Usage: Click on the item to add a new recipe.
-      <br><br>
+<br><br>
 - **Previous Page**: Go to the previous page of recipes.
     - Shown as: **Arrow (left)**
     - Usage: Click on the item to go to the previous page.
-      <br><br>
+<br><br>
 - **Next Page**: Go to the next page of recipes.
     - Shown as: **Arrow (right)**
     - Usage: Click on the item to go to the next page.
+<br><br>
 - **Recipe Icon**: The recipes that are shown in the gui. You manage them by clicking on the item.
     - Shown as: Paper
     - Usage:
         - **Left Click**: Configure the recipe. You will be forwarded to [Recipe Item Editor](#recipe-item-editor)
         - **Right Click**: Remove the recipe
-        - **Shift + Click**: Change the order of the recipe (WIP)
+        - **Shift + Left Click**: Change the order of the recipe to the left
+        - **Shift + Right Click**: Change the order of the recipe to the right
+<br><br>
 - **Back**: Go back to the [Profession Editor](#professions-editor).
     - Shown as: Barrier
     - Usage: Click to go back to the profession editor.
@@ -362,7 +365,8 @@ browse gui instead. The following functionalities are provided:
   - Usage:
       - **Left Click**: Configure the profession. You will be forwarded to [Browse Profession Editor](#configuring-of-a-profession)
       - **Right Click**: Remove the profession
-      - **Shift + Click**: Change the order of the profession (WIP)
+      - **Shift + Left Click**: Change the order of the profession to the left
+      - **Shift + Right Click**: Change the order of the profession to the right
 <br><br>
 - **Back**: Go back to the [Browse Editor](#browse-editor).
   - Shown as: Barrier
@@ -424,13 +428,13 @@ Conditions are a way to restrict the crafting of a recipe. You can add multiple 
 being able to use a profession. Most of the conditions are related to third party plugins that are used as hooks to
 allow for more customization. The following conditions are available:
 
-| Condition Key       | Possible Condition Values      | Belong to (Hooks)                                                                                                  |
-|---------------------|--------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| profession          | Any profession of this plugin  | Natively, Fusion                                                                                                   |
-| fabled              | Classe-IDs of Fabled           | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-magemonkey-studio-formerly-proskillapi.91913/) |
-| mcmmo               | PrimarySkillTypes of mcMMO     | [mcMMO](https://www.spigotmc.org/resources/official-mcmmo-original-author-returns.64348/)                          |
-| jobs                | Levels of Jobs                 | [JobsReborn](https://www.spigotmc.org/resources/jobs-reborn.4216/)                                                 |
-| aura_abilities      | Abilities from AuraSkills      | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
+| Condition Key       | Possible Condition Values     | Belong to (Hooks)                                                                                                  |
+|---------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| professions         | Any profession of this plugin | Natively, Fusion                                                                                                   |
+| fabled              | Class-IDs of Fabled           | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-magemonkey-studio-formerly-proskillapi.91913/) |
+| mcmmo               | PrimarySkillTypes of mcMMO    | [mcMMO](https://www.spigotmc.org/resources/official-mcmmo-original-author-returns.64348/)                          |
+| jobs                | Levels of Jobs                | [JobsReborn](https://www.spigotmc.org/resources/jobs-reborn.4216/)                                                 |
+| aura_abilities      | Abilities from AuraSkills     | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
 | aura_mana_abilities | Mana Abilities from AuraSkills | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
-| aura_skills         | Skills from AuraSkills         | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
-| aura_stats          | Stats from AuraSkills          | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
+| aura_skills         | Skills from AuraSkills        | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
+| aura_stats          | Stats from AuraSkills         | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |

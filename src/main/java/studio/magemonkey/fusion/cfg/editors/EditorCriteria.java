@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.commands;
+package studio.magemonkey.fusion.cfg.editors;
 
 public enum EditorCriteria {
 

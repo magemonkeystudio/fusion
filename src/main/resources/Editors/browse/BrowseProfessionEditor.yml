@@ -55,6 +55,8 @@ icons:
       - '&8--------------------'
       - '&aLeft click &7to configure'
       - '&aRight click &7to remove'
+      - '&aShift + Left click &7to change order to left'
+      - '&aShift + Right click &7to change order to right'
     conditionPrefix: '&7- $<condition>'
     conditionFormatting:
       profession: '&3Profession &2$<condition.name>&7: &a$<condition.amount>'
@@ -125,7 +127,8 @@ subEditor:
       unbreakable: false
       name: '&9Ingredients'
       lore:
-        - '&7Click to configure the ingredients.'
+        - '&7Those are items that are beeing consumed by'
+        - '&7joining the profession.'
         - '&7You will cast commands to add ingredients.'
         - '&8--------------------'
         - '&bList of Ingredients:'

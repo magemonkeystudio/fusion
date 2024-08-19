@@ -27,11 +27,14 @@ icons:
     unbreakable: false
     name: '&9$<category>'
     lore:
-      - '&7Used Icon-Item: &a$<icon.name>'
-      - '$<icon.lore>'
+      - '&7Used Icon-Item: &a$<item>'
+      - '&7Order Number: &a$<order>'
+      - '$<lore>'
       - '&8--------------------'
       - '&aLeft click &7to modify'
       - '&aRight click &7to remove'
+      - '&aShift + Left click &7to change order to left'
+      - '&aShift + Right click &7to change order to right'
     flags: []
     enchants: {}
   back:

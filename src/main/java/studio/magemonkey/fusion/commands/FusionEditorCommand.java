@@ -30,6 +30,7 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.gui.editors.Editor;
@@ -138,6 +139,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Edit_Lore -> addPatternItemLore(browseEditor, args);
                 case Pattern_Edit_Pattern -> updatePatternItem(browseEditor, args);
                 case Pattern_Add_Commands -> addPatternItemCommand(browseEditor, args);
+                case Browse_Profession_Add_Ingredients -> addBrowseIngredient(browseEditor, args);
+                case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
             }
         }
@@ -173,7 +176,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
                 case Browse_Add_Profession:
-                    if(args.length == 1) {
+                    if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(player.getUniqueId(), "professions", args[0]));
                     }
                 case Profession_Edit_Name:
@@ -248,7 +251,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("<command without / >");
 
                     }
-                    if(args.length >= 3) {
+                    if (args.length >= 3) {
                         entries.add("{player}");
                     }
                     break;
@@ -271,40 +274,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             if ("aura_stats".startsWith(args[0].toLowerCase())) entries.add("aura_stats");
                         }
                     } else if (args.length == 2) {
-                        entries.add("<conditionValue>");
-                        switch (args[0].toLowerCase()) {
-                            case "professions":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[1]));
-                                break;
-                            case "fabled":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "fabled", args[1]));
-                                break;
-                            case "mcmmo":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "mcmmo", args[1]));
-                                break;
-                            case "jobs":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "jobs", args[1]));
-                                break;
-                            case "aura_abilities":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_abilities", args[1]));
-                                break;
-                            case "aura_mana_abilities":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_mana_abilities", args[1]));
-                                break;
-                            case "aura_skills":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_skills", args[1]));
-                                break;
-                            case "aura_stats":
-                                entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "aura_stats", args[1]));
-                                break;
-                        }
-                    } else if (args.length == 3) {
-                        entries.add("<level>");
-                        entries.add("1");
-                        entries.add("10");
-                        entries.add("25");
-                        entries.add("50");
-                        entries.add("100");
+                        entries.addAll(TabCacher.getConditionsTabs(args));
                     }
                     break;
                 case Pattern_Edit_Lore:
@@ -313,7 +283,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
             }
-        } else if(editor instanceof BrowseEditor) {
+        } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
             EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
@@ -340,6 +310,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case Pattern_Edit_Pattern:
+                case Browse_Profession_Add_Ingredients:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
                     } else if (args.length == 2) {
@@ -361,9 +332,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     } else if (args.length == 3) {
                         entries.add("<command without / >");
                     }
-                    if(args.length >= 3) {
+                    if (args.length >= 3) {
                         entries.add("{player}");
                     }
+                    break;
+                case Browse_Profession_Add_Conditions:
+                    entries.addAll(TabCacher.getConditionsTabs(args));
                     break;
             }
         }
@@ -496,7 +470,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
 
         if (criteria == EditorCriteria.Profession_Category_Add) {
-            professionEditor.getTable().getCategories().put(categoryName, new Category(Map.of("name", categoryName, "icon", categoryIcon, "order", professionEditor.getTable().getCategories().size())));
+            professionEditor.getTable().getCategories().put(categoryName, new Category(Map.of("name", categoryName, "icon", categoryIcon, "order", professionEditor.getTable().getCategories().size() + 1)));
             MessageUtil.sendMessage("editor.categoryAdded", player, new MessageData("category", categoryName), new MessageData("profession", professionEditor.getTable().getName()));
         } else {
             if (!professionEditor.getTable().getCategories().containsKey(categoryName)) {
@@ -890,6 +864,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
     }
 
+
     private void updateBrowseName(BrowseEditor browseEditor, String[] args) {
         StringBuilder builder = new StringBuilder();
         for (String arg : args) {
@@ -910,7 +885,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             MessageUtil.sendMessage("editor.invalidProfession", player, new MessageData("profession", professionName));
             return;
         }
-        if(browseEditor.getProfessions().contains(professionName)) {
+        if (browseEditor.getProfessions().contains(professionName)) {
             MessageUtil.sendMessage("editor.professionAlreadyExists", player, new MessageData("profession", professionName));
             return;
         }
@@ -921,6 +896,127 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         browseEditor.getProfessionConditions().put(professionName, new ProfessionConditions(professionName, DeserializationWorker.start(conditionsMaps)));
         MessageUtil.sendMessage("editor.addedProfessionToBrowse", player, new MessageData("profession", professionName));
         browseEditor.getBrowseProfessionsEditor().reload(true);
+    }
+
+    private void addBrowseIngredient(BrowseEditor browseEditor, String[] args) {
+        Player player = browseEditor.getPlayer();
+        if (args.length != 2) {
+            MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<item> <amount>"));
+            return;
+        }
+        try {
+            String itemName = args[0];
+            int amount = Integer.parseInt(args[1]);
+            if (!isValidItem(itemName)) {
+                MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", itemName));
+                return;
+            }
+
+            int i = 0;
+            boolean found = false;
+            for (RecipeItem ingredient : browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems()) {
+                if (ingredient.toConfig().toString().split(":")[0].equalsIgnoreCase(itemName)) {
+                    browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems().set(i, RecipeItem.fromConfig(itemName + ":" + amount));
+                    found = true;
+                }
+                i++;
+            }
+            if (!found)
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems().add(RecipeItem.fromConfig(itemName + ":" + amount));
+            browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+        }
+    }
+
+    private void addBrowseConditions(BrowseEditor browseEditor, String[] args) {
+        Player player = browseEditor.getPlayer();
+        if (args.length != 3) {
+            MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
+            return;
+        }
+        String conditionKey = args[0];
+        String conditionValue = args[1];
+        int level = Integer.parseInt(args[2]);
+
+        switch (conditionKey) {
+            case "professions":
+                if (!ProfessionsCfg.getMap().containsKey(conditionValue)) {
+                    MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                    return;
+                }
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getProfessionConditions().put(conditionValue, level);
+                break;
+            case "fabled":
+                if (!Bukkit.getPluginManager().isPluginEnabled("Fabled")) return;
+                if (!Fabled.getClasses().containsKey(conditionValue)) {
+                    MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                    return;
+                }
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getFabledClassConditions().put(conditionValue, level);
+                break;
+            case "mcmmo":
+                if (!Bukkit.getPluginManager().isPluginEnabled("mcMMO")) return;
+                try {
+                    PrimarySkillType skillType = PrimarySkillType.valueOf(conditionValue.toUpperCase());
+                    browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getMcMMOConditions().put(conditionValue, level);
+                } catch (IllegalArgumentException e) {
+                    MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                    return;
+                }
+                break;
+            case "jobs":
+                if (!Bukkit.getPluginManager().isPluginEnabled("Jobs")) return;
+                Optional<Job> job = Jobs.getJobs().stream().filter(_job -> _job.getName().equalsIgnoreCase(conditionValue)).findFirst();
+                if (job.isEmpty()) {
+                    MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                    return;
+                }
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getJobsConditions().put(conditionValue, level);
+                break;
+            case "aura_abilities":
+            case "aura_mana_abilities":
+            case "aura_skills":
+            case "aura_stats":
+                if (!Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || !Bukkit.getPluginManager().isPluginEnabled("AureliumSkills"))
+                    return;
+                switch (conditionKey) {
+                    case "aura_abilities":
+                        if (AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(conditionValue)) == null) {
+                            MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                            return;
+                        }
+                        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getAuraAbilityConditions().put(conditionValue, level);
+                        break;
+                    case "aura_mana_abilities":
+                        if (AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(conditionValue)) == null) {
+                            MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                            return;
+                        }
+                        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getAuraManaAbilityConditions().put(conditionValue, level);
+                        break;
+                    case "aura_skills":
+                        if (AuraSkillsApi.get().getGlobalRegistry().getSkill(NamespacedId.fromString(conditionValue)) == null) {
+                            MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                            return;
+                        }
+                        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getAuraSkillsConditions().put(conditionValue, level);
+                        break;
+                    case "aura_stats":
+                        if (AuraSkillsApi.get().getGlobalRegistry().getStat(NamespacedId.fromString(conditionValue)) == null) {
+                            MessageUtil.sendMessage("editor.invalidConditionValue", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+                            return;
+                        }
+                        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getAuraStatsConditions().put(conditionValue, level);
+                        break;
+                }
+            default:
+                MessageUtil.sendMessage("editor.invalidConditionKey", player, new MessageData("key", conditionKey));
+                return;
+        }
+        MessageUtil.sendMessage("editor.conditionAdded", player, new MessageData("key", conditionKey), new MessageData("value", conditionValue), new MessageData("level", args[2]));
+        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
     }
 
     public static void removeEditorCriteria(UUID uuid) {

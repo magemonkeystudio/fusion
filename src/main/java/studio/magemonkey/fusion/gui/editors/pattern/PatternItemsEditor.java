@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
@@ -161,11 +162,14 @@ public class PatternItemsEditor extends Editor implements Listener {
                             char c = slots.get(event.getSlot());
                             switch (c) {
                                 case 'o', '-', '<', '>', '{', '}', 'f' -> {
-                                    // TODO Translation
-                                    player.sendMessage("§cYou can't remove this item. Its predefined.");
+                                    MessageUtil.sendMessage("editor.patternItemNotRemovable", player);
                                     return;
                                 }
                                 default -> {
+                                    if(pattern.isUsed(c)) {
+                                        MessageUtil.sendMessage("editor.patternItemUsed", player);
+                                        return;
+                                    }
                                     clipboardUndo.add(Map.entry(true, Map.entry(c, pattern.getItems().get(c))));
                                     pattern.getItems().remove(c);
                                     hasChanges = true;
