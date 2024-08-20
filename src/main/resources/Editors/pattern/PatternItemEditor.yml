@@ -130,6 +130,9 @@ subEditor:
       name: '&9Glowing'
       lore:
         - '&7Current: &a$<glowing>'
+        - 'Puts Unbreaking I on the item and'
+        - 'hides the enchantments.'
+        - '&8--------------------'
         - '&7Click to toggle glowing.'
       flags: [ ]
       enchants: { }
@@ -151,6 +154,68 @@ subEditor:
       flags: [ ]
       enchants: { }
       commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
+    durability:
+      material: IRON_SWORD
+      amount: 1
+      durability: '$<durability>'
+      unbreakable: false
+      name: '&9Durability'
+      lore:
+        - '&7Current: &a$<durability>'
+        - '&8--------------------'
+        - '&aLeft click &7to increase durability.'
+        - '&aRight click &7to decrease durability.'
+        - '&aShift click &7to change durability by 25.'
+      flags: [ ]
+      enchants: { }
+    unbreakable:
+        material: OBSIDIAN
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Unbreakable'
+        lore:
+            - '&7Current: &a$<unbreakable>'
+            - '&8--------------------'
+            - '&aClick to toggle unbreakable.'
+        flags: [ ]
+        enchants: { }
+    enchants:
+        material: ENCHANTED_BOOK
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Enchants'
+        lore:
+            - '&7Click to configure the enchants.'
+            - '&7You will cast commands to add enchants.'
+            - '&8--------------------'
+            - '&bList of Enchants:'
+            - '$<enchants>'
+            - '&8--------------------'
+            - '&aLeft click &7to add an enchant.'
+            - '&aRight click &7to remove last enchant.'
+        flags: [ ]
+        enchants: { }
+        enchantPrefix: '&7- &a$<enchant> &7(&3$<level>&7)'
+    flags:
+        material: WHITE_BANNER
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Flags'
+        lore:
+            - '&7Click to configure the flags.'
+            - '&7You will cast commands to add flags.'
+            - '&8--------------------'
+            - '&bList of Flags:'
+            - '$<flags>'
+            - '&8--------------------'
+            - '&aLeft click &7to add a flag.'
+            - '&aRight click &7to remove last flag.'
+        flags: [ ]
+        enchants: { }
+        flagPrefix: '&7- &a$<flag>'
     back:
       material: BARRIER
       amount: 1

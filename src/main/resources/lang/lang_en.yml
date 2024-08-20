@@ -13,22 +13,25 @@ fusion:
       'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
       'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"
     exp:
-      'true': '&6- &eExperience: &7(&a$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp.'
-      'false': '&6- &eExperience: &7(&c$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp.'
+      'true': "&6- &eExperience: &7(&a$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
+      'false': "&6- &eExperience: &7(&c$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
     professionLevel:
-      'true': '&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.professionLevel>&7)'
-      'false': '&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.professionLevel>&7)'
+      'true': "&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.professionLevel>&7)"
+      'false': "&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.professionLevel>&7)"
     mastery:
-      'true': '&6- &eMastery: &7(Unlocked)'
-      'false': '&6- &eMastery: &8(locked)'
+      'true': "&6- &eMastery: &7(Unlocked)"
+      'false': "&6- &eMastery: &8(locked)"
     condition:
-      'true': '&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)'
-      'false': '&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)'
+      'true': "&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)"
+      'false': "&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)"
     canCraft:
-      'true': '&aYou can craft this item.'
-      'false': '&cYou can''t craft this item.'
+      'true': "&aYou can craft this item."
+      'false': "&cYou can''t craft this item."
+    canJoin:
+      'true': "&aYou can join this profession."
+      'false': "&cYou can''t join this profession."
     rank:
-      epic: '&cEpic rank needed to craft this item!'
+      epic: "&cEpic rank needed to craft this item!"
   browse:
     alreadyUnlocked: "&cYou have already unlocked this profession!"
     noFundsMoney: "&cYou need &3$$<costs.money> to buy this!"
@@ -101,6 +104,8 @@ editor:
   invalidNumber: "&cYou tried to parse an invalid number: &3$<number>"
   invalidProfession: "&cYou tried to parse an invalid profession: &3$<profession>"
   invalidCommand: "&cYou tried to parse an invalid command: &3$<command>"
+  invalidEnchantment: "&cYou tried to parse an invalid enchantment: &3$<enchantment>"
+  invalidFlag: "&cYou tried to parse an invalid flag: &3$<flag>"
   needMinimumOne: "&cYou need to have at least one item here."
 
   defaultCategoryPattern: "&cNo category pattern found. Using default pattern as reference."
@@ -108,7 +113,7 @@ editor:
   categoryNotFound: "&cThe category &3$<category> &cdoes not exist."
   categoryAdded: "&aYou added the category &3$<category> &ato the profession &3$<profession>"
   categoryEdited: "&aYou edited the category &3$<category> &ain the profession &3$<profession>"
-  recipeAlreadyExists: "&cThe recipe &3$<recipe> &calready exists."
+
   recipeRenamed: "&aYou renamed the recipe &3$<oldName> &ato &3$<newName>"
   recipeAdded: "&aYou created the recipe &3$<recipe> &awith result &3$<result>"
   resultEdited: "&aYou edited the recipe &3$<recipe> &awith result &3$<result>"
@@ -119,7 +124,6 @@ editor:
   createdNewProfession: "&aYou created a new profession: &3$<profession>"
   copyProfession: "&aYou copied profession from &3$<oldProfession> &ato &3$<newProfession>"
   editProfession: "&aYou edit the profession &3$<profession>"
-  professionAlreadyExists: "&cThe profession &3$<profession> &calready exists and cannot be overridden by other profession."
   patternItemRenamed: "&aYou renamed the pattern item &3$<oldName> &ato &3$<newName>"
   patternItemLoreAdded: "&aYou added a new lore line to the pattern item"
   patternItemUpdated: "&aYou updated the pattern item &3$<item> with amount &3$<amount>"
@@ -128,5 +132,9 @@ editor:
   addedProfessionToBrowse: "&aYou added the profession &3$<profession> &ato the browser"
   patternItemUsed: "§cThis item is used in the pattern. You can't remove it util changed."
   patternItemPredefined: "§cYou can't remove this item. Its predefined."
+
+  recipeAlreadyExists: "&cThe recipe &3$<recipe> &calready exists."
+  professionAlreadyExists: "&cThe profession &3$<profession> &calready exists and cannot be overridden by other profession."
+  flagAlreadyExists: "&cThe flag &3$<flag> &calready exists."
 
 
