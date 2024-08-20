@@ -166,15 +166,17 @@ Here you can configure each pattern Item individually. The gui provides you the 
     - Usage:
         - **Left Click**: Add a new lore line
         - **Right Click**: Remove the last lore line
-          <br><br>
+<br><br>
 - **Icon**: The icon of the pattern item. This will be shown in the pattern gui. You will be forwarded to a click
   message
   in the chat in order to type in a new icon item for the item. (`/fusion-editor <icon> <amount>`)
     - Shown as: Oak Sign
     - Usage: Click on the item to type in a new icon and amount.
-      <br><br>
-- **Glowing**: TODO UNFINISHED YET (More details incoming instead)
-  <br><br>
+<br><br>
+- **Glowing**: Make the Item glow or not. You can toggle between `true` and `false`. This setting will automatically put the enchantment "unbreaking 1" and a flag to hide enchants.
+    - Shown as: Glowstone Dust
+    - Usage: Click on the item to toggle between `true` and `false`
+<br><br>
 - **Commands**: The commands that will be executed when the pattern item is clicked. You will be forwarded to a click
   message in the chat in order to type in a new command for the
   item. (`/fusion-editor <caster> <delay> <command without />`)
@@ -182,6 +184,37 @@ Here you can configure each pattern Item individually. The gui provides you the 
     - Usage:
         - **Left Click**: Add a new command
         - **Right Click**: Remove the last command
+<br><br>
+- **Durability**: The durability of the pattern item. You can increase or decrease the amount inside of the gui itself.
+    - Shown as: Anvil
+    - Usage:
+        - Left Click: Increase the durability by 1
+        - Right Click: Decrease the durability by 1
+        - Shift + Click: Manage each by 25
+<br><br>
+- **Unbreakable**: Make the item unbreakable or not. You can toggle between `true` and `false`.
+    - Shown as: Obsidian
+    - Usage: Click on the item to toggle between `true` and `false`
+<br><br>
+- **Enchants**: The enchants that will be applied to the pattern item. You will be forwarded to a click message in the
+  chat in order to type in a new enchant for the item. (`/fusion-editor <enchant> [level]`) providing no level leads to 
+  a default level of 1.
+    - Shown as: Enchanted Book
+    - Usage:
+        - **Left Click**: Add a new enchant
+        - **Right Click**: Remove the last enchant
+<br><br>
+- **Flags**: The flags that will be applied to the pattern item. You will be forwarded to a click message in the chat in
+  order to type in a new flag for the item. (`/fusion-editor <flag>`)
+    - Shown as: Banner
+    - Usage:
+        - **Left Click**: Add a new flag
+        - **Right Click**: Remove the last flag
+<br><br>
+- **Back**: Go back to the [Pattern Items Editor](#pattern-items-editor).
+    - Shown as: Barrier
+    - Usage: Click to go back to the pattern items editor.
+
 
 #### Pattern Editor
 ![Pattern Item Editor GUI](../images/pattern_gui.png)<br>

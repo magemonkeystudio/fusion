@@ -155,9 +155,9 @@ subEditor:
       enchants: { }
       commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
     durability:
-      material: IRON_SWORD
+      material: ANVIL
       amount: 1
-      durability: '$<durability>'
+      durability: 0
       unbreakable: false
       name: '&9Durability'
       lore:
