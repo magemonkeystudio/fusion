@@ -287,6 +287,7 @@ public class ProfessionConditions implements ConfigurationSerializable  {
             return false;
         }
 
+
         if (expCost > 0 && ExperienceManager.getTotalExperience(_player) < expCost) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             MessageUtil.sendMessage("fusion.browse.noFundsExperience", _player, data);

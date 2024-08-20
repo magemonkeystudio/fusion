@@ -10,6 +10,8 @@ import dev.aurelium.auraskills.api.skill.Skill;
 import dev.aurelium.auraskills.api.stat.Stat;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import studio.magemonkey.divinity.api.DivinityAPI;
 import studio.magemonkey.fabled.Fabled;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -140,19 +142,18 @@ public class TabCacher {
         List<String> entries = new ArrayList<>();
         if (args.length == 1) {
             entries.add("<conditionKey>");
-            if ("professions".startsWith(args[0].toLowerCase())) entries.add("professions");
-            if (Bukkit.getPluginManager().isPluginEnabled("Fabled") && "fabled".startsWith(args[0].toLowerCase()))
+            entries.add("professions");
+            if (Bukkit.getPluginManager().isPluginEnabled("Fabled"))
                 entries.add("fabled");
-            if (Bukkit.getPluginManager().isPluginEnabled("mcMMO") && "mcmmo".startsWith(args[0].toLowerCase()))
+            if (Bukkit.getPluginManager().isPluginEnabled("mcMMO"))
                 entries.add("mcmmo");
-            if (Bukkit.getPluginManager().isPluginEnabled("Jobs") && "jobs".startsWith(args[0].toLowerCase()))
+            if (Bukkit.getPluginManager().isPluginEnabled("Jobs"))
                 entries.add("jobs");
             if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager().isPluginEnabled("AureliumSkills")) {
-                if ("aura_abilities".startsWith(args[0].toLowerCase())) entries.add("aura_abilities");
-                if ("aura_mana_abilities".startsWith(args[0].toLowerCase()))
-                    entries.add("aura_mana_abilities");
-                if ("aura_skills".startsWith(args[0].toLowerCase())) entries.add("aura_skills");
-                if ("aura_stats".startsWith(args[0].toLowerCase())) entries.add("aura_stats");
+                entries.add("aura_abilities");
+                entries.add("aura_mana_abilities");
+                entries.add("aura_skills");
+                entries.add("aura_stats");
             }
         } else if (args.length == 2) {
             entries.add("<conditionValue>");
@@ -189,6 +190,36 @@ public class TabCacher {
             entries.add("25");
             entries.add("50");
             entries.add("100");
+        }
+        return entries;
+    }
+
+    public static List<String> getEnchantmentsTab(String[] args) {
+        List<String> entries = new ArrayList<>();
+        if (args.length == 1) {
+            entries.add("<enchantment>");
+            // TODO change from deprecation once existent
+            for (Enchantment enchantment : Enchantment.values()) {
+                entries.add(enchantment.getKey().getKey().toLowerCase());
+            }
+        } else if (args.length == 2) {
+            entries.add("<level>");
+            entries.add("1");
+            entries.add("2");
+            entries.add("3");
+            entries.add("4");
+            entries.add("5");
+        }
+        return entries;
+    }
+
+    public static List<String> getFlagsTab(String[] args) {
+        List<String> entries = new ArrayList<>();
+        if (args.length == 1) {
+            entries.add("<flag>");
+            for (ItemFlag flag : ItemFlag.values()) {
+                entries.add(flag.name().toLowerCase());
+            }
         }
         return entries;
     }

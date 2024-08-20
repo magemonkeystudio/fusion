@@ -9,11 +9,14 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
@@ -121,6 +124,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Edit_Lore -> addPatternItemLore(professionEditor, args);
                 case Pattern_Edit_Pattern -> updatePatternItem(professionEditor, args);
                 case Pattern_Add_Commands -> addPatternItemCommand(professionEditor, args);
+                case Pattern_Add_Enchants -> addPatternEnchants(professionEditor, args);
+                case Pattern_Add_Flags -> addPatternFlags(professionEditor, args);
 
                 case Profession_Recipe_Edit_Name -> updateRecipeName(professionEditor, args);
                 case Profession_Recipe_Add_Commands -> addRecipeCommand(professionEditor, args);
@@ -139,6 +144,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Edit_Lore -> addPatternItemLore(browseEditor, args);
                 case Pattern_Edit_Pattern -> updatePatternItem(browseEditor, args);
                 case Pattern_Add_Commands -> addPatternItemCommand(browseEditor, args);
+                case Pattern_Add_Enchants -> addPatternEnchants(browseEditor, args);
+                case Pattern_Add_Flags -> addPatternFlags(browseEditor, args);
                 case Browse_Profession_Add_Ingredients -> addBrowseIngredient(browseEditor, args);
                 case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
@@ -175,13 +182,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
             EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
-                case Browse_Add_Profession:
-                    if (args.length == 1) {
-                        entries.addAll(TabCacher.getTabs(player.getUniqueId(), "professions", args[0]));
-                    }
                 case Profession_Edit_Name:
                 case Pattern_Edit_Name:
-                case Browse_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newName>");
                         entries.add(professionEditor.getTable().getInventoryName());
@@ -221,7 +223,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Edit_ResultItem:
                 case Profession_Recipe_Add_Ingredients:
                 case Profession_Recipe_Edit_Ingredients:
-                case Browse_Profession_Add_Ingredients:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
                     } else if (args.length == 2) {
@@ -257,30 +258,18 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     break;
                 case Profession_Recipe_Add_Conditions:
                 case Browse_Profession_Add_Conditions:
-                    if (args.length == 1) {
-                        entries.add("<conditionKey>");
-                        if ("professions".startsWith(args[0].toLowerCase())) entries.add("professions");
-                        if (Bukkit.getPluginManager().isPluginEnabled("Fabled") && "fabled".startsWith(args[0].toLowerCase()))
-                            entries.add("fabled");
-                        if (Bukkit.getPluginManager().isPluginEnabled("mcMMO") && "mcmmo".startsWith(args[0].toLowerCase()))
-                            entries.add("mcmmo");
-                        if (Bukkit.getPluginManager().isPluginEnabled("Jobs") && "jobs".startsWith(args[0].toLowerCase()))
-                            entries.add("jobs");
-                        if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager().isPluginEnabled("AureliumSkills")) {
-                            if ("aura_abilities".startsWith(args[0].toLowerCase())) entries.add("aura_abilities");
-                            if ("aura_mana_abilities".startsWith(args[0].toLowerCase()))
-                                entries.add("aura_mana_abilities");
-                            if ("aura_skills".startsWith(args[0].toLowerCase())) entries.add("aura_skills");
-                            if ("aura_stats".startsWith(args[0].toLowerCase())) entries.add("aura_stats");
-                        }
-                    } else if (args.length == 2) {
-                        entries.addAll(TabCacher.getConditionsTabs(args));
-                    }
+                    entries.addAll(TabCacher.getConditionsTabs(args));
                     break;
                 case Pattern_Edit_Lore:
                     if (args.length == 1) {
                         entries.add("<lore>");
                     }
+                    break;
+                case Pattern_Add_Enchants:
+                    entries.addAll(TabCacher.getEnchantmentsTab(args));
+                    break;
+                case Pattern_Add_Flags:
+                    entries.addAll(TabCacher.getFlagsTab(args));
                     break;
             }
         } else if (editor instanceof BrowseEditor) {
@@ -339,6 +328,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Browse_Profession_Add_Conditions:
                     entries.addAll(TabCacher.getConditionsTabs(args));
                     break;
+                case Pattern_Add_Enchants:
+                    entries.addAll(TabCacher.getEnchantmentsTab(args));
+                    break;
+                case Pattern_Add_Flags:
+                    entries.addAll(TabCacher.getFlagsTab(args));
+                    break;
             }
         }
         return entries;
@@ -368,21 +363,31 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             case Browse_Edit_Name:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<newName>"));
                 break;
-            case Profession_Edit_Icon:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<icon>"));
+            case Profession_Recipe_Add_Ingredients:
+            case Profession_Recipe_Edit_Ingredients:
+            case Browse_Profession_Add_Ingredients:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<ingredient> <amount>"));
                 break;
             case Profession_Category_Add:
             case Profession_Category_Edit:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<categoryName> <categoryIcon>"));
+                break;
+            case Profession_Recipe_Add_Conditions:
+            case Browse_Profession_Add_Conditions:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
+                break;
+            case Pattern_Add_Commands:
+            case Profession_Recipe_Add_Commands:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<caster> <delay> <command without />"));
+                break;
+            case Profession_Edit_Icon:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<icon>"));
                 break;
             case Pattern_Edit_Pattern:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<item> <amount>"));
                 break;
             case Pattern_Edit_Lore:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<lore>"));
-                break;
-            case Pattern_Add_Commands:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<caster> <delay> <command without />"));
                 break;
             case Profession_Recipe_Add:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<recipeName> <resultItem> <amount>"));
@@ -393,20 +398,14 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             case Profession_Recipe_Edit_Name:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<newRecipeName>"));
                 break;
-            case Profession_Recipe_Add_Ingredients:
-            case Profession_Recipe_Edit_Ingredients:
-            case Browse_Profession_Add_Ingredients:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<ingredient> <amount>"));
-                break;
-            case Profession_Recipe_Add_Commands:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<caster> <delay> <command without />"));
-                break;
-            case Profession_Recipe_Add_Conditions:
-            case Browse_Profession_Add_Conditions:
-                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
-                break;
             case Browse_Add_Profession:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<professionName>"));
+                break;
+            case Pattern_Add_Enchants:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<enchantment> [level]"));
+                break;
+            case Pattern_Add_Flags:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<flag>"));
                 break;
         }
         sendSuggestMessage(player, suggestCommand);
@@ -639,6 +638,100 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             } catch (Exception e) {
                 e.printStackTrace();
                 MessageUtil.sendMessage("editor.invalidCommand", player, new MessageData("command", args[0] + " " + args[1] + " " + commandBuilder));
+            }
+        }
+    }
+
+    private void addPatternEnchants(Editor editor, String[] args) {
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            Player player = professionEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<enchantment> [level]"));
+                return;
+            }
+
+            int level = 1;
+            if (args.length >= 2) {
+                try {
+                    level = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+                    return;
+                }
+            }
+
+            Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase()));
+            if (enchantment == null) {
+                MessageUtil.sendMessage("editor.invalidEnchantment", player, new MessageData("enchantment", args[0]));
+                return;
+            }
+            professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().enchant(enchantment, level);
+            professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            Player player = browseEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<enchantment> [level]"));
+                return;
+            }
+
+            int level = 1;
+            if (args.length >= 2) {
+                try {
+                    level = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+                    return;
+                }
+            }
+
+            Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase()));
+            if (enchantment == null) {
+                MessageUtil.sendMessage("editor.invalidEnchantment", player, new MessageData("enchantment", args[0]));
+                return;
+            }
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().enchant(enchantment, level);
+            browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+        }
+    }
+
+    public void addPatternFlags(Editor editor, String[] args) {
+        if (editor instanceof ProfessionEditor) {
+            ProfessionEditor professionEditor = (ProfessionEditor) editor;
+            Player player = professionEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<flag>"));
+                return;
+            }
+            try {
+                ItemFlag flag = ItemFlag.valueOf(args[0].toUpperCase());
+                if(professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
+                    MessageUtil.sendMessage("editor.flagAlreadyExists", player, new MessageData("flag", flag.name()));
+                    return;
+                }
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().flag(flag);
+                professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+            } catch (Exception e) {
+                MessageUtil.sendMessage("editor.invalidFlag", player, new MessageData("flag", args[0]));
+            }
+        } else if (editor instanceof BrowseEditor) {
+            BrowseEditor browseEditor = (BrowseEditor) editor;
+            Player player = browseEditor.getPlayer();
+            if (args.length < 1) {
+                MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<flag>"));
+                return;
+            }
+            try {
+                ItemFlag flag = ItemFlag.valueOf(args[0].toUpperCase());
+                if(browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
+                    MessageUtil.sendMessage("editor.flagAlreadyExists", player, new MessageData("flag", flag.name()));
+                    return;
+                }
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().flag(flag);
+                browseEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
+            } catch (Exception e) {
+                MessageUtil.sendMessage("editor.invalidFlag", player, new MessageData("flag", args[0]));
             }
         }
     }

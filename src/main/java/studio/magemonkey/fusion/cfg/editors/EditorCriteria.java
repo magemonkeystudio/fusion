@@ -15,6 +15,8 @@ public enum EditorCriteria {
     Pattern_Edit_Lore,
     Pattern_Edit_Pattern,
     Pattern_Add_Commands,
+    Pattern_Add_Enchants,
+    Pattern_Add_Flags,
 
     // Recipes
     Profession_Recipe_Add,

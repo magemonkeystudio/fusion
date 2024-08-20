@@ -46,6 +46,10 @@ public class BrowseConfig implements ConfigurationSerializable {
     @Setter
     private static InventoryPattern browsePattern;
 
+    @Getter
+    @Setter
+    private static boolean loreConditionsEnabled = true;
+
     private BrowseConfig() {
         load();
     }
