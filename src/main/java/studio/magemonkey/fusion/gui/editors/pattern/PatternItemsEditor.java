@@ -162,7 +162,7 @@ public class PatternItemsEditor extends Editor implements Listener {
                             char c = slots.get(event.getSlot());
                             switch (c) {
                                 case 'o', '-', '<', '>', '{', '}', 'f' -> {
-                                    MessageUtil.sendMessage("editor.patternItemNotRemovable", player);
+                                    MessageUtil.sendMessage("editor.patternItemPredefined", player);
                                     return;
                                 }
                                 default -> {

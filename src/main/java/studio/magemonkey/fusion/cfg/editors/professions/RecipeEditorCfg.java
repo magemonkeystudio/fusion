@@ -33,8 +33,8 @@ public class RecipeEditorCfg {
 
     public Map<String, ItemStack> getIcons(CraftingTable table) {
         Map<String, ItemStack> icons = new HashMap<>();
-        for(String icon : config.getConfigurationSection("icons").getKeys(false)) {
-            if(icon.equalsIgnoreCase("recipeItem")) continue;
+        for (String icon : config.getConfigurationSection("icons").getKeys(false)) {
+            if (icon.equalsIgnoreCase("recipeItem")) continue;
             icons.put(icon, getIcon(table, icon));
         }
         return icons;
@@ -47,7 +47,7 @@ public class RecipeEditorCfg {
         boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
         String name = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
         List<String> lore = config.getStringList("icons." + icon + ".lore");
-        for(int i = 0; i < lore.size(); i++) {
+        for (int i = 0; i < lore.size(); i++) {
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), table.getInventoryName())
                     .replace(MessageUtil.getReplacement("profession"), table.getName())
@@ -74,20 +74,23 @@ public class RecipeEditorCfg {
         String name = config.getString("icons.recipeItem.name", "&9$<recipe.name>").replace(MessageUtil.getReplacement("recipe.name"), recipe.getName());
         List<String> lore = config.getStringList("icons.recipeItem.lore");
 
-        for(int i = 0; i < lore.size(); i++) {
-            if(lore.get(i).contains(MessageUtil.getReplacement("recipe.lore"))) {
+        for (int i = 0; i < lore.size(); i++) {
+            if (lore.get(i).contains(MessageUtil.getReplacement("recipe.lore"))) {
                 lore.remove(i);
-                if(result == null || result.getItemMeta() == null || result.getItemMeta().getLore() == null) continue;
+                if (result == null || result.getItemMeta() == null || result.getItemMeta().getLore() == null) continue;
                 int newLines = 1;
-                for(String line : result.getItemMeta().getLore()) {
+                for (String line : result.getItemMeta().getLore()) {
                     lore.add(i - 1 + newLines, ChatUT.hexString(line));
                     newLines++;
                 }
                 i += newLines;
                 continue;
             }
-            lore.set(i, ChatUT.hexString(lore.get(i).replace(MessageUtil.getReplacement("recipe.result"),
-                    (result != null && !result.getType().isAir()) && result.hasItemMeta() ? result.getItemMeta().getDisplayName() : result.getType().name())));
+            lore.set(i, ChatUT.hexString(lore.get(i)
+                    .replace(MessageUtil.getReplacement("recipe.result"),
+                            (result != null && !result.getType().isAir()) && result.hasItemMeta() ? result.getItemMeta().getDisplayName() : result.getType().name()))
+                    .replace(MessageUtil.getReplacement("conditionsrank"), String.valueOf(recipe.getConditions().getRank()))
+            );
         }
 
         return ItemBuilder.newItem(result)
@@ -105,7 +108,7 @@ public class RecipeEditorCfg {
 
     public Map<String, ItemStack> getSubIcons(Recipe recipe) {
         Map<String, ItemStack> icons = new HashMap<>();
-        for(String icon : config.getConfigurationSection("subEditor.icons").getKeys(false)) {
+        for (String icon : config.getConfigurationSection("subEditor.icons").getKeys(false)) {
             icons.put(icon, getSubIcon(recipe, icon));
         }
         return icons;
@@ -123,21 +126,21 @@ public class RecipeEditorCfg {
 
         ProfessionConditions conditions = recipe.getConditions();
 
-        for(int i = 0; i < lore.size(); i++) {
-            if(lore.get(i).contains(MessageUtil.getReplacement("result.lore"))) {
+        for (int i = 0; i < lore.size(); i++) {
+            if (lore.get(i).contains(MessageUtil.getReplacement("result.lore"))) {
                 lore.remove(i);
-                if(result.getItemMeta() == null || result.getItemMeta().getLore() == null) continue;
+                if (result.getItemMeta() == null || result.getItemMeta().getLore() == null) continue;
                 int newLines = 1;
-                for(String line : result.getItemMeta().getLore()) {
+                for (String line : result.getItemMeta().getLore()) {
                     lore.add(i - 1 + newLines, ChatUT.hexString(line));
                     newLines++;
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("commands"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("commands"))) {
                 lore.remove(i);
                 int newLines = 1;
-                for(DelayedCommand line : recipe.getResults().getCommands()) {
+                for (DelayedCommand line : recipe.getResults().getCommands()) {
                     lore.add(i - 1 + newLines, config.getString("subEditor.icons.commands.commandPrefix", "&7- &a$<command>")
                             .replace(MessageUtil.getReplacement("command"), line.getCmd())
                             .replace(MessageUtil.getReplacement("delay"), String.valueOf(line.getDelay()))
@@ -147,10 +150,10 @@ public class RecipeEditorCfg {
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
                 lore.remove(i);
                 int newLines = 1;
-                for(RecipeItem item : recipe.getConditions().getRequiredItems()) {
+                for (RecipeItem item : recipe.getConditions().getRequiredItems()) {
                     ItemStack patternItem = item.getItemStack();
                     String itemName = patternItem.hasItemMeta() ? patternItem.getItemMeta().getDisplayName() : patternItem.getType().name();
                     lore.add(i - 1 + newLines, config.getString("subEditor.icons.ingredients.ingredientPrefix", "&7- &2$<ingredient.amount>x &a$<ingredient.name>")
@@ -160,12 +163,12 @@ public class RecipeEditorCfg {
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("conditions"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("conditions"))) {
                 // TODO Full Translation of Conditions
                 lore.remove(i);
                 int newLines = 1;
-                for(Map.Entry<String, Map<String, Integer>> entry : conditions.getFullConditions().entrySet()) {
-                    for(Map.Entry<String, Integer> condition : entry.getValue().entrySet()) {
+                for (Map.Entry<String, Map<String, Integer>> entry : conditions.getFullConditions().entrySet()) {
+                    for (Map.Entry<String, Integer> condition : entry.getValue().entrySet()) {
                         lore.add(i - 1 + newLines, config.getString("subEditor.icons.conditions.conditionPrefix", "&7- &a$<condition>")
                                 .replace(MessageUtil.getReplacement("condition"), getConditionFormat(entry.getKey(), condition.getKey(), condition.getValue())));
                         newLines++;
@@ -185,6 +188,7 @@ public class RecipeEditorCfg {
                     .replace(MessageUtil.getReplacement("craftingTime"), String.valueOf(recipe.getCraftingTime()))
                     .replace(MessageUtil.getReplacement("conditions.professionLevel"), String.valueOf(recipe.getConditions().getProfessionLevel()))
                     .replace(MessageUtil.getReplacement("conditions.mastery"), String.valueOf(recipe.getConditions().isMastery()))
+                    .replace(MessageUtil.getReplacement("conditionsrank"), String.valueOf(recipe.getConditions().getRank()))
                     .replace(MessageUtil.getReplacement("category"), recipe.getCategory() == null ? "master" : recipe.getCategory())));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");

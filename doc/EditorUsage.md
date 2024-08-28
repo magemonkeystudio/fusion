@@ -241,8 +241,8 @@ Here you will be able to manage the categories of your profession. The gui provi
     - Usage:
         - **Left Click**: Change the name and icon of the category
         - **Right Click**: Remove the category
-      - **Shift + Left Click**: Change the order of the category to the left
-      - **Shift + Right Click**: Change the order of the category to the right
+        - **Shift + Left Click**: Change the order of the category to the left
+        - **Shift + Right Click**: Change the order of the category to the right
 ### Using Recipes Editor
 #### Recipes Editor
 ![Recipes Editor GUI](../images/recipes_gui.png)<br>
@@ -361,7 +361,12 @@ following functionalities:
   Enabling means you need to have mastered the profession before crafting.
     - Shown as: Diamond
     - Usage: Click on the item to toggle between `true` and `false`
-      <br><br>
+<br><br>
+- **Rank**: The rank that is required to join the profession. You will be forwarded to a click message in the chat in
+  order to type in a new rank for the profession. (`/fusion-editor <rank>`)
+    - Shown as: Emerald
+    - Usage: Click on the item to type in a new rank.
+<br><br>
 - **Conditions**: The conditions that are required to craft the recipe. You will be forwarded to a click message in the
   chat in order to type in a new condition for the recipe. (`/fusion-editor <conditionKey> <conditionValue> <level>`).
   The specific conditions that are possible will be listed under [Conditions](#conditions).
@@ -432,6 +437,11 @@ Here you can configure each profession-icon individually. The gui provides you t
     - Usage:
         - **Left Click**: Add a new ingredient
         - **Right Click**: Remove the last ingredient
+<br><br>
+- **Rank**: The rank that is required to join the profession. You will be forwarded to a click message in the chat in
+  order to type in a new rank for the profession. (`/fusion-editor <rank>`)
+    - Shown as: Emerald
+    - Usage: Click on the item to type in a new rank.
 - **Conditions**: The conditions that are required to join the profession. You will be forwarded to a click message in the
   chat in order to type in a new condition for the profession. (`/fusion-editor <conditionKey> <conditionValue> <level>`).
   The specific conditions that are possible will be listed under [Conditions](#conditions).
@@ -468,6 +478,6 @@ allow for more customization. The following conditions are available:
 | mcmmo               | PrimarySkillTypes of mcMMO    | [mcMMO](https://www.spigotmc.org/resources/official-mcmmo-original-author-returns.64348/)                          |
 | jobs                | Levels of Jobs                | [JobsReborn](https://www.spigotmc.org/resources/jobs-reborn.4216/)                                                 |
 | aura_abilities      | Abilities from AuraSkills     | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
-| aura_mana_abilities | Mana Abilities from AuraSkills | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
+| aura_mana_abilities | Mana Abilities from AuraSkills| [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
 | aura_skills         | Skills from AuraSkills        | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |
 | aura_stats          | Stats from AuraSkills         | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |

@@ -14,6 +14,7 @@ import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,20 @@ public class BrowseProfessionCfg {
         List<String> lore = config.getStringList("icons.professionItem.lore");
 
         for(int i = 0; i < lore.size(); i++) {
+            if(lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
+                lore.remove(i);
+                int newLines = 1;
+                for(RecipeItem item : conditions.getRequiredItems()) {
+                    ItemStack patternItem = item.getItemStack();
+                    String itemName = Utils.getItemName(patternItem);
+                    lore.add(i - 1 + newLines, config.getString("icons.professionItem.ingredientPrefix", "&7- &2$<ingredient.amount>x &a$<ingredient.name>")
+                            .replace(MessageUtil.getReplacement("ingredient.name"), itemName)
+                            .replace(MessageUtil.getReplacement("ingredient.amount"), String.valueOf(item.getItemStack().getAmount())));
+                    newLines++;
+                }
+                i += newLines;
+                continue;
+            }
             if(lore.get(i).contains(MessageUtil.getReplacement("conditions"))) {
                 // TODO Full Translation of Conditions
                 lore.remove(i);
@@ -93,6 +108,7 @@ public class BrowseProfessionCfg {
                     .replace(MessageUtil.getReplacement("name"), ProfessionsCfg.getMap().get(conditions.getProfession()).getInventoryName())
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.exp"), String.valueOf(conditions.getExpCost()))
+                    .replace(MessageUtil.getReplacement("conditions.rank"), String.valueOf(conditions.getRank()))
             ));
         }
 
@@ -131,6 +147,20 @@ public class BrowseProfessionCfg {
         String name = config.getString("subEditor.icons." + icon + ".name", "&cInvalid Item: &4" + icon);
         List<String> lore = config.getStringList("subEditor.icons." + icon + ".lore");
         for(int i = 0; i < lore.size(); i++) {
+            if(lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
+                lore.remove(i);
+                int newLines = 1;
+                for(RecipeItem item : conditions.getRequiredItems()) {
+                    ItemStack patternItem = item.getItemStack();
+                    String itemName = Utils.getItemName(patternItem);
+                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.ingredients.ingredientPrefix", "&7- &2$<ingredient.amount>x &a$<ingredient.name>")
+                            .replace(MessageUtil.getReplacement("ingredient.name"), itemName)
+                            .replace(MessageUtil.getReplacement("ingredient.amount"), String.valueOf(item.getItemStack().getAmount())));
+                    newLines++;
+                }
+                i += newLines;
+                continue;
+            }
             if(lore.get(i).contains(MessageUtil.getReplacement("conditions"))) {
                 lore.remove(i);
                 int newLines = 1;
@@ -143,24 +173,12 @@ public class BrowseProfessionCfg {
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
-                lore.remove(i);
-                int newLines = 1;
-                for(RecipeItem item : conditions.getRequiredItems()) {
-                    ItemStack patternItem = item.getItemStack();
-                    String itemName = patternItem.hasItemMeta() ? patternItem.getItemMeta().getDisplayName() : patternItem.getType().name();
-                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.ingredients.ingredientPrefix", "&7- &2$<ingredient.amount>x &a$<ingredient.name>")
-                            .replace(MessageUtil.getReplacement("ingredient.name"), itemName)
-                            .replace(MessageUtil.getReplacement("ingredient.amount"), String.valueOf(item.getItemStack().getAmount())));
-                    newLines++;
-                }
-                i += newLines;
-                continue;
             }
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), conditions.getProfession())
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.exp"), String.valueOf(conditions.getExpCost()))
+                    .replace(MessageUtil.getReplacement("conditions.rank"), String.valueOf(conditions.getRank()))
             ));
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");

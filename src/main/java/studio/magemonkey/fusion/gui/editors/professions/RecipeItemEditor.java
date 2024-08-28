@@ -40,14 +40,16 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
-        setItem(23, getIcons().get("commands"));
+        setItem(24, getIcons().get("commands"));
 
-        setItem(28, getIcons().get("ingredients"));
-        setItem(29, getIcons().get("moneyCost"));
-        setItem(30, getIcons().get("expCost"));
-        setItem(31, getIcons().get("professionLevel"));
-        setItem(32, getIcons().get("mastery"));
-        setItem(33, getIcons().get("conditions"));
+        setItem(37, getIcons().get("ingredients"));
+        setItem(38, getIcons().get("moneyCost"));
+        setItem(39, getIcons().get("expCost"));
+        setItem(40, getIcons().get("professionLevel"));
+        setItem(41, getIcons().get("mastery"));
+        setItem(42, getIcons().get("rank"));
+        setItem(43, getIcons().get("conditions"));
+
         setItem(53, getIcons().get("back"));
     }
 
@@ -115,7 +117,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 23 -> {
+            case 24 -> {
                 if (event.isLeftClick())
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
                 else if (event.isRightClick()) {
@@ -125,7 +127,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                     recipe.getResults().getCommands().remove(recipe.getResults().getCommands().size() - 1);
                 }
             }
-            case 28 -> {
+            case 37 -> {
                 if (event.isLeftClick())
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
                 else if (event.isRightClick()) {
@@ -138,7 +140,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                     recipe.getConditions().getRequiredItems().remove(recipe.getConditions().getRequiredItems().size() - 1);
                 }
             }
-            case 29 -> {
+            case 38 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     recipe.getConditions().setMoneyCost(recipe.getConditions().getMoneyCost() + amount);
@@ -149,7 +151,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 30 -> {
+            case 39 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     recipe.getConditions().setExpCost(recipe.getConditions().getExpCost() + amount);
@@ -160,7 +162,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 31 -> {
+            case 40 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     recipe.getConditions().setProfessionLevel(recipe.getConditions().getProfessionLevel() + amount);
@@ -171,11 +173,21 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 32 -> {
+            case 41 -> {
                 recipe.getConditions().setMastery(!recipe.getConditions().isMastery());
                 hasChanges = true;
             }
-            case 33 -> {
+            case 42 -> {
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Rank, "/fusion-editor <rank>");
+                else if (event.isRightClick()) {
+                    if (recipe.getConditions().getRank() == null)
+                        return;
+                    recipe.getConditions().setRank(null);
+                    hasChanges = true;
+                }
+            }
+            case 43 -> {
                 if (event.isLeftClick())
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
                 else if (event.isRightClick()) {

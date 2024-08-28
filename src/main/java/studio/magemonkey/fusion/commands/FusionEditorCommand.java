@@ -132,6 +132,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Add -> addNewRecipe(professionEditor, args);
                 case Profession_Recipe_Edit_ResultItem, Profession_Recipe_Add_Ingredients,
                         Profession_Recipe_Edit_Ingredients -> updateRecipeItems(professionEditor, args, criteria);
+                case Profession_Recipe_Edit_Rank -> updateRecipeRank(professionEditor, args);
                 case Profession_Recipe_Add_Conditions -> addRecipeConditions(professionEditor, args);
                 default -> editor.open(player);
             }
@@ -147,6 +148,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Add_Enchants -> addPatternEnchants(browseEditor, args);
                 case Pattern_Add_Flags -> addPatternFlags(browseEditor, args);
                 case Browse_Profession_Add_Ingredients -> addBrowseIngredient(browseEditor, args);
+                case Browse_Profession_Edit_Rank -> updateBrowseRank(browseEditor, args);
                 case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
             }
@@ -233,6 +235,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("64");
                     }
                     break;
+                case Browse_Profession_Edit_Rank:
+                    if (args.length == 1) {
+                        entries.add("<rank>");
+                        entries.add(professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRank());
+                    }
+                    break;
                 case Profession_Recipe_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newRecipeName>");
@@ -285,6 +293,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Browse_Add_Profession:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[0]));
+                    }
+                    break;
+                case Browse_Profession_Edit_Rank:
+                    if (args.length == 1) {
+                        entries.add("<rank>");
+                        entries.add(browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRank());
                     }
                     break;
                 case Pattern_Edit_Name:
@@ -362,6 +376,10 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             case Pattern_Edit_Name:
             case Browse_Edit_Name:
                 MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<newName>"));
+                break;
+            case Browse_Profession_Edit_Rank:
+            case Profession_Recipe_Edit_Rank:
+                MessageUtil.sendMessage("editor.editorUsage", player, new MessageData("syntax", "<rank>"));
                 break;
             case Profession_Recipe_Add_Ingredients:
             case Profession_Recipe_Edit_Ingredients:
@@ -706,7 +724,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 ItemFlag flag = ItemFlag.valueOf(args[0].toUpperCase());
-                if(professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
+                if (professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
                     MessageUtil.sendMessage("editor.flagAlreadyExists", player, new MessageData("flag", flag.name()));
                     return;
                 }
@@ -724,7 +742,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 ItemFlag flag = ItemFlag.valueOf(args[0].toUpperCase());
-                if(browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
+                if (browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().getFlags().contains(flag)) {
                     MessageUtil.sendMessage("editor.flagAlreadyExists", player, new MessageData("flag", flag.name()));
                     return;
                 }
@@ -849,16 +867,20 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     for (RecipeItem ingredient : professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItems()) {
                         if (ingredient.toConfig().toString().split(":")[0].equalsIgnoreCase(itemName)) {
                             professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItems().set(i, RecipeItem.fromConfig(itemName + ":" + amount));
+                            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItemNames().set(i, itemName + ":" + amount);
                             found = true;
                         }
                         i++;
                     }
-                    if (!found)
+                    if (!found) {
                         professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItems().add(RecipeItem.fromConfig(itemName + ":" + amount));
+                        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItemNames().add(itemName + ":" + amount);
+                    }
                     break;
                 case Profession_Recipe_Edit_Ingredients:
                     professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItems().clear();
                     professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItems().add(RecipeItem.fromConfig(itemName + ":" + amount));
+                    professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().getRequiredItemNames().add(itemName + ":" + amount);
                     break;
             }
             professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
@@ -866,6 +888,18 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             e.printStackTrace();
             MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
         }
+    }
+
+    private void updateRecipeRank(ProfessionEditor professionEditor, String[] args) {
+        Player player = professionEditor.getPlayer();
+        if (args.length != 1) {
+            MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
+            return;
+        }
+        String rank = args[0];
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setRank(rank);
+        MessageUtil.sendMessage("editor.recipeRankUpdated", player, new MessageData("rank", rank));
+        professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
     }
 
     private void addRecipeConditions(ProfessionEditor professionEditor, String[] args) {
@@ -1010,17 +1044,32 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             for (RecipeItem ingredient : browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems()) {
                 if (ingredient.toConfig().toString().split(":")[0].equalsIgnoreCase(itemName)) {
                     browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems().set(i, RecipeItem.fromConfig(itemName + ":" + amount));
+                    browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItemNames().set(i, itemName + ":" + amount);
                     found = true;
                 }
                 i++;
             }
-            if (!found)
+            if (!found) {
                 browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItems().add(RecipeItem.fromConfig(itemName + ":" + amount));
-            browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().getRequiredItemNames().add(itemName + ":" + amount);
+                browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
+            }
         } catch (NumberFormatException e) {
             e.printStackTrace();
             MessageUtil.sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
         }
+    }
+
+    private void updateBrowseRank(BrowseEditor browseEditor, String[] args) {
+        Player player = browseEditor.getPlayer();
+        if (args.length != 1) {
+            MessageUtil.sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
+            return;
+        }
+        String rank = args[0];
+        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().setRank(rank);
+        MessageUtil.sendMessage("editor.browseRankUpdated", player, new MessageData("rank", rank));
+        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
     }
 
     private void addBrowseConditions(BrowseEditor browseEditor, String[] args) {

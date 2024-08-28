@@ -17,7 +17,6 @@ icons:
     name: '&9Name'
     lore:
       - '&7Current: &a$<name>'
-      - '&7Click to change your profession name.'
       - '&8--------------------'
       - '&aClick &7to rename.'
     flags: [ ]

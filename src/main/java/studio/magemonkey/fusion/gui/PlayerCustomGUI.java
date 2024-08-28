@@ -447,7 +447,7 @@ public class PlayerCustomGUI implements Listener {
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
-            MessageUtil.sendMessage("fusion.gui.canCraft.false", player);
+            MessageUtil.sendMessage("fusion.gui.recipes.canCraft.false", player);
             return false;
         }
 //        this.reloadRecipes();
@@ -522,11 +522,6 @@ public class PlayerCustomGUI implements Listener {
                 entry = entry.clone();
                 if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
                     item = item.clone();
-//                    ItemMeta meta = item.getItemMeta();
-//                    List<String> itemLore = meta.getLore();
-//                    itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by"));
-//                    meta.setLore(itemLore);
-//                    item.setItemMeta(meta);
                     entry.setAmount(toTake.getAmount());
 
                     if (CalculatedRecipe.isSimilar(toTake, item)) {

@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 public class Recipe implements ConfigurationSerializable {
     @Setter
     protected String name;
-    @Setter
-    protected String rank;
 
     @Setter
     protected int craftingTime;
@@ -44,16 +42,14 @@ public class Recipe implements ConfigurationSerializable {
         this.name = dw.getString("name");
         this.category = dw.getString("category");
 
-        this.rank = dw.getString("rank");
         this.craftingTime = dw.getInt("craftingTime");
         this.results = new ProfessionResults(name, dw);
         this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(String name, String category, String rank, int craftingTime, ProfessionResults results, ProfessionConditions conditions) {
+    public Recipe(String name, String category, int craftingTime, ProfessionResults results, ProfessionConditions conditions) {
         this.name = name;
         this.category = category;
-        this.rank = rank;
         this.craftingTime = craftingTime;
         this.results = results;
         this.conditions = conditions;
@@ -159,9 +155,6 @@ public class Recipe implements ConfigurationSerializable {
         if(category != null) {
             builder.append("category", this.category);
         }
-        if(rank != null) {
-            builder.append("rank", this.rank);
-        }
 
         for(Map.Entry<String, Object> entry : this.results.serialize().entrySet()) {
             builder.append(entry.getKey(), entry.getValue());
@@ -173,7 +166,7 @@ public class Recipe implements ConfigurationSerializable {
     }
 
     public static Recipe copy(Recipe recipe) {
-        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getRank(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()));
+        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()));
     }
 
 }

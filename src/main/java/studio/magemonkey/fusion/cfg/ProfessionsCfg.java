@@ -294,6 +294,11 @@ public class ProfessionsCfg {
                             mutableRecipeData.remove("neededLevels");
                             conditions.put("professionLevel", neededLevels);
                         }
+                        if(mutableRecipeData.containsKey("rank")) {
+                            String rank = (String) mutableRecipeData.getOrDefault("rank", null);
+                            mutableRecipeData.remove("rank");
+                            conditions.put("rank", rank);
+                        }
 
                         // Results
                         if(mutableRecipeData.containsKey("result")) {

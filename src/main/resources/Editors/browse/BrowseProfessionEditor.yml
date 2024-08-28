@@ -50,13 +50,16 @@ icons:
       - '&7Costs:'
       - '&7- &eMoney: &a$<costs.money>'
       - '&7- &eExperience: &a$<costs.exp>'
+      - '&7Ingredients:'
+      - '$<ingredients>'
       - '&7Conditions:'
-      - '&7- $<conditions>'
+      - '$<conditions>'
       - '&8--------------------'
       - '&aLeft click &7to configure'
       - '&aRight click &7to remove'
       - '&aShift + Left click &7to change order to left'
       - '&aShift + Right click &7to change order to right'
+    ingredientsPrefix: '&7- &2$<ingredient.amount>x &a$<ingredient.name>'
     conditionPrefix: '&7- $<condition>'
     conditionFormatting:
       profession: '&3Profession &2$<condition.name>&7: &a$<condition.amount>'
@@ -139,6 +142,20 @@ subEditor:
       flags: [ ]
       enchants: { }
       ingredientPrefix: '&7- &2$<ingredient.amount>x &a$<ingredient.name>'
+    rank:
+      material: EMERALD
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Rank'
+      lore:
+        - '&7Current: &a$<conditions.rank>'
+        - '&7The rank required to craft this recipe.'
+        - '&7You will cast a command to change the rank.'
+        - '&8--------------------'
+        - '&aClick &7to change the rank.'
+      flags: [ ]
+      enchants: { }
     conditions:
       material: CHEST
       amount: 1

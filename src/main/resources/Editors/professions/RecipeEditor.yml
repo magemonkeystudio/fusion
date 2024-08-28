@@ -182,7 +182,7 @@ subEditor:
             - '&7Rather you need to master the'
             - '&7profession to craft this.'
             - '&8--------------------'
-            - '&aaClick &7to toggle.'
+            - '&aClick &7to toggle.'
         flags: [ ]
         enchants: { }
     professionLevel:
@@ -250,6 +250,20 @@ subEditor:
       flags: [ ]
       enchants: { }
       commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
+    rank:
+      material: EMERALD
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Rank'
+      lore:
+        - '&7Current: &a$<conditions.rank>'
+        - '&7The rank required to craft this recipe.'
+        - '&7You will cast a command to change the rank.'
+        - '&8--------------------'
+        - '&aClick &7to change the rank.'
+      flags: [ ]
+      enchants: { }
     conditions:
       material: CHEST
       amount: 1
