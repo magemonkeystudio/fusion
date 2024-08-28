@@ -31,10 +31,11 @@ public class BrowseProfessionEditor extends Editor implements Listener {
 
     private void initialize() {
         InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
-        setItem(10, getIcons().get("moneyCost"));
-        setItem(12, getIcons().get("expCost"));
-        setItem(14, getIcons().get("ingredients"));
-        setItem(16, getIcons().get("conditions"));
+        setItem(11, getIcons().get("moneyCost"));
+        setItem(13, getIcons().get("expCost"));
+        setItem(15, getIcons().get("rank"));
+        setItem(21, getIcons().get("ingredients"));
+        setItem(23, getIcons().get("conditions"));
         setItem(26, getIcons().get("back"));
     }
 
@@ -46,7 +47,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 -> {
+            case 11 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     conditions.setMoneyCost(conditions.getMoneyCost() + amount);
@@ -57,7 +58,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 12 -> {
+            case 13 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     conditions.setExpCost(conditions.getExpCost() + amount);
@@ -68,8 +69,9 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 14 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
-            case 16 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
+            case 15 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Edit_Rank, "/fusion-editor <rank>");
+            case 21 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
+            case 23 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
             case 26 -> {
                 reload(false);
                 ((BrowseProfessionsEditor) getParentEditor()).reload(true);
