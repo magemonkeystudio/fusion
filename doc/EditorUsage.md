@@ -458,7 +458,9 @@ Here you can configure each profession-icon individually. The gui provides you t
 If you want to create a new profession, you have to possibilities:
 - Either you type in `/fusion-editor <newProfession>` to generate a profession from scratch with default values
 - Or you type in `/fusion-editor <newProfession> <existingProfession>` to generate a profession that copies everything 
-from another profession.
+from another profession. Unfortunatly, we have no possibility to creating professions inside of sub-folders 
+(for example /profession/test/<profession>.yml) due to permission reasons of the servers themselves. If you find a 
+server side solution for that we'd be glad to add it into the documentation!
 
 ### Divinity-Items
 Most of the item-commands of the `/fusion-editor` allow for usage of [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-magemonkey-studio-formerly-prorpgitems.99713/)-Items 
