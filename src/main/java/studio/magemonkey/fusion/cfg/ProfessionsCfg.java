@@ -40,27 +40,7 @@ public class ProfessionsCfg {
             return;
         }
 
-        for (File file : Objects.requireNonNull(professionFolder.listFiles())) {
-            if (file.getName().endsWith(".yml")) {
-                FileConfiguration cfg = new YamlConfiguration();
-                try {
-                    Bukkit.getConsoleSender().sendMessage("loading " + file.getName());
-                    cfg.load(file);
-                    addDefs(cfg);
-                    cfg.save(file);
-                    cfg.load(file);
-                    // Get the YAMLs whole content as a map
-                    Map<String, Object> _map = cfg.getValues(true);
-                    CraftingTable ct = new CraftingTable(_map);
-                    map.put(ct.getName(), ct);
-                    cfgs.put(ct.getName(), cfg);
-                    files.put(ct.getName(), file);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
-                }
-            }
-        }
+        loadProfessions(professionFolder);
 
         for (Map.Entry<String, CraftingTable> entry : map.entrySet()) {
             String key = entry.getKey();
@@ -72,11 +52,11 @@ public class ProfessionsCfg {
     public static boolean createNewProfession(String profession, String refProfession) {
         FileConfiguration cfg = new YamlConfiguration();
         try {
-            if(refProfession != null && files.containsKey(refProfession)) {
+            if (refProfession != null && files.containsKey(refProfession)) {
                 cfg = YamlConfiguration.loadConfiguration(files.get(refProfession));
                 files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
                 File file = files.get(profession);
-                if(!file.exists()) {
+                if (!file.exists()) {
                     file.createNewFile();
                 }
                 cfg.set("name", profession);
@@ -87,10 +67,10 @@ public class ProfessionsCfg {
                 cfgs.put(profession, cfg);
                 files.put(profession, file);
                 return true;
-            } else if(refProfession == null) {
+            } else if (refProfession == null) {
                 files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
                 File file = files.get(profession);
-                if(!file.exists()) {
+                if (!file.exists()) {
                     file.createNewFile();
                 }
                 cfg.load(file);
@@ -111,6 +91,33 @@ public class ProfessionsCfg {
         }
         return false;
     }
+
+    private static void loadProfessions(File root) {
+        for (File file : Objects.requireNonNull(root.listFiles())) {
+            if (file.getName().endsWith(".yml")) {
+                FileConfiguration cfg = new YamlConfiguration();
+                try {
+                    Bukkit.getConsoleSender().sendMessage("loading " + file.getName());
+                    cfg.load(file);
+                    addDefs(cfg);
+                    cfg.save(file);
+                    cfg.load(file);
+                    // Get the YAMLs whole content as a map
+                    Map<String, Object> _map = cfg.getValues(true);
+                    CraftingTable ct = new CraftingTable(_map);
+                    map.put(ct.getName(), ct);
+                    cfgs.put(ct.getName(), cfg);
+                    files.put(ct.getName(), file);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
+                }
+            } else if (file.isDirectory()) {
+                loadProfessions(file);
+            }
+        }
+    }
+
     public static CraftingTable getTable(String str) {
         return map.get(str);
     }
@@ -121,16 +128,16 @@ public class ProfessionsCfg {
     }
 
     private static void addDefs(FileConfiguration cfg) {
-        if(!cfg.isSet("icon")) {
+        if (!cfg.isSet("icon")) {
             cfg.set("icon", "STONE");
         }
-        if(!cfg.isSet("inventoryName")) {
+        if (!cfg.isSet("inventoryName")) {
             cfg.set("inventoryName", "Template Profession");
         }
-        if(!cfg.isSet("useCategories")) {
+        if (!cfg.isSet("useCategories")) {
             cfg.set("useCategories", false);
         }
-        if(!cfg.isSet("pattern.pattern")) {
+        if (!cfg.isSet("pattern.pattern")) {
             List<String> pattern = new ArrayList<>(Arrays.asList("fffffffff", "fooooooof", "fooooooof", "ff-----ff", "f{<f0f>}f"));
             cfg.set("pattern.pattern", pattern);
         }
@@ -226,7 +233,7 @@ public class ProfessionsCfg {
         }
 
         // TODO correct serialization for catPattern without queue-items
-        if(cfg.isSet("categoryPattern")) {
+        if (cfg.isSet("categoryPattern")) {
             if (!cfg.isSet("categoryPattern.items.queue-items.-")) {
                 cfg.set("categoryPattern.items.queue-items.-", cfg.getConfigurationSection("pattern.items.queue-items.-").getValues(false));
             }
@@ -238,7 +245,7 @@ public class ProfessionsCfg {
             }
         }
 
-        if(!cfg.isSet("categories")) {
+        if (!cfg.isSet("categories")) {
             cfg.set("categories", List.of(new Category("First Category").serialize()));
         }
         if (cfg.isSet("recipes")) {
@@ -277,7 +284,7 @@ public class ProfessionsCfg {
                             costs.put("exp", ((mutableRecipeData.get("costs") instanceof Number)
                                     ? ((Number) mutableRecipeData.get("costs")).doubleValue() : 0.0));
                         }
-                        if(mutableRecipeData.containsKey("pattern")) {
+                        if (mutableRecipeData.containsKey("pattern")) {
                             List<String> pattern = (List<String>) mutableRecipeData.get("pattern");
                             mutableRecipeData.remove("pattern");
                             costs.put("items", pattern);
@@ -294,14 +301,14 @@ public class ProfessionsCfg {
                             mutableRecipeData.remove("neededLevels");
                             conditions.put("professionLevel", neededLevels);
                         }
-                        if(mutableRecipeData.containsKey("rank")) {
+                        if (mutableRecipeData.containsKey("rank")) {
                             String rank = (String) mutableRecipeData.getOrDefault("rank", null);
                             mutableRecipeData.remove("rank");
                             conditions.put("rank", rank);
                         }
 
                         // Results
-                        if(mutableRecipeData.containsKey("result")) {
+                        if (mutableRecipeData.containsKey("result")) {
                             String item = mutableRecipeData.get("result").toString();
                             mutableRecipeData.remove("result");
                             results.put("item", item);
@@ -311,7 +318,7 @@ public class ProfessionsCfg {
                                     ? ((Number) mutableRecipeData.get("xpGain")).intValue() : 0));
                             mutableRecipeData.remove("xpGain");
                         }
-                        if(mutableRecipeData.containsKey("commands")) {
+                        if (mutableRecipeData.containsKey("commands")) {
                             List<String> commands = (List<String>) mutableRecipeData.get("commands");
                             mutableRecipeData.remove("commands");
                             results.put("commands", commands);
