@@ -21,7 +21,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
     private ProfessionConditions conditions;
 
     public BrowseProfessionEditor(Editor editor, Player player, ProfessionConditions conditions) {
-        super(editor, EditorRegistry.getBrowseProfessionCfg().getSubTitle(conditions.getProfession()),27);
+        super(editor, EditorRegistry.getBrowseProfessionCfg().getSubTitle(conditions.getProfession()),36);
         this.player = player;
         this.conditions = conditions;
         setIcons(EditorRegistry.getBrowseProfessionCfg().getSubIcons(conditions));
@@ -36,7 +36,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
         setItem(15, getIcons().get("rank"));
         setItem(21, getIcons().get("ingredients"));
         setItem(23, getIcons().get("conditions"));
-        setItem(26, getIcons().get("back"));
+        setItem(35, getIcons().get("back"));
     }
 
     @EventHandler
@@ -69,10 +69,19 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 15 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Edit_Rank, "/fusion-editor <rank>");
+            case 15 -> {
+                if(event.isLeftClick()) {
+                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Edit_Rank, "/fusion-editor <rank>");
+                } else if (event.isRightClick()) {
+                    if (conditions.getRank() == null)
+                        return;
+                    conditions.setRank(null);
+                    hasChanges = true;
+                }
+            }
             case 21 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
             case 23 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
-            case 26 -> {
+            case 35 -> {
                 reload(false);
                 ((BrowseProfessionsEditor) getParentEditor()).reload(true);
             }

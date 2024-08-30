@@ -90,7 +90,6 @@ public class BrowseProfessionCfg {
                 continue;
             }
             if(lore.get(i).contains(MessageUtil.getReplacement("conditions"))) {
-                // TODO Full Translation of Conditions
                 lore.remove(i);
                 int newLines = 1;
                 for(Map.Entry<String, Map<String, Integer>> entry : conditions.getFullConditions().entrySet()) {

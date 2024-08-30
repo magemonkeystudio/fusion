@@ -177,6 +177,16 @@ Here you can configure each pattern Item individually. The gui provides you the 
     - Shown as: Glowstone Dust
     - Usage: Click on the item to toggle between `true` and `false`
 <br><br>
+- **Durability**: The durability of the pattern item. You can increase or decrease the amount inside of the gui itself.
+    - Shown as: Anvil
+    - Usage:
+        - Left Click: Increase the durability by 1
+        - Right Click: Decrease the durability by 1
+        - Shift + Click: Manage each by 25
+<br><br>
+- **Unbreakable**: Make the item unbreakable or not. You can toggle between `true` and `false`.
+    - Shown as: Obsidian
+    - Usage: Click on the item to toggle between `true` and `false`
 - **Commands**: The commands that will be executed when the pattern item is clicked. You will be forwarded to a click
   message in the chat in order to type in a new command for the
   item. (`/fusion-editor <caster> <delay> <command without />`)

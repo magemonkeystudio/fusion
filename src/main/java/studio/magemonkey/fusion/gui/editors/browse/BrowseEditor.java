@@ -100,7 +100,7 @@ public class BrowseEditor extends Editor implements Listener {
             }
             case 26 -> {
                 player.closeInventory();
-                hasChanges = true;
+                reload(false);
             }
         }
 

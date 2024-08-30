@@ -52,6 +52,7 @@ icons:
       - '&7- &eExperience: &a$<costs.exp>'
       - '&7Ingredients:'
       - '$<ingredients>'
+      - ''
       - '&7Conditions:'
       - '$<conditions>'
       - '&8--------------------'
