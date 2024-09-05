@@ -89,16 +89,16 @@ public class CalculatedRecipe {
 
             String xpLine = null;
             if (recipe.getConditions().getExpCost() != 0) {
-                if (PlayerLoader.getPlayer(player.getUniqueId()).getExperience(craftingTable) < recipe.getConditions().getExpCost()) {
+                if (ExperienceManager.getTotalExperience(player) < recipe.getConditions().getExpCost()) {
                     canCraft = false;
-                    xpLine = MessageUtil.getMessageAsString("fusion.gui.recipes.xp.false",
+                    xpLine = MessageUtil.getMessageAsString("fusion.gui.recipes.exp.false",
                             "fusion.gui.recipes.exp.false",
                             new MessageData("recipe", recipe),
                             new MessageData("exp", recipe.getConditions().getExpCost()),
                             new MessageData("costs.exp", recipe.getConditions().getExpCost()),
                             new MessageData("player", player));
                 } else {
-                    xpLine = MessageUtil.getMessageAsString("fusion.gui.recipes.xp.true",
+                    xpLine = MessageUtil.getMessageAsString("fusion.gui.recipes.exp.true",
                             "fusion.gui.recipes.exp.true",
                             new MessageData("recipe", recipe),
                             new MessageData("exp", recipe.getConditions().getExpCost()),

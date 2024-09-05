@@ -257,7 +257,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
 
     public boolean isValid(FusionPlayer player) {
         Player _player = player.getPlayer();
-        int unlocked = player.getUnlockedProfessions().size();
+        int unlocked = player.getJoinedProfessions().size();
         int allowed = PlayerUtil.getPermOption(_player, "fusion.limit");
 
         MessageData[] data = {

@@ -1,0 +1,326 @@
+# You can configurate those profession ingame via gui
+# Use `/fusion-editor profession weapon_smithing` to open the editor for this profession
+
+# The internal id of profession that is used to identify the profession (for example for `/craft use <profession-id`)
+name: weapon_smithing
+
+# Visuals for the professions in the gui
+icon: DIAMOND_SWORD
+inventoryName: Weapon Smithing
+
+# Rather you want to enable categories for this profession
+useCategories: true
+
+# The required profession level for mastery
+masteryUnlock: 40
+# The fee to unlock mastery, requires Vault
+masteryFee: 500
+
+# The pattern setup of your recipe gui
+# This is the main pattern that is used overall when no categories are setup
+pattern:
+  # The actual pattern of the items section below.
+  pattern:
+    - '111111111'
+    - 1<ooooo>1
+    - '111111111'
+    - 1{-----}1
+    - '111111111'
+    - '111111111'
+  # The items that can be used for the pattern section.
+  # Each item represents one slot in the pattern.
+  # The following characters are predefined for specific tasks:
+  # `o`, `=` -> Recipe Slots wich are empty or filled with a recipe
+  # `<`, `>` -> Previous and Next page buttons for recipe items
+  # `{`, `}` -> Previous and Next page buttons for queue items
+  # `-` -> Queue slot, this slot is used to display the queue slot when not filled
+  # `f` -> Fill item, this item is used to fill the remaining slots
+  # Further configurations are shown internally under `fillItem` and `queue-items` sections
+  items:
+    '0':
+      material: OAK_SIGN
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Weapon Smithing: &cLevel $<level>'
+      lore:
+        - ' &7The recipes above can be crafted'
+        - ' &7with the weapon smithing profession.'
+        - '&8--------------------'
+        - ' &7You need level &a40 weapon smithing'
+        - ' &a& $500 to unlock its &7mastery.'
+        - ' &7A mastery allows to craft new items.'
+      flags: []
+      enchants: {}
+    '1':
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: []
+      flags: []
+      enchants: {}
+    '2':
+      material: GRAY_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Example Slot'
+      lore:
+        - ' &7Personalize your crafting menu'
+        - ' &7with slots like this one.'
+      flags: []
+      enchants: {}
+    '3':
+      material: PAPER
+      modelData: 2
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Enable Autocraft'
+      lore:
+        - ' &7Turn on autocrafting. Epic and '
+        - ' &7above can toggle autocrafting!'
+        - '&8--------------------'
+        - ' &aLeft click to toggle auto crafting.'
+        - '&4Keep in mind!'
+        - ' &7Autocrafting can only be used when'
+        -  '&7craftingQueue: &afalse &7in config.yml'
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (recipes left)
+    <:
+      material: GREEN_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&ePrev recipes page.'
+      lore: []
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (recipes right)
+    '>':
+      material: GREEN_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&eNext recipes page.'
+      lore: []
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (queue left)
+    '{':
+      material: LIME_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: Previous queued items
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
+    # Predefined item for the navigation (queue right)
+    '}':
+      material: LIME_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: Next queued items
+      lore: []
+      flags: []
+      enchants: {}
+    # The items that are used for the queue section
+    # Those are important to show the current states of the slots
+    # `-` -> Is the empty queue slot
+    # `Unfinished` -> Is the slot that is currently crafting
+    # `Finished` -> Is the slot that is finished crafting
+    queue-items:
+      '-':
+        material: GRAY_STAINED_GLASS_PANE
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7This slot is empty.'
+        flags: []
+        enchants: {}
+      Unfinished:
+        material: '%material%'
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7&oThis item is in the crafting queue'
+          - ' '
+          - '&7Time left: &c%time%'
+          - ' '
+          - '&eClick to cancel'
+        flags: []
+        enchants: {}
+      Finished:
+        material: '%material%'
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7&oThis item is in the crafting queue'
+          - ' '
+          - '&7The item is &afinished&7!'
+          - ' '
+          - '&eClick to obtain'
+        flags: []
+        enchants: {}
+    # The fill item used in the pattern. It can also be `f` instead
+    fillItem:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: []
+      flags: []
+      enchants: {}
+  # Commands that will be executed when clicking on the items
+  # Each character represents the mirrored item in the `items`-section,
+  # meaning when you click on the item with character `3`,
+  # it will enable auto-crafting in this case
+  commands:
+    '3':
+      - delay: 0
+        as: PLAYER
+        cmd: craft auto
+
+# The 'global' category-pattern that is used when a category has no defined pattern
+categoryPattern: null
+# The categories existent for this profession
+categories:
+  # Category for wooden weapons with first slot in order
+  - name: wooden_weapons
+    icon: WOODEN_SWORD
+    order: 1
+  # Category for stone weapons with second slot in order
+  - name: stone_weapons
+    icon: STONE_SWORD
+    order: 2
+  # Category for iron weapons with third slot in order
+  - name: iron_weapons
+    icon: IRON_SWORD
+    order: 3
+    # This pattern is null now. You can however structure it 1:1 like the `pattern`-section
+    # to achieve a custom pattern for each category
+    pattern: null
+
+# The recipes that are shown in this profession
+# The recipes are divided into some main parameters and sub-sections:
+# - name: The internal name of the recipe
+# - craftingTime: The time in seconds it takes to craft the recipe
+# - category: The category the recipe belongs to
+# - results: The result-section of the recipe
+#   - vanillaExp: The amount of vanilla experience the player gets
+#   - item: The item that is given to the player
+#   - professionExp: The amount of profession experience the player gets
+#   - commands: The commands that are executed when the recipe is crafted
+# - costs: The costs-section of the recipe
+#   - money: The amount of money the player has to pay
+#   - exp: The amount of vanilla experience the player has to pay
+#   - items: The items the player has to pay
+# - conditions: The conditions-section of the recipe
+#   - professionLevel: The required profession level
+#   - mastery: Rather the recipe is only craftable with mastery
+#   - <conditions>: Further conditions that can be used. You can look them up here:
+#     https://github.com/magemonkeystudio/fusion/blob/improvements_and_33/doc/EditorUsage.md#conditions
+
+recipes:
+  # A wooden sword which takes 5 seconds to craft
+  # Belongs to the category wooden_weapons
+  - name: WoodenSword
+    craftingTime: 5
+    category: wooden_weapons
+    # Provides you a wooden sword and 15 profession exp
+    # The item has also to be valid since this is the icon that will be used to display in the recipe gui
+    results:
+      vanillaExp: 0
+      item: WOODEN_SWORD:1
+      professionExp: 15
+      commands: []
+    # Requires 4 wooden_oak_slabs, a stick and 5 vanilla exp to craft
+    costs:
+      money: 0.0
+      exp: 5
+      items:
+        - OAK_SLAB:4
+        - STICK:1
+    # Requires you to be at least lvl 1 to craft this recipe
+    conditions:
+      professionLevel: 1
+      mastery: false
+      # Just in case you might like to use other professions as dependecies for this recipe, here is a commented example:
+      # professions:
+      # armor_smithing: 5
+
+  # A crossbow which takes 10 seconds to craft
+  # Belongs to the category wooden_weapons
+  - name: CrossBow
+    craftingTime: 10
+    category: wooden_weapons
+    # Provides you a crossbow and 25 profession exp. This time, it gives you an extra stick with a command
+    results:
+      vanillaExp: 0
+      item: CROSSBOW:1
+      professionExp: 25
+      commands:
+        - delay: 0
+          as: PLAYER
+          cmd: give {player} minecraft:stick 1
+    # Requires 3 sticks, 2 strings, 2 flint and 10 vanilla exp to craft
+    costs:
+      money: 0.0
+      exp: 10
+      items:
+        - STICK:3
+        - STRING:2
+        - FLINT:2
+    # Requires you to be at least lvl 5 to craft this recipe
+    conditions:
+      professionLevel: 5
+      mastery: false
+
+  - name: StoneSword
+    craftingTime: 5
+    category: stone_weapons # Its shown under the stone_weapons category
+    results:
+      vanillaExp: 0
+      item: STONE_SWORD:1
+      professionExp: 15
+      commands: []
+    costs:
+      money: 0.0
+      exp: 5
+      items:
+        - COBBLESTONE:2
+        - STICK:1
+    conditions:
+      professionLevel: 1
+      mastery: false
+
+  - name: IronSword
+    craftingTime: 10
+    category: iron_weapons # Its shown under the iron_weapons category
+    results:
+      vanillaExp: 0
+      item: IRON_SWORD:1
+      professionExp: 25
+      commands: []
+    costs:
+      money: 0.0
+      exp: 10
+      items:
+        - IRON_INGOT:2
+        - STICK:1
+    conditions:
+      professionLevel: 5
+      mastery: false
+

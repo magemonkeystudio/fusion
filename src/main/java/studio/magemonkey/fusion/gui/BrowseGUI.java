@@ -234,7 +234,7 @@ public class BrowseGUI implements Listener {
                 new MessageData("profession", profession),
                 new MessageData("costs.money", moneyCost),
                 new MessageData("costs.experience", expCost),
-                new MessageData("unlocked", fusionPlayer.getUnlockedProfessions().size()),
+                new MessageData("unlocked", fusionPlayer.getJoinedProfessions().size()),
                 new MessageData("limit", PlayerUtil.getPermOption(player, "fusion.limit")),
                 new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
         };

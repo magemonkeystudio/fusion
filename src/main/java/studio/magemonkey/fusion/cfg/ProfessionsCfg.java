@@ -35,9 +35,10 @@ public class ProfessionsCfg {
         if (!professionFolder.exists()) {
             professionFolder.mkdirs();
         }
-        if (professionFolder.listFiles() == null) {
-            // TODO generate default professions on fresh install
-            return;
+        if (professionFolder.listFiles() == null || Objects.requireNonNull(professionFolder.listFiles()).length == 0) {
+            Fusion.getInstance().getLogger().warning("Professions folder is empty. Adding default professions.");
+            YamlParser.loadOrExtract(Fusion.getInstance(), "professions/armor_smithing.yml");
+            YamlParser.loadOrExtract(Fusion.getInstance(), "professions/weapon_smithing.yml");
         }
 
         loadProfessions(professionFolder);

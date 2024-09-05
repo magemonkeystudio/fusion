@@ -155,9 +155,14 @@ public class PlayerCustomGUI implements Listener {
             int rest      = allRecipeCount % pageSize;
             int pages     = (rest == 0) ? fullPages : (fullPages + 1);
             if (player.isOnline() && page >= pages) {
-                if (page > 0)
+                if (page > 0) {
                     this.page = pages - 1;
-                this.reloadRecipes();
+                }
+
+                // Add a check to prevent infinite recursion
+                if (this.page != page) {  // Only reload if page has changed
+                    this.reloadRecipes();
+                }
                 return;
             }
 

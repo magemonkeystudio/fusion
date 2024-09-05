@@ -123,7 +123,7 @@ public class FusionPlayer {
         return hasProfession(table.getName());
     }
 
-    public Collection<Profession> getUnlockedProfessions() {
+    public Collection<Profession> getJoinedProfessions() {
         return professions.values().stream().filter(Profession::isJoined).collect(Collectors.toList());
     }
 
