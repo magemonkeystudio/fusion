@@ -8,11 +8,6 @@ If you wish to use Fusion as a dependency in your projects, Fusion is available 
 or snapshots through Sonatype.
 
 ```xml
-<repository>
-    <id>sonatype</id>
-    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-</repository>
-...
 <dependency>
     <groupId>studio.magemonkey</groupId>
     <artifactId>fusion</artifactId>
