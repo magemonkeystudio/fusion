@@ -8,7 +8,7 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.gui.PlayerCustomGUI;
+import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 

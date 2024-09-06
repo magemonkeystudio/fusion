@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui;
+package studio.magemonkey.fusion.deprecated;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,7 +19,7 @@ import studio.magemonkey.fusion.util.Utils;
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI              gui;
+    private final CustomGUI gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
     private       boolean                isBase  = false;
 

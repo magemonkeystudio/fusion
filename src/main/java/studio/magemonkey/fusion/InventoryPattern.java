@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class InventoryPattern implements ConfigurationSerializable {
     @Getter
-    private final String[] pattern; // _ for ingredients, = for result.
+    private final String[] pattern; // - for ingredients, = for result.
     @Getter
     private final HashMap<Character, ItemStack> items;
     private final HashMap<Character, List<DelayedCommand>> commands = new HashMap<>();

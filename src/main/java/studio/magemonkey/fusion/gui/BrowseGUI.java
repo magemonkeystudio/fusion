@@ -28,6 +28,7 @@ import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.fusion.util.Utils;

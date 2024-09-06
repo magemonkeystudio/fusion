@@ -10,7 +10,6 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.gui.CustomGUI;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.queue.QueueItem;
 import studio.magemonkey.fusion.util.Utils;
@@ -428,5 +427,11 @@ public class ProfessionsCfg {
         List<String> lore = cfg.getStringList(path + ".lore");
         lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime())));
         return ItemBuilder.newItem(result).material(material).lore(lore).build();
+    }
+
+    public static void closeAll() {
+        for (ProfessionGuiRegistry gui : guiMap.values()) {
+            gui.closeAll();
+        }
     }
 }

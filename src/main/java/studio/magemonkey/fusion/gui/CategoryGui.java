@@ -2,14 +2,28 @@ package studio.magemonkey.fusion.gui;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.api.DelayedCommand;
+import studio.magemonkey.codex.api.Replacer;
+import studio.magemonkey.codex.util.ItemUtils;
+import studio.magemonkey.codex.util.messages.MessageData;
+import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 
@@ -21,50 +35,212 @@ public class CategoryGui implements Listener {
 
     private Inventory inventory;
     private final Map<Integer, RecipeGui> categories = new HashMap<>();
+    private int page = 0;
+    private int nextPage = -1;
+    private int prevPage = -1;
 
+    private Slot[] slots;
+    private final ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    private final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
 
     public CategoryGui(Player player, CraftingTable table) {
         this.player = player;
         this.table = table;
         initialize();
+        Fusion.registerListener(this);
     }
 
-    private void initialize() {
+    public void initialize() {
         this.categories.clear();
+        this.resultSlots.clear();
         this.inventory = Bukkit.createInventory(null, table.getPattern().getInventorySize(), table.getInventoryName());
-        Map<Character, ItemStack> items = table.getPattern().getItems();
+        mapSlots();
+        reloadCategories();
+    }
 
-        Set<Integer> recipeSlots = new HashSet<>();
+    public void reloadCategories() {
+        if (!player.isOnline()) return;
+        try {
+            /* Default setup */
+            ItemStack fill = table.getFillItem();
+            Collection<Category> allCategories = new ArrayList<>(table.getCategories().values());
+            int pageSize = resultSlots.size();
+            int allCategoryCount = allCategories.size();
+            int i = 0;
+            int page = this.page;
 
-        int i = 0;
+            int fullPages = allCategoryCount / pageSize;
+            int rest = allCategoryCount % pageSize;
+            int pages = (rest == 0) ? fullPages : (fullPages + 1);
+            if (player.isOnline() && page >= pages) {
+                if (page > 0) {
+                    this.page = pages - 1;
+                }
+
+                // Add a check to prevent infinite recursion
+                if (this.page != page) {  // Only reload if page has changed
+                    this.reloadCategories();
+                }
+                return;
+            }
+            Category[] allCategoryArray = allCategories.toArray(new Category[allCategoryCount]);
+
+            Integer[] slots = resultSlots.toArray(new Integer[0]);
+            for (int slot : slots) {
+                this.inventory.setItem(slot, null);
+            }
+
+            updateBlockedSlots(new MessageData[]{
+                    new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(table.getName()))),
+                    new MessageData("gui", table.getName()),
+                    new MessageData("player", player.getName()),
+                    new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
+            });
+
+            for (int k = (page * pageSize), e = Math.min(slots.length, allCategoryArray.length);
+                 (k < allCategoryArray.length) && (i < e);
+                 k++, i++) {
+                Category category = allCategoryArray[k];
+                int slot = slots[i];
+                this.categories.put(slot, new RecipeGui(player, table, category));
+                this.inventory.setItem(slot, category.getIconItem().create());
+            }
+
+            for (int k = 0; k < inventory.getSize(); k++) {
+                if (inventory.getItem(k) != null && inventory.getItem(k).getType() != Material.AIR)
+                    continue;
+
+                inventory.setItem(k, fill);
+            }
+        } catch (
+                Exception e) {
+            this.inventory.clear();
+            this.player.closeInventory();
+            throw new RuntimeException("Exception was thrown when reloading categories for: " + this.player.getName(), e);
+        }
+    }
+
+    public void reloadCategoriesTask() {
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadCategories, 1L);
+    }
+
+    public void updateBlockedSlots(MessageData[] data) {
+        int totalItems = table.getCategories().size();
+        int fullPages = totalItems / resultSlots.size();
+        int rest = totalItems % resultSlots.size();
+        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+
+        boolean includeBack = false;
+
+        int k = -1;
+        HashMap<Character, ItemStack> items = table.getPattern().getItems();
+
+        ArrayList<Integer> leaveBlank = new ArrayList<>();
+        ArrayList<Integer> fill = new ArrayList<>();
         for (String row : table.getPattern().getPattern()) {
             for (char c : row.toCharArray()) {
+                k++;
+                ItemStack item = ItemUtils.replaceText(items.get(c), data);
+                if (!includeBack && c == '<' && page <= 0) {
+                    leaveBlank.add(k);
+                    continue;
+                }
+                if (c == '>' && page + 1 >= pages) {
+                    leaveBlank.add(k);
+                    continue;
+                }
+                if (c == '{' || c == '}' || c == '-') {
+                    fill.add(k);
+                    continue;
+                }
+                if (item != null) {
+                    inventory.setItem(k, item.clone());
+                }
+            }
+        }
+
+        for (Integer index : leaveBlank) {
+            if (inventory.getSize() > index + 1)
+                inventory.setItem(index, inventory.getItem(index + 1));
+            else
+                inventory.setItem(index, inventory.getItem(index - 1));
+        }
+        for (Integer index : fill) {
+            inventory.setItem(index, ProfessionsCfg.getFillItem(table.getName()));
+        }
+    }
+
+    private void mapSlots() {
+        this.resultSlots.clear();
+        this.slots = new Slot[table.getPattern().getPattern().length * 9];
+        int k = -1;
+        int prevPage = -1, nextPage = -1;
+        for (String row : table.getPattern().getPattern()) {
+            for (char c : row.toCharArray()) {
+                k++;
                 switch (c) {
-                    // Mark the recipe slots to add categories here
-                    case 'o', '=' -> recipeSlots.add(i);
-                    // Prevent queues to be shown. This gui only shows categories on the recipe slots
-                    case '-', '{', '}' -> {}
-                    // On default use the pattern-items as usual
+                    case '=', 'o' -> {
+                        this.slots[k] = Slot.BASE_RESULT_SLOT;
+                        this.resultSlots.add(k);
+                    }
+                    case '>' -> {
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        nextPage = k;
+                    }
+                    case '<' -> {
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        prevPage = k;
+                    }
+                    case '{', '}', '-' -> {}
                     default -> {
-                        if (items.containsKey(c)) {
-                            inventory.setItem(i, items.get(c));
-                        }
+                        this.slots[k] = Slot.BLOCKED_SLOT;
+                        this.blockedSlots.add(k);
                     }
                 }
-                i++;
             }
+        }
+        this.nextPage = nextPage;
+        this.prevPage = prevPage;
+    }
 
-            List<Category> categoryList = table.getCategories().values().stream().toList();
-            int pos = 0;
-            for (int slot : recipeSlots) {
-                if (pos == categoryList.size()) {
-                    break;
-                }
-                Category category = categoryList.get(pos);
-                inventory.setItem(slot, category.getIconItem().create());
-                categories.put(slot, new RecipeGui(player, table, category));
-                pos++;
-            }
+    private boolean validatePageCount() {
+        if (this.page <= 0) {
+            this.reloadCategoriesTask();
+            return false;
+        }
+        Collection<Category> allCategories = table.getCategories().values();
+        int pageSize = resultSlots.size();
+        int fullCount = allCategories.size();
+        int page = this.page;
+
+        int fullPages = fullCount / pageSize;
+        int rest = fullCount % pageSize;
+        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        if (page >= pages) {
+            this.page = pages;
+            this.reloadCategoriesTask();
+            return false;
+        }
+        return true;
+    }
+
+    private void prevPage() {
+        if (this.page <= 0) {
+            player.closeInventory();
+            return;
+        }
+        this.page--;
+        if (this.validatePageCount()) {
+            Bukkit.getConsoleSender().sendMessage("[-] Validated: " + this.page);
+            this.reloadCategoriesTask();
+        }
+    }
+
+    private void nextPage() {
+        this.page++;
+        if (this.validatePageCount()) {
+            Bukkit.getConsoleSender().sendMessage("[+] Validated: " + this.page);
+            this.reloadCategoriesTask();
         }
     }
 
@@ -72,12 +248,87 @@ public class CategoryGui implements Listener {
         player.openInventory(inventory);
     }
 
+    public void executeCommands(Character c, HumanEntity player) {
+        Collection<DelayedCommand> patternCommands = table.getPattern().getCommands(c);
+        if (patternCommands != null && !patternCommands.isEmpty()) {
+            DelayedCommand.invoke(Fusion.getInstance(), player, patternCommands,
+                    Replacer.replacer("{crafting}", table.getName()),
+                    Replacer.replacer("{inventoryName}", table.getInventoryName()));
+        }
+    }
+
+    public void click(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if ((event.getRawSlot() >= slots.length)) {
+            if (event.getCursor().getType() == Material.BARRIER)
+                event.setCancelled(true);
+            return;
+        }
+        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+
+        Character c = table.getPattern().getSlot(event.getRawSlot());
+        executeCommands(c, event.getWhoClicked());
+
+        //Close on click
+        if (table.getPattern().getCloseOnClickSlots().contains(c)) {
+            Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> event.getWhoClicked().closeInventory());
+        }
+
+        if (slots[event.getRawSlot()].equals(Slot.BLOCKED_SLOT)) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+            if ((nextPage != -1) && (event.getSlot() == nextPage)) {
+                this.nextPage();
+                return;
+            }
+            if (prevPage != -1 && event.getSlot() == prevPage) {
+                this.prevPage();
+                return;
+            }
+            return;
+        }
+        if (slots[event.getRawSlot()].equals(Slot.BASE_RESULT_SLOT)) {
+            event.setCancelled(true);
+            event.setResult(Event.Result.DENY);
+            Fusion.getInstance().runSync(() -> categories.get(event.getRawSlot()).open((Player) event.getWhoClicked()));
+            return;
+        }
+        this.reloadCategoriesTask();
+    }
+
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
+        event.setResult(Event.Result.DENY);
+
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
+
+        Character c = table.getPattern().getSlot(slot);
+        executeCommands(c, event.getWhoClicked());
+
+        if (table.getPattern().getCloseOnClickSlots().contains(c)) {
+            Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> event.getWhoClicked().closeInventory());
+        }
+
+        Bukkit.getConsoleSender().sendMessage("Slot: " + slot);
+        Bukkit.getConsoleSender().sendMessage("Next Page: " + nextPage);
+        Bukkit.getConsoleSender().sendMessage("Prev Page: " + prevPage);
+        Bukkit.getConsoleSender().sendMessage("Page: " + page);
+
+        if ((nextPage != -1) && (event.getSlot() == nextPage)) {
+            this.nextPage();
+            return;
+        } else if (prevPage != -1 && event.getSlot() == prevPage) {
+            this.prevPage();
+            return;
+        }
+
         if (categories.containsKey(slot)) {
             categories.get(slot).open(player);
         }

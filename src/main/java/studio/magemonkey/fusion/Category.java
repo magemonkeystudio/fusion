@@ -19,22 +19,23 @@ import java.util.Map;
 public class Category implements ConfigurationSerializable {
     @Getter
     @Setter
-    private String             name;
+    private String name;
     @Getter
     @Setter
-    private ItemType           iconItem;
+    private ItemType iconItem;
     @Getter
-    private final Collection<Recipe> recipes     = new ArrayList<>();
+    private final Collection<Recipe> recipes = new ArrayList<>();
     @Setter
     @Getter
-    private       InventoryPattern   pattern;
+    private InventoryPattern pattern;
     @Getter
     @Setter
-    private int                order;
-    private       boolean            hasPrevious = true;
+    private int order;
+    private boolean hasPrevious = true;
 
     @Getter
     private final String iconName;
+
     public Category(String name) {
         this.name = name;
         this.order = 0;

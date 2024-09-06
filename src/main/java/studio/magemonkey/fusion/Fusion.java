@@ -17,7 +17,7 @@ import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.deprecated.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
@@ -26,8 +26,7 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.commands.Commands;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
+import studio.magemonkey.fusion.deprecated.CustomGUI;
 
 import java.io.File;
 import java.util.HashMap;
@@ -127,7 +126,7 @@ public class Fusion extends RisePlugin implements Listener {
     }
 
     public void closeAll() {
-        ProfessionGuiRegistry.closeAll();
+        ProfessionsCfg.closeAll();
         BrowseGUI.closeAll();
     }
 

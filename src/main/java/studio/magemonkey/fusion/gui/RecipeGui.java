@@ -3,6 +3,8 @@ package studio.magemonkey.fusion.gui;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
@@ -11,11 +13,10 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -43,7 +44,7 @@ import studio.magemonkey.fusion.util.Utils;
 import java.util.*;
 
 @Getter
-public class RecipeGui {
+public class RecipeGui implements Listener {
 
     private final Player player;
     private final CraftingTable table;
@@ -56,13 +57,13 @@ public class RecipeGui {
     private final HashMap<Integer, CalculatedRecipe> recipes;
 
     private int page = 0;
-    private transient int nextPage;
-    private transient int prevPage;
+    private int nextPage;
+    private int prevPage;
 
     /* Queue Crafting Mode */
     private int queuePage = 0;
-    private transient int prevQueuePage;
-    private transient int nextQueuePage;
+    private int prevQueuePage;
+    private int nextQueuePage;
     private CraftingQueue queue;
 
     /* Manual Crafting Mode */
@@ -90,12 +91,16 @@ public class RecipeGui {
         this.name = table.getName();
         this.inventoryName = table.getInventoryName();
         this.recipes = new HashMap<>(20);
-        this.category = category != null ? category : new Category("master");
-
-        this.pattern = isCategory() ? this.category.getPattern() : table.getPattern();
+        this.category = category != null ? category : new Category("master", "PAPER", table.getPattern(), 1);
+        if(this.category.getName().equals("master")) {
+            this.category.getRecipes().addAll(table.getRecipes().values());
+        }
+        setPattern();
         if (Cfg.craftingQueue && pattern != null) {
             this.queue = PlayerLoader.getPlayer(player).getQueue(table.getName(), this.category);
         }
+        Fusion.registerListener(this);
+        initialize();
     }
 
     private void mapSlots() {
@@ -147,13 +152,13 @@ public class RecipeGui {
     }
 
     public void updateBlockedSlots(MessageData[] data) {
-        int totalItems = isCategory() ? category.getRecipes().size() : table.getRecipes().size();
+        int totalItems = category.getRecipes().size();
         int queuedTotalItems = queue.getQueue().size();
         int fullPages = totalItems / resultSlots.size();
         int rest = totalItems % resultSlots.size();
         int pages = (rest == 0) ? fullPages : (fullPages + 1);
 
-        boolean includeBack = isCategory() && category.hasPrevious();
+        boolean includeBack = category.hasPrevious();
         int queuedPages = -1;
 
         if (!queuedSlots.isEmpty()) {
@@ -193,11 +198,7 @@ public class RecipeGui {
                     if (queue != null && queue.getQueuedItems().containsKey(k)) {
                         inventory.setItem(k, queue.getQueuedItems().get(k).getIcon());
                     } else {
-                        if (table.getUseCategories() && isCategory()) {
-                            inventory.setItem(k, ProfessionsCfg.getQueueSlot(name));
-                        } else if (!table.getUseCategories() && !isCategory()) {
-                            inventory.setItem(k, ProfessionsCfg.getQueueSlot(name));
-                        }
+                        inventory.setItem(k, ProfessionsCfg.getQueueSlot(name));
                     }
                 }
             }
@@ -223,8 +224,7 @@ public class RecipeGui {
     public void reloadRecipes() {
         if (!player.isOnline()) return;
         try {
-            if (!isCategory()) setPattern(category.getPattern());
-            else resetPattern();
+            setPattern();
 
             /* Default setup */
             ItemStack fill = table.getFillItem();
@@ -280,20 +280,18 @@ public class RecipeGui {
                             return;
                         }
 
-                        if (!table.getUseCategories() || this.category.getName() != null) {
-                            QueueItem[] queuedItems = new QueueItem[queuePageSize];
-                            QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
-                            Integer[] queuedSlots = this.queuedSlots.toArray(new Integer[0]);
+                        QueueItem[] queuedItems = new QueueItem[queuePageSize];
+                        QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
+                        Integer[] queuedSlots = this.queuedSlots.toArray(new Integer[0]);
 
-                            for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
-                                 (k < allQueueItemsArray.length) && (j < e);
-                                 k++, j++) {
-                                QueueItem queueItem = allQueueItemsArray[k];
-                                int slot = queuedSlots[j];
-                                this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
-                                this.queue.getQueuedItems().get(slot).updateIcon();
-                                this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
-                            }
+                        for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
+                             (k < allQueueItemsArray.length) && (j < e);
+                             k++, j++) {
+                            QueueItem queueItem = allQueueItemsArray[k];
+                            int slot = queuedSlots[j];
+                            this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
+                            this.queue.getQueuedItems().get(slot).updateIcon();
+                            this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
                         }
                     }
                 }
@@ -359,9 +357,8 @@ public class RecipeGui {
             this.reloadRecipesTask();
             return false;
         }
-        CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
         Collection<Recipe> allRecipes = table.getRecipes().values();
-        int pageSize = this.gui.resultSlots.size();
+        int pageSize = resultSlots.size();
         int allRecipeCount = allRecipes.size();
         int page = this.page;
 
@@ -379,7 +376,7 @@ public class RecipeGui {
     private void prevPage() {
         if (this.page <= 0) {
             cancel(true);
-            PlayerInitialGUI.open(gui, player);
+            ProfessionsCfg.getGUI(name).open(player);
             return;
         }
         this.page--;
@@ -432,8 +429,10 @@ public class RecipeGui {
         }
     }
 
-    public void setPattern(InventoryPattern pattern) {
-        this.pattern = pattern;
+    public void setPattern() {
+        this.pattern = this.category.getPattern();
+        if (this.pattern == null)
+            this.pattern = table.getPattern();
         mapSlots();
     }
 
@@ -454,10 +453,6 @@ public class RecipeGui {
         player.openInventory(inventory);
     }
 
-    public boolean isCategory() {
-        return !category.getName().equalsIgnoreCase("master");
-    }
-
     /* Manage Crafting Algorithm */
     private boolean canCraft(CalculatedRecipe calculatedRecipe, int slot) {
         Recipe recipe = calculatedRecipe.getRecipe();
@@ -465,7 +460,7 @@ public class RecipeGui {
                 .hasMastered(table.getName())) {
             MessageUtil.sendMessage("fusion.error.noMastery",
                     player,
-                    new MessageData("craftingTable", ProfessionsCfg.getTable(gui.getName())));
+                    new MessageData("craftingTable", ProfessionsCfg.getTable(table.getName())));
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
@@ -476,7 +471,7 @@ public class RecipeGui {
         if (!Objects.equals(this.recipes.get(slot), calculatedRecipe)) {
             return false;
         }
-        if (LevelFunction.getLevel(player, ProfessionsCfg.getTable(this.gui.name)) < recipe.getConditions().getProfessionLevel()) {
+        if (LevelFunction.getLevel(player, table) < recipe.getConditions().getProfessionLevel()) {
             MessageUtil.sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
             return false;
         }
@@ -825,7 +820,7 @@ public class RecipeGui {
             return;
         }
         Inventory pInventory = p.getInventory();
-        if(inv.equals(this.inventory)) {
+        if (inv.equals(this.inventory)) {
             for (int i = 0; i < this.slots.length; i++) {
                 if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT)
                         || this.slots[i].equals(Slot.QUEUED_SLOT)) {
@@ -863,7 +858,7 @@ public class RecipeGui {
         if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
-        if(e.getInventory().equals(this.inventory) && !Cfg.craftingQueue) {
+        if (e.getInventory().equals(this.inventory) && !Cfg.craftingQueue) {
             if (e.getOldCursor().getType() == Material.BARRIER)
                 e.setCancelled(true);
             if (e.getRawSlots()
@@ -888,7 +883,7 @@ public class RecipeGui {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if(this.getInventory().getViewers().contains(player) && !Cfg.craftingQueue) {
+        if (this.getInventory().getViewers().contains(player) && !Cfg.craftingQueue) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();

@@ -23,8 +23,6 @@ import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.gui.PlayerInitialGUI;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.util.Utils;
 

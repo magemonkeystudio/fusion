@@ -1,9 +1,7 @@
-package studio.magemonkey.fusion.gui;
+package studio.magemonkey.fusion.deprecated;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;

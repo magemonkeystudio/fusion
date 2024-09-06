@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui;
+package studio.magemonkey.fusion.deprecated;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -39,7 +39,7 @@ import java.util.*;
 
 public class PlayerCustomGUI implements Listener {
     @Getter
-    private final CustomGUI                          gui;
+    private final CustomGUI gui;
     private final Player                             player;
     private final Inventory                          inventory;
     @Getter
