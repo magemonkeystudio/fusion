@@ -161,10 +161,10 @@ public class BrowseGUI implements Listener {
         Player p = (Player) e.getWhoClicked();
         e.setCancelled(true);
 
-        CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
-        if (guiToOpen == null) return;
+        ProfessionGuiRegistry gui = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
+        if (gui == null) return;
 
-        String profession = guiToOpen.getName();
+        String profession = gui.getProfession();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
         ProfessionConditions conditions = BrowseConfig.getProfessionConditions(profession);

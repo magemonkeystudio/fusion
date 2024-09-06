@@ -11,6 +11,7 @@ import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.queue.QueueItem;
 import studio.magemonkey.fusion.util.Utils;
 
@@ -22,7 +23,7 @@ public class ProfessionsCfg {
     @Getter
     private static final Map<String, CraftingTable> map = new HashMap<>(4);
     @Getter
-    private static final Map<String, CustomGUI> guiMap = new HashMap<>(4);
+    private static final Map<String, ProfessionGuiRegistry> guiMap = new HashMap<>(4);
     @Getter
     private static final Map<String, FileConfiguration> cfgs = new HashMap<>(4);
     @Getter
@@ -45,8 +46,7 @@ public class ProfessionsCfg {
 
         for (Map.Entry<String, CraftingTable> entry : map.entrySet()) {
             String key = entry.getKey();
-            CraftingTable value = entry.getValue();
-            guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
+            guiMap.put(key, new ProfessionGuiRegistry(key));
         }
     }
 
@@ -123,7 +123,7 @@ public class ProfessionsCfg {
         return map.get(str);
     }
 
-    public static CustomGUI getGUI(String str) {
+    public static ProfessionGuiRegistry getGUI(String str) {
         if (str == null) return null;
         return guiMap.get(str);
     }

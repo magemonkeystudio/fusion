@@ -27,6 +27,7 @@ import studio.magemonkey.fusion.commands.Commands;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 
 import java.io.File;
 import java.util.HashMap;
@@ -126,7 +127,7 @@ public class Fusion extends RisePlugin implements Listener {
     }
 
     public void closeAll() {
-        ProfessionsCfg.getGuiMap().values().forEach(CustomGUI::closeAll);
+        ProfessionGuiRegistry.closeAll();
         BrowseGUI.closeAll();
     }
 

@@ -371,21 +371,10 @@ public class CustomGUI implements Listener {
         this.onClose(e.getPlayer());
     }
 
-    public void closeAll() {
+    public void closeAll() { // TODO use in registry
         new ArrayList<>(this.map.keySet()).forEach(h -> {
             this.onClose(h);
             h.closeInventory();
         });
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .appendSuper(super.toString())
-                .append("name", this.name)
-                .append("inventoryName", this.inventoryName)
-                .append("slots", this.slots)
-                .append("pattern", this.pattern)
-                .toString();
     }
 }
