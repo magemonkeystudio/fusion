@@ -47,7 +47,7 @@ The **Profession Editor** starts with a plain gui that allows to configure the f
     - Shown as: Map
     - Usage: Click on the item to navigate to the [Recipes Editor](#using-recipe-editor)
       <br><br>
-- **Use Categories**: Rather you want to split the recipes guis of `/craft use <profession` into sub-categories or not.
+- **Use Categories**: Rather you want to split the recipes guis of `/craft use <profession>` into sub-categories or not.
   Keep in mind to configure the category pattern properly when you set this to `true`.
     - Shown as: Book
     - Usage: Click on the item to toggle between `true` and `false`

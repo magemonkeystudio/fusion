@@ -12,7 +12,8 @@ public class HookManager {
     public HookManager() {
         hookedPlugins = new LinkedList<>();
         for (HookType hook : HookType.values()) {
-            if (Fusion.getInstance().getServer().getPluginManager().getPlugin(hook.toString()) != null) {
+            if (Fusion.getInstance().getServer().getPluginManager().getPlugin(hook.toString()) != null
+                    && Fusion.getInstance().getServer().getPluginManager().isPluginEnabled(hook.toString())) {
                 hookedPlugins.add(hook);
                 Fusion.getInstance().getLogger().info("Hooked: " + hook);
             }
