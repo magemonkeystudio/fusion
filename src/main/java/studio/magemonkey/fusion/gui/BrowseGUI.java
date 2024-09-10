@@ -15,25 +15,26 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Profession;
-import studio.magemonkey.fusion.Utils;
+import studio.magemonkey.fusion.*;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.Profession;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BrowseGUI implements Listener {
 
@@ -42,9 +43,9 @@ public class BrowseGUI implements Listener {
 
     private Inventory inventory;
     private final Map<Integer, String> slotMap = new HashMap<>();
+    private final Map<Integer, CalculatedProfession> calculatedProfessionMap = new HashMap<>();
     protected final String inventoryName;
     private final Player player;
-    private final UUID opener;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -53,7 +54,6 @@ public class BrowseGUI implements Listener {
     public BrowseGUI(String inventoryName, Player player, ItemStack fill) {
         this.inventoryName = inventoryName;
         this.player = player;
-        this.opener = player.getUniqueId();
         if (fill == null)
             fill = BrowseConfig.getBrowseFill();
         this.fillItem = fill;
@@ -111,13 +111,22 @@ public class BrowseGUI implements Listener {
                 if (table == null || !Utils.hasCraftingUsePermission(player, table.getName().toLowerCase()))
                     continue;
 
-                ItemStack item = table.getIconItem() != null ? table.getIconItem().create()
-                        : ItemBuilder.newItem(Material.BEDROCK)
-                        .name(ChatColor.RED + table.getName())
-                        .newLoreLine(ChatColor.RED + "Missing icon in config.")
-                        .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
-                        .build();
 
+                Collection<ItemStack> playerItems = PlayerCustomGUI.getPlayerItems(player);
+                CalculatedProfession calculatedProfession = CalculatedProfession.create(BrowseConfig.getProfessionConditions(table.getName()), playerItems, player, table);
+                calculatedProfessionMap.put(k, calculatedProfession);
+
+                ItemStack item;
+                if (Cfg.showRequirementsOnBrowse) {
+                    item = calculatedProfession.getIcon();
+                } else {
+                    item = table.getIconItem() != null ? table.getIconItem().create()
+                            : ItemBuilder.newItem(Material.BEDROCK)
+                            .name(ChatColor.RED + table.getName())
+                            .newLoreLine(ChatColor.RED + "Missing icon in config.")
+                            .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                            .build();
+                }
                 inventory.setItem(k, item);
                 this.slotMap.put(k, table.getName());
 
@@ -153,51 +162,86 @@ public class BrowseGUI implements Listener {
         Player p = (Player) e.getWhoClicked();
         e.setCancelled(true);
 
-        CustomGUI guiToOpen = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
-        if (guiToOpen == null) return;
+        ProfessionGuiRegistry gui = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
+        if (gui == null) return;
 
-        String profession = guiToOpen.getName();
+        String profession = gui.getProfession();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
 
-        int unlocked = fusionPlayer.getUnlockedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(p, "fusion.limit"); //Set the max number of unlockable professions.
-        int cost = BrowseConfig.getProfCost(profession);
+        ProfessionConditions conditions = BrowseConfig.getProfessionConditions(profession);
 
-        MessageData[] data = {
-                new MessageData("profession", profession),
-                new MessageData("unlocked", unlocked),
-                new MessageData("limit", allowed),
-                new MessageData("cost", cost),
-                new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
-        };
-
-        if (fusionPlayer.hasProfession(profession)) {
+        if (conditions == null) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profAlreadyUnlocked", p, data);
+            MessageUtil.sendMessage("fusion.error.profNotAvailable", p, new MessageData("profession", profession));
             return;
         }
 
-        if (unlocked >= allowed) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.limitReached", p, data);
+        if (!conditions.isValid(fusionPlayer))
             return;
+
+        double moneyCost = conditions.getMoneyCost();
+        int expCost = conditions.getExpCost();
+
+        Collection<ItemStack> itemsToTake = conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
+        Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
+        PlayerInventory inventory   = this.player.getInventory();
+
+        for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
+            ItemStack toTake = iterator.next();
+            for (ItemStack entry : PlayerCustomGUI.getPlayerItems(player)) {
+                ItemStack item = entry.clone();
+                entry = entry.clone();
+                if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
+                    item = item.clone();
+                    entry.setAmount(toTake.getAmount());
+                    if (CalculatedRecipe.isSimilar(toTake, item)) {
+                        toTake = entry;
+                        break;
+                    }
+                }
+            }
+
+            HashMap<Integer, ItemStack> notRemoved = inventory.removeItem(toTake);
+            if (notRemoved.isEmpty()) {
+                taken.add(toTake);
+                iterator.remove();
+                continue;
+            }
+            for (ItemStack itemStack : taken) {
+                HashMap<Integer, ItemStack> notAdded = inventory.addItem(itemStack);
+                if (notAdded.isEmpty()) {
+                    break;
+                }
+                for (ItemStack stack : notAdded.values()) {
+                    this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
+                }
+            }
+            break;
         }
 
-        if (cost > 0 && !CodexEngine.get().getVault().canPay(p, cost)) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profNoFunds", p, data);
+        if (!itemsToTake.isEmpty()) {
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("profession", profession));
             return;
         }
 
         fusionPlayer.addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
-        if (cost > 0)
-            CodexEngine.get().getVault().take(p, cost);
-        data[1] = new MessageData("unlocked", unlocked + 1);
+        if (moneyCost > 0)
+            CodexEngine.get().getVault().take(p, moneyCost);
+        if (expCost > 0)
+            ExperienceManager.setTotalExperience(p, (ExperienceManager.getTotalExperience(p) - expCost));
+
+        MessageData[] data = {
+                new MessageData("profession", profession),
+                new MessageData("costs.money", moneyCost),
+                new MessageData("costs.experience", expCost),
+                new MessageData("unlocked", fusionPlayer.getJoinedProfessions().size()),
+                new MessageData("limit", PlayerUtil.getPermOption(player, "fusion.limit")),
+                new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
+        };
+
         MessageUtil.sendMessage("fusion.unlockedProfession", p, data);
         p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-
-//
-//        PlayerInitialGUI.open(guiToOpen, p);
     }
 
     @EventHandler(ignoreCancelled = true)

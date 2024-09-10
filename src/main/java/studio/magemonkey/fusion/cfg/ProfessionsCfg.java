@@ -1,34 +1,32 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.items.providers.VanillaProvider;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.codex.legacy.item.ItemColors;
+import studio.magemonkey.fusion.Category;
 import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.Utils;
-import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ProfessionsCfg {
 
     @Getter
-    private static final Map<String, CraftingTable>     map    = new HashMap<>(4);
+    private static final Map<String, CraftingTable> map = new HashMap<>(4);
     @Getter
-    private static final Map<String, CustomGUI>         guiMap = new HashMap<>(4);
+    private static final Map<String, ProfessionGuiRegistry> guiMap = new HashMap<>(4);
     @Getter
-    private static final Map<String, FileConfiguration> cfgs   = new HashMap<>(4);
+    private static final Map<String, FileConfiguration> cfgs = new HashMap<>(4);
+    @Getter
+    private static final Map<String, File> files = new HashMap<>(4);
 
     public static void init() {
         map.clear();
@@ -37,53 +35,86 @@ public class ProfessionsCfg {
         if (!professionFolder.exists()) {
             professionFolder.mkdirs();
         }
-        if (professionFolder.listFiles() == null) {
-            Fusion.getInstance().getLogger().warning("There are no professions registered to load.");
-            Fusion.getInstance().getLogger().warning("Initializing default profession 'craft'");
-            HashMap<Character, ItemStack> items = new HashMap<>();
-            items.put('0', ItemBuilder.newItem(Material.STONE).durability(ItemColors.BLACK).build());
-            items.put('>', ItemBuilder.newItem(Material.BOOK).name("Next page").build());
-            items.put('<', ItemBuilder.newItem(Material.BOOK).name("Prev page").build());
-            InventoryPattern ip =
-                    new InventoryPattern(new String[]{"=========", "=========", "=========", "=========",
-                            Cfg.craftingQueue ? "{-------}" : "=========", "<0000000>"},
-                            items);
-            ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-            CraftingTable b = new CraftingTable("craft",
-                    "Craft inventory name",
-                    new VanillaProvider.VanillaItemType(Material.PAPER),
-                    ip,
-                    item,
-                    0,
-                    0);
-            loadFrom("craft", b.serialize());
-            return;
+        if (professionFolder.listFiles() == null || Objects.requireNonNull(professionFolder.listFiles()).length == 0) {
+            Fusion.getInstance().getLogger().warning("Professions folder is empty. Adding default professions.");
+            YamlParser.loadOrExtract(Fusion.getInstance(), "professions/armor_smithing.yml");
+            YamlParser.loadOrExtract(Fusion.getInstance(), "professions/weapon_smithing.yml");
         }
 
-        for (File file : Objects.requireNonNull(professionFolder.listFiles())) {
+        loadProfessions(professionFolder);
+
+        for (Map.Entry<String, CraftingTable> entry : map.entrySet()) {
+            String key = entry.getKey();
+            guiMap.put(key, new ProfessionGuiRegistry(key));
+        }
+    }
+
+    public static boolean createNewProfession(String profession, String refProfession) {
+        FileConfiguration cfg = new YamlConfiguration();
+        try {
+            if (refProfession != null && files.containsKey(refProfession)) {
+                cfg = YamlConfiguration.loadConfiguration(files.get(refProfession));
+                files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
+                File file = files.get(profession);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                cfg.set("name", profession);
+                cfg.save(file);
+                Map<String, Object> _map = cfg.getValues(true);
+                CraftingTable ct = new CraftingTable(_map);
+                map.put(ct.getName(), ct);
+                cfgs.put(profession, cfg);
+                files.put(profession, file);
+                return true;
+            } else if (refProfession == null) {
+                files.put(profession, new File(Fusion.getInstance().getDataFolder() + File.separator + "professions", profession + ".yml"));
+                File file = files.get(profession);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                cfg.load(file);
+                cfg.set("name", profession);
+                addDefs(cfg);
+                cfg.save(file);
+                cfg.load(file);
+                Map<String, Object> _map = cfg.getValues(true);
+                CraftingTable ct = new CraftingTable(_map);
+                map.put(ct.getName(), ct);
+                files.put(profession, file);
+                cfgs.put(profession, cfg);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private static void loadProfessions(File root) {
+        for (File file : Objects.requireNonNull(root.listFiles())) {
             if (file.getName().endsWith(".yml")) {
                 FileConfiguration cfg = new YamlConfiguration();
                 try {
+                    Bukkit.getConsoleSender().sendMessage("loading " + file.getName());
                     cfg.load(file);
-                    addCraftingQueueDefs(cfg);
+                    addDefs(cfg);
                     cfg.save(file);
                     cfg.load(file);
                     // Get the YAMLs whole content as a map
                     Map<String, Object> _map = cfg.getValues(true);
-                    CraftingTable       ct   = new CraftingTable(_map);
+                    CraftingTable ct = new CraftingTable(_map);
                     map.put(ct.getName(), ct);
                     cfgs.put(ct.getName(), cfg);
+                    files.put(ct.getName(), file);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
                 }
+            } else if (file.isDirectory()) {
+                loadProfessions(file);
             }
-        }
-
-        for (Map.Entry<String, CraftingTable> entry : map.entrySet()) {
-            String        key   = entry.getKey();
-            CraftingTable value = entry.getValue();
-            guiMap.put(key, new CustomGUI(key, value.getInventoryName(), value.getPattern()));
         }
     }
 
@@ -91,12 +122,25 @@ public class ProfessionsCfg {
         return map.get(str);
     }
 
-    public static CustomGUI getGUI(String str) {
+    public static ProfessionGuiRegistry getGUI(String str) {
         if (str == null) return null;
         return guiMap.get(str);
     }
 
-    private static void addCraftingQueueDefs(FileConfiguration cfg) {
+    private static void addDefs(FileConfiguration cfg) {
+        if (!cfg.isSet("icon")) {
+            cfg.set("icon", "STONE");
+        }
+        if (!cfg.isSet("inventoryName")) {
+            cfg.set("inventoryName", "Template Profession");
+        }
+        if (!cfg.isSet("useCategories")) {
+            cfg.set("useCategories", false);
+        }
+        if (!cfg.isSet("pattern.pattern")) {
+            List<String> pattern = new ArrayList<>(Arrays.asList("fffffffff", "fooooooof", "fooooooof", "ff-----ff", "f{<f0f>}f"));
+            cfg.set("pattern.pattern", pattern);
+        }
         if (!cfg.isSet("pattern.items.}")) {
             cfg.set("pattern.items.}.material", "LIME_DYE");
             cfg.set("pattern.items.}.amount", 1);
@@ -106,6 +150,26 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.}.lore", List.of());
             cfg.set("pattern.items.}.flags", List.of());
             cfg.set("pattern.items.}.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.>")) {
+            cfg.set("pattern.items.>.material", "GREEN_DYE");
+            cfg.set("pattern.items.>.amount", 1);
+            cfg.set("pattern.items.>.durability", 0);
+            cfg.set("pattern.items.>.unbreakable", false);
+            cfg.set("pattern.items.>.name", "Next recipes");
+            cfg.set("pattern.items.>.lore", List.of());
+            cfg.set("pattern.items.>.flags", List.of());
+            cfg.set("pattern.items.>.enchants", Map.of());
+        }
+        if (!cfg.isSet("pattern.items.<")) {
+            cfg.set("pattern.items.<.material", "GREEN_DYE");
+            cfg.set("pattern.items.<.amount", 1);
+            cfg.set("pattern.items.<.durability", 0);
+            cfg.set("pattern.items.<.unbreakable", false);
+            cfg.set("pattern.items.<.name", "Previous recipes");
+            cfg.set("pattern.items.<.lore", List.of());
+            cfg.set("pattern.items.<.flags", List.of());
+            cfg.set("pattern.items.<.enchants", Map.of());
         }
         if (!cfg.isSet("pattern.items.{")) {
             cfg.set("pattern.items.{.material", "LIME_DYE");
@@ -167,6 +231,121 @@ public class ProfessionsCfg {
             cfg.set("pattern.items.fillItem.flags", List.of());
             cfg.set("pattern.items.fillItem.enchants", Map.of());
         }
+
+        // TODO correct serialization for catPattern without queue-items
+        if (cfg.isSet("categoryPattern")) {
+            if (!cfg.isSet("categoryPattern.items.queue-items.-")) {
+                cfg.set("categoryPattern.items.queue-items.-", cfg.getConfigurationSection("pattern.items.queue-items.-").getValues(false));
+            }
+            if (!cfg.isSet("categoryPattern.items.queue-items.Unfinished")) {
+                cfg.set("categoryPattern.items.queue-items.Unfinished", cfg.getConfigurationSection("pattern.items.queue-items.Unfinished").getValues(false));
+            }
+            if (!cfg.isSet("categoryPattern.items.queue-items.Finished")) {
+                cfg.set("categoryPattern.items.queue-items.Finished", cfg.getConfigurationSection("pattern.items.queue-items.Finished").getValues(false));
+            }
+        }
+
+        if (!cfg.isSet("categories")) {
+            cfg.set("categories", List.of(new Category("First Category").serialize()));
+        }
+        if (cfg.isSet("recipes")) {
+            // Retrieve the list of recipes
+            List<Map<?, ?>> recipesSection = cfg.getMapList("recipes");
+
+            // Ensure recipesSection is not null
+            if (recipesSection != null) {
+                // Create a new list to hold the modified recipes
+                List<Map<String, Object>> modifiedRecipes = new ArrayList<>();
+
+                // Iterate and modify recipes
+                for (Map<?, ?> recipeData : recipesSection) {
+                    try {
+                        // Create a mutable copy of the recipe data
+                        Map<String, Object> mutableRecipeData = (Map<String, Object>) new LinkedHashMap<>(recipeData);
+
+                        Map<String, Object> costs = (Map<String, Object>) mutableRecipeData.getOrDefault("costs", new HashMap<>());
+                        Map<String, Object> results = (Map<String, Object>) mutableRecipeData.getOrDefault("results", new HashMap<>());
+                        Map<String, Object> conditions = (Map<String, Object>) mutableRecipeData.getOrDefault("conditions", new HashMap<>());
+
+
+                        if (mutableRecipeData.containsKey("cooldown")) {
+                            int craftingTime = (int) mutableRecipeData.getOrDefault("cooldown", 0);
+                            mutableRecipeData.remove("cooldown");
+                            mutableRecipeData.put("craftingTime", craftingTime);
+                        }
+
+                        // Costs
+                        if (mutableRecipeData.containsKey("price")) {
+                            costs.put("money", (mutableRecipeData.get("price") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("price")).doubleValue() : 0.0);
+                            mutableRecipeData.remove("price");
+                        }
+                        if (mutableRecipeData.containsKey("costs") && mutableRecipeData.get("costs") instanceof Number) {
+                            costs.put("exp", ((mutableRecipeData.get("costs") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("costs")).doubleValue() : 0.0));
+                        }
+                        if (mutableRecipeData.containsKey("pattern")) {
+                            List<String> pattern = (List<String>) mutableRecipeData.get("pattern");
+                            mutableRecipeData.remove("pattern");
+                            costs.put("items", pattern);
+                        }
+
+                        // Conditions
+                        if (mutableRecipeData.containsKey("mastery")) {
+                            boolean mastery = (boolean) mutableRecipeData.getOrDefault("mastery", false);
+                            mutableRecipeData.remove("mastery");
+                            conditions.put("mastery", mastery);
+                        }
+                        if (mutableRecipeData.containsKey("neededLevels")) {
+                            int neededLevels = (int) mutableRecipeData.getOrDefault("neededLevels", 0);
+                            mutableRecipeData.remove("neededLevels");
+                            conditions.put("professionLevel", neededLevels);
+                        }
+                        if (mutableRecipeData.containsKey("rank")) {
+                            String rank = (String) mutableRecipeData.getOrDefault("rank", null);
+                            mutableRecipeData.remove("rank");
+                            conditions.put("rank", rank);
+                        }
+
+                        // Results
+                        if (mutableRecipeData.containsKey("result")) {
+                            String item = mutableRecipeData.get("result").toString();
+                            mutableRecipeData.remove("result");
+                            results.put("item", item);
+                        }
+                        if (mutableRecipeData.containsKey("xpGain")) {
+                            results.put("professionExp", ((mutableRecipeData.get("xpGain") instanceof Number)
+                                    ? ((Number) mutableRecipeData.get("xpGain")).intValue() : 0));
+                            mutableRecipeData.remove("xpGain");
+                        }
+                        if (mutableRecipeData.containsKey("commands")) {
+                            List<String> commands = (List<String>) mutableRecipeData.get("commands");
+                            mutableRecipeData.remove("commands");
+                            results.put("commands", commands);
+                        }
+
+
+                        mutableRecipeData.put("results", results);
+                        mutableRecipeData.put("conditions", conditions);
+                        mutableRecipeData.put("costs", costs);
+                        // Add the modified recipe to the new list
+                        modifiedRecipes.add(mutableRecipeData);
+                    } catch (Exception e) {
+                        Fusion.getInstance()
+                                .error("Exception when reading config, Invalid entry in config of " + recipeData
+                                        + " crafting table. Value: " + recipeData);
+                        e.printStackTrace();
+                    }
+                }
+
+                // Set the modified recipes back to the config
+                cfg.set("recipes", modifiedRecipes);
+            } else {
+                Fusion.getInstance().error("Recipes section is null in the config.");
+            }
+        } else {
+            cfg.set("recipes", new ArrayList<>());
+        }
     }
 
     public static boolean loadFrom(String key, Map<String, Object> map) {
@@ -203,9 +382,9 @@ public class ProfessionsCfg {
     }
 
     public static ItemStack getFillItem(String key) {
-        String       name     = cfgs.get(key).getString("pattern.items.fillItem.name", " ");
-        List<String> lore     = cfgs.get(key).getStringList("pattern.items.fillItem.lore");
-        Material     material = Material.getMaterial(cfgs.get(key)
+        String name = cfgs.get(key).getString("pattern.items.fillItem.name", " ");
+        List<String> lore = cfgs.get(key).getStringList("pattern.items.fillItem.lore");
+        Material material = Material.getMaterial(cfgs.get(key)
                 .getString("pattern.items.fillItem.material", "BLACK_STAINED_GLASS_PANE"));
         return ItemBuilder.newItem(material).name(name).lore(lore).build();
     }
@@ -232,8 +411,8 @@ public class ProfessionsCfg {
     public static ItemStack getQueueItem(String key, QueueItem item) {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
-        FileConfiguration cfg  = cfgs.get(key);
-        String            path =
+        FileConfiguration cfg = cfgs.get(key);
+        String path =
                 item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
 
 
@@ -241,12 +420,18 @@ public class ProfessionsCfg {
             Fusion.getInstance().getLogger().warning("Profession '" + key + "' is missing '" + path + "'.");
             return null;
         }
-        ItemStack    result   = item.getRecipe().getResult().getItemStack();
-        Material     material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
+        ItemStack result = item.getRecipe().getResults().getResultItem().getItemStack();
+        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())
                 .toUpperCase());
-        List<String> lore     = cfg.getStringList(path + ".lore");
+        List<String> lore = cfg.getStringList(path + ".lore");
         lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime())));
         return ItemBuilder.newItem(result).material(material).lore(lore).build();
+    }
+
+    public static void closeAll() {
+        for (ProfessionGuiRegistry gui : guiMap.values()) {
+            gui.closeAll();
+        }
     }
 }

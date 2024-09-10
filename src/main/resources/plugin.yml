@@ -8,6 +8,12 @@ depend:
 softdepend:
   - Sapphire
   - Divinity
+  - Fabled
+  - mcMMO
+  - Jobs
+  - AureliumSkills
+  - AuraSkills
 api-version: 1.13
 commands:
   craft:
+  fusion-editor:

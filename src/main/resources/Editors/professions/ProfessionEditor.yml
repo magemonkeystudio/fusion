@@ -1,0 +1,190 @@
+title: '&2Profession &a$<profession>'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: []
+    flags: []
+    enchants: {}
+  name:
+    material: NAME_TAG
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Name'
+    lore:
+      - '&7Current: &a$<name>'
+      - '&7Click to change the profession name.'
+      - '&8--------------------'
+      - '&aClick &7to rename.'
+    flags: []
+    enchants: {}
+  icon:
+    material: '$<material>'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Icon'
+    lore:
+      - '&7Current: &a$<icon>'
+      - '&7Click to change the icon item.'
+      - '&8--------------------'
+      - '&aClick &7to change.'
+  masteryUnlock:
+    material: DIAMOND
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Mastery Unlock'
+    lore:
+      - '&7Current: &a$<masteryUnlock>'
+      - '&7The profession level you need to'
+      - '&7reach to unlock mastery for'
+      - '&7this profession.'
+      - '&8--------------------'
+      - '&aLeft click &7to increase the level.'
+      - '&aRight click &7to decrease the level.'
+      - '&aShift click &7each to increase by 10.'
+    flags: []
+    enchants: {}
+  masteryCost:
+    material: GREEN_CANDLE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Mastery Cost'
+    lore:
+      - '&7Current: &a$$<masteryCost>'
+      - '&7The cost to unlock'
+      - '&7mastery for this profession.'
+      - '&8--------------------'
+      - '&aLeft click &7to increase the cost.'
+      - '&aRight click &7to decrease the cost.'
+      - '&aShift click &7each to increase by 10.'
+    flags: []
+    enchants: {}
+  useCategories:
+    material: BOOK
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Use Categories'
+    lore:
+      - '&7Current: &a$<useCategories>'
+      - '&7Whether or not to use categories'
+      - '&7in the crafting menu.'
+      - '&8--------------------'
+      - '&aClick &7to toggle categories.'
+    flags: []
+    enchants: {}
+  patternItems:
+    material: OAK_DOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Pattern Items'
+    lore:
+      - '&7A range of items for the'
+      - '&7default pattern in the menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to setup pattern items.'
+    flags: []
+    enchants: {}
+  pattern:
+    material: OAK_TRAPDOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Pattern'
+    lore:
+      - '&7The pattern for the crafting menu.'
+      - '&8--------------------'
+      - '&7You will simulate a crafting menu'
+      - '&7with the pattern items.'
+      - '&aLeft click &ctheir &7to cycle items forward.'
+      - '&aRight click &ctheir &7to cycle items backward.'
+      - '&aESC &7to exit the pattern setup and save.'
+      - '&8--------------------'
+      - '&aLeft click &chere &7to setup the pattern.'
+      - '&aRight click &chere &7to clear the pattern.'
+    flags: []
+    enchants: {}
+  categories:
+    material: IRON_BARS
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Categories'
+    lore:
+      - '&7The categories for the crafting menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to setup categories.'
+    flags: []
+    enchants: {}
+  categoryPatternItems:
+    material: IRON_DOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Category Pattern Items'
+    lore:
+      - '&7A range of items for the'
+      - '&7default category pattern in the menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to setup category pattern items.'
+    flags: []
+    enchants: {}
+  categoryPattern:
+    material: IRON_TRAPDOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Category Pattern'
+    lore:
+      - '&7The pattern for the category crafting menu.'
+      - '&8--------------------'
+      - '&7You will simulate a category crafting menu'
+      - '&7with the category pattern items.'
+      - '&aLeft click &ctheir &7to cycle items forward.'
+      - '&aRight click &ctheir &7to cycle items backward.'
+      - '&aESC &7to exit the category pattern setup and save.'
+      - '&8--------------------'
+      - '&aLeft click &chere &7to setup the category pattern.'
+      - '&aRight click &chere &7to clear the category pattern.'
+    flags: []
+    enchants: {}
+  recipes:
+    material: MAP
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Recipes'
+    lore:
+      - '&7The recipes for the crafting menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to setup recipes.'
+    flags: []
+    enchants: {}
+  save:
+    material: LIME_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aSave'
+    lore:
+      - '&7Save all changes into the config.'
+    flags: []
+    enchants: {}
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }

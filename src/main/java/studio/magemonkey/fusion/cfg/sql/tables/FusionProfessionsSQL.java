@@ -1,7 +1,7 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Profession;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.sql.PreparedStatement;

@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui;
+package studio.magemonkey.fusion.deprecated;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,13 +9,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Category;
+import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.LevelFunction;
+import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI              gui;
+    private final CustomGUI gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
     private       boolean                isBase  = false;
 

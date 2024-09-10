@@ -1,6 +1,8 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.util;
 
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
+import studio.magemonkey.codex.legacy.item.ItemBuilder;
 
 public final class Utils {
 
@@ -29,5 +31,14 @@ public final class Utils {
             return minutes + "m " + secs + "s";
         }
         return hours + "h " + minutes + "m " + secs + "s";
+    }
+
+    public static String getItemName(ItemStack item) {
+        if(!item.hasItemMeta()) {
+            String name = item.getType().name().replace("_", " ").toLowerCase();
+            return name.substring(0, 1).toUpperCase() + name.substring(1);
+        } else {
+            return ItemBuilder.newItem(item).getName();
+        }
     }
 }

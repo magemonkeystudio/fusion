@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.commands;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
@@ -12,14 +12,19 @@ import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.CraftingTable;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.LevelFunction;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
-import studio.magemonkey.fusion.gui.PlayerInitialGUI;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +47,8 @@ public class Commands implements CommandExecutor, TabCompleter {
                 if (!Utils.hasCraftingUsePermission(sender, null)) {
                     return true;
                 }
-                CustomGUI eq = ProfessionsCfg.getGuiMap().get(args[1]);
+
+                ProfessionGuiRegistry eq = ProfessionsCfg.getGuiMap().get(args[1]);
                 if (eq == null) {
                     MessageUtil.sendMessage("fusion.notACrafting",
                             sender,
@@ -65,7 +71,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
                     //TODO ?? Make sure they have unlocked this crafting menu
 
-                    PlayerInitialGUI.open(eq, target);
+                    eq.open(target);
                     MessageUtil.sendMessage("fusion.useConfirmOther",
                             sender,
                             new MessageData("craftingInventory", eq),
@@ -74,17 +80,15 @@ public class Commands implements CommandExecutor, TabCompleter {
                     return true;
                 } else {
                     if (sender instanceof Player) {
-                        if (!Utils.hasCraftingUsePermission(sender, eq.getName())) {
+                        if (!Utils.hasCraftingUsePermission(sender, eq.getProfession())) {
                             return true;
                         }
                         //Make sure they have unlocked this crafting menu
-                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getName())) {
+                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getProfession())) {
                             MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }
-
-                        PlayerInitialGUI.open(eq, Bukkit.getPlayer(((Player) sender).getUniqueId()));
-
+                        eq.open((Player) sender);
                         MessageUtil.sendMessage("fusion.useConfirm",
                                 sender,
                                 new MessageData("craftingInventory", eq),
@@ -95,11 +99,29 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
+            } else if (args[0].equalsIgnoreCase("editor")) {
+                String editType = args[1];
+                if (editType.equalsIgnoreCase("browse")) {
+                    // TODO BrowseEditor
+                } else if (editType.equalsIgnoreCase("profession")) {
+                    String profession = args[2];
+                    if (ProfessionsCfg.getTable(profession) == null) {
+                        // TODO generate new template profession to work with
+                        MessageUtil.sendMessage("fusion.notACrafting",
+                                sender,
+                                new MessageData("name", profession),
+                                new MessageData("sender", sender));
+                        return true;
+                    } else {
+                        EditorRegistry.getProfessionEditor((Player) sender, profession).open((Player) sender);
+                    }
+                }
+                return true;
             } else if (args[0].equalsIgnoreCase("master")) {
                 if (sender instanceof Player) {
-                    Player        player  = (Player) sender;
-                    String        guiName = args[1];
-                    CraftingTable table   = ProfessionsCfg.getTable(guiName);
+                    Player player = (Player) sender;
+                    String guiName = args[1];
+                    CraftingTable table = ProfessionsCfg.getTable(guiName);
                     if (table == null) {
                         MessageUtil.sendMessage("fusion.notACrafting",
                                 sender,
@@ -144,8 +166,8 @@ public class Commands implements CommandExecutor, TabCompleter {
                 }
             } else if (args[0].equalsIgnoreCase("forget")) {
                 if (sender instanceof Player) {
-                    Player        player = (Player) sender;
-                    CraftingTable table  = ProfessionsCfg.getTable(args[1]);
+                    Player player = (Player) sender;
+                    CraftingTable table = ProfessionsCfg.getTable(args[1]);
                     if (table == null) {
                         MessageUtil.sendMessage("fusion.notACrafting",
                                 sender,
@@ -176,8 +198,8 @@ public class Commands implements CommandExecutor, TabCompleter {
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             } else if (args[0].equalsIgnoreCase("storage")) {
-                String       storage = args[1];
-                DatabaseType type    =
+                String storage = args[1];
+                DatabaseType type =
                         DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
                 switch (storage.toLowerCase()) {
                     case "local":

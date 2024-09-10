@@ -2,86 +2,57 @@ package studio.magemonkey.fusion;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.cfg.professions.ProfessionResults;
+import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+@Getter
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
-    @Getter
-    protected final String                     name;
-    protected final LinkedList<RecipeItem>     pattern;
-    @Getter
-    protected final RecipeItem                 result;
-    @Getter
-    protected final double                     price;
-    @Getter
-    protected final int                        neededLevels;
-    @Getter
-    protected final int                        neededXp;
-    @Getter
-    protected final int                        xpGain;
-    @Getter
-    protected final boolean                    mastery;
-    @Getter
-    protected final Collection<DelayedCommand> commands = new ArrayList<>();
-    @Getter
-    protected final String                     rank;
+    @Setter
+    protected String name;
 
-    @Getter
-    protected final int cooldown;
+    @Setter
+    protected int craftingTime;
+    @Setter
+    protected String category;
+
+    protected final ProfessionResults results;
+    protected final ProfessionConditions conditions;
 
     public Recipe(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
-        this.result = RecipeItem.fromConfig(map.get("result"));
-//        this.pattern = dw.getStringList("pattern").stream().map(RecipeItem::fromConfig).collect(Collectors.toList());
-        this.pattern = dw.getStringList("pattern")
-                .stream()
-                .map(RecipeItem::fromConfig)
-                .collect(Collectors.toCollection(LinkedList::new));
-        this.price = dw.getDouble("price", 0);
-        this.neededLevels = dw.getInt("neededLevels", 0);
-        this.neededXp = dw.getInt("neededXp", 0);
-        this.xpGain = dw.getInt("xpGain", 0);
-        this.mastery = dw.getBoolean("mastery");
-        this.rank = dw.getString("rank");
-        this.cooldown = dw.getInt("cooldown");
-        dw.deserializeCollection(this.commands, "commands", DelayedCommand.class);
+        this.category = dw.getString("category");
 
-        if (result == null) {
-            throw new IllegalArgumentException("Invalid result: " + map.get("result"));
-        }
+        this.craftingTime = dw.getInt("craftingTime");
+        this.results = new ProfessionResults(name, dw);
+        this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(String name,
-                  Collection<RecipeItem> pattern,
-                  RecipeEconomyItem result,
-                  double price,
-                  int neededLevels,
-                  int neededXp) {
+    public Recipe(String name, String category, int craftingTime, ProfessionResults results, ProfessionConditions conditions) {
         this.name = name;
-        this.pattern = new LinkedList<>(pattern);
-        this.result = result;
-        this.price = price;
-        this.neededLevels = neededLevels;
-        this.neededXp = neededXp;
-        this.xpGain = 0;
-        this.mastery = false;
-        this.rank = "";
-        this.cooldown = 0;
+        this.category = category;
+        this.craftingTime = craftingTime;
+        this.results = results;
+        this.conditions = conditions;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
@@ -99,8 +70,8 @@ public class Recipe implements ConfigurationSerializable {
     public static Map<ItemStack, Integer> getPattern(Collection<RecipeItem> items) {
         Map<ItemStack, Integer> localPattern = new HashMap<>(20);
         for (RecipeItem recipeItem : items) {
-            ItemStack item  = recipeItem.getItemStack();
-            boolean   added = false;
+            ItemStack item = recipeItem.getItemStack();
+            boolean added = false;
 
             int itemAmount = item.getAmount();
             item.setAmount(1);
@@ -118,26 +89,23 @@ public class Recipe implements ConfigurationSerializable {
             if (!Utils.hasCraftingPermission(p, this.name)) {
                 return false;
             }
-            if (LevelFunction.getLevel(p, craftingTable) < this.neededLevels) {
+            if (LevelFunction.getLevel(p, craftingTable) < this.conditions.getProfessionLevel()) {
                 return false;
             }
-            if (PlayerLoader.getPlayer(p.getUniqueId()).getExperience(craftingTable) < this.neededXp) {
-                return false;
-            }
-            if (!CodexEngine.get().getVault().canPay(p, this.price)) {
+            if (!this.conditions.isValid(PlayerLoader.getPlayer(p))) {
                 return false;
             }
         }
-        Map<ItemStack, Integer> eqItems      = getItems(items);
-        Map<ItemStack, Integer> localPattern = getPattern(this.pattern);
+        Map<ItemStack, Integer> eqItems = getItems(items);
+        Map<ItemStack, Integer> localPattern = getPattern(this.conditions.getRequiredItems());
         for (Iterator<Entry<ItemStack, Integer>> iterator = localPattern.entrySet().iterator(); iterator.hasNext(); ) {
             Entry<ItemStack, Integer> patternEntry = iterator.next();
-            int                       eqAmount     = eqItems.getOrDefault(patternEntry.getKey(), -1);
+            int eqAmount = eqItems.getOrDefault(patternEntry.getKey(), -1);
             if (eqAmount == -1) {
                 return false;
             }
-            ItemStack eqEntry       = patternEntry.getKey();
-            int       patternAmount = patternEntry.getValue();
+            ItemStack eqEntry = patternEntry.getKey();
+            int patternAmount = patternEntry.getValue();
             if (eqAmount < patternAmount) {
                 return false;
             }
@@ -151,37 +119,54 @@ public class Recipe implements ConfigurationSerializable {
         return localPattern.isEmpty();
     }
 
-    public Collection<RecipeItem> getPattern() {
-        return this.pattern;
+    public Collection<ItemStack> getItemsToTake() {
+        return this.conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
     }
 
-    public Collection<ItemStack> getItemsToTake() {
-        return this.pattern.stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
+    public double getMoneyCost() {
+        return this.conditions.getMoneyCost();
+    }
+
+    public int getExpCost() {
+        return this.conditions.getExpCost();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString())
                 .append("name", this.name)
-                .append("price", this.price)
-                .append("pattern", this.pattern)
-                .append("result", this.result)
-                .append("cooldown", this.cooldown)
+                .append("costs.money", this.conditions.getMoneyCost())
+                .append("costs.experience", this.conditions.getExpCost())
+                .append("costs.items", this.conditions.getRequiredItemNames())
+                .append("results.item", this.getResults().getResultItem())
+                .append("results.professionExp", this.getResults().getProfessionExp())
+                .append("results.vanillaExp", this.getResults().getVanillaExp())
+                .append("results.commands", this.getResults().getCommands())
+                .append("craftingTime", this.craftingTime)
                 .toString();
     }
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        return SerializationBuilder.start(6)
+        SerializationBuilder builder = SerializationBuilder.start(6)
                 .append("name", this.name)
-                .append("result", this.result.toConfig())
-                .append("price", this.price)
-                .append("neededXp", this.neededXp)
-                .append("neededLevels", this.neededLevels)
-                .append("xpGain", this.xpGain)
-                .append("pattern", this.pattern.stream().map(RecipeItem::toConfig).collect(Collectors.toList()))
-                .append("cooldown", this.cooldown)
-                .append("commands", this.commands)
-                .build();
+                .append("craftingTime", this.craftingTime);
+
+        if(category != null) {
+            builder.append("category", this.category);
+        }
+
+        for(Map.Entry<String, Object> entry : this.results.serialize().entrySet()) {
+            builder.append(entry.getKey(), entry.getValue());
+        }
+        for(Map.Entry<String, Object> entry : this.conditions.serialize().entrySet()) {
+            builder.append(entry.getKey(), entry.getValue());
+        }
+        return builder.build();
     }
+
+    public static Recipe copy(Recipe recipe) {
+        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()));
+    }
+
 }

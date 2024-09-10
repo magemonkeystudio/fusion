@@ -48,7 +48,7 @@ public class CraftingQueue {
                 visualRemainingTotalTime = 0;
                 queue.forEach(item -> {
                     if (!item.isDone()) {
-                        visualRemainingTotalTime += (item.getRecipe().getCooldown() - item.getSavedSeconds());
+                        visualRemainingTotalTime += (item.getRecipe().getCraftingTime() - item.getSavedSeconds());
                         item.update();
                     }
                 });
@@ -90,15 +90,18 @@ public class CraftingQueue {
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
             //Commands
-            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getCommands());
+            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
             //Experience
             CraftingTable table = ProfessionsCfg.getTable(profession);
 
-            if (item.getRecipe().getXpGain() > 0) {
-                PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(item.getRecipe().getXpGain());
+            if (item.getRecipe().getResults().getProfessionExp() > 0) {
+                PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(item.getRecipe().getResults().getProfessionExp());
+            }
+            if(item.getRecipe().getResults().getVanillaExp() > 0) {
+                player.giveExp(item.getRecipe().getResults().getVanillaExp());
             }
 
-            RecipeItem recipeItem = item.getRecipe().getResult();
+            RecipeItem recipeItem = item.getRecipe().getResults().getResultItem();
             ItemStack  result     = recipeItem.getItemStack();
             result.setAmount(recipeItem.getAmount());
             // If there is no space in the inventory, drop the items
@@ -115,7 +118,7 @@ public class CraftingQueue {
 
     public void removeRecipe(QueueItem item, boolean refund) {
         if (refund) {
-            CodexEngine.get().getVault().give(this.player, item.getRecipe().getPrice());
+            CodexEngine.get().getVault().give(this.player, item.getRecipe().getConditions().getMoneyCost());
             Collection<ItemStack> refunds = item.getRecipe().getItemsToTake();
             for (ItemStack refundItem : refunds) {
                 Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();

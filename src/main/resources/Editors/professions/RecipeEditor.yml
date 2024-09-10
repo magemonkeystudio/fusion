@@ -1,0 +1,303 @@
+title: '&2Recipes'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: [ ]
+    flags: [ ]
+    enchants: { }
+  add:
+    material: GRAY_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aAdd Recipe Item'
+    lore:
+      - '&7Click on an item from your inventory'
+      - '&7to add it to the recipes'
+      - '&8-------------------'
+      - '&eYou will then need to configure the recipe.'
+    flags: []
+    enchants: {}
+  next:
+    material: ARROW
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aNext'
+    lore:
+      - '&7Go to the next page.'
+    flags: []
+    enchants: {}
+  previous:
+    material: ARROW
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aPrevious'
+    lore:
+      - '&7Go to the previous page.'
+    flags: []
+    enchants: {}
+  recipeItem:
+    name: '&9$<recipe.name>'
+    lore:
+      - '&7Result: &a$<recipe.result>'
+      - '$<recipe.lore>'
+      - '&8--------------------'
+      - '&aLeft click &7to configure'
+      - '&aRight click &7to remove'
+      - '&aShift + Left click &7to change order to left'
+      - '&aShift + Right click &7to change order to right'
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }
+
+subEditor:
+  title: '&2Recipe Item &a$<recipe.name>'
+  icons:
+    fill:
+      material: 'GRAY_STAINED_GLASS_PANE'
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
+    name:
+      material: NAME_TAG
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Name'
+      lore:
+        - '&7Current: &a$<name>'
+        - '&8--------------------'
+        - '&aaClick &7to rename.'
+      flags: [ ]
+      enchants: { }
+    resultItem:
+      name: '&9Result Item'
+      lore:
+        - '&7Result: &a$<results.resultItem>'
+        - '$<result.lore>'
+        - '&8--------------------'
+        - '&aLeft click &7to modify the result.'
+    professionExp:
+      material: EXPERIENCE_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Profession EXP Gain'
+      lore:
+        - '&7Current: &a$<results.professionExp>'
+        - '&7The profession exp gained for'
+        - '&7crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the xp.'
+        - '&aRight click &7to decrease the xp.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    vanillaExp:
+      material: EXPERIENCE_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Vanilla EXP Gain'
+      lore:
+        - '&7Current: &a$<results.vanillaExp>'
+        - '&7The vanilla exp gained for'
+        - '&7crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the xp.'
+        - '&aRight click &7to decrease the xp.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    moneyCost:
+      material: GREEN_CANDLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Money Cost'
+      lore:
+        - '&7Current: &a$$<costs.money>'
+        - '&7The cost for crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the cost.'
+        - '&aRight click &7to decrease the cost.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    expCost:
+        material: LIME_CANDLE
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Experience Cost'
+        lore:
+            - '&7Current: &a$<costs.experience> Exp'
+            - '&7The experience cost for crafting this recipe.'
+            - '&8--------------------'
+            - '&aLeft click &7to increase the cost.'
+            - '&aRight click &7to decrease the cost.'
+            - '&aShift click &7each to increase by 10.'
+        flags: [ ]
+        enchants: { }
+    craftingTime:
+      material: CLOCK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Crafting Time'
+      lore:
+          - '&7Current: &a$<craftingTime>'
+          - '&7The time it takes to craft this recipe.'
+          - '&8--------------------'
+          - '&aLeft click &7to increase the time.'
+          - '&aRight click &7to decrease the time.'
+          - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    mastery:
+        material: DIAMOND
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Mastery'
+        lore:
+            - '&7Current: &a$<conditions.mastery>'
+            - '&7Rather you need to master the'
+            - '&7profession to craft this.'
+            - '&8--------------------'
+            - '&aClick &7to toggle.'
+        flags: [ ]
+        enchants: { }
+    professionLevel:
+        material: EXPERIENCE_BOTTLE
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Needed Profession Level'
+        lore:
+            - '&7Current: &a$<conditions.professionLevel>'
+            - '&7The required profession level to'
+            - '&7craft this recipe.'
+            - '&8--------------------'
+            - '&aLeft click &7to increase the levels.'
+            - '&aRight click &7to decrease the levels.'
+            - '&aShift click &7each to increase by 10.'
+        flags: [ ]
+        enchants: { }
+    ingredients:
+      material: GLASS_BOTTLE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Ingredients'
+      lore:
+        - '&7Click to configure the ingredients.'
+        - '&7You will cast commands to add ingredients.'
+        - '&8--------------------'
+        - '&bList of Ingredients:'
+        - '$<ingredients>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an ingredient.'
+        - '&aRight click &7to remove last ingredient.'
+      flags: [ ]
+      enchants: { }
+      ingredientPrefix: '&7- &2$<ingredient.amount>x &a$<ingredient.name>'
+    category:
+      material: IRON_BARS
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Category'
+      lore:
+          - '&7Current: &a$<category>'
+          - "&8--------------------"
+          - "&aLeft click &7to cycle forward."
+          - "&aRight click &7to cycle backward."
+      flags: [ ]
+      enchants: { }
+    commands:
+      material: COMMAND_BLOCK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Commands'
+      lore:
+        - '&7Click to configure the commands.'
+        - '&7You will cast commands to add commands.'
+        - '&8--------------------'
+        - '&bList of Commands:'
+        - '$<commands>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an command.'
+        - '&aRight click &7to remove last command.'
+      flags: [ ]
+      enchants: { }
+      commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
+    rank:
+      material: EMERALD
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Rank'
+      lore:
+        - '&7Current: &a$<conditions.rank>'
+        - '&7The rank required to craft this recipe.'
+        - '&7You will cast a command to change the rank.'
+        - '&8--------------------'
+        - '&aClick &7to change the rank.'
+      flags: [ ]
+      enchants: { }
+    conditions:
+      material: CHEST
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Conditions'
+      lore:
+        - '&7Click to configure the conditions.'
+        - '&7You will cast commands to add conditions.'
+        - '&8--------------------'
+        - '&bList of Conditions:'
+        - '$<conditions>'
+        - '&8--------------------'
+        - '&aLeft click &7to add an condition.'
+        - '&aRight click &7to remove last condition.'
+      flags: [ ]
+      enchants: { }
+      conditionPrefix: '&7- $<condition>'
+      conditionFormatting:
+        profession: '&3Profession &2$<condition.name>&7: &a$<condition.amount>'
+        fabled: '&3Fabled &2$<condition.name>&7: &a$<condition.amount>'
+        mcmmo: '&3McMMO &2$<condition.name>&7: &a$<condition.amount>'
+        jobs: '&3Job &2$<condition.name>&7: &a$<condition.amount>'
+        auraAbility: '&3Aura Ability &2$<condition.name>: &a$<condition.amount>'
+        auraManaAbility: '&3Aura Mana Ability &2$<condition.name>&7: &a$<condition.amount>'
+        auraSkill: '&3Aura Skill &2$<condition.name>&7: &a$<condition.amount>'
+        auraStats: '&3Aura Stat &2$<condition.name>&7: &a$<condition.amount>'
+    back:
+      material: BARRIER
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&cBack'
+      lore:
+        - '&7Go back to the previous page.'
+      flags: [ ]
+      enchants: { }

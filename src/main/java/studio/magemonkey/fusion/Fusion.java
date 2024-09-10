@@ -17,12 +17,16 @@ import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.PConfigManager;
+import studio.magemonkey.fusion.deprecated.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.commands.Commands;
+import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.gui.CustomGUI;
+import studio.magemonkey.fusion.deprecated.CustomGUI;
 
 import java.io.File;
 import java.util.HashMap;
@@ -45,10 +49,12 @@ public class Fusion extends RisePlugin implements Listener {
 
     @Getter
     private static Fusion instance;
-
     {
         instance = this;
     }
+
+    @Getter
+    private static HookManager hookManager;
 
     @Override
     public void reloadConfig() {
@@ -57,9 +63,11 @@ public class Fusion extends RisePlugin implements Listener {
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
+        hookManager = new HookManager();
 
         Cfg.init();
         ProfessionsCfg.init();
+        EditorRegistry.reload();
         SQLManager.init();
         BrowseConfig.load();
     }
@@ -70,9 +78,11 @@ public class Fusion extends RisePlugin implements Listener {
         RECIPE_ITEM.registerItem("itemName",
                 i -> (i instanceof RecipeEconomyItem) ? ((RecipeEconomyItem) i).getItemName() : null);
         RECIPE.registerItem("name", Recipe::getName);
-        RECIPE.registerItem("price", Recipe::getPrice);
-        RECIPE.registerItem("neededLevels", Recipe::getNeededLevels);
-        RECIPE.registerItem("neededXp", Recipe::getNeededXp);
+        RECIPE.registerItem("costs.money", Recipe::getMoneyCost);
+        RECIPE.registerItem("costs.exp", Recipe::getExpCost);
+        RECIPE.registerItem("results", Recipe::getResults);
+        RECIPE.registerItem("professionLevel", entry -> entry.getConditions().getProfessionLevel());
+        RECIPE.registerItem("conditions", Recipe::getConditions);
         CRAFTING_TABLE.registerItem("name", CraftingTable::getName);
         CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
         CRAFTING_TABLE.registerItem("masteryUnlock", CraftingTable::getMasteryUnlock);
@@ -91,7 +101,7 @@ public class Fusion extends RisePlugin implements Listener {
                     });
         }
         RECIPE_ITEM.registerChild("item", PlaceholderRegistry.ITEM, RecipeItem::getItemStack);
-        RECIPE.registerChild("result", RECIPE_ITEM, Recipe::getResult);
+        RECIPE.registerChild("results", RECIPE_ITEM, entry -> entry.getResults().getResultItem());
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
         CALCULATED_RECIPE.registerChild("icon", PlaceholderRegistry.ITEM, CalculatedRecipe::getIcon);
 
@@ -110,12 +120,13 @@ public class Fusion extends RisePlugin implements Listener {
         });
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
+        this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
         getServer().getPluginManager().registerEvents(this, this);
         runQueueTask();
     }
 
     public void closeAll() {
-        ProfessionsCfg.getGuiMap().values().forEach(CustomGUI::closeAll);
+        ProfessionsCfg.closeAll();
         BrowseGUI.closeAll();
     }
 
@@ -174,5 +185,9 @@ public class Fusion extends RisePlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         PlayerLoader.unloadPlayer(event.getPlayer());
+    }
+
+    public static void registerListener(Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, Fusion.getInstance());
     }
 }

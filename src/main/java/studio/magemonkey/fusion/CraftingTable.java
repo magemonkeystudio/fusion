@@ -1,7 +1,9 @@
 package studio.magemonkey.fusion;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -12,51 +14,55 @@ import studio.magemonkey.codex.items.exception.MissingItemException;
 import studio.magemonkey.codex.items.exception.MissingProviderException;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class CraftingTable implements ConfigurationSerializable {
+    private String name;
+    private String inventoryName;
+    private InventoryPattern pattern;
+    private InventoryPattern catPattern;
+    private ItemStack fillItem;
+    private Map<String, Recipe> recipes;
+    private ItemType iconItem;
+    private boolean useCategories = true;
     @Getter
-    private final String                          name;
-    @Getter
-    private final String                          inventoryName;
-    @Getter
-    private final InventoryPattern                pattern;
-    private final InventoryPattern                catPattern;
-    @Getter
-    private final ItemStack                       fillItem;
-    @Getter
-    private final Map<String, Recipe>             recipes;
-    @Getter
-    private final ItemType                        iconItem;
-    private       boolean                         useCategories = true;
-    private final LinkedHashMap<String, Category> categories    = new LinkedHashMap<>();
+    private LinkedHashMap<String, Category> categories = new LinkedHashMap<>();
 
     //Mastery!
-    @Getter
-    private final int masteryUnlock;
-    @Getter
-    private final int masteryFee;
+    private int masteryUnlock;
+    private int masteryFee;
 
     public CraftingTable(String name,
                          String inventoryName,
                          ItemType iconItem,
                          InventoryPattern pattern,
+                         InventoryPattern catPattern,
+                         boolean useCategories,
                          ItemStack fillItem,
                          int masteryUnlock,
                          int masteryFee,
-                         Map<String, Recipe> recipes) {
+                         Map<String, Recipe> recipes,
+                         Map<String, Category> categories) {
         this.name = name;
         this.inventoryName = inventoryName;
         this.iconItem = iconItem;
         this.pattern = pattern;
-        this.catPattern = null;
+        this.catPattern = catPattern;
+        this.useCategories = useCategories;
         this.recipes = recipes;
         this.fillItem = fillItem;
         this.masteryUnlock = masteryUnlock;
         this.masteryFee = masteryFee;
+        this.categories = new LinkedHashMap<>(categories);
     }
 
     public CraftingTable(String name,
@@ -85,7 +91,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.inventoryName = dw.getString("inventoryName");
         this.pattern = new InventoryPattern(dw.getSection("pattern"));
         this.catPattern =
-                dw.getSection("categoryPattern") != null ? new InventoryPattern(dw.getSection("categoryPattern"))
+                dw.getSection("categoryPattern") != null && dw.getSection("categoryPattern").containsKey("pattern") ? new InventoryPattern(dw.getSection("categoryPattern"))
                         : null;
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
@@ -130,8 +136,8 @@ public class CraftingTable implements ConfigurationSerializable {
         }
     }
 
-    public Map<String, Category> getCategories() {
-        return categories;
+    public List<String> getCategoryList() {
+        return new ArrayList<>(categories.keySet());
     }
 
     public Recipe getRecipe(String str) {
@@ -161,6 +167,55 @@ public class CraftingTable implements ConfigurationSerializable {
         return this.categories.get(name);
     }
 
+    public void updateCategoryOrder() {
+        LinkedHashMap<String, Category> newCategories = new LinkedHashMap<>();
+        // Compare the categories by their order and make a new map with the sorted categories
+        this.categories.values().stream()
+                .sorted(Comparator.comparingInt(Category::getOrder))
+                .forEach(c -> newCategories.put(c.getName(), c));
+        this.categories = newCategories;
+    }
+
+    public void moveEntry(Recipe recipe, int offset) {
+        // Ensure the offset is either -1 (left) or 1 (right)
+        if (offset != -1 && offset != 1) {
+            throw new IllegalArgumentException("Offset must be -1 or 1");
+        }
+
+        List<Map.Entry<String, Recipe>> entries = new ArrayList<>(recipes.entrySet());
+        int index = -1;
+
+        // Find the index of the current entry
+        for (int i = 0; i < entries.size(); i++) {
+            if (entries.get(i).getKey().equals(recipe.getName())) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            return; // Key not found, do nothing
+        }
+
+        // Calculate the new index
+        int newIndex = index + offset;
+
+        // Check if the new index is within bounds
+        if (newIndex < 0 || newIndex >= entries.size()) {
+            return; // New index out of bounds, do nothing
+        }
+
+        // Remove and reinsert the entry at the new position
+        Map.Entry<String, Recipe> entry = entries.remove(index);
+        entries.add(newIndex, entry);
+
+        // Clear the original map and reinsert the entries in the new order
+        recipes.clear();
+        for (Map.Entry<String, Recipe> e : entries) {
+            recipes.put(e.getKey(), e.getValue());
+        }
+    }
+
     @Override
     public @NotNull Map<String, Object> serialize() {
         return SerializationBuilder.start(4)
@@ -171,9 +226,57 @@ public class CraftingTable implements ConfigurationSerializable {
                 .append("inventoryName", this.inventoryName)
                 .append("masteryUnlock", this.masteryUnlock)
                 .append("masteryFee", this.masteryFee)
-                .append("fillItem", ItemBuilder.newItem(fillItem).serialize())
                 .append("useCategories", useCategories)
                 .append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList()))
                 .build();
+    }
+
+    public void save() {
+        // Saving all changes to the file
+        FileConfiguration config = ProfessionsCfg.getCfgs().get(this.name);
+        File file = ProfessionsCfg.getFiles().get(this.name);
+        Map<String, Object> map = this.serialize();
+
+        Map<String, Object> patterntemsMap = (Map<String, Object>) map.get("pattern");
+        Map<String, Object> catPatterntemsMap = (Map<String, Object>) map.get("categoryPattern");
+        patterntemsMap.remove("f");
+        patterntemsMap.remove("q");
+        patterntemsMap.remove("o");
+        if(this.catPattern != null) {
+            catPatterntemsMap.remove("f");
+            catPatterntemsMap.remove("q");
+            catPatterntemsMap.remove("o");
+        }
+        config.set("name", map.get("name"));
+        config.set("inventoryName", map.get("inventoryName"));
+        config.set("icon", map.get("icon"));
+        config.set("pattern", patterntemsMap);
+        config.set("categoryPattern", catPatterntemsMap);
+        config.set("masteryUnlock", map.get("masteryUnlock"));
+        config.set("masteryFee", map.get("masteryFee"));
+        config.set("useCategories", map.get("useCategories"));
+        config.set("recipes", map.get("recipes"));
+        try {
+            config.save(file);
+            ProfessionsCfg.init();
+        } catch (IOException e) {
+            Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
+        }
+    }
+
+    // Static method to copy contents from one CraftingTable instance to another
+    public static CraftingTable copy(CraftingTable source) {
+        Map<String, Recipe> recipes = new LinkedHashMap<>();
+        for (Recipe recipe : source.getRecipes().values()) {
+            recipes.put(recipe.getName(), Recipe.copy(recipe));
+        }
+
+        Map<String, Category> categories = new LinkedHashMap<>();
+        for (Category category : source.getCategories().values()) {
+            categories.put(category.getName(), Category.copy(category));
+        }
+        return new CraftingTable(source.getName(), source.getInventoryName(), source.getIconItem(),
+                InventoryPattern.copy(source.getPattern()), InventoryPattern.copy(source.getCatPattern()), source.getUseCategories(), source.getFillItem(), source.getMasteryUnlock(), source.getMasteryFee(),
+                recipes, categories);
     }
 }

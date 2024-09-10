@@ -1,11 +1,8 @@
-package studio.magemonkey.fusion.gui;
+package studio.magemonkey.fusion.deprecated;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -20,7 +17,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
-
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
@@ -373,21 +369,10 @@ public class CustomGUI implements Listener {
         this.onClose(e.getPlayer());
     }
 
-    public void closeAll() {
+    public void closeAll() { // TODO use in registry
         new ArrayList<>(this.map.keySet()).forEach(h -> {
             this.onClose(h);
             h.closeInventory();
         });
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .appendSuper(super.toString())
-                .append("name", this.name)
-                .append("inventoryName", this.inventoryName)
-                .append("slots", this.slots)
-                .append("pattern", this.pattern)
-                .toString();
     }
 }

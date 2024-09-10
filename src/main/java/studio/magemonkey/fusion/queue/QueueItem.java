@@ -41,12 +41,12 @@ public class QueueItem {
         this.recipe = recipe;
         this.timestamp = timestamp;
         this.savedSeconds = savedSeconds;
-        this.visualRemainingItemTime = (recipe.getCooldown() - savedSeconds);
+        this.visualRemainingItemTime = (recipe.getCraftingTime() - savedSeconds);
         // If the queue item shall not be working when player is offline, just instantly override the timestamp
         if (Cfg.updateQueueOffline) {
             int diff = (int) ((System.currentTimeMillis() - timestamp) / 1000);
-            if (diff + savedSeconds > recipe.getCooldown()) {
-                this.savedSeconds = recipe.getCooldown();
+            if (diff + savedSeconds > recipe.getCraftingTime()) {
+                this.savedSeconds = recipe.getCraftingTime();
                 this.done = true;
             } else {
                 this.savedSeconds += diff;
@@ -65,14 +65,14 @@ public class QueueItem {
             this.visualRemainingItemTime = craftingQueue.getVisualRemainingTotalTime();
             int reconstructedCooldown = this.visualRemainingItemTime + savedSeconds;
 
-            if (visualRemainingItemTime == recipe.getCooldown() + 1) return;
-            if (reconstructedCooldown <= recipe.getCooldown()) {
+            if (visualRemainingItemTime == recipe.getCraftingTime() + 1) return;
+            if (reconstructedCooldown <= recipe.getCraftingTime()) {
                 if (!isRunning) {
                     isRunning = true;
                     return;
                 }
                 this.savedSeconds++;
-                this.done = savedSeconds >= recipe.getCooldown();
+                this.done = savedSeconds >= recipe.getCraftingTime();
                 this.icon = ProfessionsCfg.getQueueItem(profession, this);
                 if (this.savedSeconds > 0)
                     this.visualRemainingItemTime--;

@@ -1,0 +1,87 @@
+title: '&2Browse Gui Editor'
+icons:
+  fill:
+    material: 'GRAY_STAINED_GLASS_PANE'
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: ' '
+    lore: [ ]
+    flags: [ ]
+    enchants: { }
+  name:
+    material: NAME_TAG
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Name'
+    lore:
+      - '&7Current: &a$<name>'
+      - '&8--------------------'
+      - '&aClick &7to rename.'
+    flags: [ ]
+    enchants: { }
+  patternItems:
+    material: OAK_DOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Pattern Items'
+    lore:
+      - '&7A range of items for the'
+      - '&7default pattern in the menu.'
+      - '&8--------------------'
+      - '&aLeft click &7to setup pattern items.'
+    flags: [ ]
+    enchants: { }
+  pattern:
+    material: OAK_TRAPDOOR
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Pattern'
+    lore:
+      - '&7The pattern for the browse menu.'
+      - '&8--------------------'
+      - '&7You will simulate a browse menu'
+      - '&7with the pattern items.'
+      - '&aLeft click &ctheir &7to cycle items forward.'
+      - '&aRight click &ctheir &7to cycle items backward.'
+      - '&aESC &7to exit the pattern setup and save.'
+      - '&8--------------------'
+      - '&aLeft click &chere &7to setup the pattern.'
+      - '&aRight click &chere &7to clear the pattern.'
+    flags: [ ]
+    enchants: { }
+  professions:
+    material: CHEST
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&9Professions'
+    lore:
+      - '&7The professions for the browse menu.'
+      - '&8--------------------'
+      - '&aClick &7to setup professions.'
+    flags: [ ]
+    enchants: { }
+  save:
+    material: LIME_DYE
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&aSave'
+    lore:
+      - '&7Save all changes into the config.'
+    flags: [ ]
+    enchants: { }
+  back:
+    material: BARRIER
+    amount: 1
+    durability: 0
+    unbreakable: false
+    name: '&cBack'
+    lore:
+      - '&7Go back to the previous page.'
+    flags: [ ]
+    enchants: { }

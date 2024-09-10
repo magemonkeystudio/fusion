@@ -1,36 +1,54 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.InventoryPattern;
+import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 @SuppressWarnings("all")
-public class BrowseConfig {
+public class BrowseConfig implements ConfigurationSerializable {
 
     private static FileConfiguration config;
-    private static File              file;
+    private static File file;
 
     @Getter
-    private static final LinkedList<String>       professions = new LinkedList<>();
-    private static final HashMap<String, Integer> profCosts   = new HashMap<>();
+    @Setter
+    private static final LinkedList<String> professions = new LinkedList<>();
+    @Getter
+    @Setter
+    private static final HashMap<String, ProfessionConditions> professionConditions = new HashMap<>();
 
     @Getter
-    private static String           browseName = ChatColor.DARK_AQUA + "Browse";
+    @Setter
+    private static String browseName = ChatColor.DARK_AQUA + "Browse";
     @Getter
-    private static ItemStack        browseFill;
+    @Setter
+    private static ItemStack browseFill;
     @Getter
+    @Setter
     private static InventoryPattern browsePattern;
+
+    @Getter
+    @Setter
+    private static boolean loreConditionsEnabled = true;
 
     private BrowseConfig() {
         load();
@@ -112,23 +130,20 @@ public class BrowseConfig {
 
     private static void readData() {
         professions.clear();
-        profCosts.clear();
+        professionConditions.clear();
         browseName = config.getString("name");
         browseFill = config.getItemStack("pattern.items.fillItem");
         browsePattern = new InventoryPattern(config.getConfigurationSection("pattern").getValues(false));
 
         for (String prof : config.getConfigurationSection("professions").getValues(false).keySet()) {
             professions.add(prof.toLowerCase());
-
-            if (config.contains("professions." + prof + ".cost"))
-                profCosts.put(prof.toLowerCase(), config.getInt("professions." + prof + ".cost"));
-
+            professionConditions.put(prof.toLowerCase(), new ProfessionConditions(prof, config.getConfigurationSection("professions." + prof)));
             Fusion.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }
 
-    public static int getProfCost(String profession) {
-        return profCosts.getOrDefault(profession.toLowerCase(), 0);
+    public static ProfessionConditions getProfessionConditions(String profession) {
+        return professionConditions.getOrDefault(profession.toLowerCase(), null);
     }
 
     public void saveConfig() {
@@ -142,4 +157,33 @@ public class BrowseConfig {
         }
     }
 
+    public static void save(BrowseEditor editor) {
+        Map<String, Object> professionsMap = new LinkedHashMap<>();
+        for (ProfessionConditions conditions : editor.getProfessionConditions().values()) {
+            professionsMap.put(conditions.getProfession(), conditions.serialize());
+        }
+        config.set("name", editor.getName());
+        config.set("pattern", editor.getBrowsePattern().serialize());
+        config.set("professions", professionsMap);
+        try {
+            config.save(file);
+            config = YamlConfiguration.loadConfiguration(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @NotNull
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> professionsMap = new LinkedHashMap<>();
+        for (ProfessionConditions conditions : professionConditions.values()) {
+            professionsMap.put(conditions.getProfession(), conditions.serialize());
+        }
+        return SerializationBuilder.start(2)
+                .append("name", browseName)
+                .append("pattern", browsePattern.serialize())
+                .append("professions", professionsMap)
+                .build();
+    }
 }

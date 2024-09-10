@@ -1,0 +1,307 @@
+# You can configurate those profession ingame via gui
+# Use `/fusion-editor profession armor_smithing` to open the editor for this profession
+
+# The internal id of profession that is used to identify the profession (for example for `/craft use <profession-id`)
+name: armor_smithing
+
+# Visuals for the professions in the gui
+icon: IRON_CHESTPLATE
+inventoryName: Armor Smithing
+
+# Rather you want to enable categories for this profession
+useCategories: false
+
+# The required profession level for mastery
+masteryUnlock: 40
+# The fee to unlock mastery, requires Vault
+masteryFee: 500
+
+# The pattern setup of your recipe gui
+# This is the main pattern that is used overall when no categories are setup
+pattern:
+  # The actual pattern of the items section below.
+  pattern:
+    - '111111111'
+    - 1<ooooo>1
+    - '111111111'
+    - 1{-----}1
+    - '111111111'
+    - '111111111'
+  # The items that can be used for the pattern section.
+  # Each item represents one slot in the pattern.
+  # The following characters are predefined for specific tasks:
+  # `o`, `=` -> Recipe Slots wich are empty or filled with a recipe
+  # `<`, `>` -> Previous and Next page buttons for recipe items
+  # `{`, `}` -> Previous and Next page buttons for queue items
+  # `-` -> Queue slot, this slot is used to display the queue slot when not filled
+  # `f` -> Fill item, this item is used to fill the remaining slots
+  # Further configurations are shown internally under `fillItem` and `queue-items` sections
+  items:
+    '0':
+      material: OAK_SIGN
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Armor Smithing: &cLevel $<level>'
+      lore:
+        - ' &7The recipes above can be crafted'
+        - ' &7with the armor smithing profession.'
+        - '&8--------------------'
+        - ' &7You need level &a40 armor smithing'
+        - ' &a& $500 to unlock its &7mastery.'
+        - ' &7A mastery allows to craft new items.'
+      flags: []
+      enchants: {}
+    '1':
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: []
+      flags: []
+      enchants: {}
+    '2':
+      material: GRAY_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Example Slot'
+      lore:
+        - ' &7Personalize your crafting menu'
+        - ' &7with slots like this one.'
+      flags: []
+      enchants: {}
+    '3':
+      material: PAPER
+      modelData: 2
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Enable Autocraft'
+      lore:
+        - ' &7Turn on autocrafting. Epic and '
+        - ' &7above can toggle autocrafting!'
+        - '&8--------------------'
+        - ' &aLeft click to toggle auto crafting.'
+        - '&4Keep in mind!'
+        - ' &7Autocrafting can only be used when'
+        -  '&7craftingQueue: &afalse &7in config.yml'
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (recipes left)
+    <:
+      material: GREEN_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&ePrev recipes page.'
+      lore: []
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (recipes right)
+    '>':
+      material: GREEN_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&eNext recipes page.'
+      lore: []
+      flags: []
+      enchants: {}
+    # Predefined item for the navigation (queue left)
+    '{':
+      material: LIME_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: Previous queued items
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
+    # Predefined item for the navigation (queue right)
+    '}':
+      material: LIME_DYE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: Next queued items
+      lore: []
+      flags: []
+      enchants: {}
+    # The items that are used for the queue section
+    # Those are important to show the current states of the slots
+    # `-` -> Is the empty queue slot
+    # `Unfinished` -> Is the slot that is currently crafting
+    # `Finished` -> Is the slot that is finished crafting
+    queue-items:
+      '-':
+        material: GRAY_STAINED_GLASS_PANE
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7This slot is empty.'
+        flags: []
+        enchants: {}
+      Unfinished:
+        material: '%material%'
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7&oThis item is in the crafting queue'
+          - ' '
+          - '&7Time left: &c%time%'
+          - ' '
+          - '&eClick to cancel'
+        flags: []
+        enchants: {}
+      Finished:
+        material: '%material%'
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&cQueue Slot'
+        lore:
+          - '&7&oThis item is in the crafting queue'
+          - ' '
+          - '&7The item is &afinished&7!'
+          - ' '
+          - '&eClick to obtain'
+        flags: []
+        enchants: {}
+    # The fill item used in the pattern. It can also be `f` instead
+    fillItem:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: []
+      flags: []
+      enchants: {}
+  # Commands that will be executed when clicking on the items
+  # Each character represents the mirrored item in the `items`-section,
+  # meaning when you click on the item with character `3`,
+  # it will enable auto-crafting in this case
+  commands:
+    '3':
+      - delay: 0
+        as: PLAYER
+        cmd: craft auto
+
+# The 'global' category-pattern that is used when a category has no defined pattern
+# Since here are no patterns, we can leave this empty too in theory
+categoryPattern: null
+# The categories that are used for the profession.
+# Since we disabled categories, we can leave this empty
+categories: []
+
+# The recipes that are shown in this profession
+# The recipes are divided into some main parameters and sub-sections:
+# - name: The internal name of the recipe
+# - craftingTime: The time in seconds it takes to craft the recipe
+# - category: The category the recipe belongs to
+# - results: The result-section of the recipe
+#   - vanillaExp: The amount of vanilla experience the player gets
+#   - item: The item that is given to the player
+#   - professionExp: The amount of profession experience the player gets
+#   - commands: The commands that are executed when the recipe is crafted
+# - costs: The costs-section of the recipe
+#   - money: The amount of money the player has to pay
+#   - exp: The amount of vanilla experience the player has to pay
+#   - items: The items the player has to pay
+# - conditions: The conditions-section of the recipe
+#   - professionLevel: The required profession level
+#   - mastery: Rather the recipe is only craftable with mastery
+#   - <conditions>: Further conditions that can be used. You can look them up here:
+#     https://github.com/magemonkeystudio/fusion/blob/improvements_and_33/doc/EditorUsage.md#conditions
+recipes:
+  # A leather helmet which takes 5 seconds to craft
+  - name: LeatherHelmet
+    craftingTime: 5
+    # Provides you a leather helmet, 10 profession exp and 5 vanilla exp
+    # The item has also to be valid since this is the icon that will be used to display in the recipe gui
+    results:
+      vanillaExp: 5
+      item: LEATHER_HELMET
+      professionExp: 10
+      commands: []
+    # Requires 5 leather to craft
+    costs:
+      money: 0.0
+      exp: 0
+      items:
+        - LEATHER:5
+    # Requires level 1 armor smithing
+    conditions:
+      professionLevel: 1
+      mastery: false
+
+  # A iron chestplate which takes 20 seconds to craft
+  - name: IronChestplate
+    craftingTime: 20
+    # Provides you a iron chestplate, 50 profession exp and 20 vanilla exp
+    # The item has also to be valid since this is the icon that will be used to display in the recipe gui
+    results:
+      vanillaExp: 20
+      item: IRON_CHESTPLATE
+      professionExp: 50
+      commands: []
+    # Requires 8 iron ingots to craft
+    costs:
+      money: 0.0
+      exp: 0
+      items:
+        - IRON_INGOT:8
+    # Requires level 5 armor smithing
+    conditions:
+      professionLevel: 5
+      mastery: false
+
+  # A diamond leggings which takes 30 seconds to craft
+  - name: DiamondLeggings
+    craftingTime: 30
+    # Provides you a diamond leggings, 100 profession exp and 30 vanilla exp
+    # The item has also to be valid since this is the icon that will be used to display in the recipe gui
+    results:
+      vanillaExp: 30
+      item: DIAMOND_LEGGINGS
+      professionExp: 100
+      commands: []
+    # Requires 7 diamonds to craft
+    costs:
+      money: 0.0
+      exp: 0
+      items:
+        - DIAMOND:7
+    # Requires level 10 armor smithing
+    conditions:
+      professionLevel: 10
+      mastery: false
+
+  # Chain boots which takes 15 seconds to craft
+  - name: ChainBoots
+    craftingTime: 15
+    # Provides you a chain boots, 30 profession exp and 15 vanilla exp
+    # The item has also to be valid since this is the icon that will be used to display in the recipe gui
+    results:
+      vanillaExp: 15
+      item: CHAINMAIL_BOOTS
+      professionExp: 30
+      commands: []
+    # Requires 4 iron ingots to craft
+    costs:
+      money: 0.0
+      exp: 0
+      items:
+        - IRON_INGOT:4
+    # Requires level 15 armor smithing and needs weapon smithing at level 5
+    conditions:
+      professionLevel: 15
+      mastery: false
+      professions:
+        weapon_smithing: 5

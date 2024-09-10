@@ -1,8 +1,16 @@
 package studio.magemonkey.fusion.util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.fusion.Fusion;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class PlayerUtil {
 
@@ -33,4 +41,21 @@ public class PlayerUtil {
         return ret;
     }
 
+    public static List<String> getPlayerNames() {
+        List<String> entries = new ArrayList<>();
+        Bukkit.getOnlinePlayers().forEach(player -> entries.add(player.getName()));
+        return entries;
+    }
+
+    public static Collection<ItemStack> getPlayerItems(InventoryHolder player) {
+        ItemStack[]     contents = ItemUtils.compact(false, player.getInventory().getContents());
+        List<ItemStack> result   = new ArrayList<>(contents.length);
+        for (ItemStack content : contents) {
+            if (content == null) {
+                continue;
+            }
+            result.add(content);
+        }
+        return result;
+    }
 }

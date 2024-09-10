@@ -1,9 +1,10 @@
-package studio.magemonkey.fusion.cfg;
+package studio.magemonkey.fusion.deprecated;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Profession;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.queue.QueueItem;
 

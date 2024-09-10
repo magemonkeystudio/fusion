@@ -12,14 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 public final class Cfg {
-    public static String  recursive               = "floor(n+300^(n/7)^2)";
-    public static String  finalMod                = "floor(x)/4";
-    public static long    dataSaveInterval        = 12000;
-    public static double  forgetPenalty           = 0.2d;
-    public static boolean craftingQueue           = true;
-    public static int     finishedMessageInterval = 300;
-    public static String  finishMessage           = "&aYou have crafting items ready for pickup! ($<amount>)";
-    public static boolean updateQueueOffline      = true;
+    public static String  recursive                 = "floor(n+300^(n/7)^2)";
+    public static String  finalMod                  = "floor(x)/4";
+    public static long    dataSaveInterval          = 12000;
+    public static double  forgetPenalty             = 0.2d;
+    public static boolean craftingQueue             = true;
+    public static int     finishedMessageInterval   = 300;
+    public static String  finishMessage             = "&aYou have crafting items ready for pickup! ($<amount>)";
+    public static boolean updateQueueOffline        = true;
+    public static boolean showRequirementsOnBrowse  = true;
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
     private static final DatabaseType storageType     = DatabaseType.LOCAL;
@@ -69,6 +70,7 @@ public final class Cfg {
         if (!cfg.isSet("update_queue_offline")) cfg.set("update_queue_offline", updateQueueOffline);
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
+        if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
         if (!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);
@@ -93,6 +95,7 @@ public final class Cfg {
         updateQueueOffline = cfg.getBoolean("update_queue_offline");
         finishedMessageInterval = cfg.getInt("finished_message_interval");
         finishMessage = cfg.getString("finished_message");
+        showRequirementsOnBrowse = cfg.getBoolean("showRequirementsOnBrowse");
 
         migrateOldTypes(cfg);
     }
