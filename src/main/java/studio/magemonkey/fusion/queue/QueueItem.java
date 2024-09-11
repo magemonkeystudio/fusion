@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 
 @Getter
 @AllArgsConstructor

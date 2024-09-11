@@ -9,10 +9,14 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
@@ -22,7 +26,7 @@ public class CraftingQueue {
 
     private final Player                      player;
     private final String                      profession;
-    private final Category                    category;
+    private final Category category;
     private final List<QueueItem>             queue = new ArrayList<>();
     private final HashMap<Integer, QueueItem> queuedItems;
     private final BukkitTask                  queueTask;

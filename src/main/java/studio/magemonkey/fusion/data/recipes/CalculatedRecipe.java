@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.recipes;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +10,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.util.ExperienceManager;
+import studio.magemonkey.fusion.util.InvalidPatternItemException;
+import studio.magemonkey.fusion.util.LevelFunction;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;

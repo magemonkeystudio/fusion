@@ -1,10 +1,11 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.recipes;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.fusion.Fusion;
 
 import java.util.Map;
 

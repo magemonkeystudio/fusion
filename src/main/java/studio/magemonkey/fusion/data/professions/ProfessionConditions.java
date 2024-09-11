@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.cfg.professions;
+package studio.magemonkey.fusion.data.professions;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;
@@ -26,15 +26,15 @@ import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fabled.Fabled;
-import studio.magemonkey.fusion.ExperienceManager;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 

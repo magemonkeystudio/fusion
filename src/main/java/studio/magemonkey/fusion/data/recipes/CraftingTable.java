@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.recipes;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +14,10 @@ import studio.magemonkey.codex.items.exception.MissingItemException;
 import studio.magemonkey.codex.items.exception.MissingProviderException;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.util.Utils;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.io.File;

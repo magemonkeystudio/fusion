@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.recipes;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,8 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
-import studio.magemonkey.fusion.cfg.professions.ProfessionResults;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.ProfessionResults;
+import studio.magemonkey.fusion.util.LevelFunction;
 import studio.magemonkey.fusion.util.Utils;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 

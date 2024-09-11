@@ -20,21 +20,24 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.FusionPlayer;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.fusion.cfg.professions.Profession;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
-import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
+import studio.magemonkey.fusion.data.professions.CalculatedProfession;
+import studio.magemonkey.fusion.data.professions.Profession;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BrowseGUI implements Listener {
 
@@ -112,7 +115,7 @@ public class BrowseGUI implements Listener {
                     continue;
 
 
-                Collection<ItemStack> playerItems = PlayerCustomGUI.getPlayerItems(player);
+                Collection<ItemStack> playerItems = PlayerUtil.getPlayerItems(player);
                 CalculatedProfession calculatedProfession = CalculatedProfession.create(BrowseConfig.getProfessionConditions(table.getName()), playerItems, player, table);
                 calculatedProfessionMap.put(k, calculatedProfession);
 
@@ -150,29 +153,17 @@ public class BrowseGUI implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onClick(InventoryClickEvent e) {
-        Inventory clickedInv = e.getClickedInventory();
-        if (clickedInv == null) return;
-        if (!clickedInv.equals(inventory)) return;
-        if (e.getRawSlot() < 0) {
-            return;
-        }
-
-        Player p = (Player) e.getWhoClicked();
-        e.setCancelled(true);
-
-        ProfessionGuiRegistry gui = ProfessionsCfg.getGUI(this.slotMap.get(e.getRawSlot()));
+    public static void joinProfession(Player player, ProfessionGuiRegistry gui) {
         if (gui == null) return;
 
         String profession = gui.getProfession();
-        FusionPlayer fusionPlayer = PlayerLoader.getPlayer(p.getUniqueId());
+        FusionPlayer fusionPlayer = PlayerLoader.getPlayer(player.getUniqueId());
 
         ProfessionConditions conditions = BrowseConfig.getProfessionConditions(profession);
 
         if (conditions == null) {
-            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profNotAvailable", p, new MessageData("profession", profession));
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
+            MessageUtil.sendMessage("fusion.error.profNotAvailable", player, new MessageData("profession", profession));
             return;
         }
 
@@ -182,13 +173,13 @@ public class BrowseGUI implements Listener {
         double moneyCost = conditions.getMoneyCost();
         int expCost = conditions.getExpCost();
 
-        Collection<ItemStack> itemsToTake = conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).collect(Collectors.toList());
+        Collection<ItemStack> itemsToTake = conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).toList();
         Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
-        PlayerInventory inventory   = this.player.getInventory();
+        PlayerInventory inventory   = player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
             ItemStack toTake = iterator.next();
-            for (ItemStack entry : PlayerCustomGUI.getPlayerItems(player)) {
+            for (ItemStack entry : PlayerUtil.getPlayerItems(player)) {
                 ItemStack item = entry.clone();
                 entry = entry.clone();
                 if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
@@ -213,7 +204,7 @@ public class BrowseGUI implements Listener {
                     break;
                 }
                 for (ItemStack stack : notAdded.values()) {
-                    this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
+                    player.getWorld().dropItemNaturally(player.getLocation(), stack);
                 }
             }
             break;
@@ -225,11 +216,11 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        fusionPlayer.addProfession(new Profession(-1, p.getUniqueId(), profession, 0, false, true));
+        fusionPlayer.addProfession(new Profession(-1, player.getUniqueId(), profession, 0, false, true));
         if (moneyCost > 0)
-            CodexEngine.get().getVault().take(p, moneyCost);
+            CodexEngine.get().getVault().take(player, moneyCost);
         if (expCost > 0)
-            ExperienceManager.setTotalExperience(p, (ExperienceManager.getTotalExperience(p) - expCost));
+            ExperienceManager.setTotalExperience(player, (ExperienceManager.getTotalExperience(player) - expCost));
 
         MessageData[] data = {
                 new MessageData("profession", profession),
@@ -241,7 +232,23 @@ public class BrowseGUI implements Listener {
         };
 
         MessageUtil.sendMessage("fusion.unlockedProfession", p, data);
-        p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onClick(InventoryClickEvent e) {
+        Inventory clickedInv = e.getClickedInventory();
+        if (clickedInv == null) return;
+        if (!clickedInv.equals(inventory)) return;
+        if (e.getRawSlot() < 0) {
+            return;
+        }
+
+        Player p = (Player) e.getWhoClicked();
+        e.setCancelled(true);
+
+        ProfessionGuiRegistry gui = ProfessionsCfg.getGUI(slotMap.get(e.getRawSlot()));
+        joinProfession(p, gui);
     }
 
     @EventHandler(ignoreCancelled = true)

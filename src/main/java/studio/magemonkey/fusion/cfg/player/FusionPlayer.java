@@ -4,11 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
+import studio.magemonkey.fusion.data.professions.Profession;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.gui.RecipeGui;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
 
@@ -26,7 +26,7 @@ public class FusionPlayer {
     private final Map<String, Profession>    professions = new TreeMap<>();
     private       Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
 
-    private final Map<String, PlayerCustomGUI> cachedGuis = new TreeMap<>();
+    private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
 
     @Getter
     @Setter
@@ -52,9 +52,9 @@ public class FusionPlayer {
         return cachedQeues.get(profession);
     }
 
-    public void cacheGui(String id, PlayerCustomGUI gui) {
+    public void cacheGui(String id, RecipeGui gui) {
         if (cachedGuis.containsKey(id)) {
-            cachedGuis.get(id).getGui().open(getPlayer(), cachedGuis.get(id));
+            cachedGuis.get(id).open(getPlayer());
             return;
         }
         cachedGuis.put(id, gui);

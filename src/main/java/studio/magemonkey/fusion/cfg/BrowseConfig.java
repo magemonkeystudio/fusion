@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 
 import java.io.File;

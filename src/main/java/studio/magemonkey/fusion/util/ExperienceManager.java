@@ -1,11 +1,13 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.util;
 
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.data.professions.Profession;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 
 import java.io.File;
 import java.math.BigDecimal;

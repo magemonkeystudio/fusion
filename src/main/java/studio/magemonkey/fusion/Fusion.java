@@ -17,7 +17,6 @@ import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.deprecated.PConfigManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
@@ -25,8 +24,11 @@ import studio.magemonkey.fusion.cfg.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.commands.Commands;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.data.recipes.*;
+import studio.magemonkey.fusion.deprecated.PConfigManager;
 import studio.magemonkey.fusion.gui.BrowseGUI;
-import studio.magemonkey.fusion.deprecated.CustomGUI;
+import studio.magemonkey.fusion.util.ExperienceManager;
+import studio.magemonkey.fusion.util.LevelFunction;
 
 import java.io.File;
 import java.util.HashMap;
@@ -44,8 +46,6 @@ public class Fusion extends RisePlugin implements Listener {
             PlaceholderType.create("craftingTable", CraftingTable.class);
     public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  =
             PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
-    public static final PlaceholderType<CustomGUI>        CRAFTING_INVENTORY =
-            PlaceholderType.create("craftingInventory", CustomGUI.class);
 
     @Getter
     private static Fusion instance;
@@ -87,8 +87,6 @@ public class Fusion extends RisePlugin implements Listener {
         CRAFTING_TABLE.registerItem("inventoryName", CraftingTable::getInventoryName);
         CRAFTING_TABLE.registerItem("masteryUnlock", CraftingTable::getMasteryUnlock);
         CRAFTING_TABLE.registerItem("masteryFee", CraftingTable::getMasteryFee);
-        CRAFTING_INVENTORY.registerItem("name", CustomGUI::getName);
-        CRAFTING_INVENTORY.registerItem("inventoryName", CustomGUI::getInventoryName);
 
         if (!Bukkit.getPluginManager().isPluginEnabled("Sapphire")) {
             RECIPE_ITEM.registerChild("customItem",

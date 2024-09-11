@@ -31,15 +31,20 @@ import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
-import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.fusion.util.Utils;
+import studio.magemonkey.fusion.util.*;
 
 import java.util.*;
 
@@ -51,7 +56,7 @@ public class RecipeGui implements Listener {
     @Getter
     protected final String name;
     @Getter
-    protected final String inventoryName;
+    private final String inventoryName;
     private final Category category;
     private InventoryPattern pattern;
     private final HashMap<Integer, CalculatedRecipe> recipes;

@@ -1,9 +1,9 @@
-package studio.magemonkey.fusion.cfg.professions;
+package studio.magemonkey.fusion.data.professions;
 
 import lombok.Getter;
 import lombok.Setter;
-import studio.magemonkey.fusion.LevelFunction;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.util.LevelFunction;
 
 import java.util.UUID;
 
