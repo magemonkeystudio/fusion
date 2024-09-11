@@ -38,6 +38,7 @@ public class Recipe implements ConfigurationSerializable {
 
     /* Things were recipes could be hidden */
     private Boolean hideNoPermission;
+    private Boolean hideNoRank;
     private Boolean hideLimitReached;
 
     public Recipe(Map<String, Object> map) {
@@ -49,7 +50,8 @@ public class Recipe implements ConfigurationSerializable {
 
         Map<String, Object> hiding = dw.getSection("hiding");
         this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
-        this.hideNoPermission = (hiding != null && hiding.get("limitReached") != null) ? (boolean) hiding.get("limitReached") : null;
+        this.hideNoRank = (hiding != null && hiding.get("noRank") != null) ? (boolean) hiding.get("noRank") : null;
+        this.hideLimitReached = (hiding != null && hiding.get("limitReached") != null) ? (boolean) hiding.get("limitReached") : null;
 
         this.results = new ProfessionResults(name, dw);
         this.conditions = new ProfessionConditions(name, dw);
@@ -166,6 +168,15 @@ public class Recipe implements ConfigurationSerializable {
             builder.append("category", this.category);
         }
 
+        Map<String, Object> hiding = new HashMap<>(3);
+        if(hideNoPermission != null) hiding.put("noPermission", hideNoPermission);
+        if(hideNoRank != null) hiding.put("noRank", hideNoRank);
+        if(hideLimitReached != null) hiding.put("limitReached", hideLimitReached);
+
+        if(!hiding.isEmpty()) {
+            builder.append("hiding", hiding);
+        }
+
         for(Entry<String, Object> entry : this.results.serialize().entrySet()) {
             builder.append(entry.getKey(), entry.getValue());
         }
@@ -187,16 +198,25 @@ public class Recipe implements ConfigurationSerializable {
         } else if(!Utils.hasCraftingPermission(player, getName())){
             if(hideNoPermission != null) isHidden = hideNoPermission;
         }
-        if(isHidden) {
-            return true;
+        if(isHidden) return true;
+
+        if(conditions.getRank() != null) {
+            if (Cfg.hideRecipesNoPermission && !player.hasPermission("fusion.rank." + conditions.getRank())) {
+                isHidden = true;
+                if (hideNoPermission != null) isHidden = hideNoPermission;
+            } else if (!Utils.hasCraftingPermission(player, getName())) {
+                if (hideNoPermission != null) isHidden = hideNoPermission;
+            }
+            if(isHidden) return true;
         }
+
         if(Cfg.hideRecipesLimitReached) {
             isHidden = true;
             if(hideLimitReached != null) isHidden = hideLimitReached;
         } else {
             if(hideLimitReached != null) isHidden = hideLimitReached;
         }
-        return isHidden; // TODO
+        return isHidden;
     }
 
 }

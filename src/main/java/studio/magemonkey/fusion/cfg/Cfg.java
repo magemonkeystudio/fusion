@@ -22,6 +22,7 @@ public final class Cfg {
     public static boolean showRequirementsOnBrowse  = true;
 
     public static boolean hideRecipesNoPermission   = false;
+    public static boolean hideRecipesNoRank   = false;
     public static boolean hideRecipesLimitReached   = false;
 
     public static String  finishMessage             = "&aYou have crafting items ready for pickup! ($<amount>)";
@@ -78,6 +79,7 @@ public final class Cfg {
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
         if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
         if (!cfg.isSet("hideRecipesDefault.noPermission")) cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
+        if (!cfg.isSet("hideRecipesDefault.noRank")) cfg.set("hideRecipesDefault.noRank", hideRecipesNoRank);
         if (!cfg.isSet("hideRecipesDefault.limitReached")) cfg.set("hideRecipesDefault.limitReached", hideRecipesLimitReached);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
@@ -105,6 +107,7 @@ public final class Cfg {
         finishMessage = cfg.getString("finished_message");
         showRequirementsOnBrowse = cfg.getBoolean("showRequirementsOnBrowse");
         hideRecipesNoPermission = cfg.getBoolean("hideRecipesDefault.noPermission");
+        hideRecipesNoRank = cfg.getBoolean("hideRecipesDefault.noRank");
         hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.limitReached");
 
         migrateOldTypes(cfg);
