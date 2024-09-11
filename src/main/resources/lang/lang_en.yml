@@ -1,6 +1,7 @@
 fusion:
   gui:
     professions:
+      requirementLine: "&7Joining Requirements"
       learned:
         'true': "&aYou have unlocked this profession"
         'false': "&cThis profession is locked"
@@ -34,6 +35,7 @@ fusion:
       rank:
         epic: "&cEpic rank needed to craft this item!"
     recipes:
+      requirementLine: "&7Crafting Requirements"
       learned:
         'true': "&aYou have unlocked this recipe"
         'false': "&cThis recipe is locked"

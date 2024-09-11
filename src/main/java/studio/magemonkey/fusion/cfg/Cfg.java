@@ -18,12 +18,14 @@ public final class Cfg {
     public static double  forgetPenalty             = 0.2d;
     public static boolean craftingQueue             = true;
     public static int     finishedMessageInterval   = 300;
-    public static String  finishMessage             = "&aYou have crafting items ready for pickup! ($<amount>)";
     public static boolean updateQueueOffline        = true;
     public static boolean showRequirementsOnBrowse  = true;
 
     public static boolean hideRecipesNoPermission   = false;
     public static boolean hideRecipesLimitReached   = false;
+
+    public static String  finishMessage             = "&aYou have crafting items ready for pickup! ($<amount>)";
+
 
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class

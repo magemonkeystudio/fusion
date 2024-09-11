@@ -44,6 +44,10 @@ public class CalculatedProfession {
                 lore.append('\n');
             }
 
+            String requirementLine = MessageUtil.getMessageAsString("fusion.gui.professions.requirementLine", "fusion.gui.professions.requirementLine");
+            if(!requirementLine.isEmpty())
+                lore.append(requirementLine).append('\n');
+
             boolean canJoin = true;
 
             //Rank line

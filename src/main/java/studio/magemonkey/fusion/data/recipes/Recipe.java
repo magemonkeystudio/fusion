@@ -183,13 +183,6 @@ public class Recipe implements ConfigurationSerializable {
         return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideLimitReached());
     }
 
-    private boolean hasLimitReached(Player player) {
-        if(Cfg.overrideOp) {
-            return false;
-        }
-        return false;
-    }
-
     public boolean isHidden(Player player) {
         boolean isHidden = false;
         if(Cfg.hideRecipesNoPermission && !Utils.hasCraftingPermission(player, getName())) {

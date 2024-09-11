@@ -11,6 +11,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.InvalidPatternItemException;
@@ -47,6 +48,10 @@ public class CalculatedRecipe {
                 resultLore.forEach((str) -> lore.append(str).append('\n'));
                 lore.append('\n');
             }
+
+            String requirementLine = MessageUtil.getMessageAsString("fusion.gui.recipes.requirementLine", "fusion.gui.recipes.requirementLine");
+            if(!requirementLine.isEmpty())
+                lore.append(requirementLine).append('\n');
 
             boolean canCraft = true;
 
@@ -157,16 +162,7 @@ public class CalculatedRecipe {
             Map<ItemStack, Integer> eqItems = Recipe.getItems(items);
 
 
-//        Map<String, Entry<DarkRiseItem, Integer>> eqItems = new LinkedHashMap<>(20);
-//        for (ItemStack item : items)
-//        {
-//            DarkRiseItem riseItem = ir.getItemByStack(item);
-//            if (riseItem == null)
-//            {
-//                continue;
-//            }
-//            eqItems.put(riseItem.getId().toLowerCase(), new SimpleEntry<>(riseItem, item.getAmount()));
-//        }
+
             Collection<RecipeItem> localPattern = new HashSet<>(recipe.getConditions().getRequiredItems());
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem recipeItem = it.next();
