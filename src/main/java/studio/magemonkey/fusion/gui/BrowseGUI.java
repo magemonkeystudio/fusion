@@ -21,6 +21,7 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -216,23 +217,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        fusionPlayer.addProfession(new Profession(-1, player.getUniqueId(), profession, 0, false, true));
-        if (moneyCost > 0)
-            CodexEngine.get().getVault().take(player, moneyCost);
-        if (expCost > 0)
-            ExperienceManager.setTotalExperience(player, (ExperienceManager.getTotalExperience(player) - expCost));
-
-        MessageData[] data = {
-                new MessageData("profession", profession),
-                new MessageData("costs.money", moneyCost),
-                new MessageData("costs.experience", expCost),
-                new MessageData("unlocked", fusionPlayer.getJoinedProfessions().size()),
-                new MessageData("limit", PlayerUtil.getPermOption(player, "fusion.limit")),
-                new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
-        };
-
-        MessageUtil.sendMessage("fusion.unlockedProfession", player, data);
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        FusionAPI.getEventManager().callProfessionJoinEvent(profession, player, moneyCost, expCost);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)

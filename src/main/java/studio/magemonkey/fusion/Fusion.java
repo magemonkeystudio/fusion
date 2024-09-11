@@ -15,6 +15,7 @@ import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
@@ -126,6 +127,8 @@ public class Fusion extends RisePlugin implements Listener {
         if(hookManager.isHooked(HookType.PlaceholderAPI)) {
             new FusionPlaceholders().register();
         }
+
+        FusionAPI.init();
     }
 
     public void closeAll() {

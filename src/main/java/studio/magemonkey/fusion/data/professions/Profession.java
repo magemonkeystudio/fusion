@@ -6,6 +6,7 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.util.LevelFunction;
 
 import java.util.UUID;
+import java.util.logging.Level;
 
 @Getter
 
@@ -30,11 +31,11 @@ public class Profession {
         this.joined = joined;
     }
 
-    public void addExp(long exp) {
+    public void addExp(double exp) {
         this.exp += exp;
     }
 
-    public void removeExp(long exp) {
+    public void removeExp(double exp) {
         this.exp -= exp;
     }
 
@@ -62,5 +63,10 @@ public class Profession {
 
     public int getLevel() {
         return LevelFunction.getLevel(exp);
+    }
+
+    public void setLevel(int level) {
+        long requiredExp = (long) (LevelFunction.getXP(getLevel()) - LevelFunction.getXP(level));
+        addExp(requiredExp);
     }
 }

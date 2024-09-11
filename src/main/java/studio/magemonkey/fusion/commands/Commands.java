@@ -13,6 +13,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
@@ -137,7 +138,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("craftingTable", table));
                         return true;
                     }
-
+                    FusionAPI.getEventManager().callProfessionMasteryEvent(table.getName(), player, true);
                     PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
                     MessageUtil.sendMessage("fusion.mastered",
                             sender,
@@ -158,13 +159,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("sender", sender));
                         return true;
                     }
-                    ConfirmationAction action = () -> {
-                        PlayerLoader.getPlayer(player.getUniqueId()).removeProfession(table.getName());
-                        MessageUtil.sendMessage("fusion.forgotten",
-                                sender,
-                                new MessageData("sender", sender),
-                                new MessageData("craftingTable", table));
-                    };
+                    ConfirmationAction action = () -> FusionAPI.getEventManager().callProfessionLeaveEvent(table, player);
 
                     confirmation.put(player.getUniqueId().toString(), action);
                     MessageUtil.sendMessage("fusion.forget.confirm",

@@ -10,6 +10,7 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -86,64 +87,21 @@ public class CraftingQueue {
         }
 
         QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
-        item.setCraftinQueue(this);
-        queue.add(item);
+        FusionAPI.getEventManager().callQueueItemAddedEvent(player, ProfessionsCfg.getTable(profession), this, item);
     }
 
 
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
-            //Commands
-            DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
-            //Experience
-            CraftingTable table = ProfessionsCfg.getTable(profession);
-
-            if (item.getRecipe().getResults().getProfessionExp() > 0) {
-                PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(item.getRecipe().getResults().getProfessionExp());
-            }
-            if(item.getRecipe().getResults().getVanillaExp() > 0) {
-                player.giveExp(item.getRecipe().getResults().getVanillaExp());
-            }
-
             RecipeItem recipeItem = item.getRecipe().getResults().getResultItem();
-            ItemStack  result     = recipeItem.getItemStack();
-            result.setAmount(recipeItem.getAmount());
-            // If there is no space in the inventory, drop the items
-            Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
-            if (!notAdded.isEmpty()) {
-                for (ItemStack _item : notAdded) {
-                    Objects.requireNonNull(player.getLocation().getWorld())
-                            .dropItemNaturally(player.getLocation(), _item);
-                }
-            }
-            removeRecipe(item, false);
+            FusionAPI.getEventManager().callQueueItemFinishedEvent(player, ProfessionsCfg.getTable(profession), this, item, recipeItem.getItemStack(), recipeItem.getAmount());
         }
     }
 
     public void removeRecipe(QueueItem item, boolean refund) {
-        if (refund) {
-            CodexEngine.get().getVault().give(this.player, item.getRecipe().getConditions().getMoneyCost());
-            Collection<ItemStack> refunds = item.getRecipe().getItemsToTake();
-            for (ItemStack refundItem : refunds) {
-                Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
-                if (!notAdded.isEmpty()) {
-                    for (ItemStack _item : notAdded) {
-                        Objects.requireNonNull(player.getLocation().getWorld())
-                                .dropItemNaturally(player.getLocation(), _item);
-                    }
-                }
-            }
-        }
-        queue.remove(item);
-        for (Map.Entry<Integer, QueueItem> entry : queuedItems.entrySet()) {
-            if (entry.getValue().equals(item)) {
-                queuedItems.remove(entry.getKey());
-                break;
-            }
-        }
-        if (!SQLManager.queues().removeQueueItem(item)) {
-            Fusion.getInstance().getLogger().warning("Failed to remove queue item from SQL");
-        }
+        // As of today, refunding only happens when the crafting is not finished. Meaning !refund is our finish-parameter here
+        // The opposite for !refund -> the recipe finished successfully
+        FusionAPI.getEventManager().callQueueItemCanceledEvent(player, ProfessionsCfg.getTable(profession), this, item, !refund, refund, refund ? item.getRecipe().getItemsToTake() : List.of());
     }
 
     public void cancelTask() {

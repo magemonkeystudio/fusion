@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
@@ -187,17 +188,17 @@ public class FusionPlayer {
         setJoined(table.getName(), joined);
     }
 
-    public void addExperience(String profession, int experience) {
+    public void addExperience(String profession, double experience) {
         if (professions.containsKey(profession)) {
             professions.get(profession).addExp(experience);
         }
     }
 
-    public void addExp(Profession profession, int experience) {
+    public void addExp(Profession profession, double experience) {
         addExperience(profession.getName(), experience);
     }
 
-    public void addExp(CraftingTable table, int experience) {
+    public void addExp(CraftingTable table, double experience) {
         addExperience(table.getName(), experience);
     }
 
