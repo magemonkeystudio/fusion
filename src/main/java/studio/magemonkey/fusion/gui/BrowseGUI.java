@@ -16,7 +16,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
@@ -28,13 +27,11 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.CalculatedProfession;
-import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;
 import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.fusion.util.Utils;
 
@@ -174,9 +171,9 @@ public class BrowseGUI implements Listener {
         double moneyCost = conditions.getMoneyCost();
         int expCost = conditions.getExpCost();
 
-        Collection<ItemStack> itemsToTake = conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).toList();
-        Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
-        PlayerInventory inventory   = player.getInventory();
+        Collection<ItemStack> itemsToTake = new ArrayList<>(conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).toList());
+        Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
+        PlayerInventory inventory = player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
             ItemStack toTake = iterator.next();

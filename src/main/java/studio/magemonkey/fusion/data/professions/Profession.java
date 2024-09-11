@@ -6,7 +6,6 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.util.LevelFunction;
 
 import java.util.UUID;
-import java.util.logging.Level;
 
 @Getter
 

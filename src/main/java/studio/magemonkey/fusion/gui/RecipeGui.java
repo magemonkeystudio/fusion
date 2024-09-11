@@ -45,7 +45,10 @@ import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.queue.CraftingQueue;
 import studio.magemonkey.fusion.queue.QueueItem;
-import studio.magemonkey.fusion.util.*;
+import studio.magemonkey.fusion.util.ExperienceManager;
+import studio.magemonkey.fusion.util.InvalidPatternItemException;
+import studio.magemonkey.fusion.util.LevelFunction;
+import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
 
