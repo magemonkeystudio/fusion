@@ -2,6 +2,8 @@ package studio.magemonkey.fusion.cfg.hooks;
 
 public enum HookType {
 
+    PlaceholderAPI("PlaceholderAPI"),
+
     Vault("Vault"),
     Fabled("Fabled"),
     mcMMO("mcMMO"),

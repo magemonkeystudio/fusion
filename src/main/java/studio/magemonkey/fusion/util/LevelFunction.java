@@ -3,7 +3,7 @@ package studio.magemonkey.fusion.util;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 
 import java.text.DecimalFormat;

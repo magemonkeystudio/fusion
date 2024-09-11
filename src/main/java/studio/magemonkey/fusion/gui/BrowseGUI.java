@@ -24,8 +24,8 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.FusionPlayer;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.FusionPlayer;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.CalculatedProfession;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;
@@ -228,10 +228,10 @@ public class BrowseGUI implements Listener {
                 new MessageData("costs.experience", expCost),
                 new MessageData("unlocked", fusionPlayer.getJoinedProfessions().size()),
                 new MessageData("limit", PlayerUtil.getPermOption(player, "fusion.limit")),
-                new MessageData("bal", CodexEngine.get().getVault().getBalance(p))
+                new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
         };
 
-        MessageUtil.sendMessage("fusion.unlockedProfession", p, data);
+        MessageUtil.sendMessage("fusion.unlockedProfession", player, data);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
 
