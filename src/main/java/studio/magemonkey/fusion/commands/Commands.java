@@ -74,12 +74,20 @@ public class Commands implements CommandExecutor, TabCompleter {
                             new MessageData("target", target));
                     return true;
                 } else {
-                    if (sender instanceof Player) {
+                    if (sender instanceof Player player) {
                         if (!Utils.hasCraftingUsePermission(sender, eq.getProfession())) {
                             return true;
                         }
                         //Make sure they have unlocked this crafting menu
-                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getProfession())) {
+                        if (!PlayerLoader.getPlayer(player).hasProfession(eq.getProfession())) {
+                            if(player.isOp()) {
+                                eq.open(player);
+                                MessageUtil.sendMessage("fusion.useConfirm",
+                                        sender,
+                                        new MessageData("craftingInventory", eq),
+                                        new MessageData("player", sender));
+                                return true;
+                            }
                             MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }

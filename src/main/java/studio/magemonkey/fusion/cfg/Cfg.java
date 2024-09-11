@@ -22,6 +22,10 @@ public final class Cfg {
     public static boolean updateQueueOffline        = true;
     public static boolean showRequirementsOnBrowse  = true;
 
+    public static boolean hideRecipesNoPermission   = false;
+    public static boolean hideRecipesLimitReached   = false;
+
+
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
     private static final DatabaseType storageType     = DatabaseType.LOCAL;
     private static final String       storageHost     = "localhost";
@@ -71,6 +75,8 @@ public final class Cfg {
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
         if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
+        if (!cfg.isSet("hideRecipesDefault.noPermission")) cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
+        if (!cfg.isSet("hideRecipesDefault.limitReached")) cfg.set("hideRecipesDefault.limitReached", hideRecipesLimitReached);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
         if (!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);
@@ -96,6 +102,8 @@ public final class Cfg {
         finishedMessageInterval = cfg.getInt("finished_message_interval");
         finishMessage = cfg.getString("finished_message");
         showRequirementsOnBrowse = cfg.getBoolean("showRequirementsOnBrowse");
+        hideRecipesNoPermission = cfg.getBoolean("hideRecipesDefault.noPermission");
+        hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.limitReached");
 
         migrateOldTypes(cfg);
     }

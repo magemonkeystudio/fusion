@@ -58,7 +58,7 @@ public class CalculatedRecipe {
             }
 
             String permissionLine;
-            if (!Utils.hasCraftingPermission(player, recipe.name)) {
+            if (!Utils.hasCraftingPermission(player, recipe.getName())) {
                 canCraft = false;
                 permissionLine = MessageUtil.getMessageAsString("fusion.gui.recipes.learned.false",
                         "fusion.gui.recipes.learned.false",

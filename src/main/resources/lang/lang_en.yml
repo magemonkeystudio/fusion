@@ -2,8 +2,8 @@ fusion:
   gui:
     professions:
       learned:
-        'true': "&aYou have unlocked this profession: &ayes"
-        'false': "&cThis profession is locked: &cno"
+        'true': "&aYou have unlocked this profession"
+        'false': "&cThis profession is locked"
       ingredient:
         'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<requiredAmount>&7)"
         'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<requiredAmount>&7)"
@@ -35,8 +35,8 @@ fusion:
         epic: "&cEpic rank needed to craft this item!"
     recipes:
       learned:
-        'true': "&aYou have unlocked this recipe: &ayes"
-        'false': "&cThis recipe is locked: &cno"
+        'true': "&aYou have unlocked this recipe"
+        'false': "&cThis recipe is locked"
       ingredient:
         'true': "&6- &r$<recipeItem.customItem.name> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
         'false': "&6- &r$<recipeItem.customItem.name> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"

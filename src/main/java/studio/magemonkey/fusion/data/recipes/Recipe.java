@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;
 import studio.magemonkey.fusion.data.professions.ProfessionResults;
@@ -28,15 +30,19 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
     @Setter
-    protected String name;
+    private String name;
 
     @Setter
-    protected int craftingTime;
+    private int craftingTime;
     @Setter
-    protected String category;
+    private String category;
 
-    protected final ProfessionResults results;
-    protected final ProfessionConditions conditions;
+    private final ProfessionResults results;
+    private final ProfessionConditions conditions;
+
+    /* Things were recipes could be hidden */
+    private Boolean hideNoPermission;
+    private Boolean hideLimitReached;
 
     public Recipe(Map<String, Object> map) {
         DeserializationWorker dw = DeserializationWorker.start(map);
@@ -44,16 +50,23 @@ public class Recipe implements ConfigurationSerializable {
         this.category = dw.getString("category");
 
         this.craftingTime = dw.getInt("craftingTime");
+
+        Map<String, Object> hiding = dw.getSection("hiding");
+        this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
+        this.hideNoPermission = (hiding != null && hiding.get("limitReached") != null) ? (boolean) hiding.get("limitReached") : null;
+
         this.results = new ProfessionResults(name, dw);
         this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(String name, String category, int craftingTime, ProfessionResults results, ProfessionConditions conditions) {
+    public Recipe(String name, String category, int craftingTime, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideLimitReached) {
         this.name = name;
         this.category = category;
         this.craftingTime = craftingTime;
         this.results = results;
         this.conditions = conditions;
+        this.hideNoPermission = hideNoPermission;
+        this.hideLimitReached = hideLimitReached;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
@@ -87,7 +100,7 @@ public class Recipe implements ConfigurationSerializable {
             return false;
         }
         if (p != null) {
-            if (!Utils.hasCraftingPermission(p, this.name)) {
+            if (!Utils.hasCraftingPermission(p, getName())) {
                 return false;
             }
             if (LevelFunction.getLevel(p, craftingTable) < this.conditions.getProfessionLevel()) {
@@ -157,17 +170,44 @@ public class Recipe implements ConfigurationSerializable {
             builder.append("category", this.category);
         }
 
-        for(Map.Entry<String, Object> entry : this.results.serialize().entrySet()) {
+        for(Entry<String, Object> entry : this.results.serialize().entrySet()) {
             builder.append(entry.getKey(), entry.getValue());
         }
-        for(Map.Entry<String, Object> entry : this.conditions.serialize().entrySet()) {
+        for(Entry<String, Object> entry : this.conditions.serialize().entrySet()) {
             builder.append(entry.getKey(), entry.getValue());
         }
         return builder.build();
     }
 
     public static Recipe copy(Recipe recipe) {
-        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()));
+        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideLimitReached());
+    }
+
+    private boolean hasLimitReached(Player player) {
+        if(Cfg.overrideOp) {
+            return false;
+        }
+        return false;
+    }
+
+    public boolean isHidden(Player player) {
+        boolean isHidden = false;
+        if(Cfg.hideRecipesNoPermission && !Utils.hasCraftingPermission(player, getName())) {
+            isHidden = true;
+            if(hideNoPermission != null) isHidden = hideNoPermission;
+        } else if(!Utils.hasCraftingPermission(player, getName())){
+            if(hideNoPermission != null) isHidden = hideNoPermission;
+        }
+        if(isHidden) {
+            return true;
+        }
+        if(Cfg.hideRecipesLimitReached) {
+            isHidden = true;
+            if(hideLimitReached != null) isHidden = hideLimitReached;
+        } else {
+            if(hideLimitReached != null) isHidden = hideLimitReached;
+        }
+        return isHidden; // TODO
     }
 
 }

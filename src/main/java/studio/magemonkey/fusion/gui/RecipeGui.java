@@ -234,7 +234,7 @@ public class RecipeGui implements Listener {
             /* Default setup */
             ItemStack fill = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
-            allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
+            allRecipes.removeIf(r -> r.isHidden(player));
             int pageSize = resultSlots.size();
             int allRecipeCount = allRecipes.size();
             int i = 0;
