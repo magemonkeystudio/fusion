@@ -14,8 +14,8 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
@@ -64,7 +64,7 @@ public class EventManager {
      * @param player The player that wants to leave the profession.
      */
     public void callProfessionLeaveEvent(CraftingTable table, Player player) {
-        ProfessionJoinEvent event = new ProfessionJoinEvent(table.getName(), player);
+        ProfessionLeaveEvent event = new ProfessionLeaveEvent(table.getName(), player);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             event.getFusionPlayer().removeProfession(table);
@@ -201,6 +201,16 @@ public class EventManager {
         QueueItemFinishedEvent event = new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
+            if(event.getFusionPlayer().hasRecipeLimitReached(event.getQueueItem().getRecipe())) {
+                callQueueItemCanceledEvent(player, table, queue, item, false, true, event.getQueueItem().getRecipe().getItemsToTake());
+                event.setCancelled(true);
+                MessageUtil.sendMessage("fusion.error.recipeLimitReached", player,
+                        new MessageData("recipe", event.getQueueItem().getRecipe().getName()),
+                        new MessageData("amount", event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe())),
+                        new MessageData("recipe.limit", event.getQueueItem().getRecipe().getCraftingLimit()),
+                        new MessageData("limit", event.getQueueItem().getRecipe().getCraftingLimit()));
+                return;
+            }
             //Commands
             DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
             //Experience
@@ -221,6 +231,9 @@ public class EventManager {
                     Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
                 }
             }
+            if(event.getQueueItem().getRecipe().getCraftingLimit() > 0)
+                event.getFusionPlayer().incrementLimit(event.getQueueItem().getRecipe());
+
             event.getQueue().removeRecipe(event.getQueueItem(), false);
         }
     }

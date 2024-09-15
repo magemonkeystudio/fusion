@@ -3,8 +3,8 @@ package studio.magemonkey.fusion.api.events;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 
 @Getter
 public class QueueItemAddedEvent extends FusionEvent {

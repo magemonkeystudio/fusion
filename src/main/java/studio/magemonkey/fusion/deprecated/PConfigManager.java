@@ -6,7 +6,7 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 
 import java.io.File;
 import java.util.*;

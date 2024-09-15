@@ -6,8 +6,8 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

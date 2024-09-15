@@ -8,6 +8,7 @@ import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionPlayersSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionProfessionsSQL;
 import studio.magemonkey.fusion.cfg.sql.tables.FusionQueuesSQL;
+import studio.magemonkey.fusion.cfg.sql.tables.FusionRecipeLimitsSQL;
 
 import java.io.File;
 import java.sql.*;
@@ -17,9 +18,10 @@ public class SQLManager {
     @Getter
     private static volatile Connection connection;
 
-    private static FusionPlayersSQL     fusionPlayersSQL;
-    private static FusionProfessionsSQL fusionProfessionsSQL;
-    private static FusionQueuesSQL      fusionQueuesSQL;
+    private static FusionPlayersSQL         fusionPlayersSQL;
+    private static FusionProfessionsSQL     fusionProfessionsSQL;
+    private static FusionQueuesSQL          fusionQueuesSQL;
+    private static FusionRecipeLimitsSQL    fusionRecipeLimitsSQL;
 
     private static String host;
     private static int    port;
@@ -56,6 +58,7 @@ public class SQLManager {
             fusionPlayersSQL = new FusionPlayersSQL();
             fusionProfessionsSQL = new FusionProfessionsSQL();
             fusionQueuesSQL = new FusionQueuesSQL();
+            fusionRecipeLimitsSQL = new FusionRecipeLimitsSQL();
             Fusion.getInstance().getLogger().info("Connection initialized successfully.");
         }
     }
@@ -134,6 +137,13 @@ public class SQLManager {
             fusionQueuesSQL = new FusionQueuesSQL();
         }
         return fusionQueuesSQL;
+    }
+
+    public static FusionRecipeLimitsSQL recipeLimits() {
+        if (fusionRecipeLimitsSQL == null) {
+            fusionRecipeLimitsSQL = new FusionRecipeLimitsSQL();
+        }
+        return fusionRecipeLimitsSQL;
     }
 
     public static void swapToLocal() {

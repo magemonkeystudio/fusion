@@ -28,7 +28,7 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
 
 import java.util.*;
 

@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;
 import studio.magemonkey.fusion.data.professions.ProfessionResults;
@@ -25,11 +26,17 @@ import java.util.stream.Collectors;
 @Getter
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
+
+    @Getter
+    private final CraftingTable table;
+
     @Setter
     private String name;
 
     @Setter
     private int craftingTime;
+    @Setter
+    private int craftingLimit = 0;
     @Setter
     private String category;
 
@@ -37,34 +44,42 @@ public class Recipe implements ConfigurationSerializable {
     private final ProfessionConditions conditions;
 
     /* Things were recipes could be hidden */
+    @Setter
     private Boolean hideNoPermission;
+    @Setter
     private Boolean hideNoRank;
-    private Boolean hideLimitReached;
+    @Setter
+    private Boolean hideRecipeLimitReached;
 
-    public Recipe(Map<String, Object> map) {
+    public Recipe(CraftingTable table, Map<String, Object> map) {
+        this.table = table;
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
         this.category = dw.getString("category");
 
         this.craftingTime = dw.getInt("craftingTime");
+        this.craftingLimit = dw.getInt("craftingLimit");
 
         Map<String, Object> hiding = dw.getSection("hiding");
         this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
         this.hideNoRank = (hiding != null && hiding.get("noRank") != null) ? (boolean) hiding.get("noRank") : null;
-        this.hideLimitReached = (hiding != null && hiding.get("limitReached") != null) ? (boolean) hiding.get("limitReached") : null;
+        this.hideRecipeLimitReached = (hiding != null && hiding.get("recipeLimitReached") != null) ? (boolean) hiding.get("recipeLimitReached") : null;
 
         this.results = new ProfessionResults(name, dw);
         this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(String name, String category, int craftingTime, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideLimitReached) {
+    public Recipe(CraftingTable table, String name, String category, int craftingTime, int craftingLimit, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideNoRank,Boolean hideLimitReached) {
+        this.table = table;
         this.name = name;
         this.category = category;
         this.craftingTime = craftingTime;
+        this.craftingLimit = craftingLimit;
         this.results = results;
         this.conditions = conditions;
         this.hideNoPermission = hideNoPermission;
-        this.hideLimitReached = hideLimitReached;
+        this.hideNoRank = hideNoRank;
+        this.hideRecipeLimitReached = hideLimitReached;
     }
 
     public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
@@ -155,6 +170,7 @@ public class Recipe implements ConfigurationSerializable {
                 .append("results.vanillaExp", this.getResults().getVanillaExp())
                 .append("results.commands", this.getResults().getCommands())
                 .append("craftingTime", this.craftingTime)
+                .append("craftingLimit", this.craftingLimit)
                 .toString();
     }
 
@@ -162,7 +178,8 @@ public class Recipe implements ConfigurationSerializable {
     public @NotNull Map<String, Object> serialize() {
         SerializationBuilder builder = SerializationBuilder.start(6)
                 .append("name", this.name)
-                .append("craftingTime", this.craftingTime);
+                .append("craftingTime", this.craftingTime)
+                .append("craftingLimit", this.craftingLimit);
 
         if(category != null) {
             builder.append("category", this.category);
@@ -171,7 +188,7 @@ public class Recipe implements ConfigurationSerializable {
         Map<String, Object> hiding = new HashMap<>(3);
         if(hideNoPermission != null) hiding.put("noPermission", hideNoPermission);
         if(hideNoRank != null) hiding.put("noRank", hideNoRank);
-        if(hideLimitReached != null) hiding.put("limitReached", hideLimitReached);
+        if(hideRecipeLimitReached != null) hiding.put("recipeLimitReached", hideRecipeLimitReached);
 
         if(!hiding.isEmpty()) {
             builder.append("hiding", hiding);
@@ -187,7 +204,7 @@ public class Recipe implements ConfigurationSerializable {
     }
 
     public static Recipe copy(Recipe recipe) {
-        return new Recipe(recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideLimitReached());
+        return new Recipe(recipe.getTable(), recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), recipe.getCraftingLimit(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideNoRank(), recipe.getHideRecipeLimitReached());
     }
 
     public boolean isHidden(Player player) {
@@ -210,13 +227,17 @@ public class Recipe implements ConfigurationSerializable {
             if(isHidden) return true;
         }
 
-        if(Cfg.hideRecipesLimitReached) {
+        FusionPlayer fusionPlayer = PlayerLoader.getPlayer(player);
+        if(Cfg.hideRecipesLimitReached && fusionPlayer.hasRecipeLimitReached(this)) {
             isHidden = true;
-            if(hideLimitReached != null) isHidden = hideLimitReached;
-        } else {
-            if(hideLimitReached != null) isHidden = hideLimitReached;
+            if(hideRecipeLimitReached != null) isHidden = hideRecipeLimitReached;
+        } else if(fusionPlayer.hasRecipeLimitReached(this)) {
+            if(hideRecipeLimitReached != null) isHidden = hideRecipeLimitReached;
         }
         return isHidden;
     }
 
+    public String getRecipePath() {
+        return table.getName() + "." + category + "." + name;
+    }
 }

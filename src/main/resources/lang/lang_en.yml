@@ -57,6 +57,9 @@ fusion:
       mastery:
         'true': "&6- &eMastery: &7(Unlocked)"
         'false': "&6- &eMastery: &8(locked)"
+      limit:
+        'true': "&6- &eLimit: &7(&a$<amount>&8/&7$<recipe.limit>&7)"
+        'false': "&6- &eLimit: &7(&c$<amount>&8/&7$<recipe.limit>&7)"
       condition:
         'true': "&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)"
         'false': "&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)"
@@ -97,6 +100,7 @@ fusion:
     invalidStorage: "&cInvalid storage type: &3$<storage> (valid: &4locale, sql&c)"
     alreadyUsedStorage: "&cYou are already using this storage type. ($<storage>)"
     noJoin: "&cYou can't join this profession due to lack of finished requirements."
+    recipeLimitReached: "&cYou have already crafted &3$<amount>/$<recipe.limit> &cof this recipe."
   storageChanged: "&7You have swapped to &3$<storage> storage."
   unlockedProfession: "&aYou unlocked &3$<profession>. &7($<unlocked>/$<limit>)"
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"

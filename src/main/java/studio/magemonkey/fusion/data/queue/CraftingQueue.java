@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.queue;
+package studio.magemonkey.fusion.data.queue;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;

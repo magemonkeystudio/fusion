@@ -117,7 +117,7 @@ public class CraftingTable implements ConfigurationSerializable {
         List<Map<?, ?>> recipesSection = dw.getList("recipes", new ArrayList<>(2));
         for (Map<?, ?> recipeData : recipesSection) {
             try {
-                Recipe recipe = new Recipe((Map<String, Object>) recipeData);
+                Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData);
                 this.recipes.put(recipe.getName(), recipe);
 
                 if (recipeData.containsKey("category") && recipeData.get("category") instanceof String) {

@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.queue;
+package studio.magemonkey.fusion.data.queue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -151,6 +151,27 @@ public class CalculatedRecipe {
                 }
             }
 
+            String limitLine = null;
+            if(recipe.getCraftingLimit() > 0) {
+                int crafted = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
+                if(crafted >= recipe.getCraftingLimit()) {
+                    canCraft = false;
+                    limitLine = MessageUtil.getMessageAsString("fusion.gui.recipes.limit.false",
+                            "fusion.gui.recipes.limit.false",
+                            new MessageData("recipe", recipe),
+                            new MessageData("amount", crafted),
+                            new MessageData("crafted", crafted),
+                            new MessageData("recipe.limit", recipe.getCraftingLimit()));
+                } else {
+                    limitLine = MessageUtil.getMessageAsString("fusion.gui.recipes.limit.true",
+                            "fusion.gui.recipes.limit.true",
+                            new MessageData("recipe", recipe),
+                            new MessageData("amount", crafted),
+                            new MessageData("crafted", crafted),
+                            new MessageData("recipe.limit", recipe.getCraftingLimit()));
+                }
+            }
+
             List<Map.Entry<Boolean, String>> conditionLines = recipe.getConditions().getConditionLines(player);
             for (Map.Entry<Boolean, String> entry : conditionLines) {
                 if (!entry.getKey()) {
@@ -259,6 +280,9 @@ public class CalculatedRecipe {
             }
             if (masteryLine != null) {
                 lore.append(masteryLine).append('\n');
+            }
+            if(limitLine != null) {
+                lore.append(limitLine).append('\n');
             }
 
             if(!conditionLines.isEmpty())

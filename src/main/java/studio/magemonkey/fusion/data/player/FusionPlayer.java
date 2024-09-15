@@ -8,9 +8,10 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.RecipeGui;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,8 +24,9 @@ public class FusionPlayer {
 
     private final UUID uuid;
 
-    private final Map<String, Profession>    professions = new TreeMap<>();
-    private       Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private final Map<String, Profession> professions = new TreeMap<>();
+    private Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private Map<String, Integer> cachedRecipeLimits = new TreeMap<>();
 
     private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
 
@@ -39,6 +41,7 @@ public class FusionPlayer {
             professions.put(profession.getName(), profession);
         }
         cachedQeues = SQLManager.queues().getCraftingQueues(getPlayer());
+        cachedRecipeLimits = SQLManager.recipeLimits().getRecipeLimits(uuid);
     }
 
     public Player getPlayer() {
@@ -60,16 +63,26 @@ public class FusionPlayer {
         cachedGuis.put(id, gui);
     }
 
-    /*
-     * Returns the amount of items in the queue for the given profession and category
-     * @param profession The profession to check
-     * @param category The category to check
-     * @return The amount of items in the queue for the given profession and category
+    public int getRecipeLimit(Recipe recipe) {
+        return getRecipeLimit(recipe.getRecipePath());
+    }
 
-     * sizes[0] = amount of items in the queue for the given profession and category
-     * sizes[1] = amount of items in the queue for the given profession
-     * sizes[2] = amount of items in the queue
-     */
+    public int getRecipeLimit(String recipePath) {
+        return cachedRecipeLimits.getOrDefault(recipePath, 0);
+    }
+
+    public void incrementLimit(Recipe recipe) {
+        incrementLimit(recipe.getRecipePath());
+    }
+
+    public void incrementLimit(String recipePath) {
+        cachedRecipeLimits.put(recipePath, getRecipeLimit(recipePath) + 1);
+    }
+
+    public boolean hasRecipeLimitReached(Recipe recipe) {
+        if(recipe.getCraftingLimit() <= 0) return false;
+        return getRecipeLimit(recipe.getRecipePath()) >= recipe.getCraftingLimit();
+    }
 
     public int getExperience(String profession) {
         int experience = 0;
@@ -271,9 +284,19 @@ public class FusionPlayer {
         reset(table.getName());
     }
 
+    /*
+     * Returns the amount of items in the queue for the given profession and category
+     * @param profession The profession to check
+     * @param category The category to check
+     * @return The amount of items in the queue for the given profession and category
+
+     * sizes[0] = amount of items in the queue for the given profession and category
+     * sizes[1] = amount of items in the queue for the given profession
+     * sizes[2] = amount of items in the queue
+     */
     public int[] getQueueSizes(String profession, Category category) {
-        int[]  limits = new int[]{0, 0, 0};
-        String path   = profession + "." + category.getName();
+        int[] limits = new int[]{0, 0, 0};
+        String path = profession + "." + category.getName();
         limits[0] = cachedQeues.containsKey(path) ? cachedQeues.get(path).getQueue().size() : 0;
         for (Map.Entry<String, CraftingQueue> queue : cachedQeues.entrySet()) {
             if (queue.getKey().contains(profession + ".")) {
@@ -304,7 +327,9 @@ public class FusionPlayer {
         for (CraftingQueue queue : cachedQeues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
         }
+        SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
         cachedGuis.clear();
         cachedQeues.clear();
+        cachedRecipeLimits.clear();
     }
 }

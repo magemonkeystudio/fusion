@@ -80,7 +80,7 @@ public final class Cfg {
         if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
         if (!cfg.isSet("hideRecipesDefault.noPermission")) cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
         if (!cfg.isSet("hideRecipesDefault.noRank")) cfg.set("hideRecipesDefault.noRank", hideRecipesNoRank);
-        if (!cfg.isSet("hideRecipesDefault.limitReached")) cfg.set("hideRecipesDefault.limitReached", hideRecipesLimitReached);
+        if (!cfg.isSet("hideRecipesDefault.recipeLimitReached")) cfg.set("hideRecipesDefault.recipeLimitReached", hideRecipesLimitReached);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
         if (!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);
@@ -108,7 +108,7 @@ public final class Cfg {
         showRequirementsOnBrowse = cfg.getBoolean("showRequirementsOnBrowse");
         hideRecipesNoPermission = cfg.getBoolean("hideRecipesDefault.noPermission");
         hideRecipesNoRank = cfg.getBoolean("hideRecipesDefault.noRank");
-        hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.limitReached");
+        hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.recipeLimitReached");
 
         migrateOldTypes(cfg);
     }
