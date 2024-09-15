@@ -26,6 +26,13 @@ import java.util.Objects;
 
 public class EventManager {
 
+    /**
+     * Call the ProfessionJoinEvent.
+     * @param professionName The name of the profession.
+     * @param player The player that wants to join the profession.
+     * @param moneyCost The money cost to join the profession.
+     * @param expCost The experience cost to join the profession.
+     */
     public void callProfessionJoinEvent(String professionName, Player player, double moneyCost, int expCost) {
         ProfessionJoinEvent event = new ProfessionJoinEvent(professionName, player);
         Bukkit.getPluginManager().callEvent(event);
@@ -50,6 +57,12 @@ public class EventManager {
         }
     }
 
+
+    /**
+     * Call the ProfessionLeaveEvent.
+     * @param table The crafting table (profession) the player wants to leave.
+     * @param player The player that wants to leave the profession.
+     */
     public void callProfessionLeaveEvent(CraftingTable table, Player player) {
         ProfessionJoinEvent event = new ProfessionJoinEvent(table.getName(), player);
         Bukkit.getPluginManager().callEvent(event);
@@ -62,6 +75,12 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the ProfessionGainXpEvent.
+     * @param player The player that gains the experience.
+     * @param table The crafting table (profession) the player gains experience in.
+     * @param xp The amount of experience the player gains.
+     */
     public void callProfessionGainXpEvent(Player player, CraftingTable table, double xp) {
         ProfessionGainXpEvent event = new ProfessionGainXpEvent(table.getName(), player, xp);
         Bukkit.getPluginManager().callEvent(event);
@@ -76,6 +95,13 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the ProfessionLevelUpEvent.
+     * @param player The player that levels up.
+     * @param table The crafting table (profession) the player levels up in.
+     * @param previousLevel The previous level of the player.
+     * @param newLevel The new level of the player.
+     */
     public void callLevelUpEvent(Player player, CraftingTable table, int previousLevel, int newLevel) {
         ProfessionLevelUpEvent event = new ProfessionLevelUpEvent(table.getName(), player, previousLevel, newLevel);
         Bukkit.getPluginManager().callEvent(event);
@@ -88,6 +114,12 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the ProfessionMasteryEvent.
+     * @param professionName The name of the profession.
+     * @param player The player that masters the profession.
+     * @param isMastered If the player has mastered the profession.
+     */
     public void callProfessionMasteryEvent(String professionName, Player player, boolean isMastered) {
         ProfessionMasteryEvent event = new ProfessionMasteryEvent(professionName, player, isMastered);
         Bukkit.getPluginManager().callEvent(event);
@@ -99,6 +131,13 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the QueueItemAddedEvent.
+     * @param player The player that adds the item to the queue.
+     * @param table The crafting table (profession) the player is using.
+     * @param queue The crafting queue the player is using.
+     * @param item The queue item that is added to the queue.
+     */
     public void callQueueItemAddedEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
         QueueItemAddedEvent event = new QueueItemAddedEvent(table.getName(), player, queue, item);
         Bukkit.getPluginManager().callEvent(event);
@@ -108,6 +147,16 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the QueueItemCanceledEvent.
+     * @param player The player that cancels the item in the queue.
+     * @param table The crafting table (profession) the player is using.
+     * @param queue The crafting queue the player is using.
+     * @param item The queue item that is canceled.
+     * @param finished If the item is finished.
+     * @param refunded If the item ingredients will be refunded.
+     * @param refundItems The items that will be refunded in case `refunded=true`.
+     */
     public void callQueueItemCanceledEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, boolean finished, boolean refunded, List<ItemStack> refundItems) {
         QueueItemRemovedEvent event = new QueueItemRemovedEvent(table.getName(), player, queue, item, finished, refunded, refundItems);
         Bukkit.getPluginManager().callEvent(event);
@@ -139,6 +188,15 @@ public class EventManager {
         }
     }
 
+    /**
+     * Call the QueueItemFinishedEvent.
+     * @param player The player that finishes the item in the queue.
+     * @param table The crafting table (profession) the player is using.
+     * @param queue The crafting queue the player is using.
+     * @param item The queue item that is finished.
+     * @param resultItem The result item of the queue item.
+     * @param resultAmount The amount of the result item.
+     */
     public void callQueueItemFinishedEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, ItemStack resultItem, int resultAmount) {
         QueueItemFinishedEvent event = new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
         Bukkit.getPluginManager().callEvent(event);
