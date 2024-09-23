@@ -5,7 +5,6 @@ import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.gmail.nossr50.api.ExperienceAPI;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import com.gmail.nossr50.mcMMO;
 import dev.aurelium.auraskills.api.AuraSkillsApi;
 import dev.aurelium.auraskills.api.ability.Ability;
 import dev.aurelium.auraskills.api.mana.ManaAbility;
@@ -28,12 +27,11 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fabled.Fabled;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
-import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
-import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
@@ -72,12 +70,12 @@ public class ProfessionConditions implements ConfigurationSerializable {
     private final Map<String, Integer> auraStatsConditions = new LinkedHashMap<>();
 
     @Getter
-    protected List<String> requiredItemNames = new LinkedList<>();
+    protected List<Object> requiredItemNames = new LinkedList<>();
 
     public ProfessionConditions(String profession,
                                 double moneyCost,
                                 int expCost,
-                                LinkedList<String> requiredItemNames,
+                                LinkedList<Object> requiredItemNames,
                                 int professionLevel,
                                 boolean isMastery,
                                 String rank,
@@ -115,7 +113,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 .stream()
                 .map(RecipeItem::fromConfig)
                 .collect(Collectors.toCollection(LinkedList::new));
-        this.requiredItemNames = config.getStringList("costs.items");
+        this.requiredItemNames = (List<Object>) config.getList("costs.items");
 
         this.professionLevel = config.getInt("conditions.professionLevel", 0);
         this.isMastery = config.getBoolean("conditions.mastery", false);
@@ -182,11 +180,11 @@ public class ProfessionConditions implements ConfigurationSerializable {
         if (costsSection != null) {
             this.moneyCost = (double) costsSection.getOrDefault("money", 0.0);
             this.expCost = (int) costsSection.getOrDefault("exp", 0);
-            this.requiredItems = ((List<String>) costsSection.get("items"))
+            this.requiredItems = ((List<Object>) costsSection.get("items"))
                     .stream()
                     .map(RecipeItem::fromConfig)
                     .collect(Collectors.toCollection(LinkedList::new));
-            this.requiredItemNames = (List<String>) costsSection.get("items");
+            this.requiredItemNames = (List<Object>) costsSection.get("items");
         }
 
         Map<String, Object> conditionsSection = dw.getSection("conditions");
@@ -474,43 +472,23 @@ public class ProfessionConditions implements ConfigurationSerializable {
     public List<Map.Entry<Boolean, String>> getConditionLines(Player player) {
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(player.getUniqueId());
         List<Map.Entry<Boolean, String>> lines = new ArrayList<>();
-        String trueConditionLine = MessageUtil.getMessageAsString("fusion.gui.recipes.condition", "&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)");
-        String falseConditionLine = MessageUtil.getMessageAsString("fusion.gui.recipes.condition", "&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)");
 
         for (Map.Entry<String, Integer> entry : professionConditions.entrySet()) {
             Profession profession = fusionPlayer.getProfession(entry.getKey());
             boolean condition = profession != null && profession.getLevel() >= entry.getValue();
-            String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-            lines.add(Map.entry(condition, finalLineFormat
-                    .replace(MessageUtil.getReplacement("condition.name"),
-                            MessageUtil.getMessageAsString("fusion.conditionFormatting.profession", null, new MessageData("profession", ProfessionsCfg.getTable(entry.getKey()).getName())))
-                    .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                    .replace(MessageUtil.getReplacement("level"), String.valueOf(profession != null ? fusionPlayer.getProfession(entry.getKey()).getLevel() : 0))
-            ));
+            lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "profession", entry.getKey(), profession != null ? profession.getLevel() : 0, entry.getValue())));
         }
         if (Fusion.getHookManager().isHooked(HookType.Fabled)) {
             for (Map.Entry<String, Integer> entry : fabledClassConditions.entrySet()) {
                 boolean condition = Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel() >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.fabled", null, new MessageData("class", Fabled.getClasses().get(entry.getKey()).getName())))
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel()))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "fabled", entry.getKey(), Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel(), entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.mcMMO)) {
             for (Map.Entry<String, Integer> entry : mcMMOConditions.entrySet()) {
                 PrimarySkillType skill = PrimarySkillType.getSkill(entry.getKey().toUpperCase());
                 boolean condition = ExperienceAPI.getLevel(player, skill) >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.mcmmo", null, new MessageData("skill", mcMMO.p.getSkillTools().getLocalizedSkillName(skill))))
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(ExperienceAPI.getLevel(player, skill)))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "mcmmo", entry.getKey(), ExperienceAPI.getLevel(player, skill), entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.Jobs)) {
@@ -518,13 +496,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 Job job = Jobs.getJob(entry.getKey());
                 JobProgression progression = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job);
                 boolean condition = progression != null && Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job).getLevel() >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.jobs", null, new MessageData("job", job.getJobFullName())))
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(progression != null ? Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job).getLevel() : 0))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "jobs", entry.getKey(), progression != null ? progression.getLevel() : 0, entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.AuraSkills)) {
@@ -532,53 +504,25 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 Ability ability = AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) continue;
                 boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability) >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.auraAbility", null, new MessageData("ability", ability.getDisplayName(Locale.ENGLISH)))
-                        )
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability)))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraAbility", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability), entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraManaAbilityConditions.entrySet()) {
                 ManaAbility ability = AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) continue;
                 boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability) >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.auraManaAbility", null, new MessageData("ability", ability.getDisplayName(Locale.ENGLISH)))
-                        )
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability)))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraManaAbility", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability), entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraSkillsConditions.entrySet()) {
                 Skill skill = AuraSkillsApi.get().getGlobalRegistry().getSkill(NamespacedId.fromString(entry.getKey()));
                 if (skill == null) continue;
                 boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill) >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.auraSkill", null, new MessageData("skill", skill.getDisplayName(Locale.ENGLISH)))
-                        )
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill)))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraSkill", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill), entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraStatsConditions.entrySet()) {
                 Stat stat = AuraSkillsApi.get().getGlobalRegistry().getStat(NamespacedId.fromString(entry.getKey()));
                 if (stat == null) continue;
                 boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat) >= entry.getValue();
-                String finalLineFormat = ChatUT.hexString(condition ? trueConditionLine : falseConditionLine);
-                lines.add(Map.entry(condition, finalLineFormat
-                        .replace(MessageUtil.getReplacement("condition.name"),
-                                MessageUtil.getMessageAsString("fusion.conditionFormatting.auraStat", null, new MessageData("stat", stat.name()))
-                        )
-                        .replace(MessageUtil.getReplacement("condition.level"), String.valueOf(entry.getValue()))
-                        .replace(MessageUtil.getReplacement("level"), String.valueOf(AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat)))
-                ));
+                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraStat", entry.getKey(), (int) AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat), entry.getValue())));
             }
         }
         return lines;

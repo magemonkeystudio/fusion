@@ -235,13 +235,13 @@ public class Commands implements CommandExecutor, TabCompleter {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                for (Map.Entry<String, CraftingTable> entry : ProfessionsCfg.getMap().entrySet()) {
+                for(Profession profession : PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions()) {
                     MessageUtil.sendMessage("fusion.level.format", sender,
-                            new MessageData("category", entry.getValue().getName()),
-                            new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
+                            new MessageData("category", profession.getName()),
+                            new MessageData("level", profession.getLevel()),
                             new MessageData("experience",
                                     PlayerLoader.getPlayer(((Player) sender).getUniqueId())
-                                            .getExperience(entry.getValue())));
+                                            .getExperience(profession)));
                 }
 
                 return true;

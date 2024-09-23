@@ -125,7 +125,7 @@ public class CalculatedProfession {
                     break;
                 }
             }
-            Map<ItemStack, Integer> eqItems = Recipe.getItems(items);
+            Map<ItemStack, Integer> eqItems = Map.of(); //Recipe.getItems(items);
 
             Collection<RecipeItem> localPattern = new HashSet<>(conditions.getRequiredItems());
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
@@ -139,7 +139,7 @@ public class CalculatedProfession {
                     if (professionItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) professionItem).asItemType()
                             .isInstance(item)) {
                         eqAmount = entry.getValue();
-                    } else if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+                    } else if (item.hasItemMeta()) {
                         item = item.clone();
                         if (CalculatedRecipe.isSimilar(professionItemStackOne, item)) {
                             eqAmount = entry.getValue();
@@ -241,7 +241,7 @@ public class CalculatedProfession {
         } catch (Exception e) {
             Fusion.getInstance().error("The profession-item seems not to be recognized. Please check your setup on the following profession '" + craftingTable.getName() + "':");
             Fusion.getInstance().error("Pattern Items: ");
-            for (String patternItem : conditions.getRequiredItemNames()) {
+            for (Object patternItem : conditions.getRequiredItemNames()) {
                 Fusion.getInstance().error("- " + patternItem);
             }
             Fusion.getInstance().error("Error on creating CalculatedProfession: " + e.getMessage());

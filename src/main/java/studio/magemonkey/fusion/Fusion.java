@@ -18,6 +18,7 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
@@ -65,6 +66,7 @@ public class Fusion extends RisePlugin implements Listener {
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
         MessageUtil.reload(lang, this);
+        CraftingRequirementsCfg.init();
         hookManager = new HookManager();
 
         Cfg.init();

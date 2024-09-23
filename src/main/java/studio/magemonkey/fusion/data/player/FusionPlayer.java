@@ -7,11 +7,11 @@ import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.RecipeGui;
-import studio.magemonkey.fusion.data.queue.CraftingQueue;
-import studio.magemonkey.fusion.data.queue.QueueItem;
 
 import java.util.Collection;
 import java.util.Map;

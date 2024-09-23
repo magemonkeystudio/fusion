@@ -34,21 +34,19 @@ import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.data.queue.CraftingQueue;
-import studio.magemonkey.fusion.data.queue.QueueItem;
-import studio.magemonkey.fusion.util.ExperienceManager;
-import studio.magemonkey.fusion.util.InvalidPatternItemException;
-import studio.magemonkey.fusion.util.LevelFunction;
-import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.*;
 
 import java.util.*;
 
@@ -473,7 +471,7 @@ public class RecipeGui implements Listener {
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
-            MessageUtil.sendMessage("fusion.gui.recipes.canCraft.false", player);
+            player.sendMessage(CraftingRequirementsCfg.getCanCraft(false));
             return false;
         }
 
@@ -542,7 +540,7 @@ public class RecipeGui implements Listener {
             for (ItemStack entry : PlayerUtil.getPlayerItems(player)) {
                 ItemStack item = entry.clone();
                 entry = entry.clone();
-                if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
+                if (item.hasItemMeta()) {
                     item = item.clone();
                     entry.setAmount(toTake.getAmount());
 

@@ -9,14 +9,14 @@ fusion:
         'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<requiredAmount>&7)"
         'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<requiredAmount>&7)"
       ingredientSimple:
-        'true': "&6- &a$<amount>&8/&7$<requiredAmount> &r$<material>:$<durability>"
-        'false': "&6- &c$<amount>&8/&7$<requiredAmount> &r$<material>:$<durability>"
+        'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<requiredAmount>&7)"
+        'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<requiredAmount>&7)"
       money:
-        'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
-        'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"
+        'true': "&6- &eMoney: &7(&a$$<money>&8/&7$$<costs>&7)"
+        'false': "&6- &eMoney: &7(&c$$<money>&8/&7$$<costs>&7)"
       exp:
-        'true': "&6- &eExperience: &7(&a$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
-        'false': "&6- &eExperience: &7(&c$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
+        'true': "&6- &eExperience: &7(&a$<exp>&8/&7$<costs>&7) &eexp."
+        'false': "&6- &eExperience: &7(&c$<exp>&8/&7$<costs>&7) &eexp."
       professionLevel:
         'true': "&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.professionLevel>&7)"
         'false': "&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.professionLevel>&7)"
@@ -43,8 +43,8 @@ fusion:
         'true': "&6- &r$<recipeItem.customItem.name> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
         'false': "&6- &r$<recipeItem.customItem.name> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"
       ingredientSimple:
-        'true': "&6- &a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
-        'false': "&6- &c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
+        'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
+        'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"
       money:
         'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
         'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"

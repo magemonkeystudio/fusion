@@ -9,9 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
-import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;

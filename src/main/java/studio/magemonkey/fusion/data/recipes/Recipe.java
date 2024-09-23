@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -82,28 +83,37 @@ public class Recipe implements ConfigurationSerializable {
         this.hideRecipeLimitReached = hideLimitReached;
     }
 
-    public static Map<ItemStack, Integer> getItems(Collection<ItemStack> items) {
-        Map<ItemStack, Integer> eqItems = new HashMap<>(20);
+    public static List<Pair<ItemStack, Integer>> getItems(Collection<ItemStack> items) {
+        List<Pair<ItemStack, Integer>> eqItems = new ArrayList<>(20);
         for (ItemStack item : items) {
-            int itemAmount = item.getAmount();
-            item = item.clone();
-            item.setAmount(1);
-            Integer amount = eqItems.getOrDefault(item, 0);
-            eqItems.put(item, amount + itemAmount);
+            // Get left pair and check for its item-meta
+            ItemStack finalItem = item.clone();
+            finalItem.setAmount(1);
+            int amount = item.getAmount();
+            Pair<ItemStack, Integer> pair = eqItems.stream().filter(p -> p.getLeft().isSimilar(finalItem)).findFirst().orElse(null);
+            if (pair != null) {
+                eqItems.remove(pair);
+                eqItems.add(Pair.of(pair.getLeft(), pair.getRight() + amount));
+            } else {
+                eqItems.add(Pair.of(finalItem, amount));
+            }
         }
         return eqItems;
     }
 
-    public static Map<ItemStack, Integer> getPattern(Collection<RecipeItem> items) {
-        Map<ItemStack, Integer> localPattern = new HashMap<>(20);
+    public static List<Pair<ItemStack, Integer>> getPattern(Collection<RecipeItem> items) {
+        List<Pair<ItemStack, Integer>> localPattern = new ArrayList<>(20);
         for (RecipeItem recipeItem : items) {
             ItemStack item = recipeItem.getItemStack();
-            boolean added = false;
-
-            int itemAmount = item.getAmount();
             item.setAmount(1);
-            Integer amount = localPattern.getOrDefault(item, 0);
-            localPattern.put(item, amount + itemAmount);
+            int amount = recipeItem.getAmount();
+            Pair<ItemStack, Integer> pair = localPattern.stream().filter(p -> p.getLeft().isSimilar(item)).findFirst().orElse(null);
+            if (pair != null) {
+                localPattern.remove(pair);
+                localPattern.add(Pair.of(pair.getLeft(), pair.getRight() + amount));
+            } else {
+                localPattern.add(Pair.of(item, amount));
+            }
         }
         return localPattern;
     }
@@ -123,11 +133,11 @@ public class Recipe implements ConfigurationSerializable {
                 return false;
             }
         }
-        Map<ItemStack, Integer> eqItems = getItems(items);
-        Map<ItemStack, Integer> localPattern = getPattern(this.conditions.getRequiredItems());
-        for (Iterator<Entry<ItemStack, Integer>> iterator = localPattern.entrySet().iterator(); iterator.hasNext(); ) {
-            Entry<ItemStack, Integer> patternEntry = iterator.next();
-            int eqAmount = eqItems.getOrDefault(patternEntry.getKey(), -1);
+        List<Pair<ItemStack, Integer>> eqItems = getItems(items);
+        List<Pair<ItemStack, Integer>> localPattern = getPattern(this.conditions.getRequiredItems());
+        for (Iterator<Pair<ItemStack, Integer>> iterator = localPattern.iterator(); iterator.hasNext(); ) {
+            Pair<ItemStack, Integer> patternEntry = iterator.next();
+            int eqAmount = eqItems. stream().filter(e -> e.getLeft().isSimilar(patternEntry.getKey())).mapToInt(Pair::getRight).findFirst().orElse(-1);
             if (eqAmount == -1) {
                 return false;
             }
@@ -137,10 +147,12 @@ public class Recipe implements ConfigurationSerializable {
                 return false;
             }
             if (eqAmount == patternAmount) {
-                eqItems.remove(eqEntry);
+                eqItems.remove(patternEntry);
             }
             int rest = eqAmount - patternAmount;
-            eqItems.put(eqEntry, rest);
+            if (rest > 0) {
+                eqItems.add(Pair.of(eqEntry, rest));
+            }
             iterator.remove();
         }
         return localPattern.isEmpty();
