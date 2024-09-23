@@ -9,10 +9,7 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CraftingRequirementsCfg {
 
@@ -113,7 +110,7 @@ public class CraftingRequirementsCfg {
         if(!config.getBoolean(path + ".ingredients.extensions.enchantments.enabled")) return entries;
         if(required.isEmpty()) return entries;
         for(Map.Entry<Enchantment, Integer> entry : required.entrySet()) {
-            boolean fulfilled = provided.containsKey(entry.getKey()) && provided.get(entry.getKey()) >= entry.getValue();
+            boolean fulfilled = provided.containsKey(entry.getKey()) && Objects.equals(provided.get(entry.getKey()), entry.getValue());
             String line = config.getString(path + ".ingredients.extensions.enchantments." + (fulfilled ? "true" : "false"),
                     fulfilled ? "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<fulfilled>&7)"
                             : "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<unfulfilled>&7)");

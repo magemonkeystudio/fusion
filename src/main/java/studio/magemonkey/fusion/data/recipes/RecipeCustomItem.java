@@ -2,8 +2,14 @@ package studio.magemonkey.fusion.data.recipes;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class RecipeCustomItem implements RecipeItem {
     private final ItemStack item;
@@ -35,7 +41,16 @@ public class RecipeCustomItem implements RecipeItem {
             return CUSTOM_PREFIX + this.item.getType().name() + ":" + this.item.getDurability() + (this.amount != 0 ? (
                     ":" + this.amount) : "");
         }
-        return ItemBuilder.newItem(this.item).serialize();
+        ItemBuilder builder = ItemBuilder.newItem(this.item);
+        if(item.getType() == Material.ENCHANTED_BOOK) {
+            // Reapply enchants to the item, if its an enchanted book
+            if(item.getItemMeta() instanceof EnchantmentStorageMeta storage) {
+                builder.clearEnchants();
+                Map<Enchantment, Integer> enchants = new LinkedHashMap<>(storage.getStoredEnchants());
+                builder.enchant(enchants);
+            }
+        }
+        return builder.serialize();
     }
 
     @Override
@@ -43,11 +58,9 @@ public class RecipeCustomItem implements RecipeItem {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof RecipeCustomItem)) {
+        if (!(o instanceof RecipeCustomItem that)) {
             return false;
         }
-
-        RecipeCustomItem that = (RecipeCustomItem) o;
 
         return (this.amount == that.amount) && this.item.equals(that.item);
 

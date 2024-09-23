@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.api;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
@@ -166,11 +167,26 @@ public class EventManager {
 
                 Collection<ItemStack> refunds = event.getRefundedItems();
                 for (ItemStack refundItem : refunds) {
-                    Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
-                    if (!notAdded.isEmpty()) {
-                        for (ItemStack _item : notAdded) {
-                            Objects.requireNonNull(player.getLocation().getWorld())
-                                    .dropItemNaturally(player.getLocation(), _item);
+                    // If those are not stacked natively, we need to give them one by one
+                    if(refundItem.getMaxStackSize() < refundItem.getAmount()) {
+                        for (int i = 0; i < refundItem.getAmount(); i++) {
+                            ItemStack singleItem = refundItem.clone();
+                            singleItem.setAmount(1);
+                            Collection<ItemStack> notAdded = player.getInventory().addItem(singleItem).values();
+                            if (!notAdded.isEmpty()) {
+                                for (ItemStack _item : notAdded) {
+                                    Objects.requireNonNull(player.getLocation().getWorld())
+                                            .dropItemNaturally(player.getLocation(), _item);
+                                }
+                            }
+                        }
+                    } else {
+                        Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
+                        if (!notAdded.isEmpty()) {
+                            for (ItemStack _item : notAdded) {
+                                Objects.requireNonNull(player.getLocation().getWorld())
+                                        .dropItemNaturally(player.getLocation(), _item);
+                            }
                         }
                     }
                 }

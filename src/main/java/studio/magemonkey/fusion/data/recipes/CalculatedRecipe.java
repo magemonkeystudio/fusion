@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
@@ -139,50 +140,15 @@ public class CalculatedRecipe {
                         eqEntry = entry;
                     } else if (item.hasItemMeta()) {
                         item = item.clone();
-                        if (CalculatedRecipe.isSimilar(recipeItemStackOne, item, extensionLines)) {
-                            Bukkit.getConsoleSender().sendMessage("Found similar item: " + item);
+
+                        // TODO Lightweight fix for duplicated lore. Should be replaced with a more efficient solution
+
+                        if (CalculatedRecipe.isSimilar("recipes", recipeItemStackOne, item, extensionLines)) {
                             eqEntry = entry;
                             break;
                         }
                     }
                 }
-
-                /*if (isExtensionEnabled) {
-                    ItemMeta requiredMeta = recipeItemStack.getItemMeta();
-                    ItemMeta providedMeta = eqEntry != null ? eqEntry.getKey().getItemMeta() : null;
-                    if (requiredMeta != null) {
-                        Map<Enchantment, Integer> providedEnchantments = providedMeta != null ? providedMeta.getEnchants() : Map.of();
-                        Map<Enchantment, Integer> requiredEnchantments = requiredMeta.getEnchants();
-                        if (!requiredEnchantments.isEmpty())
-                            extensionLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine("recipes", providedEnchantments, requiredEnchantments));
-
-                        Set<ItemFlag> providedFlags = providedMeta != null ? providedMeta.getItemFlags() : Set.of();
-                        Set<ItemFlag> requiredFlags = requiredMeta.getItemFlags();
-                        if (!requiredFlags.isEmpty())
-                            extensionLines.addAll(CraftingRequirementsCfg.getExtensionFlagLine("recipes", providedFlags, requiredFlags));
-
-                        if (requiredMeta.isUnbreakable()) {
-                            String unbreakableLine = CraftingRequirementsCfg.getExtensionUnbreakableLine("recipes", providedMeta != null && providedMeta.isUnbreakable(), requiredMeta.isUnbreakable());
-                            if (unbreakableLine != null)
-                                extensionLines.add(unbreakableLine);
-                        }
-
-                        if (requiredMeta instanceof Damageable) {
-                            int providedDamage = providedMeta instanceof Damageable ? ((Damageable) providedMeta).getDamage() : 0;
-                            if (providedDamage != ((Damageable) requiredMeta).getDamage()) {
-                                String damageLine = CraftingRequirementsCfg.getExtensionDurabilityLine("recipes", providedDamage, ((Damageable) requiredMeta).getDamage());
-                                if (damageLine != null)
-                                    extensionLines.add(damageLine);
-                            }
-                        }
-
-                        if (requiredMeta.hasCustomModelData()) {
-                            String customModelDataLine = CraftingRequirementsCfg.getExtensionCustomModelDataLine("recipes", providedMeta != null && providedMeta.hasCustomModelData() ? providedMeta.getCustomModelData() : 0, requiredMeta.getCustomModelData());
-                            if (customModelDataLine != null)
-                                extensionLines.add(customModelDataLine);
-                        }
-                    }
-                }*/
 
                 int eqAmount = eqEntry != null ? eqEntry.getValue() : 0;
                 int patternAmount = recipeItem.getAmount();
@@ -190,14 +156,16 @@ public class CalculatedRecipe {
                     canCraft = false;
                     lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount)).append('\n');
                     if (isExtensionEnabled) {
-                        for (String extension : extensionLines) {
-                            lore.append(extension).append('\n');
+                        if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly && (recipeItem instanceof RecipeEconomyItem))) {
+                            for (String extension : extensionLines) {
+                                lore.append(extension).append('\n');
+                            }
                         }
                     }
                     continue;
                 }
                 if (eqAmount == patternAmount) {
-                    eqItems.remove(eqAmount);
+                    eqItems.remove(eqEntry);
                 }
                 int rest = eqAmount - patternAmount;
                 if (rest > 0 && eqEntry != null) {
@@ -206,8 +174,10 @@ public class CalculatedRecipe {
                 it.remove();
                 lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount)).append('\n');
                 if (isExtensionEnabled) {
-                    for (String extension : extensionLines) {
-                        lore.append(extension).append('\n');
+                    if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly && (recipeItem instanceof RecipeEconomyItem))) {
+                        for (String extension : extensionLines) {
+                            lore.append(extension).append('\n');
+                        }
                     }
                 }
             }
@@ -259,6 +229,7 @@ public class CalculatedRecipe {
                 Fusion.getInstance().error("- " + patternItem);
             }
             Fusion.getInstance().error("Error on creating CalculatedRecipe: " + e.getMessage());
+            e.printStackTrace();
             throw new InvalidPatternItemException(e);
         }
     }
@@ -277,10 +248,14 @@ public class CalculatedRecipe {
     }
 
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
-        return isSimilar(is1, is2, List.of());
+        return isSimilar("recipes", is1, is2);
     }
 
-    public static boolean isSimilar(ItemStack is1, ItemStack is2, List<String> checkingLines) {
+    public static boolean isSimilar(String path, ItemStack is1, ItemStack is2) {
+        return isSimilar(path, is1, is2, List.of());
+    }
+
+    public static boolean isSimilar(String path, ItemStack is1, ItemStack is2, List<String> checkingLines) {
         //More relaxed comparison
         if (is1.getType() != is2.getType())
             return false;
@@ -293,24 +268,40 @@ public class CalculatedRecipe {
         boolean isValid = true;
 
         // Check for name
-        if (im1.hasDisplayName() && im2.hasDisplayName())
-            isValid = im1.getDisplayName().equals(im2.getDisplayName());
+        if (im1.hasDisplayName()) {
+            String displayName1 = im1.getDisplayName();
+            String displayName2 = im2.hasDisplayName() ? im2.getDisplayName() : "";
+            isValid = displayName1.equals(displayName2);
+        } else if (!im1.hasDisplayName() && im2.hasDisplayName()) {
+            isValid = false;
+        }
 
         // Check for enchantments
-        if (im1.hasEnchants()) {
-            Map<Enchantment, Integer> ench1 = im1.getEnchants();
-            Map<Enchantment, Integer> ench2 = im2.getEnchants();
+        if (im1 instanceof EnchantmentStorageMeta storage1) {
+            EnchantmentStorageMeta storage2 = (EnchantmentStorageMeta) im2;
+            Map<Enchantment, Integer> ench1 = storage1.getStoredEnchants();
+            Map<Enchantment, Integer> ench2 = storage2.getStoredEnchants();
+
             if (ench1.size() != ench2.size())
                 isValid = false;
-            if (isValid) {
+            for (Map.Entry<Enchantment, Integer> entry : ench1.entrySet()) {
+                if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
+                    isValid = false;
+            }
+            checkingLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine(path, ench2, ench1));
+        } else {
+            if (im1.hasEnchants()) {
+                Map<Enchantment, Integer> ench1 = im1.getEnchants();
+                Map<Enchantment, Integer> ench2 = im2.getEnchants();
+                if (ench1.size() != ench2.size())
+                    isValid = false;
                 for (Map.Entry<Enchantment, Integer> entry : ench1.entrySet()) {
                     if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
                         isValid = false;
                 }
+                checkingLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine(path, ench2, ench1));
             }
-            checkingLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine("recipes", ench2, ench1));
         }
-
         // Check for flags
         if (!im1.getItemFlags().isEmpty()) {
             if (im1.getItemFlags().size() != im2.getItemFlags().size())
@@ -319,7 +310,7 @@ public class CalculatedRecipe {
                 if (!im2.getItemFlags().contains(flag))
                     isValid = false;
             }
-            checkingLines.addAll(CraftingRequirementsCfg.getExtensionFlagLine("recipes", im2.getItemFlags(), im1.getItemFlags()));
+            checkingLines.addAll(CraftingRequirementsCfg.getExtensionFlagLine(path, im2.getItemFlags(), im1.getItemFlags()));
         }
 
         // Check for lore
@@ -338,13 +329,13 @@ public class CalculatedRecipe {
         if (im1.hasCustomModelData()) {
             if (im1.getCustomModelData() != im2.getCustomModelData())
                 isValid = false;
-            checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine("recipes", im2.getCustomModelData(), im1.getCustomModelData()));
+            checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path, im2.getCustomModelData(), im1.getCustomModelData()));
         }
 
         // Check if unbreakable
         if (im1.isUnbreakable()) {
             isValid = im1.isUnbreakable() == im2.isUnbreakable();
-            checkingLines.add(CraftingRequirementsCfg.getExtensionUnbreakableLine("recipes", im2.isUnbreakable(), im1.isUnbreakable()));
+            checkingLines.add(CraftingRequirementsCfg.getExtensionUnbreakableLine(path, im2.isUnbreakable(), im1.isUnbreakable()));
         }
 
         // Check for durability if instanceof Damageable
@@ -352,37 +343,9 @@ public class CalculatedRecipe {
             int damage1 = dmg.getDamage();
             int damage2 = im2 instanceof Damageable dmg2 ? dmg2.getDamage() : 0;
             isValid = damage1 == damage2;
-            checkingLines.add(CraftingRequirementsCfg.getExtensionDurabilityLine("recipes", damage2, damage1));
+            checkingLines.add(CraftingRequirementsCfg.getExtensionDurabilityLine(path, damage2, damage1));
         }
         return isValid && is1.isSimilar(is2);
-
-        //More Strict comparison
-        /*ItemStack recipeItemStackOne = is1.clone();
-        recipeItemStackOne.setAmount(1);
-        trimLore(recipeItemStackOne);
-
-        ItemStack item = is2.clone();
-        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            item = item.clone();
-            trimLore(item);
-
-            return item.isSimilar(recipeItemStackOne);
-        }
-        return false;*/
-    }
-
-    public static void trimLore(ItemStack item) {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        List<String> itemLore = meta.getLore();
-        if (itemLore == null) return;
-        itemLore.removeIf(s -> org.apache.commons.lang3.StringUtils.contains(s, "Crafted by") || s.trim().isEmpty()
-                || org.apache.commons.lang3.StringUtils.contains(s, "Craft Requirements")
-                || org.apache.commons.lang3.StringUtils.contains(s, "Item")
-                || org.apache.commons.lang3.StringUtils.contains(s, "Level Needed")
-                || org.apache.commons.lang3.StringUtils.contains(s, "Mastery"));
-        meta.setLore(itemLore);
-        item.setItemMeta(meta);
     }
 
     @Override
