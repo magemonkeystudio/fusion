@@ -1,4 +1,6 @@
 # The crafting requirement section that is applied to recipes only
+fulfilled: "&a&l✓&r"
+unfulfilled: "&c&l✗&r"
 recipes:
   # The line that is displayed above the crafting requirements
   requirementLine: "&7Crafting Requirements"
@@ -33,28 +35,28 @@ recipes:
       # The enchantments that are displayed in the ingredients
       enchantments:
         enabled: true
-        'true': "  &6- &7Enchant &b$<enchantment> &7(&a$<value>&8/&7$<required>&7)"
-        'false': "  &6- &7Enchant &b$<enchantment> &7(&c$<value>&8/&7$<required>&7)"
+        'true': "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Enchant &9$<enchantment> &7(&c$<required>&7) &7($<unfulfilled>&7)"
       # The flags that are displayed in the ingredients
       flags:
         enabled: false
-        'true': "  &6- &7Flag &b$<flag> &7(&a$<value>&8/&7$<required>&7)"
-        'false': "  &6- &7Flag &b$<flag> &7(&c$<value>&8/&7$<required>&7)"
+        'true': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<unfulfilled>&7)"
       # The unbreakable that is displayed in the ingredients
       unbreakable:
         enabled: false
-        'true': "  &6- &7Unbreakable &7(&a$<value>&8/&7$<required>&7)"
-        'false': "  &6- &7Unbreakable &7(&c$<value>&8/&7$<required>&7)"
+        'true': "  &8• &7Unbreakable &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Unbreakable &7(&c$<required>&7) &7($<unfulfilled>&7)"
       # The durability that is displayed in the ingredients (only if existent)
       durability:
         enabled: true
-        'true': "  &6- &7Durability &7(&a$<value>&8/&7$<required>&7)"
-        'false': "  &6- &7Durability &7(&c$<value>&8/&7$<required>&7)"
+        'true': "  &8• &7Durability &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Durability &7(&a$<required>&7) &7($<unfulfilled>&7)"
       # The custom model data that is displayed in the ingredients
       customModelData:
         enabled: false
-        'true': "  &6- &7Custom Model &7(&a$<value>&8/&7$<required>&7)"
-        'false': "  &6- &7Custom Model &7(&c$<value>&8/&7$<required>&7)"
+        'true': "  &8• &7Custom Model &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Custom Model &7(&a$<required>&7) &7($<unfulfilled>&7)"
   # The money that is displayed in the crafting requirements
   money:
     'true': "&6- &eMoney: &7(&a$$<money>&8/&7$$<required>&7)"

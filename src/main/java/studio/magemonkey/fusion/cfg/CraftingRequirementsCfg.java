@@ -22,6 +22,14 @@ public class CraftingRequirementsCfg {
         config = YamlParser.loadOrExtract(Fusion.getInstance(), "lang/CraftingRequirements.yml");
     }
 
+    private static String getFulfilled() {
+        return ChatUT.hexString(config.getString("fulfilled", "&a✓"));
+    }
+
+    private static String getUnfulfilled() {
+        return ChatUT.hexString(config.getString("unfulfilled", "&c✗"));
+    }
+
     /* Recipe-related crafting requirements */
     public static String getCraftingRequirementLine(String path) {
         return ChatUT.hexString(config.getString(path + ".requirementLine", "&7Crafting Requirements"));
@@ -106,12 +114,23 @@ public class CraftingRequirementsCfg {
         if(required.isEmpty()) return entries;
         for(Map.Entry<Enchantment, Integer> entry : required.entrySet()) {
             boolean fulfilled = provided.containsKey(entry.getKey()) && provided.get(entry.getKey()) >= entry.getValue();
-            String line = config.getString(path + ".ingredients.extensions.enchantments" + (fulfilled ? "true" : "false"),
-                    fulfilled ? "  &6- &7Enchant &b$<enchantment> &7(&a$<value>&8/&7$<required>&7)"
-                            : "  &6- &7Enchant &b$<enchantment> &7(&c$<value>&8/&7$<required>&7)");
-            line = line.replace("$<value>", String.valueOf(provided.getOrDefault(entry.getKey(), 0))).replace("$<required>", String.valueOf(entry.getValue()));
+            String line = config.getString(path + ".ingredients.extensions.enchantments." + (fulfilled ? "true" : "false"),
+                    fulfilled ? "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<fulfilled>&7)"
+                            : "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<unfulfilled>&7)");
+            line = line.replace("$<required>", String.valueOf(entry.getValue()));
+            line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
             line = line.replace("$<enchantment>", ChatUT.serialize(Component.translatable(entry.getKey().getTranslationKey())));
             entries.add(ChatUT.hexString(line));
+        }
+        for(Map.Entry<Enchantment, Integer> entry : provided.entrySet()) {
+            if(!required.containsKey(entry.getKey())) {
+                String line = config.getString(path + ".ingredients.extensions.enchantments.false",
+                        "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<unfulfilled>&7)");
+                line = line.replace("$<required>", "0");
+                line = line.replace("$<unfulfilled>", getUnfulfilled());
+                line = line.replace("$<enchantment>", ChatUT.serialize(Component.translatable(entry.getKey().getTranslationKey())));
+                entries.add(ChatUT.hexString(line));
+            }
         }
         return entries;
     }
@@ -122,10 +141,11 @@ public class CraftingRequirementsCfg {
         if(required.isEmpty()) return entries;
         for(ItemFlag flag : required) {
             boolean fulfilled = provided.contains(flag);
-            String line = config.getString(path + ".ingredients.extensions.flags" + (fulfilled ? "true" : "false"),
-                    fulfilled ? "  &6- &7Flag &b$<flag> &7(&a$<value>&8/&7$<required>&7)"
-                            : "  &6- &7Flag &b$<flag> &7(&c$<value>&8/&7$<required>&7)");
-            line = line.replace("$<value>", fulfilled ? "true" : "false").replace("$<required>", "true");
+            String line = config.getString(path + ".ingredients.extensions.flags." + (fulfilled ? "true" : "false"),
+                    fulfilled ? "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<fulfilled>&7)"
+                            : "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<unfulfilled>&7)");
+            line = line.replace("$<required>", getFulfilled());
+            line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
             line = line.replace("$<flag>", flag.toString().toLowerCase());
             entries.add(ChatUT.hexString(line));
         }
@@ -135,30 +155,33 @@ public class CraftingRequirementsCfg {
     public static String getExtensionUnbreakableLine(String path, boolean provided, boolean required) {
         if(!config.getBoolean(path + ".ingredients.extensions.unbreakable.enabled")) return null;
         boolean fulfilled = provided == required;
-        String line = config.getString(path + ".ingredients.extensions.unbreakable" + (fulfilled ? "true" : "false"),
-                fulfilled ? "  &6- &7Unbreakable &7(&a$<value>&8/&7$<required>&7)"
-                        : "  &6- &7Unbreakable &7(&c$<value>&8/&7$<required>&7)");
-        line = line.replace("$<value>", String.valueOf(provided)).replace("$<required>", String.valueOf(required));
+        String line = config.getString(path + ".ingredients.extensions.unbreakable." + (fulfilled ? "true" : "false"),
+                fulfilled ? "  &8• &7Unbreakable &7(&a$<required>&7) &7($<fulfilled>&7)"
+                        : "  &8• &7Unbreakable &7(&a$<required>&7) &7($<unfulfilled>&7)");
+        line = line.replace("$<required>", String.valueOf(required));
+        line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
         return ChatUT.hexString(line);
     }
 
     public static String getExtensionDurabilityLine(String path, int provided, int required) {
         if(!config.getBoolean(path + ".ingredients.extensions.durability.enabled")) return null;
-        boolean fulfilled = provided >= required;
-        String line = config.getString(path + ".ingredients.extensions.durability" + (fulfilled ? "true" : "false"),
-                fulfilled ? "  &6- &7Durability &7(&a$<value>&8/&7$<required>&7)"
-                        : "  &6- &7Durability &7(&c$<value>&8/&7$<required>&7)");
-        line = line.replace("$<value>", String.valueOf(provided)).replace("$<required>", String.valueOf(required));
+        boolean fulfilled = provided == required;
+        String line = config.getString(path + ".ingredients.extensions.durability." + (fulfilled ? "true" : "false"),
+                fulfilled ? "  &8• &7Durability &7(&a$<required>&7) &7($<fulfilled>&7)"
+                        : "  &8• &7Durability &7(&a$<required>&7) &7($<unfulfilled>&7)");
+        line = line.replace("$<required>", String.valueOf(required));
+        line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
         return ChatUT.hexString(line);
     }
 
     public static String getExtensionCustomModelDataLine(String path, int provided, int required) {
         if(!config.getBoolean(path + ".ingredients.extensions.customModelData.enabled")) return null;
-        boolean fulfilled = provided >= required;
-        String line = config.getString(path + ".ingredients.extensions.customModelData" + (fulfilled ? "true" : "false"),
-                fulfilled ? "  &6- &7Custom Model &7(&a$<value>&8/&7$<required>&7)"
-                        : "  &6- &7Custom Model &7(&c$<value>&8/&7$<required>&7)");
-        line = line.replace("$<value>", String.valueOf(provided)).replace("$<required>", String.valueOf(required));
+        boolean fulfilled = provided == required;
+        String line = config.getString(path + ".ingredients.extensions.customModelData." + (fulfilled ? "true" : "false"),
+                fulfilled ? "  &8• &7Custom Model &7(&a$<required>&7) &7($<fulfilled>&7)"
+                        : "  &8• &7Custom Model &7(&a$<required>&7) &7($<unfulfilled>&7)");
+        line = line.replace("$<required>", String.valueOf(required));
+        line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
         return ChatUT.hexString(line);
     }
 
