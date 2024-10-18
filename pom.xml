@@ -15,7 +15,7 @@
     <version>1.0.1-R0.2-SNAPSHOT</version>
 
     <properties>
-        <codex.version>1.0.0-R0.20-SNAPSHOT</codex.version>
+        <codex.version>1.0.1-R0.8-SNAPSHOT</codex.version>
     </properties>
 
     <build>
@@ -122,7 +122,7 @@
         <dependency>
             <groupId>com.github.Zrips</groupId>
             <artifactId>Jobs</artifactId>
-            <version>b537ec4</version>
+            <version>v5.2.2.3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
