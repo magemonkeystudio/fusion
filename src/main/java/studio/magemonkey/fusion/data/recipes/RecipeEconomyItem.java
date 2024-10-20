@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.recipes;
 
 import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.CodexItemException;
+import studio.magemonkey.fusion.Fusion;
 
 public class RecipeEconomyItem implements RecipeItem {
     @Getter

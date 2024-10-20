@@ -2,7 +2,6 @@ package studio.magemonkey.fusion.cfg.editors;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.editors.browse.BrowseEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.browse.BrowseProfessionCfg;
@@ -11,6 +10,7 @@ import studio.magemonkey.fusion.cfg.editors.pattern.PatternItemEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.CategoryEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.ProfessionEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.RecipeEditorCfg;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;

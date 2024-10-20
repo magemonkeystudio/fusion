@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.util;
 
 public class InvalidPatternItemException extends Exception {
 

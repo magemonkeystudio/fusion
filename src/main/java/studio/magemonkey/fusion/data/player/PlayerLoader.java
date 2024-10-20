@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.cfg.player;
+package studio.magemonkey.fusion.data.player;
 
 import org.bukkit.entity.Player;
 

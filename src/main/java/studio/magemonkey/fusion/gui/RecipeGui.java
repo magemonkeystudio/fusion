@@ -31,15 +31,25 @@ import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.ExperienceManager;
+import studio.magemonkey.fusion.util.InvalidPatternItemException;
+import studio.magemonkey.fusion.util.LevelFunction;
 import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 
@@ -51,7 +61,7 @@ public class RecipeGui implements Listener {
     @Getter
     protected final String name;
     @Getter
-    protected final String inventoryName;
+    private final String inventoryName;
     private final Category category;
     private InventoryPattern pattern;
     private final HashMap<Integer, CalculatedRecipe> recipes;
@@ -229,7 +239,7 @@ public class RecipeGui implements Listener {
             /* Default setup */
             ItemStack fill = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
-            allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
+            allRecipes.removeIf(r -> r.isHidden(player));
             int pageSize = resultSlots.size();
             int allRecipeCount = allRecipes.size();
             int i = 0;
@@ -464,7 +474,7 @@ public class RecipeGui implements Listener {
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
-            MessageUtil.sendMessage("fusion.gui.recipes.canCraft.false", player);
+            player.sendMessage(CraftingRequirementsCfg.getCanCraft(false));
             return false;
         }
 
@@ -625,7 +635,7 @@ public class RecipeGui implements Listener {
 
                     //Experience
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventManager().callProfessionGainXpEvent(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());

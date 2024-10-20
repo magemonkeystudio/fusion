@@ -1,13 +1,13 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

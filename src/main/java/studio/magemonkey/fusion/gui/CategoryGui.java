@@ -17,15 +17,17 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.fusion.*;
-import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.QueueItem;
-import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.fusion.util.Utils;
+import studio.magemonkey.fusion.util.LevelFunction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public class CategoryGui implements Listener {

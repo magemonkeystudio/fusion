@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.professions.pattern;
 
 import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;

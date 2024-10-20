@@ -6,8 +6,8 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 
 public final class Utils {
 
-    public static boolean hasCraftingPermission(Permissible permissible, String item) {
-        return permissible.hasPermission("fusion.recipe." + item) || permissible.hasPermission("fusion.recipes") ||
+    public static boolean hasCraftingPermission(Permissible permissible, String recipe) {
+        return permissible.hasPermission("fusion.recipe." + recipe) || permissible.hasPermission("fusion.recipes") ||
                 permissible.hasPermission("fusion.recipe.*");
     }
 

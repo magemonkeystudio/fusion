@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion;
+package studio.magemonkey.fusion.data.professions.pattern;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,8 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.items.exception.CodexItemException;
 import studio.magemonkey.codex.items.providers.VanillaProvider;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.ArrayList;

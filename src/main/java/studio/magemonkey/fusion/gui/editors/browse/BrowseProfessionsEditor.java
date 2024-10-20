@@ -1,19 +1,17 @@
 package studio.magemonkey.fusion.gui.editors.browse;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 

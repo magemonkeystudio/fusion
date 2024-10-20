@@ -1,16 +1,17 @@
-package studio.magemonkey.fusion.cfg.player;
+package studio.magemonkey.fusion.data.player;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
-import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.deprecated.PlayerCustomGUI;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.data.professions.Profession;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.gui.RecipeGui;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,10 +24,11 @@ public class FusionPlayer {
 
     private final UUID uuid;
 
-    private final Map<String, Profession>    professions = new TreeMap<>();
-    private       Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private final Map<String, Profession> professions = new TreeMap<>();
+    private Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
+    private Map<String, Integer> cachedRecipeLimits = new TreeMap<>();
 
-    private final Map<String, PlayerCustomGUI> cachedGuis = new TreeMap<>();
+    private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
 
     @Getter
     @Setter
@@ -39,6 +41,7 @@ public class FusionPlayer {
             professions.put(profession.getName(), profession);
         }
         cachedQeues = SQLManager.queues().getCraftingQueues(getPlayer());
+        cachedRecipeLimits = SQLManager.recipeLimits().getRecipeLimits(uuid);
     }
 
     public Player getPlayer() {
@@ -52,24 +55,34 @@ public class FusionPlayer {
         return cachedQeues.get(profession);
     }
 
-    public void cacheGui(String id, PlayerCustomGUI gui) {
+    public void cacheGui(String id, RecipeGui gui) {
         if (cachedGuis.containsKey(id)) {
-            cachedGuis.get(id).getGui().open(getPlayer(), cachedGuis.get(id));
+            cachedGuis.get(id).open(getPlayer());
             return;
         }
         cachedGuis.put(id, gui);
     }
 
-    /*
-     * Returns the amount of items in the queue for the given profession and category
-     * @param profession The profession to check
-     * @param category The category to check
-     * @return The amount of items in the queue for the given profession and category
+    public int getRecipeLimit(Recipe recipe) {
+        return getRecipeLimit(recipe.getRecipePath());
+    }
 
-     * sizes[0] = amount of items in the queue for the given profession and category
-     * sizes[1] = amount of items in the queue for the given profession
-     * sizes[2] = amount of items in the queue
-     */
+    public int getRecipeLimit(String recipePath) {
+        return cachedRecipeLimits.getOrDefault(recipePath, 0);
+    }
+
+    public void incrementLimit(Recipe recipe) {
+        incrementLimit(recipe.getRecipePath());
+    }
+
+    public void incrementLimit(String recipePath) {
+        cachedRecipeLimits.put(recipePath, getRecipeLimit(recipePath) + 1);
+    }
+
+    public boolean hasRecipeLimitReached(Recipe recipe) {
+        if(recipe.getCraftingLimit() <= 0) return false;
+        return getRecipeLimit(recipe.getRecipePath()) >= recipe.getCraftingLimit();
+    }
 
     public int getExperience(String profession) {
         int experience = 0;
@@ -187,17 +200,17 @@ public class FusionPlayer {
         setJoined(table.getName(), joined);
     }
 
-    public void addExperience(String profession, int experience) {
+    public void addExperience(String profession, double experience) {
         if (professions.containsKey(profession)) {
             professions.get(profession).addExp(experience);
         }
     }
 
-    public void addExp(Profession profession, int experience) {
+    public void addExp(Profession profession, double experience) {
         addExperience(profession.getName(), experience);
     }
 
-    public void addExp(CraftingTable table, int experience) {
+    public void addExp(CraftingTable table, double experience) {
         addExperience(table.getName(), experience);
     }
 
@@ -271,9 +284,19 @@ public class FusionPlayer {
         reset(table.getName());
     }
 
+    /*
+     * Returns the amount of items in the queue for the given profession and category
+     * @param profession The profession to check
+     * @param category The category to check
+     * @return The amount of items in the queue for the given profession and category
+
+     * sizes[0] = amount of items in the queue for the given profession and category
+     * sizes[1] = amount of items in the queue for the given profession
+     * sizes[2] = amount of items in the queue
+     */
     public int[] getQueueSizes(String profession, Category category) {
-        int[]  limits = new int[]{0, 0, 0};
-        String path   = profession + "." + category.getName();
+        int[] limits = new int[]{0, 0, 0};
+        String path = profession + "." + category.getName();
         limits[0] = cachedQeues.containsKey(path) ? cachedQeues.get(path).getQueue().size() : 0;
         for (Map.Entry<String, CraftingQueue> queue : cachedQeues.entrySet()) {
             if (queue.getKey().contains(profession + ".")) {
@@ -304,7 +327,9 @@ public class FusionPlayer {
         for (CraftingQueue queue : cachedQeues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
         }
+        SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
         cachedGuis.clear();
         cachedQeues.clear();
+        cachedRecipeLimits.clear();
     }
 }
