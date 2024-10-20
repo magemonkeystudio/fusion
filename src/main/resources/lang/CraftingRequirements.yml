@@ -174,14 +174,10 @@ professions:
   exp:
     'true': "&6- &eExperience: &7(&a$<exp>&8/&7$<required>&7) &eexp."
     'false': "&6- &eExperience: &7(&c$<exp>&8/&7$<required>&7) &eexp."
-  # The profession level that is displayed in the crafting requirements
-  professionLevel:
-    'true': "&6- &eLevel Needed: &7(&a$<level>&8/&7$<required>&7)"
-    'false': "&6- &eLevel Needed: &7(&c$<level>&8/&7$<required>&7)"
   # The mastery that is displayed in the crafting requirements
   canJoin:
-    'true': "&aYou can craft this item."
-    'false': "&cYou can't craft this item."
+    'true': "&aYou can join this profession."
+    'false': "&cYou can't join this profession."
   # The message that is displayed when the player needs a specific rank to craft the item
   rank:
     epic: "&cEpic rank needed to craft this item!"
