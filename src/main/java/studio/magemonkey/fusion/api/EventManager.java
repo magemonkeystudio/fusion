@@ -2,7 +2,6 @@ package studio.magemonkey.fusion.api;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;

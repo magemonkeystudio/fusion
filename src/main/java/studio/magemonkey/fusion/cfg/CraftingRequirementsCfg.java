@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.data.recipes.RecipeEconomyItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
 
