@@ -130,6 +130,7 @@ fusion:
     You typed: &7$<text>&r
       Valid syntax:
         &8/&7craft &rbrowse
+        &8/&7craft &rjoin &8<&7profession&8>
         &8/&7craft &ruse &8<&7profession&8>
         &8/&7craft &ruse &8<&7profession&8> <&7player&8>
         &8/&7craft &rlevel
