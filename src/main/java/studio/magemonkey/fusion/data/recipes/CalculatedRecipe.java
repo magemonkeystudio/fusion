@@ -251,7 +251,6 @@ public class CalculatedRecipe {
     }
 
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
-        Bukkit.getConsoleSender().sendMessage("RecipeEditor");
         return isSimilar("recipes", is1, is2);
     }
 
@@ -274,7 +273,6 @@ public class CalculatedRecipe {
 
             String displayName1 = im1.getDisplayName().trim();
             String displayName2 = im2.hasDisplayName() ? im2.getDisplayName().trim() : "";
-            Bukkit.getConsoleSender().sendMessage(displayName1 + " " + displayName2);
             if (!displayName1.equals(displayName2))
                 return false;
         } else if (!im1.hasDisplayName() && im2.hasDisplayName()) {
@@ -362,7 +360,6 @@ public class CalculatedRecipe {
             checkingLines.add(CraftingRequirementsCfg.getExtensionDurabilityLine(path, damage2, damage1));
         }
 
-        Bukkit.getConsoleSender().sendMessage("Valid: " + isValid);
         if (isValid)
             return true;
         // If all those checks failed, try to check once more through the native item meta check
