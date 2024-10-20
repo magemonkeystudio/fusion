@@ -138,18 +138,6 @@ public class CalculatedRecipe {
                         eqEntry = entry;
                         break;
                     }
-                    /*if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType().isInstance(item)) {
-                        eqEntry = entry;
-                    } else if (item.hasItemMeta()) {
-                        item = item.clone();
-
-                        // TODO Lightweight fix for duplicated lore. Should be replaced with a more efficient solution
-
-                        if (CalculatedRecipe.isSimilar("recipes", recipeItemStackOne, item, extensionLines)) {
-                            eqEntry = entry;
-                            break;
-                        }
-                    }*/
                 }
 
                 int eqAmount = eqEntry != null ? eqEntry.getValue() : 0;
