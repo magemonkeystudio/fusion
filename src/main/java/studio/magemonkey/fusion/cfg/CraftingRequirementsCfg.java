@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.data.recipes.RecipeEconomyItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
 
@@ -89,12 +90,20 @@ public class CraftingRequirementsCfg {
                         : "&6- &e$<item>&8: &7(&c<amount>&8/&7<required>&7)");
         line = line.replace("$<amount>", String.valueOf(amount)).replace("$<required>", String.valueOf(required));
 
+
         ItemStack _item = item.getItemStack();
         ItemMeta meta = _item.getItemMeta();
         String itemName = meta != null && meta.hasDisplayName() ? meta.getDisplayName() : ChatUT.serialize(Component.translatable(_item.getTranslationKey()));
 
+        if(_item.hasItemMeta()) {
+            line = getCustomHighlight(path) + line;
+        }
         line = line.replace("$<item>", itemName);
         return ChatUT.hexString(line);
+    }
+
+    private static String getCustomHighlight(String path) {
+        return config.getString(path + ".ingredients.highlightCustomItem", "");
     }
 
     public static boolean hasExtensionEnabled(String path) {
@@ -103,6 +112,29 @@ public class CraftingRequirementsCfg {
 
     public static boolean hasOnlyVanillaExtension(String path) {
         return config.getBoolean(path + ".ingredients.extensions.onlyVanilla", false);
+    }
+
+    public static List<String> getExtensionLoreLine(String path, List<String> provided, List<String> required) {
+        List<String> entries = new ArrayList<>();
+        if(!config.getBoolean(path + ".ingredients.extensions.lore.enabled")) return entries;
+        if(required.isEmpty()) return entries;
+        for(String lore : required) {
+            boolean fulfilled = provided.contains(lore);
+            String line = config.getString(path + ".ingredients.extensions.lore." + (fulfilled ? "true" : "false"), "  $<lore>");
+            line = line.replace("$<fulfilled>", getFulfilled()).replace("$<unfulfilled>", getUnfulfilled());
+            line = line.replace("$<lore>", ChatUT.serialize(Component.text(lore)));
+            entries.add(ChatUT.hexString(line));
+        }
+        for(String lore : provided) {
+            if(!required.contains(lore)) {
+                String line = config.getString(path + ".ingredients.extensions.lore.false",
+                        "  $<lore> &7($<unfulfilled>&7)");
+                line = line.replace("$<unfulfilled>", getUnfulfilled());
+                line = line.replace("$<lore>", ChatUT.serialize(Component.text(lore)));
+                entries.add(ChatUT.hexString(line));
+            }
+        }
+        return entries;
     }
 
     public static List<String> getExtensionEnchantmentLine(String path, Map<Enchantment, Integer> provided,  Map<Enchantment, Integer> required) {

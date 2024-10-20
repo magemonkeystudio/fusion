@@ -135,8 +135,11 @@ public class CalculatedRecipe {
                 List<String> extensionLines = new ArrayList<>();
                 for (Pair<ItemStack, Integer> entry : eqItems) {
                     ItemStack item = entry.getKey().clone();
-                    if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType()
-                            .isInstance(item)) {
+                    if (CalculatedRecipe.isSimilar("recipes", recipeItemStackOne, item, extensionLines)) {
+                        eqEntry = entry;
+                        break;
+                    }
+                    /*if (recipeItem instanceof RecipeEconomyItem && ((RecipeEconomyItem) recipeItem).asItemType().isInstance(item)) {
                         eqEntry = entry;
                     } else if (item.hasItemMeta()) {
                         item = item.clone();
@@ -147,7 +150,7 @@ public class CalculatedRecipe {
                             eqEntry = entry;
                             break;
                         }
-                    }
+                    }*/
                 }
 
                 int eqAmount = eqEntry != null ? eqEntry.getValue() : 0;
@@ -248,11 +251,12 @@ public class CalculatedRecipe {
     }
 
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
+        Bukkit.getConsoleSender().sendMessage("RecipeEditor");
         return isSimilar("recipes", is1, is2);
     }
 
     public static boolean isSimilar(String path, ItemStack is1, ItemStack is2) {
-        return isSimilar(path, is1, is2, List.of());
+        return isSimilar(path, is1, is2, new ArrayList<>());
     }
 
     public static boolean isSimilar(String path, ItemStack is1, ItemStack is2, List<String> checkingLines) {
@@ -265,15 +269,39 @@ public class CalculatedRecipe {
         if ((im1 == null && im2 != null) || (im1 != null && im2 == null)) return false;
         if (im1 == null) return true;
 
-        boolean isValid = true;
-
         // Check for name
         if (im1.hasDisplayName()) {
-            String displayName1 = im1.getDisplayName();
-            String displayName2 = im2.hasDisplayName() ? im2.getDisplayName() : "";
-            isValid = displayName1.equals(displayName2);
+
+            String displayName1 = im1.getDisplayName().trim();
+            String displayName2 = im2.hasDisplayName() ? im2.getDisplayName().trim() : "";
+            Bukkit.getConsoleSender().sendMessage(displayName1 + " " + displayName2);
+            if (!displayName1.equals(displayName2))
+                return false;
         } else if (!im1.hasDisplayName() && im2.hasDisplayName()) {
-            isValid = false;
+            return false;
+        }
+
+        boolean isValid = true;
+
+        // Check for lore
+        if (im1.hasLore()) {
+            List<String> lore1 = im1.getLore();
+            List<String> lore2 = im2.hasLore() ? im2.getLore() : new ArrayList<>();
+            if (lore1 == null || lore2 == null) {
+                isValid = false;
+            } else {
+                if (lore1.isEmpty() || (lore1.size() != lore2.size())) {
+                    isValid = false;
+                } else {
+                    for (int i = 0; i < lore1.size(); i++) {
+                        if (!lore1.get(i).equals(lore2.get(i))) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            checkingLines.addAll(CraftingRequirementsCfg.getExtensionLoreLine(path, lore2, lore1));
         }
 
         // Check for enchantments
@@ -313,39 +341,33 @@ public class CalculatedRecipe {
             checkingLines.addAll(CraftingRequirementsCfg.getExtensionFlagLine(path, im2.getItemFlags(), im1.getItemFlags()));
         }
 
-        // Check for lore
-        /*List<String> lore1 = im1.getLore();
-        List<String> lore2 = im2.getLore();
-        if ((lore1 == null && lore2 != null) || (lore1 != null && lore2 == null)) isValid = false;
-        if (lore1 == null) isValid = true;
-        if (lore1.size() != lore2.size())
-            isValid = false;
-        for (int i = 0; i < lore1.size(); i++) {
-            if (!lore1.get(i).equals(lore2.get(i)))
-                isValid = false;
-        }*/
-
         // Check for custom model data
         if (im1.hasCustomModelData()) {
             if (im1.getCustomModelData() != im2.getCustomModelData())
                 isValid = false;
             checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path, im2.getCustomModelData(), im1.getCustomModelData()));
         }
-
         // Check if unbreakable
         if (im1.isUnbreakable()) {
-            isValid = im1.isUnbreakable() == im2.isUnbreakable();
+            if (im2.isUnbreakable())
+                isValid = false;
             checkingLines.add(CraftingRequirementsCfg.getExtensionUnbreakableLine(path, im2.isUnbreakable(), im1.isUnbreakable()));
         }
-
         // Check for durability if instanceof Damageable
         if (im1 instanceof Damageable dmg && dmg.getDamage() > 0) {
             int damage1 = dmg.getDamage();
             int damage2 = im2 instanceof Damageable dmg2 ? dmg2.getDamage() : 0;
-            isValid = damage1 == damage2;
+            if (damage1 != damage2)
+                isValid = false;
             checkingLines.add(CraftingRequirementsCfg.getExtensionDurabilityLine(path, damage2, damage1));
         }
-        return isValid && is1.isSimilar(is2);
+
+        Bukkit.getConsoleSender().sendMessage("Valid: " + isValid);
+        if (isValid)
+            return true;
+        // If all those checks failed, try to check once more through the native item meta check
+        // This is useful for custom items like from Divinity, etc.
+        return is1.isSimilar(is2);
     }
 
     @Override
