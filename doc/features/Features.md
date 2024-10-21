@@ -5,7 +5,7 @@
 ### Usage
 You open the browse gui with the command `/craft browse`.
 
-![](../../images/browsing/browse_gui.png)<br>
+![](../../images/features/browse_gui.png)<br>
 
 In case you dont want to open the browse gui all the time, you can also skip it by using `/craft join <profession>`
 
@@ -82,13 +82,13 @@ Both mechanism start inside of a gui, where you can see the recipes or specific 
 First, we open the gui by typing `/craft use <profession>`.
 
 In this simple case we have a wooden sword and cross bow available:
-![](../../images/browsing/recipe_gui.png)<br>
+![](../../images/features/recipe_gui.png)<br>
 
 The green dye in this example represents a navigation button to get into the previous page. This can either be a category gui for this profession, or another 'page' of those recipes here (This gui is configured to always show a max. of 5 recipes at the same time).
 
 While hovering on the item, you can see what is required for this recipe to be craftable:
 
-![](../../images/browsing/recipe_example.png)<br>
+![](../../images/features/recipe_example.png)<br>
 
 Those requirements are usually seperated into two sections in the configs.<br>
 
@@ -100,10 +100,10 @@ This is the part of crafting that is always the same. Now lets look further into
 #### Queue-Mechanism
 Queue is a mechanism that allows you to queue multiple recipes in a row so that once the first is finished, the seconds 'starts' to craft in the **background**.
 Those queue-slots are defined as a '-' in the pattern of your gui, which can look like the following:
-![](../../images/browsing/queue_slot.png)<br>
+![](../../images/features/queue_slot.png)<br>
 
 You then click on the desired recipe to add this item into the queue:
-![](../../images/browsing/queue_slot_active.png)<br>
+![](../../images/features/queue_slot_active.png)<br>
 The item now runs in the background and allows to do other tasks without having to look at this recipe the whole time.
 Clicking on the recipe while working cancels the queue-task and refunds you the items, if properly configured. 
 Doing so after it finished provides you the item into the inventory (or drops it, if you have no space in inventory).
@@ -112,8 +112,8 @@ Doing so after it finished provides you the item into the inventory (or drops it
 While explaining the queue-mechanism with the comfortable background option, you might guess what the manual mechanism does.
 Once you click on the recipe here, you will get a barrier in you inventory and a boss bar occurs at the top of your screen:
 
-![](../../images/browsing/manual_bossbar.png)<br>
-![](../../images/browsing/manual_barrier.png)<br>
+![](../../images/features/manual_bossbar.png)<br>
+![](../../images/features/manual_barrier.png)<br>
 
 This option requires the player to stay inside of this gui until it is finished. 
 You see the progress of the recipe at the bossbar which updates continously to show the progress.
