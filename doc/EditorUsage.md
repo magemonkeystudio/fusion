@@ -326,6 +326,16 @@ following functionalities:
         - Left Click: Increase the amount by 1
         - Right Click: Decrease the amount by 1
         - Shift + Click: Manage each by 10
+            <br><br>
+- **Hiding Options** Those are options to hide the recipe if specific conditions occur.
+   - Shown as: Levers
+   - **Hiding if no permission** Rather the recipe is hidden if the player has no permission to craft it.
+   - **Hiding if no rank** Rather the recipe is hidden if the player has not the rank to craft it.
+   - **Hiding if limit reached** Rather the recipe is hidden if the player has reached the limit of crafting this recipe.
+   - Usage:
+        - Left Click: Toggle between `true` and `false`
+        - Right Click: Unset the option to respect global settings
+          <br><br>
 - **Commands**: The commands that will be executed when the recipe is crafted. You will be forwarded to a click message
   in the chat in order to type in a new command for the recipe. (`/fusion-editor <caster> <delay> <command without />`)
     - Shown as: Command Block
