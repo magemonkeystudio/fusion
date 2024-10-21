@@ -98,9 +98,8 @@ The second one is the `conditions`-section, which are conditions that need be fu
 This is the part of crafting that is always the same. Now lets look further into the different mechanisms.
 
 #### Queue-Mechanism
-Queue is a mechanism that allows you to queue multiple recipes in a row so that once the first is finished, the seconds 'starts' to craft in the **background**. 
-You will have a detailed overview of queuing under the [Queuing Items](#)-Section later. 
-For now, it's important that those queue-slots are defined as a '-' in the pattern of your gui, which can look like the following:
+Queue is a mechanism that allows you to queue multiple recipes in a row so that once the first is finished, the seconds 'starts' to craft in the **background**.
+Those queue-slots are defined as a '-' in the pattern of your gui, which can look like the following:
 ![](../../images/browsing/queue_slot.png)<br>
 
 You then click on the desired recipe to add this item into the queue:
@@ -809,5 +808,5 @@ recipes:
 </details>
 
 ### Additionals
-- Setting the permission `fusion.browse` to false in your permission handler disabled the browse command for the player. If you dont set it at all, its natively active.
+- Setting the permission `fusion.browse` to false in your permission handler disabled the browse command for the player. If you dont set it at all, its natively active. You can also look for further permissions under the [Permissions](Permissions) page.
 - Make sure to visit [Customizing Sections](Customizations) for further knowledge about the ItemBuilder, Cost-Section and Condition-Section of professions and even recipes!

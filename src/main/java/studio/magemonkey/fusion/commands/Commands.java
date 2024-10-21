@@ -306,7 +306,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             if ("master".startsWith(args[0])) entries.add("master");
             if ("forget".startsWith(args[0])) entries.add("forget");
             if ("join".startsWith(args[0])) entries.add("join");
-            if (Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0]))
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && "storage".startsWith(args[0]))
                 entries.add("storage");
             if (Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0]))
                 entries.add("auto");
