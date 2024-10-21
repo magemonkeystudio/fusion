@@ -5,6 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
@@ -32,6 +33,10 @@ public class CraftingRequirementsCfg {
         return ChatUT.hexString(config.getString(path + ".requirementLine", "&7Crafting Requirements"));
     }
 
+    public static String getBossBarTitle(ItemStack item) {
+        String itemName = item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : ChatUT.serialize(Component.translatable(item.getTranslationKey()));
+        return ChatUT.hexString(config.getString("recipes.bossbar", "&5Crafting $<item>...").replace(MessageUtil.getReplacement("item"), itemName));
+    }
     public static String getLearned(String path, boolean fulfilled) {
         return ChatUT.hexString(config.getString(path + ".learned." + (fulfilled ? "true" : "false"), (fulfilled ? "&aLearned" : "&cNot Learned")));
     }

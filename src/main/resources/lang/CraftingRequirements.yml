@@ -4,6 +4,8 @@ unfulfilled: "&c&l✗&r"
 recipes:
   # The line that is displayed above the crafting requirements
   requirementLine: "&7Crafting Requirements"
+  # The bossbar that will be shown when manual crafting is enabled
+  bossbar: '&5Crafting $<item>...'
   # The message that is displayed when the player has learned the recipe
   learned:
     'true': "&aYou have unlocked this profession"
