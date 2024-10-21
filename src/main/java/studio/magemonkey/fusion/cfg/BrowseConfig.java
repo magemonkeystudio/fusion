@@ -118,14 +118,18 @@ public class BrowseConfig implements ConfigurationSerializable {
         browseItems.put('0',
                 ItemBuilder.newItem(Material.BIRCH_SIGN)
                         .name("&3Crafting Groups")
-                        .insertLoreLine(0, ChatColor.GRAY + "Select a group to get started!")
+                        .insertLoreLine(0, ChatColor.GRAY + "Select a profession")
                         .build());
         browseItems.put('1', ItemBuilder.newItem(Material.CYAN_STAINED_GLASS_PANE).name(" ").build());
 
         InventoryPattern browsePattern =
                 new InventoryPattern(new java.lang.String[]{"111101111", "ooooooooo", "ooooooooo"}, browseItems);
         config.addDefault("pattern", browsePattern.serialize());
-        config.addDefault("professions.smelting.cost", 10);
+
+        config.addDefault("professions.armor_smithing.costs", Map.of("exp", 10));
+        config.addDefault("professions.armor_smithing.conditions", Map.of());
+        config.addDefault("professions.weapon_smithing.costs", Map.of("money", 5));
+        config.addDefault("professions.weapon_smithing.conditions", Map.of());
     }
 
     private static void readData() {

@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
@@ -32,6 +33,7 @@ import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.PlayerUtil;
 import studio.magemonkey.fusion.util.Utils;
 
@@ -128,6 +130,13 @@ public class BrowseGUI implements Listener {
                             .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
                             .build();
                 }
+
+                // Set the profession name manually
+                ItemMeta meta = item.getItemMeta();
+                if(meta != null)
+                    meta.setDisplayName(ChatUT.hexString(table.getInventoryName()));
+                item.setItemMeta(meta);
+
                 inventory.setItem(k, item);
                 this.slotMap.put(k, table.getName());
 
