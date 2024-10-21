@@ -40,6 +40,9 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
+        setItem(19, getIcons().get("hiding_noPermission"));
+        setItem(20, getIcons().get("hiding_noRank"));
+        setItem(21, getIcons().get("hiding_recipeLimitReached"));
         setItem(24, getIcons().get("commands"));
 
         setItem(37, getIcons().get("ingredients"));
@@ -116,6 +119,42 @@ public class RecipeItemEditor extends Editor implements Listener {
                     recipe.getResults().setVanillaExp(Math.max(recipe.getResults().getVanillaExp() - amount, 0));
                     hasChanges = true;
                 }
+            }
+            case 19 -> {
+                if(event.isLeftClick()) {
+                    if (recipe.getHideNoPermission() == null) {
+                        recipe.setHideNoPermission(true);
+                    } else {
+                        recipe.setHideNoPermission(!recipe.getHideNoPermission());
+                    }
+                } else if(event.isRightClick()) {
+                    recipe.setHideNoPermission(null);
+                }
+                hasChanges = true;
+            }
+            case 20 -> {
+                if (event.isLeftClick()) {
+                    if (recipe.getHideNoRank() == null) {
+                        recipe.setHideNoRank(true);
+                    } else {
+                        recipe.setHideNoRank(!recipe.getHideNoRank());
+                    }
+                } else if (event.isRightClick()) {
+                    recipe.setHideNoRank(null);
+                }
+                hasChanges = true;
+            }
+            case 21 -> {
+                if (event.isLeftClick()) {
+                    if (recipe.getHideRecipeLimitReached() == null) {
+                        recipe.setHideRecipeLimitReached(true);
+                    } else {
+                        recipe.setHideRecipeLimitReached(!recipe.getHideRecipeLimitReached());
+                    }
+                } else if (event.isRightClick()) {
+                    recipe.setHideRecipeLimitReached(null);
+                }
+                hasChanges = true;
             }
             case 24 -> {
                 if (event.isLeftClick())
