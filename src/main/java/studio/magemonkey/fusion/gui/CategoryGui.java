@@ -22,6 +22,7 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.LevelFunction;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class CategoryGui implements Listener {
     public void initialize() {
         this.categories.clear();
         this.resultSlots.clear();
-        this.inventory = Bukkit.createInventory(null, table.getPattern().getInventorySize(), table.getInventoryName());
+        this.inventory = Bukkit.createInventory(null, table.getPattern().getInventorySize(), ChatUT.hexString(table.getInventoryName()));
         mapSlots();
         reloadCategories();
     }

@@ -46,10 +46,7 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.util.ExperienceManager;
-import studio.magemonkey.fusion.util.InvalidPatternItemException;
-import studio.magemonkey.fusion.util.LevelFunction;
-import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.*;
 
 import java.util.*;
 
@@ -99,7 +96,7 @@ public class RecipeGui implements Listener {
         this.player = player;
         this.table = table;
         this.name = table.getName();
-        this.inventoryName = table.getInventoryName();
+        this.inventoryName = ChatUT.hexString(table.getInventoryName());
         this.recipes = new HashMap<>(20);
         this.category = category != null ? category : new Category("master", "PAPER", table.getPattern(), 1);
         if(this.category.getName().equals("master")) {
@@ -163,7 +160,7 @@ public class RecipeGui implements Listener {
 
     public void updateBlockedSlots(MessageData[] data) {
         int totalItems = category.getRecipes().size();
-        int queuedTotalItems = queue.getQueue().size();
+        int queuedTotalItems = queue != null ? queue.getQueue().size() : 0;
         int fullPages = totalItems / resultSlots.size();
         int rest = totalItems % resultSlots.size();
         int pages = (rest == 0) ? fullPages : (fullPages + 1);
@@ -584,7 +581,7 @@ public class RecipeGui implements Listener {
             int cooldown = modifier == 0d
                     ? recipe.getCraftingTime()
                     : (int) Math.round(recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier));
-            showBossBar(this.player, cooldown);
+            showBossBar(this.player, recipe.getResults().getResultItem().getItemStack(), cooldown);
 
             if (cooldown != 0) {
                 previousCursor = player.getOpenInventory().getCursor();
@@ -675,11 +672,11 @@ public class RecipeGui implements Listener {
     }
 
     /* Manual Crafting Options */
-    private void showBossBar(Player target, double cooldown) {
+    private void showBossBar(Player target, ItemStack item, double cooldown) {
         if (cooldown == 0)
             return;
 
-        bar = Bukkit.createBossBar(ChatColor.GREEN + "fusion...",
+        bar = Bukkit.createBossBar(CraftingRequirementsCfg.getBossBarTitle(item),
                 BarColor.BLUE,
                 BarStyle.SOLID,
                 BarFlag.PLAY_BOSS_MUSIC);
