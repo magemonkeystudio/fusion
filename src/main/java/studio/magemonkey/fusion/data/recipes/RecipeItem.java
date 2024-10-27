@@ -1,20 +1,17 @@
 package studio.magemonkey.fusion.data.recipes;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import scala.Int;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.divinity.Divinity;
-
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.cfg.hooks.DivinityRecipeMeta;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
+import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityRecipeMeta;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

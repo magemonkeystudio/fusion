@@ -1,18 +1,16 @@
-package studio.magemonkey.fusion.cfg.hooks;
+package studio.magemonkey.fusion.cfg.hooks.divinity;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.divinity.modules.list.itemgenerator.ItemGeneratorManager;
 import studio.magemonkey.divinity.modules.list.itemgenerator.ResourceManager;
 import studio.magemonkey.divinity.stats.tiers.Tier;
 import studio.magemonkey.divinity.utils.ItemUtils;
-import studio.magemonkey.fusion.util.ChatUT;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class DivinityUT {
 

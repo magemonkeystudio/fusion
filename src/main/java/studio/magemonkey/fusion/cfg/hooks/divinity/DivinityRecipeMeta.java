@@ -1,9 +1,10 @@
-package studio.magemonkey.fusion.cfg.hooks;
+package studio.magemonkey.fusion.cfg.hooks.divinity;
 
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.items.ItemType;
+import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 import studio.magemonkey.fusion.util.ChatUT;
 
 @Getter

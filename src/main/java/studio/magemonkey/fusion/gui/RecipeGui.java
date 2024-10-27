@@ -636,7 +636,7 @@ public class RecipeGui implements Listener {
 
                     //Experience
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        FusionAPI.getEventServices().getProfessionService().callProfessionGainXpEvent(player, table, recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());

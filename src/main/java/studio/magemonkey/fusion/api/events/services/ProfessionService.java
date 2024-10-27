@@ -23,7 +23,7 @@ public class ProfessionService {
      * @param moneyCost The money cost to join the profession.
      * @param expCost The experience cost to join the profession.
      */
-    public void callProfessionJoinEvent(String professionName, Player player, double moneyCost, int expCost) {
+    public void joinProfession(String professionName, Player player, double moneyCost, int expCost) {
         ProfessionJoinEvent event = new ProfessionJoinEvent(professionName, player);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -53,7 +53,7 @@ public class ProfessionService {
      * @param table The crafting table (profession) the player wants to leave.
      * @param player The player that wants to leave the profession.
      */
-    public void callProfessionLeaveEvent(CraftingTable table, Player player) {
+    public void leaveProfession(CraftingTable table, Player player) {
         ProfessionLeaveEvent event = new ProfessionLeaveEvent(table.getName(), player);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -71,7 +71,7 @@ public class ProfessionService {
      * @param table The crafting table (profession) the player gains experience in.
      * @param xp The amount of experience the player gains.
      */
-    public void callProfessionGainXpEvent(Player player, CraftingTable table, long xp) {
+    public void giveProfessionExp(Player player, CraftingTable table, long xp) {
         ProfessionGainXpEvent event = new ProfessionGainXpEvent(table.getName(), player, xp);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -80,7 +80,7 @@ public class ProfessionService {
             FusionAPI.getPlayerManager().getPlayer(player).addExperience(table.getName(), event.getGainedExp());
             int newLevel = fusionPlayer.getProfession(table).getLevel();
             if (newLevel != previousLevel) {
-                callLevelUpEvent(player, table, previousLevel, newLevel);
+                levelUpProfession(player, table, previousLevel, newLevel);
             }
         }
     }
@@ -92,7 +92,7 @@ public class ProfessionService {
      * @param previousLevel The previous level of the player.
      * @param newLevel The new level of the player.
      */
-    public void callLevelUpEvent(Player player, CraftingTable table, int previousLevel, int newLevel) {
+    public void levelUpProfession(Player player, CraftingTable table, int previousLevel, int newLevel) {
         ProfessionLevelUpEvent event = new ProfessionLevelUpEvent(table.getName(), player, previousLevel, newLevel);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -110,7 +110,7 @@ public class ProfessionService {
      * @param player The player that masters the profession.
      * @param isMastered If the player has mastered the profession.
      */
-    public void callProfessionMasteryEvent(String professionName, Player player, boolean isMastered) {
+    public void masterProfession(String professionName, Player player, boolean isMastered) {
         ProfessionMasteryEvent event = new ProfessionMasteryEvent(professionName, player, isMastered);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {

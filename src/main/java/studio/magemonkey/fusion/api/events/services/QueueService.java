@@ -31,7 +31,7 @@ public class QueueService {
      * @param queue The crafting queue the player is using.
      * @param item The queue item that is added to the queue.
      */
-    public void callQueueItemAddedEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
+    public void addQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
         QueueItemAddedEvent event = new QueueItemAddedEvent(table.getName(), player, queue, item);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -50,7 +50,7 @@ public class QueueService {
      * @param refunded If the item ingredients will be refunded.
      * @param refundItems The items that will be refunded in case `refunded=true`.
      */
-    public void callQueueItemCanceledEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, boolean finished, boolean refunded, List<ItemStack> refundItems) {
+    public void cancelQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, boolean finished, boolean refunded, List<ItemStack> refundItems) {
         QueueItemRemovedEvent event = new QueueItemRemovedEvent(table.getName(), player, queue, item, finished, refunded, refundItems);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
@@ -105,12 +105,12 @@ public class QueueService {
      * @param resultItem The result item of the queue item.
      * @param resultAmount The amount of the result item.
      */
-    public void callQueueItemFinishedEvent(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, ItemStack resultItem, int resultAmount) {
+    public void finishQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, ItemStack resultItem, int resultAmount) {
         QueueItemFinishedEvent event = new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if(event.getFusionPlayer().hasRecipeLimitReached(event.getQueueItem().getRecipe())) {
-                callQueueItemCanceledEvent(player, table, queue, item, false, true, event.getQueueItem().getRecipe().getItemsToTake());
+                cancelQueueItem(player, table, queue, item, false, true, event.getQueueItem().getRecipe().getItemsToTake());
                 event.setCancelled(true);
                 MessageUtil.sendMessage("fusion.error.recipeLimitReached", player,
                         new MessageData("recipe", event.getQueueItem().getRecipe().getName()),
@@ -124,7 +124,7 @@ public class QueueService {
             //Experience
 
             if (item.getRecipe().getResults().getProfessionExp() > 0) {
-                FusionAPI.getEventServices().getProfessionService().callProfessionGainXpEvent(player, event.getCraftingTable(), event.getQueueItem().getRecipe().getResults().getProfessionExp());
+                FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, event.getCraftingTable(), event.getQueueItem().getRecipe().getResults().getProfessionExp());
             }
             if(item.getRecipe().getResults().getVanillaExp() > 0) {
                 player.giveExp(event.getQueueItem().getRecipe().getResults().getVanillaExp());

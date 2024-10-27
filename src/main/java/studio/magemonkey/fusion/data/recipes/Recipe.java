@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.Cfg;
-import studio.magemonkey.fusion.cfg.hooks.DivinityRecipeMeta;
+import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityRecipeMeta;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;

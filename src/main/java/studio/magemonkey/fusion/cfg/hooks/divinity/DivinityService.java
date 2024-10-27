@@ -1,8 +1,9 @@
-package studio.magemonkey.fusion.cfg.hooks;
+package studio.magemonkey.fusion.cfg.hooks.divinity;
 
 import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.divinity.modules.list.itemgenerator.ItemGeneratorManager;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 
 import java.util.HashMap;
 import java.util.Map;

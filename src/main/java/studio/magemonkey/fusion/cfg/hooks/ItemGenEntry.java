@@ -2,7 +2,6 @@ package studio.magemonkey.fusion.cfg.hooks;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.items.ItemType;
 import studio.magemonkey.divinity.modules.list.itemgenerator.ItemGeneratorManager;
 import studio.magemonkey.divinity.modules.list.itemgenerator.api.IAttributeGenerator;
@@ -12,8 +11,12 @@ import studio.magemonkey.divinity.stats.items.attributes.DefenseAttribute;
 import studio.magemonkey.divinity.stats.items.attributes.FabledAttribute;
 import studio.magemonkey.divinity.stats.items.attributes.SocketAttribute;
 import studio.magemonkey.divinity.stats.tiers.Tier;
+import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityUT;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Getter
 public class ItemGenEntry {

@@ -1,6 +1,5 @@
-package studio.magemonkey.fusion.cfg.hooks;
+package studio.magemonkey.fusion.cfg.hooks.divinity;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.items.ItemType;
@@ -8,6 +7,7 @@ import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.YamlParser;
+import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 import studio.magemonkey.fusion.util.ChatUT;
 
 import java.util.List;
@@ -38,15 +38,14 @@ public class DivinityCfg {
 
         for (int i = 0; i < lore.size(); i++) {
             if (lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
-
-                //int newLines = 1;
-                /*for (String line : entry.reference.getLore()) {
+                int newLines = 1;
+                for (String line : entry.getReference().getLore()) {
                     if(line.contains("%GENERATOR_")) continue;
                     lore.add(i - 1 + newLines, ChatUT.hexString(line));
                     newLines++;
-                }*/
-                //i += newLines;
-                //continue;
+                }
+                i += newLines;
+                continue;
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("levels"))) {
                 String loreEntry = lore.get(i);

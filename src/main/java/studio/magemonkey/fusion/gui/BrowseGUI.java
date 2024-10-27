@@ -223,7 +223,7 @@ public class BrowseGUI implements Listener {
             return;
         }
 
-        FusionAPI.getEventServices().getProfessionService().callProfessionJoinEvent(profession, player, moneyCost, expCost);
+        FusionAPI.getEventServices().getProfessionService().joinProfession(profession, player, moneyCost, expCost);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
