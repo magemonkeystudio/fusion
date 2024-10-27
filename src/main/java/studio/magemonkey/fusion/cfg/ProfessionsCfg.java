@@ -412,15 +412,14 @@ public class ProfessionsCfg {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
         FileConfiguration cfg = cfgs.get(key);
-        String path =
-                item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
+        String path = item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
 
 
         if (!cfg.isSet(path)) {
             Fusion.getInstance().getLogger().warning("Profession '" + key + "' is missing '" + path + "'.");
             return null;
         }
-        ItemStack result = item.getRecipe().getResults().getResultItem().getItemStack();
+        ItemStack result = item.getRecipe().getDivinityRecipeMeta() == null ? item.getRecipe().getResults().getResultItem().getItemStack() : item.getRecipe().getDivinityRecipeMeta().getIcon();
         Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())
                 .toUpperCase());

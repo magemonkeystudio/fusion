@@ -12,7 +12,7 @@ public class ProfessionGainXpEvent extends FusionEvent {
     /**
      * The amount of experience gained
      */
-    private double gainedExp;
+    private long gainedExp;
 
     /**
      * Constructor for the ProfessionGainXpEvent
@@ -21,7 +21,7 @@ public class ProfessionGainXpEvent extends FusionEvent {
      * @param player The player that gained the experience
      * @param gainedExp The amount of experience gained
      */
-    public ProfessionGainXpEvent(String professionName, Player player, double gainedExp) {
+    public ProfessionGainXpEvent(String professionName, Player player, long gainedExp) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.gainedExp = gainedExp;
     }

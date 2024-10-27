@@ -30,11 +30,11 @@ public class Profession {
         this.joined = joined;
     }
 
-    public void addExp(double exp) {
+    public void addExp(long exp) {
         this.exp += exp;
     }
 
-    public void removeExp(double exp) {
+    public void removeExp(long exp) {
         this.exp -= exp;
     }
 
