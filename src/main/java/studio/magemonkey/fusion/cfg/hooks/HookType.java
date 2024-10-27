@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.cfg.hooks;
 
 public enum HookType {
 
+    Divinity("Divinity"),
     PlaceholderAPI("PlaceholderAPI"),
 
     Vault("Vault"),

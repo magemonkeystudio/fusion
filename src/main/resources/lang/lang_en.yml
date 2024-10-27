@@ -101,6 +101,7 @@ fusion:
     alreadyUsedStorage: "&cYou are already using this storage type. ($<storage>)"
     noJoin: "&cYou can't join this profession due to lack of finished requirements."
     recipeLimitReached: "&cYou have already crafted &3$<amount>/$<recipe.limit> &cof this recipe."
+    profNotAvailable: "&cThis profession is not available."
   storageChanged: "&7You have swapped to &3$<storage> storage."
   unlockedProfession: "&aYou unlocked &3$<profession>. &7($<unlocked>/$<limit>)"
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"

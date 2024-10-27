@@ -21,6 +21,7 @@ import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.cfg.hooks.DivinityService;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -74,6 +75,7 @@ public class Fusion extends RisePlugin implements Listener {
         EditorRegistry.reload();
         SQLManager.init();
         BrowseConfig.load();
+        DivinityService.init();
     }
 
     @Override

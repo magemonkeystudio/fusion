@@ -298,6 +298,7 @@ public class RecipeGui implements Listener {
                             int slot = queuedSlots[j];
                             this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
                             this.queue.getQueuedItems().get(slot).updateIcon();
+
                             this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
                         }
                     }
@@ -323,7 +324,11 @@ public class RecipeGui implements Listener {
                 try {
                     CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
                     this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
-                    this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
+                    if(recipe.getDivinityRecipeMeta() != null) {
+                        this.inventory.setItem(slot, recipe.getDivinityRecipeMeta().generateIcon());
+                    } else {
+                        this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
+                    }
                 } catch (InvalidPatternItemException ignored) {
                 }
             }
@@ -331,7 +336,6 @@ public class RecipeGui implements Listener {
             for (int k = 0; k < inventory.getSize(); k++) {
                 if (inventory.getItem(k) != null && inventory.getItem(k).getType() != Material.AIR)
                     continue;
-
                 inventory.setItem(k, fill);
             }
         } catch (
@@ -632,7 +636,7 @@ public class RecipeGui implements Listener {
 
                     //Experience
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        FusionAPI.getEventManager().callProfessionGainXpEvent(player, table, recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices().getProfessionService().callProfessionGainXpEvent(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());

@@ -138,7 +138,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("craftingTable", table));
                         return true;
                     }
-                    FusionAPI.getEventManager().callProfessionMasteryEvent(table.getName(), player, true);
+                    FusionAPI.getEventServices().getProfessionService().callProfessionMasteryEvent(table.getName(), player, true);
                     PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
                     MessageUtil.sendMessage("fusion.mastered",
                             sender,
@@ -159,7 +159,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("sender", sender));
                         return true;
                     }
-                    ConfirmationAction action = () -> FusionAPI.getEventManager().callProfessionLeaveEvent(table, player);
+                    ConfirmationAction action = () -> FusionAPI.getEventServices().getProfessionService().callProfessionLeaveEvent(table, player);
 
                     confirmation.put(player.getUniqueId().toString(), action);
                     MessageUtil.sendMessage("fusion.forget.confirm",

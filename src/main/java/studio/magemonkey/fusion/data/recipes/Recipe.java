@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.hooks.DivinityRecipeMeta;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.ProfessionConditions;
@@ -37,7 +38,7 @@ public class Recipe implements ConfigurationSerializable {
     @Setter
     private int craftingTime;
     @Setter
-    private int craftingLimit = 0;
+    private int craftingLimit;
     @Setter
     private String category;
 
@@ -51,6 +52,12 @@ public class Recipe implements ConfigurationSerializable {
     private Boolean hideNoRank;
     @Setter
     private Boolean hideRecipeLimitReached;
+
+    // This is a optional meta information that is usually empty, until a recipe uses the ItemGenerator function from Divinity.
+    // I might outsource this someday but for now it's urgent and requires this solution.
+    @Getter
+    @Setter
+    private DivinityRecipeMeta divinityRecipeMeta;
 
     public Recipe(CraftingTable table, Map<String, Object> map) {
         this.table = table;
@@ -70,7 +77,30 @@ public class Recipe implements ConfigurationSerializable {
         this.conditions = new ProfessionConditions(name, dw);
     }
 
-    public Recipe(CraftingTable table, String name, String category, int craftingTime, int craftingLimit, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideNoRank,Boolean hideLimitReached) {
+    public Recipe(CraftingTable table, Map<String, Object> map, DivinityRecipeMeta meta) {
+        this.table = table;
+        DeserializationWorker dw = DeserializationWorker.start(map);
+        this.name = dw.getString("name");
+        this.category = dw.getString("category");
+
+        this.craftingTime = dw.getInt("craftingTime");
+        this.craftingLimit = dw.getInt("craftingLimit");
+
+        Map<String, Object> hiding = dw.getSection("hiding");
+        this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
+        this.hideNoRank = (hiding != null && hiding.get("noRank") != null) ? (boolean) hiding.get("noRank") : null;
+        this.hideRecipeLimitReached = (hiding != null && hiding.get("recipeLimitReached") != null) ? (boolean) hiding.get("recipeLimitReached") : null;
+
+        this.results = new ProfessionResults(name, dw);
+        this.conditions = new ProfessionConditions(name, dw);
+
+        if(meta != null) {
+            this.divinityRecipeMeta = meta;
+            this.results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
+        }
+    }
+
+    public Recipe(CraftingTable table, String name, String category, int craftingTime, int craftingLimit, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideNoRank,Boolean hideLimitReached, DivinityRecipeMeta meta) {
         this.table = table;
         this.name = name;
         this.category = category;
@@ -81,6 +111,10 @@ public class Recipe implements ConfigurationSerializable {
         this.hideNoPermission = hideNoPermission;
         this.hideNoRank = hideNoRank;
         this.hideRecipeLimitReached = hideLimitReached;
+        if(meta != null) {
+            this.divinityRecipeMeta = meta;
+            this.results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
+        }
     }
 
     public static List<Pair<ItemStack, Integer>> getItems(Collection<ItemStack> items) {
@@ -216,7 +250,7 @@ public class Recipe implements ConfigurationSerializable {
     }
 
     public static Recipe copy(Recipe recipe) {
-        return new Recipe(recipe.getTable(), recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), recipe.getCraftingLimit(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideNoRank(), recipe.getHideRecipeLimitReached());
+        return new Recipe(recipe.getTable(), recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), recipe.getCraftingLimit(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideNoRank(), recipe.getHideRecipeLimitReached(), recipe.getDivinityRecipeMeta());
     }
 
     public boolean isHidden(Player player) {
@@ -251,5 +285,10 @@ public class Recipe implements ConfigurationSerializable {
 
     public String getRecipePath() {
         return table.getName() + "." + category + "." + name;
+    }
+
+    public void appendDivinityRecipeMeta(DivinityRecipeMeta meta) {
+        this.divinityRecipeMeta = meta;
+        results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
     }
 }

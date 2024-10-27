@@ -85,21 +85,21 @@ public class CraftingQueue {
         }
 
         QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
-        FusionAPI.getEventManager().callQueueItemAddedEvent(player, ProfessionsCfg.getTable(profession), this, item);
+        FusionAPI.getEventServices().getQueueService().callQueueItemAddedEvent(player, ProfessionsCfg.getTable(profession), this, item);
     }
 
 
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
             RecipeItem recipeItem = item.getRecipe().getResults().getResultItem();
-            FusionAPI.getEventManager().callQueueItemFinishedEvent(player, ProfessionsCfg.getTable(profession), this, item, recipeItem.getItemStack(), recipeItem.getAmount());
+            FusionAPI.getEventServices().getQueueService().callQueueItemFinishedEvent(player, ProfessionsCfg.getTable(profession), this, item, recipeItem.getItemStack(), recipeItem.getAmount());
         }
     }
 
     public void removeRecipe(QueueItem item, boolean refund) {
         // As of today, refunding only happens when the crafting is not finished. Meaning !refund is our finish-parameter here
         // The opposite for !refund -> the recipe finished successfully
-        FusionAPI.getEventManager().callQueueItemCanceledEvent(player, ProfessionsCfg.getTable(profession), this, item, !refund, refund, refund ? item.getRecipe().getItemsToTake() : List.of());
+        FusionAPI.getEventServices().getQueueService().callQueueItemCanceledEvent(player, ProfessionsCfg.getTable(profession), this, item, !refund, refund, refund ? item.getRecipe().getItemsToTake() : List.of());
     }
 
     public void cancelTask() {
