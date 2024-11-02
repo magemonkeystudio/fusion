@@ -14,7 +14,7 @@ public class ChatUT {
     private static final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
 
     public static String serialize(Component component) {
-        if(component == null) return " ";
+        if (component == null) return " ";
         return serializer.serialize(component);
     }
 
@@ -27,10 +27,10 @@ public class ChatUT {
         Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
-            String hexCode = message.substring(matcher.start(), matcher.end());
+            String hexCode      = message.substring(matcher.start(), matcher.end());
             String replaceSharp = hexCode.replace("&", "").replace('#', 'x');
 
-            char[] ch = replaceSharp.toCharArray();
+            char[]        ch      = replaceSharp.toCharArray();
             StringBuilder builder = new StringBuilder();
             for (char c : ch) {
                 builder.append("&" + c);
@@ -53,7 +53,7 @@ public class ChatUT {
         Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
-            String hexCode = message.substring(matcher.start(), matcher.end());
+            String hexCode      = message.substring(matcher.start(), matcher.end());
             String replaceSharp = hexCode.replace("&", "");
 
             message = message.replace(hexCode, "<color:" + replaceSharp + ">");
@@ -66,7 +66,7 @@ public class ChatUT {
         Pattern pattern = Pattern.compile("&[a-flmnokrA-F0-9]");
         Matcher matcher = pattern.matcher(message);
         while (matcher.find()) {
-            String colorCode = message.substring(matcher.start(), matcher.end());
+            String colorCode    = message.substring(matcher.start(), matcher.end());
             String replaceSharp = colorCode.replace("&", "");
 
             message = message.replace(colorCode, getNativeColor(replaceSharp.toCharArray()[0]));
@@ -80,7 +80,7 @@ public class ChatUT {
             return ChatUT.hexComp(value);
 
         String colorMsg = message.split(key)[0];
-        String color = colorMsg.substring(colorMsg.length() - 2);
+        String color    = colorMsg.substring(colorMsg.length() - 2);
         if (color.trim().isEmpty())
             return ChatUT.hexComp(value);
         if (color.charAt(0) == '&')
@@ -89,9 +89,9 @@ public class ChatUT {
     }
 
     private static String getNativeColor(char color) {
-        String reset = "<!b><!i><!obf><!u><!st>";
+        String reset     = "<!b><!i><!obf><!u><!st>";
         String colorCode = "<color:white>";
-        if(color == 'r') return reset + colorCode;
+        if (color == 'r') return reset + colorCode;
         switch (color) {
             case 'a' -> colorCode = "<color:green>";
             case 'b' -> colorCode = "<color:aqua>";
