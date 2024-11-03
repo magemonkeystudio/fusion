@@ -360,11 +360,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             return true;
         } catch (IllegalArgumentException e) {
             // If the is a custom item from divinity without "DIVINITY_" prefix, return true
-            try {
-                return CodexEngine.get().getItemManager().getItemType(item) != null;
-            } catch (MissingItemException | MissingProviderException e1) {
-                return false;
-            }
+            return CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(item).getItemStack()) != null;
         }
     }
 
@@ -461,12 +457,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
             return;
         }
-        try {
-            professionEditor.getTable().setIconItem(CodexEngine.get().getItemManager().getItemType(icon));
-        } catch (CodexItemException e) {
-            MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
-            return;
-        }
+        professionEditor.getTable().setIconItem(CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(icon).getItemStack()));
         MessageUtil.sendMessage("editor.professionIconChanged", player, new MessageData("oldIcon", oldIcon), new MessageData("newIcon", icon));
         professionEditor.reload(true);
     }
@@ -496,14 +487,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             professionEditor.getTable().getCategories().get(categoryName).setName(categoryName);
             ItemType oldIcon = professionEditor.getTable().getCategories().get(categoryName).getIconItem();
-            try {
-                professionEditor.getTable().getCategories().get(categoryName).setIconItem(CodexEngine.get().getItemManager().getItemType(categoryIcon));
-                MessageUtil.sendMessage("editor.categoryEdited", player, new MessageData("category", categoryName), new MessageData("profession", professionEditor.getTable().getName()));
-            } catch (CodexItemException e) {
-                professionEditor.getTable().getCategories().get(categoryName).setIconItem(oldIcon);
-                MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", categoryIcon));
-                return;
-            }
+            professionEditor.getTable().getCategories().get(categoryName).setIconItem(CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(categoryIcon).getItemStack()));
+            MessageUtil.sendMessage("editor.categoryEdited", player, new MessageData("category", categoryName), new MessageData("profession", professionEditor.getTable().getName()));
         }
         professionEditor.getCategoryEditor().reload(true);
     }

@@ -25,11 +25,7 @@ public class RecipeEconomyItem implements RecipeItem {
     }
 
     public ItemType asItemType() {
-        try {
-            return CodexEngine.get().getItemManager().getItemType(this.itemName);
-        } catch (CodexItemException e) {
-            return null;
-        }
+        return CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(this.itemName).getItemStack());
     }
 
     @Override

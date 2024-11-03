@@ -24,9 +24,9 @@ public class FusionQueuesSQL {
                         + "Id long,"
                         + "UUID varchar(36), "
                         + "RecipePath varchar(100),"
-                        + "Timestamp BIGINT,"
                         + "CraftingTime numeric,"
-                        + "SavedSeconds numeric)")) {
+                        + "SavedSeconds numeric,"
+                        + "Timestamp BIGINT)")) {
             create.execute();
         } catch (SQLException e) {
             Fusion.getInstance()

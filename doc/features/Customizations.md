@@ -249,10 +249,23 @@ You have seen this above before:
 Divinity is a soft-dependend plugin of us that provides you with a lot of features regarding to items and other modules.
 We encourage you to use [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-magemonkey-studio-formerly-prorpgitems.99713/) for your custom items, but you can also use others through the ItemBuilder-Function.
 
-The current possible way of using Divinity items is by using the `DIVINITY_<item>` type. Those items are only available from the Custom-Items module yet.
+The current possible way of using Divinity items is by using the `DIVINITY_<module>_<item>` type.
+The following modules exist:
 
-W.I.P.:
-- Using other modules of divinity too.
+| Module Item (long)                                    | Module Item (short)                        | Extras |
+|-------------------------------------------------------|--------------------------------------------|--------|
+| DIVINITY_ARROWS_[item]:[level]:[amount]               | DIVINITY_AR_[item]:[level]:[amount]        |        |
+| DIVINITY_CONSUMABLES_[item]:[level]:[amount]          | DIVINITY_CO_[item]:[level]:[amount]        |        | 
+| DIVINITY_CUSTOMITEMS_[item]:[amount]                  | DIVINITY_CI_[item]:[amount]                |        | 
+| DIVINITY_DISMANTLE_[item]:[level]:[amount]            | DIVINITY_DI_[item]:[level]:[amount]        |        | 
+| DIVINITY_ESSENCES_[item]:[level]:[amount]             | DIVINITY_ES_[item]:[level]:[amount]        |        | 
+| DIVINITY_EXTRACTOR_[item]:[level]:[amount]            | DIVINITY_EX_[item]:[level]:[amount]        |        | 
+| DIVINITY_FORTIFY_[item]:[level]:[amount]              | DIVINITY_FO_[item]:[level]:[amount]        |        | 
+| DIVINITY_GEMS_[item]:[level]:[amount]                 | DIVINITY_GE_[item]:[level]:[amount]        |        | 
+| DIVINITY_IDENTIFY_[item]:[level]:[amount]             | DIVINITY_ID_[item]:[level]:[amount]        |        | 
+| DIVINITY_ITEMGENERATOR_[item]:[level]:[amount]:[type] | DIVINITY_IG_[item]:[level]:[amount]:[type] |        | 
+| DIVINITY_MAGICDUST_[item]:[level]:[amount]            | DIVINITY_MA_[item]:[level]:[amount]        |        | 
+| DIVINITY_RUNES_[item]:[level]:[amount]                | DIVINITY_RU_[item]:[level]:[amount]        |        |
 
 
 ### Key-Value Conditions + Supported Plugins

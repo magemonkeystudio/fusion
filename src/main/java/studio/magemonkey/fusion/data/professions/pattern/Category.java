@@ -11,6 +11,7 @@ import studio.magemonkey.codex.items.exception.CodexItemException;
 import studio.magemonkey.codex.items.providers.VanillaProvider;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.ArrayList;
@@ -48,11 +49,7 @@ public class Category implements ConfigurationSerializable {
     public Category(String name, String iconName, InventoryPattern pattern, int order) {
         this.name = name;
         this.iconName = iconName;
-        try {
-            this.iconItem = CodexEngine.get().getItemManager().getItemType(iconName);
-        } catch (CodexItemException e) {
-            throw new RuntimeException(e);
-        }
+        this.iconItem = CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(iconName).getItemStack());
         this.pattern = pattern;
         this.order = order;
     }
@@ -62,12 +59,7 @@ public class Category implements ConfigurationSerializable {
         name = dw.getString("name");
         order = dw.getInt("order");
         iconName = dw.getString("icon");
-        try {
-            iconItem = CodexEngine.get().getItemManager().getItemType(iconName);
-        } catch (CodexItemException e) {
-            throw new RuntimeException(e);
-        }
-
+        iconItem = CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(iconName).getItemStack());
         if (iconItem == null) {
             Fusion.getInstance().getLogger().severe("Invalid category icon for: " + name);
         }

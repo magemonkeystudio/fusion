@@ -26,7 +26,7 @@ public class FusionPlayer {
 
     private final Map<String, Profession> professions = new TreeMap<>();
     private Map<String, CraftingQueue> cachedQeues = new TreeMap<>();
-    private Map<String, Integer> cachedRecipeLimits = new TreeMap<>();
+    private Map<String, PlayerRecipeLimit> cachedRecipeLimits = new TreeMap<>();
 
     private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
 
@@ -63,25 +63,25 @@ public class FusionPlayer {
         cachedGuis.put(id, gui);
     }
 
-    public int getRecipeLimit(Recipe recipe) {
+    public PlayerRecipeLimit getRecipeLimit(Recipe recipe) {
         return getRecipeLimit(recipe.getRecipePath());
     }
 
-    public int getRecipeLimit(String recipePath) {
-        return cachedRecipeLimits.getOrDefault(recipePath, 0);
+    public PlayerRecipeLimit getRecipeLimit(String recipePath) {
+        cachedRecipeLimits.putIfAbsent(recipePath, new PlayerRecipeLimit(recipePath, 0, -1));
+        return cachedRecipeLimits.get(recipePath);
     }
 
     public void incrementLimit(Recipe recipe) {
-        incrementLimit(recipe.getRecipePath());
-    }
-
-    public void incrementLimit(String recipePath) {
-        cachedRecipeLimits.put(recipePath, getRecipeLimit(recipePath) + 1);
+        getRecipeLimit(recipe).incrementLimit(1);
+        if(recipe.getCraftingLimitCooldown() > 0) {
+            getRecipeLimit(recipe).updateCooldown(recipe.getCraftingLimitCooldown());
+        }
     }
 
     public boolean hasRecipeLimitReached(Recipe recipe) {
         if(recipe.getCraftingLimit() <= 0) return false;
-        return getRecipeLimit(recipe.getRecipePath()) >= recipe.getCraftingLimit();
+        return getRecipeLimit(recipe.getRecipePath()).getLimit() >= recipe.getCraftingLimit();
     }
 
     public int getExperience(String profession) {

@@ -39,6 +39,7 @@ public class Recipe implements ConfigurationSerializable {
     private int craftingTime;
     @Setter
     private int craftingLimit;
+    private int craftingLimitCooldown = -1;
     @Setter
     private String category;
 
@@ -67,6 +68,7 @@ public class Recipe implements ConfigurationSerializable {
 
         this.craftingTime = dw.getInt("craftingTime");
         this.craftingLimit = dw.getInt("craftingLimit");
+        this.craftingLimitCooldown = dw.getInt("craftingLimitCooldown");
 
         Map<String, Object> hiding = dw.getSection("hiding");
         this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
@@ -85,6 +87,7 @@ public class Recipe implements ConfigurationSerializable {
 
         this.craftingTime = dw.getInt("craftingTime");
         this.craftingLimit = dw.getInt("craftingLimit");
+        this.craftingLimitCooldown = dw.getInt("craftingLimitCooldown");
 
         Map<String, Object> hiding = dw.getSection("hiding");
         this.hideNoPermission = (hiding != null && hiding.get("noPermission") != null) ? (boolean) hiding.get("noPermission") : null;
@@ -100,12 +103,13 @@ public class Recipe implements ConfigurationSerializable {
         }
     }
 
-    public Recipe(CraftingTable table, String name, String category, int craftingTime, int craftingLimit, ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideNoRank,Boolean hideLimitReached, DivinityRecipeMeta meta) {
+    public Recipe(CraftingTable table, String name, String category, int craftingTime, int craftingLimit, int craftingLimitCooldown,ProfessionResults results, ProfessionConditions conditions, Boolean hideNoPermission, Boolean hideNoRank,Boolean hideLimitReached, DivinityRecipeMeta meta) {
         this.table = table;
         this.name = name;
         this.category = category;
         this.craftingTime = craftingTime;
         this.craftingLimit = craftingLimit;
+        this.craftingLimitCooldown = craftingLimitCooldown;
         this.results = results;
         this.conditions = conditions;
         this.hideNoPermission = hideNoPermission;
@@ -217,6 +221,7 @@ public class Recipe implements ConfigurationSerializable {
                 .append("results.commands", this.getResults().getCommands())
                 .append("craftingTime", this.craftingTime)
                 .append("craftingLimit", this.craftingLimit)
+                .append("craftingLimitCooldown", this.craftingLimitCooldown)
                 .toString();
     }
 
@@ -225,7 +230,8 @@ public class Recipe implements ConfigurationSerializable {
         SerializationBuilder builder = SerializationBuilder.start(6)
                 .append("name", this.name)
                 .append("craftingTime", this.craftingTime)
-                .append("craftingLimit", this.craftingLimit);
+                .append("craftingLimit", this.craftingLimit)
+                .append("craftingLimitCooldown", this.craftingLimitCooldown);
 
         if(category != null) {
             builder.append("category", this.category);
@@ -250,7 +256,7 @@ public class Recipe implements ConfigurationSerializable {
     }
 
     public static Recipe copy(Recipe recipe) {
-        return new Recipe(recipe.getTable(), recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), recipe.getCraftingLimit(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideNoRank(), recipe.getHideRecipeLimitReached(), recipe.getDivinityRecipeMeta());
+        return new Recipe(recipe.getTable(), recipe.getName(), recipe.getCategory(), recipe.getCraftingTime(), recipe.getCraftingLimit(), recipe.getCraftingLimitCooldown(), ProfessionResults.copy(recipe.getResults()), ProfessionConditions.copy(recipe.getConditions()), recipe.getHideNoPermission(), recipe.getHideNoRank(), recipe.getHideRecipeLimitReached(), recipe.getDivinityRecipeMeta());
     }
 
     public boolean isHidden(Player player) {
@@ -284,7 +290,11 @@ public class Recipe implements ConfigurationSerializable {
     }
 
     public String getRecipePath() {
-        return table.getName() + "." + category + "." + name;
+        String recipeName = name;
+        if(recipeName.contains("::")) {
+            recipeName = recipeName.split("::")[0];
+        }
+        return table.getName() + "." + category + "." + recipeName;
     }
 
     public void appendDivinityRecipeMeta(DivinityRecipeMeta meta) {

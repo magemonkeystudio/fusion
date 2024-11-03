@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -16,6 +17,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerRecipeLimit;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.InvalidPatternItemException;
 import studio.magemonkey.fusion.util.LevelFunction;
@@ -44,7 +46,7 @@ public class CalculatedRecipe {
             Fusion pl = Fusion.getInstance();
 
             StringBuilder lore = new StringBuilder(512);
-            ItemStack result = recipe.getResults().getResultItem().getItemStack();
+            ItemStack result = recipe.getDivinityRecipeMeta() == null ? recipe.getResults().getResultItem().getItemStack() : recipe.getDivinityRecipeMeta().getIcon();
             List<String> resultLore = result.getItemMeta().getLore();
 
             if ((resultLore != null) && !resultLore.isEmpty()) {
@@ -105,11 +107,17 @@ public class CalculatedRecipe {
 
             String limitLine = null;
             if (recipe.getCraftingLimit() > 0) {
-                int crafted = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
-                if (crafted >= recipe.getCraftingLimit()) {
+                PlayerRecipeLimit limit = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
+                if(limit.getLimit() > 0) {
+                    if(limit.getCooldownTimestamp() > 0 && !limit.hasCooldown()) {
+                        limit.resetLimit();
+                        Bukkit.getConsoleSender().sendMessage("§aResetting limit for " + player.getName() + " on " + recipe.getRecipePath());
+                    }
+                }
+                if (limit.getLimit() >= recipe.getCraftingLimit()) {
                     canCraft = false;
                 }
-                limitLine = CraftingRequirementsCfg.getLimit("recipes", crafted, recipe.getCraftingLimit());
+                limitLine = CraftingRequirementsCfg.getLimit("recipes", limit.getLimit(), recipe.getCraftingLimit());
             }
 
             List<Map.Entry<Boolean, String>> conditionLines = recipe.getConditions().getConditionLines(player);

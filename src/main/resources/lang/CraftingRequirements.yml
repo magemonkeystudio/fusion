@@ -8,8 +8,8 @@ recipes:
   bossbar: '&5Crafting $<item>...'
   # The message that is displayed when the player has learned the recipe
   learned:
-    'true': "&aYou have unlocked this profession"
-    'false': "&cThis profession is locked"
+    'true': "&aYou have learned this recipe"
+    'false': "&cThis recipe is locked"
     # The conditions that are displayed in the crafting requirements
   conditions:
     true: "&6- &e$<condition>&8: &7(&a$<level>&8/&7$<required>&7)"

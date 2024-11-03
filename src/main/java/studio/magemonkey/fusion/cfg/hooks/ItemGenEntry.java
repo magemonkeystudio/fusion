@@ -53,6 +53,7 @@ public class ItemGenEntry {
     public ItemGenEntry(ItemGeneratorManager.GeneratorItem entry) {
         this.reference = entry;
 
+
         minLevel = entry.getMinLevel();
         maxLevel = entry.getMaxLevel();
         minEnchantments = entry.getMinEnchantments();
@@ -96,16 +97,16 @@ public class ItemGenEntry {
         tier = entry.getTier();
     }
 
-    public Map<ItemType, Set<String>> loadNames(ItemType type) {
+    public Map<ItemType, Set<String>> loadNames(ItemType type, int level) {
         Map<ItemType, Set<String>> names = new LinkedHashMap<>();
         if(type == null) {
             for (ItemType material : materials) {
-                Bukkit.getConsoleSender().sendMessage(material.getID());
-                names.put(material, DivinityUT.getAllCombinations(reference, material.create().getType(), tier));
+                names.put(material, DivinityUT.getAllCombinations(reference, material.create().getType(), tier, level));
             }
         } else {
-            names.put(type, DivinityUT.getAllCombinations(reference, type.create().getType(), tier));
+            names.put(type, DivinityUT.getAllCombinations(reference, type.create().getType(), tier, level));
         }
+
         return names;
     }
 }

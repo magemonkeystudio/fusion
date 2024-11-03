@@ -2,15 +2,20 @@ package studio.magemonkey.fusion.cfg.hooks.divinity;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.items.ItemType;
+import studio.magemonkey.codex.legacy.item.DataBuilder;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 import studio.magemonkey.fusion.util.ChatUT;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class DivinityCfg {
 
@@ -20,12 +25,18 @@ public class DivinityCfg {
         this.config = YamlParser.loadOrExtract(Fusion.getInstance(), "Hooks/Divinity.yml");
     }
 
-    public ItemStack getRecipeIcon(ItemGenEntry entry, String name, ItemType type) {
+    public ItemStack getRecipeIcon(ItemGenEntry entry, String name, ItemType type, int level) {
         Material material = Material.valueOf(config.getString("ItemGenerator.RecipeIcon.material", "$<material>").replace(MessageUtil.getReplacement("material"), type.create().getType().toString()));
         String itemName = ChatUT.hexString(config.getString("ItemGenerator.RecipeIcon.name", "$<name>").replace(MessageUtil.getReplacement("name"), name));
 
+        int customModelData = -1;
+        if(entry.getReference().create(level, -1, type).getItemMeta().hasCustomModelData()) {
+            customModelData = entry.getReference().create(level, -1, type).getItemMeta().getCustomModelData();
+        }
+
         List<String> lore = config.getStringList("ItemGenerator.RecipeIcon.lore");
-        String chanceLevels = getValueFormat("levels", entry.getMinLevel(), entry.getMaxLevel());
+
+        String chanceLevels = level < 0 ? getValueFormat("levels", entry.getMinLevel(), entry.getMaxLevel()) : getSingleValueFormat("levels", level);
         String chanceEnchants = getValueFormat("enchants", entry.getMinEnchantments(), entry.getMaxEnchantments());
         String chanceDamageTypes = getValueFormat("damage_types", entry.getMinDamageTypes(), entry.getMaxDamageTypes());
         String chanceDefenseTypes = getValueFormat("defense_types", entry.getMinDefenseTypes(), entry.getMaxDefenseTypes());
@@ -38,10 +49,15 @@ public class DivinityCfg {
 
         for (int i = 0; i < lore.size(); i++) {
             if (lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
-                int newLines = 1;
+                lore.remove(i);
+
+                int newLines = 0;
                 for (String line : entry.getReference().getLore()) {
-                    if(line.contains("%GENERATOR_")) continue;
-                    lore.add(i - 1 + newLines, ChatUT.hexString(line));
+                    // If the lore has any placeholder with '%<placeholder>%' it will be skipped since it is something dynamical that cant be defined yet.
+                    Pattern pattern = Pattern.compile("%[a-zA-Z0-9_]+%");
+                    if(line.isEmpty()) continue;
+                    if (pattern.matcher(line).find()) continue;
+                    lore.add(i - newLines, ChatUT.hexString(line));
                     newLines++;
                 }
                 i += newLines;
@@ -159,7 +175,14 @@ public class DivinityCfg {
 
             lore.set(i, ChatUT.hexString(lore.get(i)));
         }
-        return ItemBuilder.newItem(material).name(itemName).lore(lore).build();
+
+        ItemStack item = ItemBuilder.newItem(material).name(itemName).lore(lore).build();
+        if(customModelData > 0) {
+            ItemMeta meta = item.getItemMeta();
+            meta.setCustomModelData(customModelData);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 
     private String getValueFormat(String path, int min, int max) {

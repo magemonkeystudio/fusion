@@ -7,6 +7,7 @@ import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class DivinityService {
 
@@ -17,13 +18,15 @@ public class DivinityService {
         return ItemGenResults.containsKey(namespace);
     }
 
-    public static boolean cache(String namespace) {
+    public static boolean cache(String namespace, Consumer<ItemGenEntry> callback) {
         ItemGeneratorManager.GeneratorItem item = Divinity.getInstance().getModuleCache().getTierManager().getItemById(namespace);
         if (item == null) {
             Fusion.getInstance().getLogger().warning("Failed to cache item " + namespace + " from Divinity as it does not exist.");
             return false;
         }
         ItemGenResults.put(namespace, new ItemGenEntry(item));
+        if (callback != null)
+            callback.accept(ItemGenResults.get(namespace));
         return true;
     }
 

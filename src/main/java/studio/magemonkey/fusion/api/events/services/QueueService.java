@@ -114,7 +114,7 @@ public class QueueService {
                 event.setCancelled(true);
                 MessageUtil.sendMessage("fusion.error.recipeLimitReached", player,
                         new MessageData("recipe", event.getQueueItem().getRecipe().getName()),
-                        new MessageData("amount", event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe())),
+                        new MessageData("amount", event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe()).getLimit()),
                         new MessageData("recipe.limit", event.getQueueItem().getRecipe().getCraftingLimit()),
                         new MessageData("limit", event.getQueueItem().getRecipe().getCraftingLimit()));
                 return;

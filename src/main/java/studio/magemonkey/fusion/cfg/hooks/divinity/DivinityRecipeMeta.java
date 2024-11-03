@@ -10,6 +10,7 @@ import studio.magemonkey.fusion.util.ChatUT;
 @Getter
 public class DivinityRecipeMeta {
 
+    private final String originalRecipeName;
     private final ItemGenEntry entry;
     private final int level;
     private final int amount;
@@ -18,7 +19,8 @@ public class DivinityRecipeMeta {
     private final String itemName;
     private ItemStack icon;
 
-    public DivinityRecipeMeta(ItemGenEntry entry, int level, int amount, ItemType type, String itemName) {
+    public DivinityRecipeMeta(String originalRecipeName, ItemGenEntry entry, int level, int amount, ItemType type, String itemName) {
+        this.originalRecipeName = originalRecipeName;
         this.entry = entry;
         this.level = level;
         this.amount = amount;
@@ -34,9 +36,9 @@ public class DivinityRecipeMeta {
         return item;
     }
 
-    public ItemStack generateIcon() {
-        if (icon == null) {
-            icon = DivinityService.divinityCfg.getRecipeIcon(entry, itemName, type);
+    public ItemStack getIcon() {
+        if(icon == null) {
+            icon = DivinityService.divinityCfg.getRecipeIcon(entry, itemName, type, level);
         }
         return icon;
     }

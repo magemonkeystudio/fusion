@@ -99,7 +99,7 @@ public class RecipeGui implements Listener {
         this.inventoryName = ChatUT.hexString(table.getInventoryName());
         this.recipes = new HashMap<>(20);
         this.category = category != null ? category : new Category("master", "PAPER", table.getPattern(), 1);
-        if(this.category.getName().equals("master")) {
+        if (this.category.getName().equals("master")) {
             this.category.getRecipes().addAll(table.getRecipes().values());
         }
         setPattern();
@@ -324,11 +324,7 @@ public class RecipeGui implements Listener {
                 try {
                     CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
                     this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
-                    if(recipe.getDivinityRecipeMeta() != null) {
-                        this.inventory.setItem(slot, recipe.getDivinityRecipeMeta().generateIcon());
-                    } else {
-                        this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
-                    }
+                    this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
                 } catch (InvalidPatternItemException ignored) {
                 }
             }

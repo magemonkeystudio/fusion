@@ -101,7 +101,7 @@ public class CraftingTable implements ConfigurationSerializable {
         this.masteryUnlock = dw.getInt("masteryUnlock");
         this.masteryFee = dw.getInt("masteryFee");
         this.useCategories = dw.getBoolean("useCategories", true);
-        this.iconItem = CodexEngine.get().getItemManager().getItemType(dw.getString("icon"));
+        this.iconItem = CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(dw.getString("icon")).getItemStack());
         if (dw.getSection("pattern.items.fillItem") != null)
             this.fillItem = new ItemBuilder(dw.getSection("pattern.items.fillItem")).build();
         else
@@ -131,7 +131,7 @@ public class CraftingTable implements ConfigurationSerializable {
                     String[] params = itemArgs[2].split(":");
                     String namespace = params[0];
                     if (!DivinityService.isCached(namespace)) {
-                        if (!DivinityService.cache(namespace)) {
+                        if (!DivinityService.cache(namespace, null)) {
                             Fusion.getInstance().error("Invalid entry in config of " + this.name + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
                             continue;
                         }
@@ -156,22 +156,25 @@ public class CraftingTable implements ConfigurationSerializable {
                         Fusion.getInstance().error("Invalid entry in config of " + this.name + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
                         continue;
                     }
-                    Map<ItemType, Set<String>> names = entry.loadNames(type);
+                    Map<ItemType, Set<String>> names = entry.loadNames(type, level);
 
                     Category category = null;
                     if (recipeData.containsKey("category") && recipeData.get("category") instanceof String) {
                         category = categories.get(recipeData.get("category"));
                     }
 
+                    String recipeName = (String) recipeData.get("name");
+                    int i = 0;
                     for (Map.Entry<ItemType, Set<String>> nameEntry : names.entrySet()) {
                         for (String name : nameEntry.getValue()) {
-                            DivinityRecipeMeta meta = new DivinityRecipeMeta(entry, level, amount, nameEntry.getKey(), name);
+                            DivinityRecipeMeta meta = new DivinityRecipeMeta(recipeName, entry, level, amount, nameEntry.getKey(), name);
                             Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData, meta);
-                            recipe.setName(recipe.getName() + "_" + UUID.randomUUID());
+                            recipe.setName(recipe.getName() + "::" + i);
                             recipes.put(recipe.getName(), recipe);
                             if (category != null) {
                                 category.getRecipes().add(recipe);
                             }
+                            i++;
                         }
                     }
                 } else {

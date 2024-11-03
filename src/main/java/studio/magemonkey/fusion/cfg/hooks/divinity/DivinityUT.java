@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class DivinityUT {
 
-    public static Set<String> getAllCombinations(ItemGeneratorManager.GeneratorItem item, Material material, Tier tier) {
+    public static Set<String> getAllCombinations(ItemGeneratorManager.GeneratorItem item, Material material, Tier tier, int level) {
         String name = item.getName();
         String itemGroupName = ItemUtils.getItemGroupNameFor(new ItemStack(material));
         Set<String> names = new HashSet<>();
@@ -29,6 +29,14 @@ public class DivinityUT {
         // Process all combinations
         generatePrefixSuffixCombinations(names, name, itemGroupName, prefixes, suffixes);
 
+        if(level > 0) {
+            // Replace %ITEM_LEVEL% with level
+            Set<String> newNames = new HashSet<>();
+            for (String n : names) {
+                newNames.add(n.replace("%ITEM_LEVEL%", String.valueOf(level)));
+            }
+            names = newNames;
+        }
         return names;
     }
 

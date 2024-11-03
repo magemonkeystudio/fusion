@@ -74,23 +74,23 @@ playerManager.clearAllPlayers();
 [...]
 ```
 
-### `FusionAPI#getEventManager`
-The event manager is responsible for handling events and calling them.
+### `FusionAPI#getEventServices`
+The event services are responsible for handling events and calling them.
 Those are usually natively integrated in the plugin, but in case you want to fire them customized, you can use it's methods.
 
 You can see some examples below:
 
 ```java
-EventManager eventManager = FusionApi.getEventManager();
+EventServices eventServices = FusionApi.getEventServices();
 
 // Fire a profession join event
-eventManager.callProfessionJoinEvent("myProfession", player, /* Required money (Vault)*/ 0.0, /* Required vanilla exp */ 0);
+eventManager.leaveProfession("myProfession", player, /* Required money (Vault)*/ 0.0, /* Required vanilla exp */ 0);
 
 // Fire a profession leave event
-eventManager.callProfessionLeaveEvent(FusionApi.getProfessionManager().getProfession("myProfession"), player);
+eventManager.leaveProfession(FusionApi.getProfessionManager().getProfession("myProfession"), player);
 
 // Fire a profession mastery event
-eventManager.callProfessionMasteryEvent(FusionApi.getProfessionManager().getProfession("myProfession"), player, true); // Masters the profession
-eventManager.callProfessionMasteryEvent(FusionApi.getProfessionManager().getProfession("myProfession"), player, false); // Removes the mastery from the player
+eventManager.masterProfession(FusionApi.getProfessionManager().getProfession("myProfession"), player, true); // Masters the profession
+eventManager.masterProfession(FusionApi.getProfessionManager().getProfession("myProfession"), player, false); // Removes the mastery from the player
 [...]
 ```
