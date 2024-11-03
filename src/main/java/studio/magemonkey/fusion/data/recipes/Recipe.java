@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 @Getter
 @EqualsAndHashCode
 public class Recipe implements ConfigurationSerializable {
-
-    @Getter
     private final CraftingTable table;
 
     @Setter
@@ -57,7 +55,6 @@ public class Recipe implements ConfigurationSerializable {
 
     // This is a optional meta information that is usually empty, until a recipe uses the ItemGenerator function from Divinity.
     // I might outsource this someday but for now it's urgent and requires this solution.
-    @Getter
     @Setter
     private DivinityRecipeMeta divinityRecipeMeta;
 
