@@ -172,6 +172,37 @@ subEditor:
           - '&aShift click &7each to increase by 10.'
       flags: [ ]
       enchants: { }
+    craftingLimit:
+      material: CLOCK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Crafting Limit'
+      lore:
+        - '&7Current: &a$<craftingLimit>'
+        - '&7The is the amount how often a player can craft this.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the limit.'
+        - '&aRight click &7to decrease the limit.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
+    craftingLimitCooldown:
+      material: CLOCK
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&9Crafting Limit Cooldown'
+      lore:
+        - '&7Current: &a$<craftingLimitCooldown>'
+        - '&7The time in seconds, when a limit resets.'
+        - '&7With &a-1 &7it will never reset.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the cooldown.'
+        - '&aRight click &7to decrease the cooldown.'
+        - '&aShift click &7each to increase by 10.'
+      flags: [ ]
+      enchants: { }
     hiding_noPermission:
       material: lever
       amount: 1

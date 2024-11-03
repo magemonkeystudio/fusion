@@ -34,9 +34,10 @@ public class RecipeItemEditor extends Editor implements Listener {
 
     public void initialize() {
         InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
-        setItem(10, getIcons().get("name"));
-        setItem(11, getIcons().get("category"));
-        setItem(12, getIcons().get("craftingTime"));
+        setItem(4, getIcons().get("name"));
+        setItem(10, getIcons().get("craftingTime"));
+        setItem(11, getIcons().get("craftingLimit"));
+        setItem(12, getIcons().get("craftingLimitCooldown"));
         setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
@@ -52,6 +53,7 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(41, getIcons().get("mastery"));
         setItem(42, getIcons().get("rank"));
         setItem(43, getIcons().get("conditions"));
+        setItem(49, getIcons().get("category"));
 
         setItem(53, getIcons().get("back"));
     }
@@ -64,29 +66,9 @@ public class RecipeItemEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 ->
+            case 4 ->
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Name, "/fusion-editor <newName>");
-            case 11 -> {
-                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
-                String currentCategory = recipe.getCategory();
-                int currentIndex = categories.indexOf(currentCategory);
-                if (event.isLeftClick()) {
-                    if(currentIndex == categories.size() - 1) {
-                        recipe.setCategory(categories.get(0));
-                    } else {
-                        recipe.setCategory(categories.get(currentIndex + 1));
-                    }
-                    hasChanges = true;
-                } else if (event.isRightClick()) {
-                    if (currentIndex == 0) {
-                        recipe.setCategory(categories.get(categories.size() - 1));
-                    } else {
-                        recipe.setCategory(categories.get(currentIndex - 1));
-                    }
-                    hasChanges = true;
-                }
-            }
-            case 12 -> {
+            case 10 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     recipe.setCraftingTime(recipe.getCraftingTime() + amount);
@@ -94,6 +76,28 @@ public class RecipeItemEditor extends Editor implements Listener {
                 } else if (event.isRightClick()) {
                     if (recipe.getCraftingTime() == 0) return;
                     recipe.setCraftingTime(Math.max(recipe.getCraftingTime() - amount, 0));
+                    hasChanges = true;
+                }
+            }
+            case 11 -> {
+                int amount = event.isShiftClick() ? 10 : 1;
+                if (event.isLeftClick()) {
+                    recipe.setCraftingLimit(recipe.getCraftingLimit() + amount);
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (recipe.getCraftingLimit() == 0) return;
+                    recipe.setCraftingLimit(Math.max(recipe.getCraftingLimit() - amount, 0));
+                    hasChanges = true;
+                }
+            }
+            case 12 -> {
+                int amount = event.isShiftClick() ? 10 : 1;
+                if (event.isLeftClick()) {
+                    recipe.setCraftingLimitCooldown(recipe.getCraftingLimitCooldown() + amount);
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (recipe.getCraftingLimitCooldown() == -1) return;
+                    recipe.setCraftingLimitCooldown(Math.max(recipe.getCraftingLimitCooldown() - amount, -1));
                     hasChanges = true;
                 }
             }
@@ -233,6 +237,26 @@ public class RecipeItemEditor extends Editor implements Listener {
                     if (recipe.getConditions().getFullConditions().isEmpty())
                         return;
                     recipe.getConditions().removeLastCondition();
+                    hasChanges = true;
+                }
+            }
+            case 49 -> {
+                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
+                String currentCategory = recipe.getCategory();
+                int currentIndex = categories.indexOf(currentCategory);
+                if (event.isLeftClick()) {
+                    if(currentIndex == categories.size() - 1) {
+                        recipe.setCategory(categories.get(0));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex + 1));
+                    }
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (currentIndex == 0) {
+                        recipe.setCategory(categories.get(categories.size() - 1));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex - 1));
+                    }
                     hasChanges = true;
                 }
             }

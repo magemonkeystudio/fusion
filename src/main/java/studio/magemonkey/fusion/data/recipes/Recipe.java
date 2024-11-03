@@ -39,6 +39,7 @@ public class Recipe implements ConfigurationSerializable {
     private int craftingTime;
     @Setter
     private int craftingLimit;
+    @Setter
     private int craftingLimitCooldown = -1;
     @Setter
     private String category;

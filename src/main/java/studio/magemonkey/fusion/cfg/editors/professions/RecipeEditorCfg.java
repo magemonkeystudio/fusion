@@ -186,6 +186,8 @@ public class RecipeEditorCfg {
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.experience"), String.valueOf(conditions.getExpCost()))
                     .replace(MessageUtil.getReplacement("craftingTime"), String.valueOf(recipe.getCraftingTime()))
+                    .replace(MessageUtil.getReplacement("craftingLimit"), String.valueOf(recipe.getCraftingLimit()))
+                    .replace(MessageUtil.getReplacement("craftingLimitCooldown"), String.valueOf(recipe.getCraftingLimitCooldown()))
                     .replace(MessageUtil.getReplacement("conditions.professionLevel"), String.valueOf(recipe.getConditions().getProfessionLevel()))
                     .replace(MessageUtil.getReplacement("conditions.mastery"), String.valueOf(recipe.getConditions().isMastery()))
                     .replace(MessageUtil.getReplacement("conditions.rank"), String.valueOf(recipe.getConditions().getRank()))

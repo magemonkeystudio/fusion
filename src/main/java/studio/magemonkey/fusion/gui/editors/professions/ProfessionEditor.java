@@ -38,6 +38,7 @@ public class ProfessionEditor extends Editor implements Listener {
         this.profession = profession;
         // Copy the table to prevent changes to the original table while people do crafting
         this.table = CraftingTable.copy(ProfessionsCfg.getTable(profession));
+        table.cleanUpRecipesForEditor();
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
 
         initialize();
@@ -134,13 +135,13 @@ public class ProfessionEditor extends Editor implements Listener {
                     }
                 }
             }
-            case 36 -> {
-                table.save();
+            case 36 -> table.save(() -> {
                 player.closeInventory();
                 MessageUtil.sendMessage("editor.changesSaved", player, new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
                 EditorRegistry.removeCurrentEditor(player);
                 FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
-            }
+                ProfessionsCfg.init();
+            });
             case 44 -> {
                 player.closeInventory();
                 hasChanges = true;
