@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.data.recipes;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -295,7 +296,7 @@ public class CraftingTable implements ConfigurationSerializable {
                 .build();
     }
 
-    public void save() {
+    public void save(Runnable runnable) {
         // Saving all changes to the file
         FileConfiguration config = ProfessionsCfg.getCfgs().get(this.name);
         File file = ProfessionsCfg.getFiles().get(this.name);
@@ -322,7 +323,8 @@ public class CraftingTable implements ConfigurationSerializable {
         config.set("recipes", map.get("recipes"));
         try {
             config.save(file);
-            ProfessionsCfg.init();
+            if(runnable != null)
+                Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), runnable, 1L);
         } catch (IOException e) {
             Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
         }
@@ -342,5 +344,25 @@ public class CraftingTable implements ConfigurationSerializable {
         return new CraftingTable(source.getName(), source.getInventoryName(), source.getIconItem(),
                 InventoryPattern.copy(source.getPattern()), InventoryPattern.copy(source.getCatPattern()), source.getUseCategories(), source.getFillItem(), source.getMasteryUnlock(), source.getMasteryFee(),
                 recipes, categories);
+    }
+
+    // A method to cleanup 'pseudo' recipes created from the ItemGenerator Module of Divinity.
+    // If not cleaned, the gui results in a OOM-Exception.
+    public void cleanUpRecipesForEditor() {
+        Map<String, Recipe> cleanedRecipes = new LinkedHashMap<>();
+        Set<String> uniqueRecipes = new HashSet<>();
+        for (Recipe recipe : recipes.values()) {
+            if (recipe.getName().contains("::")) {
+                String recipeName = recipe.getName().split("::")[0];
+                if (uniqueRecipes.add(recipeName)) {
+                    Recipe copiedRecipe = Recipe.copy(recipe);
+                    copiedRecipe.setName(recipeName);
+                    cleanedRecipes.put(recipeName, copiedRecipe);
+                }
+            } else {
+                cleanedRecipes.put(recipe.getName(), recipe);
+            }
+        }
+        this.recipes = cleanedRecipes;
     }
 }
