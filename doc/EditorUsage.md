@@ -293,15 +293,11 @@ following functionalities:
     - Shown as: Nametag
     - Usage: Click on the item to type in a new name.
       <br><br>
-- **Category**: The category of the recipe. You can cycle through it to change the category if more than one exists.
-    - Shown as: Iron Bars
-    - Usage:
-        - **Left Click**: Go forward in the categories
-        - **Right Click**: Go backward in the categories
-          <br><br>
-- **Crafting Time**: The time that is required to craft the recipe. You can increase or decrease the amount inside of
-  the gui itself.
+- **Crafting Options**: Those are the settings how the result is crafted and how often a player can craft it.
     - Shown as: Clock
+    - **Crafting Time**: The time in seconds that is required to craft the recipe.
+    - **Crafting Limit**: The amount of times a player can craft the recipe.
+    - **Crafting Limit Cooldown**: The cooldown in seconds that resets the crafting limit of a player. If set to `-1`, it wont be resetted.
     - Usage:
         - Left Click: Increase the time by 1
         - Right Click: Decrease the time by 1
@@ -394,6 +390,13 @@ following functionalities:
     - Usage:
         - **Left Click**: Add a new condition
         - **Right Click**: Remove the last condition
+<br><br>
+- **Category**: The category of the recipe. You can cycle through it to change the category if more than one exists.
+    - Shown as: Iron Bars
+    - Usage:
+        - **Left Click**: Go forward in the categories
+        - **Right Click**: Go backward in the categories 
+<br><br>
 - **Back**: Go back to the [Recipes Editor](#using-recipe-editor).
     - Shown as: Barrier
     - Usage: Click to go back to the recipes editor.
