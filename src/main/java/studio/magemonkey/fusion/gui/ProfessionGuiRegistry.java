@@ -3,9 +3,9 @@ package studio.magemonkey.fusion.gui;
 import lombok.Getter;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 
 import java.util.ArrayList;
 import java.util.Map;

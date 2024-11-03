@@ -7,10 +7,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
-import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
@@ -34,12 +34,16 @@ public class RecipeItemEditor extends Editor implements Listener {
 
     public void initialize() {
         InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
-        setItem(10, getIcons().get("name"));
-        setItem(11, getIcons().get("category"));
-        setItem(12, getIcons().get("craftingTime"));
+        setItem(4, getIcons().get("name"));
+        setItem(10, getIcons().get("craftingTime"));
+        setItem(11, getIcons().get("craftingLimit"));
+        setItem(12, getIcons().get("craftingLimitCooldown"));
         setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
+        setItem(19, getIcons().get("hiding_noPermission"));
+        setItem(20, getIcons().get("hiding_noRank"));
+        setItem(21, getIcons().get("hiding_recipeLimitReached"));
         setItem(24, getIcons().get("commands"));
 
         setItem(37, getIcons().get("ingredients"));
@@ -49,6 +53,7 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(41, getIcons().get("mastery"));
         setItem(42, getIcons().get("rank"));
         setItem(43, getIcons().get("conditions"));
+        setItem(49, getIcons().get("category"));
 
         setItem(53, getIcons().get("back"));
     }
@@ -61,29 +66,9 @@ public class RecipeItemEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 ->
+            case 4 ->
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Name, "/fusion-editor <newName>");
-            case 11 -> {
-                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
-                String currentCategory = recipe.getCategory();
-                int currentIndex = categories.indexOf(currentCategory);
-                if (event.isLeftClick()) {
-                    if(currentIndex == categories.size() - 1) {
-                        recipe.setCategory(categories.get(0));
-                    } else {
-                        recipe.setCategory(categories.get(currentIndex + 1));
-                    }
-                    hasChanges = true;
-                } else if (event.isRightClick()) {
-                    if (currentIndex == 0) {
-                        recipe.setCategory(categories.get(categories.size() - 1));
-                    } else {
-                        recipe.setCategory(categories.get(currentIndex - 1));
-                    }
-                    hasChanges = true;
-                }
-            }
-            case 12 -> {
+            case 10 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
                     recipe.setCraftingTime(recipe.getCraftingTime() + amount);
@@ -91,6 +76,28 @@ public class RecipeItemEditor extends Editor implements Listener {
                 } else if (event.isRightClick()) {
                     if (recipe.getCraftingTime() == 0) return;
                     recipe.setCraftingTime(Math.max(recipe.getCraftingTime() - amount, 0));
+                    hasChanges = true;
+                }
+            }
+            case 11 -> {
+                int amount = event.isShiftClick() ? 10 : 1;
+                if (event.isLeftClick()) {
+                    recipe.setCraftingLimit(recipe.getCraftingLimit() + amount);
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (recipe.getCraftingLimit() == 0) return;
+                    recipe.setCraftingLimit(Math.max(recipe.getCraftingLimit() - amount, 0));
+                    hasChanges = true;
+                }
+            }
+            case 12 -> {
+                int amount = event.isShiftClick() ? 10 : 1;
+                if (event.isLeftClick()) {
+                    recipe.setCraftingLimitCooldown(recipe.getCraftingLimitCooldown() + amount);
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (recipe.getCraftingLimitCooldown() == -1) return;
+                    recipe.setCraftingLimitCooldown(Math.max(recipe.getCraftingLimitCooldown() - amount, -1));
                     hasChanges = true;
                 }
             }
@@ -116,6 +123,42 @@ public class RecipeItemEditor extends Editor implements Listener {
                     recipe.getResults().setVanillaExp(Math.max(recipe.getResults().getVanillaExp() - amount, 0));
                     hasChanges = true;
                 }
+            }
+            case 19 -> {
+                if(event.isLeftClick()) {
+                    if (recipe.getHideNoPermission() == null) {
+                        recipe.setHideNoPermission(true);
+                    } else {
+                        recipe.setHideNoPermission(!recipe.getHideNoPermission());
+                    }
+                } else if(event.isRightClick()) {
+                    recipe.setHideNoPermission(null);
+                }
+                hasChanges = true;
+            }
+            case 20 -> {
+                if (event.isLeftClick()) {
+                    if (recipe.getHideNoRank() == null) {
+                        recipe.setHideNoRank(true);
+                    } else {
+                        recipe.setHideNoRank(!recipe.getHideNoRank());
+                    }
+                } else if (event.isRightClick()) {
+                    recipe.setHideNoRank(null);
+                }
+                hasChanges = true;
+            }
+            case 21 -> {
+                if (event.isLeftClick()) {
+                    if (recipe.getHideRecipeLimitReached() == null) {
+                        recipe.setHideRecipeLimitReached(true);
+                    } else {
+                        recipe.setHideRecipeLimitReached(!recipe.getHideRecipeLimitReached());
+                    }
+                } else if (event.isRightClick()) {
+                    recipe.setHideRecipeLimitReached(null);
+                }
+                hasChanges = true;
             }
             case 24 -> {
                 if (event.isLeftClick())
@@ -194,6 +237,26 @@ public class RecipeItemEditor extends Editor implements Listener {
                     if (recipe.getConditions().getFullConditions().isEmpty())
                         return;
                     recipe.getConditions().removeLastCondition();
+                    hasChanges = true;
+                }
+            }
+            case 49 -> {
+                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
+                String currentCategory = recipe.getCategory();
+                int currentIndex = categories.indexOf(currentCategory);
+                if (event.isLeftClick()) {
+                    if(currentIndex == categories.size() - 1) {
+                        recipe.setCategory(categories.get(0));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex + 1));
+                    }
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (currentIndex == 0) {
+                        recipe.setCategory(categories.get(categories.size() - 1));
+                    } else {
+                        recipe.setCategory(categories.get(currentIndex - 1));
+                    }
                     hasChanges = true;
                 }
             }

@@ -7,10 +7,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 

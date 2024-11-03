@@ -6,19 +6,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
-import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class RecipeEditor extends Editor implements Listener {
 
@@ -67,7 +64,7 @@ public class RecipeEditor extends Editor implements Listener {
             slots.put(inv, invSlots);
             invSlot++;
         }
-        if(inv == null) {
+        if (inv == null) {
             inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
             inv.setItem(4, getIcons().get("add"));
             inv.setItem(48, getIcons().get("previous"));
@@ -105,7 +102,7 @@ public class RecipeEditor extends Editor implements Listener {
             default -> {
                 if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
                     Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
-                    if(!event.isShiftClick()) {
+                    if (!event.isShiftClick()) {
                         if (event.isLeftClick()) {
                             recipeItemEditor = new RecipeItemEditor(this, player, entry);
                             recipeItemEditor.open(player);
@@ -115,11 +112,11 @@ public class RecipeEditor extends Editor implements Listener {
                         }
                     } else {
                         Recipe recipe = table.getRecipes().get(entry.getName());
-                        if(event.isLeftClick()) {
+                        if (event.isLeftClick()) {
                             // Put the Recipe one more to the left in the Map
                             table.moveEntry(recipe, -1);
                             hasChanges = true;
-                        } else if(event.isRightClick()) {
+                        } else if (event.isRightClick()) {
                             // Put the Recipe one more to the right in the Map
                             table.moveEntry(recipe, 1);
                             hasChanges = true;

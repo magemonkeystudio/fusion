@@ -7,11 +7,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
-import studio.magemonkey.fusion.queue.QueueItem;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;
@@ -412,15 +412,14 @@ public class ProfessionsCfg {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
         FileConfiguration cfg = cfgs.get(key);
-        String path =
-                item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
+        String path = item.isDone() ? "pattern.items.queue-items.Finished" : "pattern.items.queue-items.Unfinished";
 
 
         if (!cfg.isSet(path)) {
             Fusion.getInstance().getLogger().warning("Profession '" + key + "' is missing '" + path + "'.");
             return null;
         }
-        ItemStack result = item.getRecipe().getResults().getResultItem().getItemStack();
+        ItemStack result = item.getRecipe().getDivinityRecipeMeta() == null ? item.getRecipe().getResults().getResultItem().getItemStack() : item.getRecipe().getDivinityRecipeMeta().getIcon();
         Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())
                 .toUpperCase());

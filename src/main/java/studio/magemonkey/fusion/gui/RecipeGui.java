@@ -31,15 +31,22 @@ import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
-import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.fusion.util.Utils;
+import studio.magemonkey.fusion.util.*;
 
 import java.util.*;
 
@@ -51,7 +58,7 @@ public class RecipeGui implements Listener {
     @Getter
     protected final String name;
     @Getter
-    protected final String inventoryName;
+    private final String inventoryName;
     private final Category category;
     private InventoryPattern pattern;
     private final HashMap<Integer, CalculatedRecipe> recipes;
@@ -89,10 +96,10 @@ public class RecipeGui implements Listener {
         this.player = player;
         this.table = table;
         this.name = table.getName();
-        this.inventoryName = table.getInventoryName();
+        this.inventoryName = ChatUT.hexString(table.getInventoryName());
         this.recipes = new HashMap<>(20);
         this.category = category != null ? category : new Category("master", "PAPER", table.getPattern(), 1);
-        if(this.category.getName().equals("master")) {
+        if (this.category.getName().equals("master")) {
             this.category.getRecipes().addAll(table.getRecipes().values());
         }
         setPattern();
@@ -153,7 +160,7 @@ public class RecipeGui implements Listener {
 
     public void updateBlockedSlots(MessageData[] data) {
         int totalItems = category.getRecipes().size();
-        int queuedTotalItems = queue.getQueue().size();
+        int queuedTotalItems = queue != null ? queue.getQueue().size() : 0;
         int fullPages = totalItems / resultSlots.size();
         int rest = totalItems % resultSlots.size();
         int pages = (rest == 0) ? fullPages : (fullPages + 1);
@@ -229,7 +236,7 @@ public class RecipeGui implements Listener {
             /* Default setup */
             ItemStack fill = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
-            allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
+            allRecipes.removeIf(r -> r.isHidden(player));
             int pageSize = resultSlots.size();
             int allRecipeCount = allRecipes.size();
             int i = 0;
@@ -291,6 +298,7 @@ public class RecipeGui implements Listener {
                             int slot = queuedSlots[j];
                             this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
                             this.queue.getQueuedItems().get(slot).updateIcon();
+
                             this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
                         }
                     }
@@ -324,7 +332,6 @@ public class RecipeGui implements Listener {
             for (int k = 0; k < inventory.getSize(); k++) {
                 if (inventory.getItem(k) != null && inventory.getItem(k).getType() != Material.AIR)
                     continue;
-
                 inventory.setItem(k, fill);
             }
         } catch (
@@ -464,7 +471,7 @@ public class RecipeGui implements Listener {
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
-            MessageUtil.sendMessage("fusion.gui.recipes.canCraft.false", player);
+            player.sendMessage(CraftingRequirementsCfg.getCanCraft(false));
             return false;
         }
 
@@ -574,7 +581,7 @@ public class RecipeGui implements Listener {
             int cooldown = modifier == 0d
                     ? recipe.getCraftingTime()
                     : (int) Math.round(recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier));
-            showBossBar(this.player, cooldown);
+            showBossBar(this.player, recipe.getResults().getResultItem().getItemStack(), cooldown);
 
             if (cooldown != 0) {
                 previousCursor = player.getOpenInventory().getCursor();
@@ -625,7 +632,7 @@ public class RecipeGui implements Listener {
 
                     //Experience
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());
@@ -665,11 +672,11 @@ public class RecipeGui implements Listener {
     }
 
     /* Manual Crafting Options */
-    private void showBossBar(Player target, double cooldown) {
+    private void showBossBar(Player target, ItemStack item, double cooldown) {
         if (cooldown == 0)
             return;
 
-        bar = Bukkit.createBossBar(ChatColor.GREEN + "fusion...",
+        bar = Bukkit.createBossBar(CraftingRequirementsCfg.getBossBarTitle(item),
                 BarColor.BLUE,
                 BarStyle.SOLID,
                 BarFlag.PLAY_BOSS_MUSIC);

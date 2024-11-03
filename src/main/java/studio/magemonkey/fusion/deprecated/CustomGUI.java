@@ -22,13 +22,13 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.InventoryPattern;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.CraftingQueue;
 
 import java.util.*;
 

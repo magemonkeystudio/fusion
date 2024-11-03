@@ -1,8 +1,8 @@
 package studio.magemonkey.fusion.cfg.sql.tables;
 
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.data.professions.Profession;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

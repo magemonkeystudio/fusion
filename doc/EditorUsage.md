@@ -293,15 +293,11 @@ following functionalities:
     - Shown as: Nametag
     - Usage: Click on the item to type in a new name.
       <br><br>
-- **Category**: The category of the recipe. You can cycle through it to change the category if more than one exists.
-    - Shown as: Iron Bars
-    - Usage:
-        - **Left Click**: Go forward in the categories
-        - **Right Click**: Go backward in the categories
-          <br><br>
-- **Crafting Time**: The time that is required to craft the recipe. You can increase or decrease the amount inside of
-  the gui itself.
+- **Crafting Options**: Those are the settings how the result is crafted and how often a player can craft it.
     - Shown as: Clock
+    - **Crafting Time**: The time in seconds that is required to craft the recipe.
+    - **Crafting Limit**: The amount of times a player can craft the recipe.
+    - **Crafting Limit Cooldown**: The cooldown in seconds that resets the crafting limit of a player. If set to `-1`, it wont be resetted.
     - Usage:
         - Left Click: Increase the time by 1
         - Right Click: Decrease the time by 1
@@ -326,6 +322,16 @@ following functionalities:
         - Left Click: Increase the amount by 1
         - Right Click: Decrease the amount by 1
         - Shift + Click: Manage each by 10
+            <br><br>
+- **Hiding Options** Those are options to hide the recipe if specific conditions occur.
+   - Shown as: Levers
+   - **Hiding if no permission** Rather the recipe is hidden if the player has no permission to craft it.
+   - **Hiding if no rank** Rather the recipe is hidden if the player has not the rank to craft it.
+   - **Hiding if limit reached** Rather the recipe is hidden if the player has reached the limit of crafting this recipe.
+   - Usage:
+        - Left Click: Toggle between `true` and `false`
+        - Right Click: Unset the option to respect global settings
+          <br><br>
 - **Commands**: The commands that will be executed when the recipe is crafted. You will be forwarded to a click message
   in the chat in order to type in a new command for the recipe. (`/fusion-editor <caster> <delay> <command without />`)
     - Shown as: Command Block
@@ -384,6 +390,13 @@ following functionalities:
     - Usage:
         - **Left Click**: Add a new condition
         - **Right Click**: Remove the last condition
+<br><br>
+- **Category**: The category of the recipe. You can cycle through it to change the category if more than one exists.
+    - Shown as: Iron Bars
+    - Usage:
+        - **Left Click**: Go forward in the categories
+        - **Right Click**: Go backward in the categories 
+<br><br>
 - **Back**: Go back to the [Recipes Editor](#using-recipe-editor).
     - Shown as: Barrier
     - Usage: Click to go back to the recipes editor.

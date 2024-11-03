@@ -12,25 +12,21 @@ import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.LevelFunction;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
-import studio.magemonkey.fusion.cfg.professions.Profession;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.professions.Profession;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
+import studio.magemonkey.fusion.util.LevelFunction;
 import studio.magemonkey.fusion.util.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
@@ -79,12 +75,20 @@ public class Commands implements CommandExecutor, TabCompleter {
                             new MessageData("target", target));
                     return true;
                 } else {
-                    if (sender instanceof Player) {
+                    if (sender instanceof Player player) {
                         if (!Utils.hasCraftingUsePermission(sender, eq.getProfession())) {
                             return true;
                         }
                         //Make sure they have unlocked this crafting menu
-                        if (!PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasProfession(eq.getProfession())) {
+                        if (!PlayerLoader.getPlayer(player).hasProfession(eq.getProfession())) {
+                            if(player.isOp()) {
+                                eq.open(player);
+                                MessageUtil.sendMessage("fusion.useConfirm",
+                                        sender,
+                                        new MessageData("craftingInventory", eq),
+                                        new MessageData("player", sender));
+                                return true;
+                            }
                             MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }
@@ -99,27 +103,8 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
-            } else if (args[0].equalsIgnoreCase("editor")) {
-                String editType = args[1];
-                if (editType.equalsIgnoreCase("browse")) {
-                    // TODO BrowseEditor
-                } else if (editType.equalsIgnoreCase("profession")) {
-                    String profession = args[2];
-                    if (ProfessionsCfg.getTable(profession) == null) {
-                        // TODO generate new template profession to work with
-                        MessageUtil.sendMessage("fusion.notACrafting",
-                                sender,
-                                new MessageData("name", profession),
-                                new MessageData("sender", sender));
-                        return true;
-                    } else {
-                        EditorRegistry.getProfessionEditor((Player) sender, profession).open((Player) sender);
-                    }
-                }
-                return true;
             } else if (args[0].equalsIgnoreCase("master")) {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
+                if (sender instanceof Player player) {
                     String guiName = args[1];
                     CraftingTable table = ProfessionsCfg.getTable(guiName);
                     if (table == null) {
@@ -153,7 +138,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("craftingTable", table));
                         return true;
                     }
-
+                    FusionAPI.getEventServices().getProfessionService().masterProfession(table.getName(), player, true);
                     PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
                     MessageUtil.sendMessage("fusion.mastered",
                             sender,
@@ -165,8 +150,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                             new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             } else if (args[0].equalsIgnoreCase("forget")) {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
+                if (sender instanceof Player player) {
                     CraftingTable table = ProfessionsCfg.getTable(args[1]);
                     if (table == null) {
                         MessageUtil.sendMessage("fusion.notACrafting",
@@ -175,13 +159,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                                 new MessageData("sender", sender));
                         return true;
                     }
-                    ConfirmationAction action = () -> {
-                        PlayerLoader.getPlayer(player.getUniqueId()).removeProfession(table.getName());
-                        MessageUtil.sendMessage("fusion.forgotten",
-                                sender,
-                                new MessageData("sender", sender),
-                                new MessageData("craftingTable", table));
-                    };
+                    ConfirmationAction action = () -> FusionAPI.getEventServices().getProfessionService().leaveProfession(table, player);
 
                     confirmation.put(player.getUniqueId().toString(), action);
                     MessageUtil.sendMessage("fusion.forget.confirm",
@@ -200,7 +178,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             } else if (args[0].equalsIgnoreCase("storage")) {
                 String storage = args[1];
                 DatabaseType type =
-                        DatabaseType.valueOf(Cfg.getConfig().getString("storage.type", "LOCALE").toUpperCase());
+                        DatabaseType.valueOf(Objects.requireNonNull(Cfg.getConfig()).getString("storage.type", "LOCALE").toUpperCase());
                 switch (storage.toLowerCase()) {
                     case "local":
                         if (type == DatabaseType.LOCAL) {
@@ -229,14 +207,27 @@ public class Commands implements CommandExecutor, TabCompleter {
                         break;
                 }
                 return true;
+            } else if (args[0].equalsIgnoreCase("join")) {
+                if (sender instanceof Player player) {
+                    if (ProfessionsCfg.getGuiMap().containsKey(args[1])) {
+                        BrowseGUI.joinProfession(player, ProfessionsCfg.getGUI(args[1]));
+                    } else {
+                        MessageUtil.sendMessage("fusion.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
+                    }
+                } else {
+                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                }
+                return true;
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("browse")) {
-                if (!(sender instanceof Player)) {
+                if (!(sender instanceof Player player)) {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                Player player = (Player) sender;
+                if(player.isPermissionSet("fusion.browse") && !player.hasPermission("fusion.browse")) {
+                    return true;
+                }
                 BrowseGUI.open(player);
                 return true;
             } else if (args[0].equalsIgnoreCase("level")) {
@@ -244,18 +235,18 @@ public class Commands implements CommandExecutor, TabCompleter {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                for (Map.Entry<String, CraftingTable> entry : ProfessionsCfg.getMap().entrySet()) {
+                for(Profession profession : PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions()) {
                     MessageUtil.sendMessage("fusion.level.format", sender,
-                            new MessageData("category", entry.getValue().getName()),
-                            new MessageData("level", LevelFunction.getLevel((Player) sender, entry.getValue())),
+                            new MessageData("category", profession.getName()),
+                            new MessageData("level", profession.getLevel()),
                             new MessageData("experience",
                                     PlayerLoader.getPlayer(((Player) sender).getUniqueId())
-                                            .getExperience(entry.getValue())));
+                                            .getExperience(profession)));
                 }
 
                 return true;
             } else if (args[0].equalsIgnoreCase("auto")) {
-                if (!(sender instanceof Player)) {
+                if (!(sender instanceof Player player)) {
                     MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
@@ -266,7 +257,6 @@ public class Commands implements CommandExecutor, TabCompleter {
                 if (!instance.checkPermission(sender, "fusion.auto")) {
                     return true;
                 }
-                Player player = (Player) sender;
 
                 boolean autoOn = PlayerLoader.getPlayer(player).isAutoCrafting();
 
@@ -315,7 +305,8 @@ public class Commands implements CommandExecutor, TabCompleter {
             if ("use".startsWith(args[0])) entries.add("use");
             if ("master".startsWith(args[0])) entries.add("master");
             if ("forget".startsWith(args[0])) entries.add("forget");
-            if (Fusion.getInstance().checkPermission(sender, "fusion.admin") && "storage".startsWith(args[0]))
+            if ("join".startsWith(args[0])) entries.add("join");
+            if (Fusion.getInstance().checkPermission(sender, "fusion.admin.use") && "storage".startsWith(args[0]))
                 entries.add("storage");
             if (Fusion.getInstance().checkPermission(sender, "fusion.auto") && "auto".startsWith(args[0]))
                 entries.add("auto");
@@ -325,23 +316,30 @@ public class Commands implements CommandExecutor, TabCompleter {
             List<Profession> professions =
                     new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
             if (args[0].equalsIgnoreCase("use")) {
-                for (String name : professions.stream().map(Profession::getName).collect(Collectors.toList())) {
+                for (String name : professions.stream().map(Profession::getName).toList()) {
                     if (name.startsWith(args[1])) entries.add(name);
                 }
             } else if (args[0].equalsIgnoreCase("master")) {
                 for (String name : professions.stream()
                         .filter(Profession::isMastered)
                         .map(Profession::getName)
-                        .collect(Collectors.toList())) {
+                        .toList()) {
                     if (name.startsWith(args[1])) entries.add(name);
                 }
             } else if (args[0].equalsIgnoreCase("forget")) {
                 for (String name : ProfessionsCfg.getMap().keySet()) {
                     if (name.startsWith(args[1])) entries.add(name);
                 }
-            } else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
+            } else if (args[0].equalsIgnoreCase("join")) {
+                for (String name : ProfessionsCfg.getGuiMap().keySet()) {
+                    if (!professions.stream().map(Profession::getName).toList().contains(name)) {
+                        if (name.startsWith(args[1])) entries.add(name);
+                    }
+                }
+            }
+            else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
                     .checkPermission(sender, "fusion.admin")) {
-                if ("locale".startsWith(args[1])) entries.add("locale");
+                if ("local".startsWith(args[1])) entries.add("local");
                 if ("sql".startsWith(args[1])) entries.add("sql");
             }
         } else if (args.length == 3) {

@@ -1,21 +1,22 @@
 fusion:
   gui:
     professions:
+      requirementLine: "&7Joining Requirements"
       learned:
-        'true': "&aYou have unlocked this profession: &ayes"
-        'false': "&cThis profession is locked: &cno"
+        'true': "&aYou have unlocked this profession"
+        'false': "&cThis profession is locked"
       ingredient:
         'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<requiredAmount>&7)"
         'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<requiredAmount>&7)"
       ingredientSimple:
-        'true': "&6- &a$<amount>&8/&7$<requiredAmount> &r$<material>:$<durability>"
-        'false': "&6- &c$<amount>&8/&7$<requiredAmount> &r$<material>:$<durability>"
+        'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<requiredAmount>&7)"
+        'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<requiredAmount>&7)"
       money:
-        'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
-        'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"
+        'true': "&6- &eMoney: &7(&a$$<money>&8/&7$$<costs>&7)"
+        'false': "&6- &eMoney: &7(&c$$<money>&8/&7$$<costs>&7)"
       exp:
-        'true': "&6- &eExperience: &7(&a$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
-        'false': "&6- &eExperience: &7(&c$<player.totalExperience>&8/&7$<costs.exp>&7) &eexp."
+        'true': "&6- &eExperience: &7(&a$<exp>&8/&7$<costs>&7) &eexp."
+        'false': "&6- &eExperience: &7(&c$<exp>&8/&7$<costs>&7) &eexp."
       professionLevel:
         'true': "&6- &eLevel Needed: &7(&a$<level>&8/&7$<recipe.professionLevel>&7)"
         'false': "&6- &eLevel Needed: &7(&c$<level>&8/&7$<recipe.professionLevel>&7)"
@@ -34,15 +35,16 @@ fusion:
       rank:
         epic: "&cEpic rank needed to craft this item!"
     recipes:
+      requirementLine: "&7Crafting Requirements"
       learned:
-        'true': "&aYou have unlocked this recipe: &ayes"
-        'false': "&cThis recipe is locked: &cno"
+        'true': "&aYou have unlocked this recipe"
+        'false': "&cThis recipe is locked"
       ingredient:
         'true': "&6- &r$<recipeItem.customItem.name> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
         'false': "&6- &r$<recipeItem.customItem.name> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"
       ingredientSimple:
-        'true': "&6- &a$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
-        'false': "&6- &c$<amount>&8/&7$<recipeItem.amount> &r$<recipeItem.item.material>:$<recipeItem.item.durability>"
+        'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<recipeItem.amount>&7)"
+        'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<recipeItem.amount>&7)"
       money:
         'true': "&6- &eMoney: &7(&a$$<player.money>&8/&7$$<costs.money>&7)"
         'false': "&6- &eMoney: &7(&c$$<player.money>&8/&7$$<costs.money>&7)"
@@ -55,6 +57,9 @@ fusion:
       mastery:
         'true': "&6- &eMastery: &7(Unlocked)"
         'false': "&6- &eMastery: &8(locked)"
+      limit:
+        'true': "&6- &eLimit: &7(&a$<amount>&8/&7$<recipe.limit>&7)"
+        'false': "&6- &eLimit: &7(&c$<amount>&8/&7$<recipe.limit>&7)"
       condition:
         'true': "&6- &e$<condition.name>&8: &7(&a$<level>&8/&7$<condition.level>&7)"
         'false': "&6- &e$<condition.name>&8: &7(&c$<level>&8/&7$<condition.level>&7)"
@@ -95,6 +100,8 @@ fusion:
     invalidStorage: "&cInvalid storage type: &3$<storage> (valid: &4locale, sql&c)"
     alreadyUsedStorage: "&cYou are already using this storage type. ($<storage>)"
     noJoin: "&cYou can't join this profession due to lack of finished requirements."
+    recipeLimitReached: "&cYou have already crafted &3$<amount>/$<recipe.limit> &cof this recipe."
+    profNotAvailable: "&cThis profession is not available."
   storageChanged: "&7You have swapped to &3$<storage> storage."
   unlockedProfession: "&aYou unlocked &3$<profession>. &7($<unlocked>/$<limit>)"
   notACrafting: "&cThere is no crafting inventory named \"$<name>\"!"
@@ -124,6 +131,7 @@ fusion:
     You typed: &7$<text>&r
       Valid syntax:
         &8/&7craft &rbrowse
+        &8/&7craft &rjoin &8<&7profession&8>
         &8/&7craft &ruse &8<&7profession&8>
         &8/&7craft &ruse &8<&7profession&8> <&7player&8>
         &8/&7craft &rlevel

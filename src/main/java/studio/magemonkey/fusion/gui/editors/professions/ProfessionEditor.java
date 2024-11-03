@@ -7,12 +7,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternEditor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternItemsEditor;
@@ -38,6 +38,7 @@ public class ProfessionEditor extends Editor implements Listener {
         this.profession = profession;
         // Copy the table to prevent changes to the original table while people do crafting
         this.table = CraftingTable.copy(ProfessionsCfg.getTable(profession));
+        table.cleanUpRecipesForEditor();
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
 
         initialize();
@@ -134,13 +135,13 @@ public class ProfessionEditor extends Editor implements Listener {
                     }
                 }
             }
-            case 36 -> {
-                table.save();
+            case 36 -> table.save(() -> {
                 player.closeInventory();
                 MessageUtil.sendMessage("editor.changesSaved", player, new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
                 EditorRegistry.removeCurrentEditor(player);
                 FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
-            }
+                ProfessionsCfg.init();
+            });
             case 44 -> {
                 player.closeInventory();
                 hasChanges = true;

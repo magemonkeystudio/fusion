@@ -26,13 +26,22 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.*;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
-import studio.magemonkey.fusion.cfg.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.queue.CraftingQueue;
+import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.slot.Slot;
-import studio.magemonkey.fusion.queue.CraftingQueue;
-import studio.magemonkey.fusion.queue.QueueItem;
+import studio.magemonkey.fusion.util.ExperienceManager;
+import studio.magemonkey.fusion.util.InvalidPatternItemException;
+import studio.magemonkey.fusion.util.LevelFunction;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
@@ -43,7 +52,7 @@ public class PlayerCustomGUI implements Listener {
     private final Player                             player;
     private final Inventory                          inventory;
     @Getter
-    private final Category                           category;
+    private final Category category;
     private final HashMap<Integer, CalculatedRecipe> recipes;
     private       int                                page   = 0;
     private       BukkitTask                         craftingTask;
@@ -53,7 +62,7 @@ public class PlayerCustomGUI implements Listener {
     private       ItemStack                          previousCursor;
 
     private boolean craftingSuccess = true;
-    private Recipe  craftingRecipe  = null;
+    private Recipe craftingRecipe  = null;
 
     /* Specifics if crafting_queue: true */
     private CraftingQueue queue;
@@ -142,7 +151,7 @@ public class PlayerCustomGUI implements Listener {
             else
                 gui.resetPattern();
             /* Default setup */
-            CraftingTable      table      = ProfessionsCfg.getTable(this.gui.name);
+            CraftingTable table      = ProfessionsCfg.getTable(this.gui.name);
             ItemStack          fill       = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
@@ -619,7 +628,7 @@ public class PlayerCustomGUI implements Listener {
                     CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
 
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        PlayerLoader.getPlayer(player.getUniqueId()).getProfession(table).addExp(recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());

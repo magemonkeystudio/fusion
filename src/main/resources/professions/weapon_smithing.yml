@@ -6,7 +6,7 @@ name: weapon_smithing
 
 # Visuals for the professions in the gui
 icon: DIAMOND_SWORD
-inventoryName: Weapon Smithing
+inventoryName: '&9Weapon Smithing'
 
 # Rather you want to enable categories for this profession
 useCategories: true

@@ -1,0 +1,185 @@
+# The crafting requirement section that is applied to recipes only
+fulfilled: "&a&l✓&r"
+unfulfilled: "&c&l✗&r"
+recipes:
+  # The line that is displayed above the crafting requirements
+  requirementLine: "&7Crafting Requirements"
+  # The bossbar that will be shown when manual crafting is enabled
+  bossbar: '&5Crafting $<item>...'
+  # The message that is displayed when the player has learned the recipe
+  learned:
+    'true': "&aYou have learned this recipe"
+    'false': "&cThis recipe is locked"
+    # The conditions that are displayed in the crafting requirements
+  conditions:
+    true: "&6- &e$<condition>&8: &7(&a$<level>&8/&7$<required>&7)"
+    false: "&6- &e$<condition>&8: &7(&c$<level>&8/&7$<required>&7)"
+    # The variations that can be displayed in the conditions (hooks etc.)
+    variations:
+      profession: "&3Profession &a$<name>"
+      fabled: "&3Fabled &a$<name>"
+      mcmmo: "&3McMMO &a$<name>"
+      jobs: "&3Job &a$<name>"
+      auraAbility: "&3Aura Ability &a$<name>"
+      auraManaAbility: "&3Aura Mana Ability &a$<name>"
+      auraSkill: "&3Aura Skill &a$<name>"
+      auraStat: "&3Aura Stat &a$<name>"
+  # The ingredients that are displayed in the crafting requirements
+  ingredients:
+    'true': "&6- &e$<item> &7(&a$<amount>&8/&7$<required>&7)"
+    'false': "&6- &e$<item> &7(&c$<amount>&8/&7$<required>&7)"
+
+    # This is kind of a highlight that can be added when items have an item meta. Its helpful when items are called the same (ex. Iron Ore).
+    # Setting this to something like '&d*' would make the ingredient line into '&d*- Iron Ore <...>'
+    # If you want to leave it, simply make it blank
+    highlightCustomItem: "&d*"
+
+    # The vanilla extension that can be displayed in the ingredients
+    extensions:
+      # Rather those extensions are enabled
+      enabled: true
+      # Rather those extensions will be shown on vanilla items only. If set to 'false', items from Divinity will be extended too
+      onlyVanilla: true
+      # The lore that needs to be displayed in the ingredients
+      # Since this is kind of redundant to display twice, you will only see how it should look like.
+      lore:
+        enabled: true
+        'true': "  $<lore> &7($<fulfilled>&7)"
+        'false': "  $<lore> &7($<unfulfilled>&7)"
+      # The enchantments that are displayed in the ingredients
+      enchantments:
+        enabled: true
+        'true': "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Enchant &9$<enchantment> &7(&c$<required>&7) &7($<unfulfilled>&7)"
+      # The flags that are displayed in the ingredients
+      flags:
+        enabled: false
+        'true': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<unfulfilled>&7)"
+      # The unbreakable that is displayed in the ingredients
+      unbreakable:
+        enabled: false
+        'true': "  &8• &7Unbreakable &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Unbreakable &7(&c$<required>&7) &7($<unfulfilled>&7)"
+      # The durability that is displayed in the ingredients (only if existent)
+      durability:
+        enabled: true
+        'true': "  &8• &7Durability &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Durability &7(&a$<required>&7) &7($<unfulfilled>&7)"
+      # The custom model data that is displayed in the ingredients
+      customModelData:
+        enabled: false
+        'true': "  &8• &7Custom Model &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Custom Model &7(&a$<required>&7) &7($<unfulfilled>&7)"
+  # The money that is displayed in the crafting requirements
+  money:
+    'true': "&6- &eMoney: &7(&a$$<money>&8/&7$$<required>&7)"
+    'false': "&6- &eMoney: &7(&c$$<money>&8/&7$$<required>&7)"
+  # The experience that is displayed in the crafting requirements
+  exp:
+    'true': "&6- &eExperience: &7(&a$<exp>&8/&7$<required>&7) &eexp."
+    'false': "&6- &eExperience: &7(&c$<exp>&8/&7$<required>&7) &eexp."
+  # The profession level that is displayed in the crafting requirements
+  professionLevel:
+    'true': "&6- &eLevel Needed: &7(&a$<level>&8/&7$<required>&7)"
+    'false': "&6- &eLevel Needed: &7(&c$<level>&8/&7$<required>&7)"
+  # The mastery that is displayed in the crafting requirements
+  mastery:
+    'true': "&6- &eMastery: &7(Unlocked)"
+    'false': "&6- &eMastery: &8(locked)"
+  # The limit that is displayed in the crafting requirements
+  limit:
+    'true': "&6- &eLimit: &7(&a$<limit>&8/&7$<required>&7)"
+    'false': "&6- &eLimit: &7(&c$<limit>&8/&7$<required>&7)"
+  # The message that is displayed when the player can craft the item
+  canCraft:
+    'true': "&aYou can craft this item."
+    'false': "&cYou can't craft this item."
+  # The message that is displayed when the player needs a specific rank to craft the item
+  rank:
+    epic: "&cEpic rank needed to craft this item!"
+
+# The crafting requirement section that is applied to professions only
+professions:
+  # The line that is displayed above the crafting requirements
+  requirementLine: "&7Crafting Requirements"
+  # The message that is displayed when the player has unlocked the profession
+  learned:
+    'true': "&aYou have unlocked this profession"
+    'false': "&cThis profession is locked"
+  # The conditions that are displayed in the crafting requirements
+  conditions:
+    true: "&6- &e$<condition>&8: &7(&a$<level>&8/&7$<required>&7)"
+    false: "&6- &e$<condition>&8: &7(&c$<level>&8/&7$<required>&7)"
+    # The variations that can be displayed in the conditions (hooks etc.)
+    variations:
+      profession: "&3Profession &a$<name>"
+      fabled: "&3Fabled &a$<name>"
+      mcmmo: "&3McMMO &a$<name>"
+      jobs: "&3Job &a$<name>"
+      auraAbility: "&3Aura Ability &a$<name>"
+      auraManaAbility: "&3Aura Mana Ability &a$<name>"
+      auraSkill: "&3Aura Skill &a$<name>"
+      auraStats: "&3Aura Stat &a$<name>"
+  # The ingredients that are displayed in the crafting requirements
+  ingredients:
+    'true': "&6- &r$<item> &7(&a$<amount>&8/&7$<required>&7)"
+    'false': "&6- &r$<item> &7(&c$<amount>&8/&7$<required>&7)"
+
+    # This is kind of a highlight that can be added when items have an item meta. Its helpful when items are called the same (ex. Iron Ore).
+    # Setting this to something like '&d*' would make the ingredient line into '&d*- Iron Ore <...>'
+    # If you want to leave it, simply make it blank
+    highlightCustomItem: "&d*"
+
+    # The vanilla extension that can be displayed in the ingredients
+    extensions:
+      # Rather those extensions are enabled
+      enabled: true
+      # Rather those extensions will be shown on vanilla items only. If set to 'false', items from Divinity will be extended too
+      onlyVanilla: true
+      # The lore that needs to be displayed in the ingredients
+      # Since this is kind of redundant to display twice, you will only see how it should look like.
+      lore:
+        enabled: true
+        'true': "  $<lore> &7($<fulfilled>&7)"
+        'false': "  $<lore> &7($<unfulfilled>&7)"
+      # The enchantments that are displayed in the ingredients
+      enchantments:
+        enabled: true
+        'true': "  &8• &7Enchant &9$<enchantment> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Enchant &9$<enchantment> &7(&c$<required>&7) &7($<unfulfilled>&7)"
+      # The flags that are displayed in the ingredients
+      flags:
+        enabled: false
+        'true': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Flag &9$<flag> &7(&a$<required>&7) &7($<unfulfilled>&7)"
+      # The unbreakable that is displayed in the ingredients
+      unbreakable:
+        enabled: false
+        'true': "  &8• &7Unbreakable &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Unbreakable &7(&c$<required>&7) &7($<unfulfilled>&7)"
+      # The durability that is displayed in the ingredients (only if existent)
+      durability:
+        enabled: true
+        'true': "  &8• &7Durability &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Durability &7(&a$<required>&7) &7($<unfulfilled>&7)"
+      # The custom model data that is displayed in the ingredients
+      customModelData:
+        enabled: false
+        'true': "  &8• &7Custom Model &7(&a$<required>&7) &7($<fulfilled>&7)"
+        'false': "  &8• &7Custom Model &7(&a$<required>&7) &7($<unfulfilled>&7)"
+  # The money that is displayed in the crafting requirements
+  money:
+    'true': "&6- &eMoney: &7(&a$$<money>&8/&7$$<required>&7)"
+    'false': "&6- &eMoney: &7(&c$$<money>&8/&7$$<required>&7)"
+  # The experience that is displayed in the crafting requirements
+  exp:
+    'true': "&6- &eExperience: &7(&a$<exp>&8/&7$<required>&7) &eexp."
+    'false': "&6- &eExperience: &7(&c$<exp>&8/&7$<required>&7) &eexp."
+  # The mastery that is displayed in the crafting requirements
+  canJoin:
+    'true': "&aYou can join this profession."
+    'false': "&cYou can't join this profession."
+  # The message that is displayed when the player needs a specific rank to craft the item
+  rank:
+    epic: "&cEpic rank needed to craft this item!"

@@ -6,7 +6,7 @@ name: armor_smithing
 
 # Visuals for the professions in the gui
 icon: IRON_CHESTPLATE
-inventoryName: Armor Smithing
+inventoryName: '&9Armor Smithing'
 
 # Rather you want to enable categories for this profession
 useCategories: false

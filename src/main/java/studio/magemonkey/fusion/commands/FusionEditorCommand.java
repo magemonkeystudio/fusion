@@ -29,13 +29,13 @@ import studio.magemonkey.codex.items.exception.MissingProviderException;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fabled.Fabled;
-import studio.magemonkey.fusion.Category;
-import studio.magemonkey.fusion.Recipe;
-import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
@@ -360,11 +360,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             return true;
         } catch (IllegalArgumentException e) {
             // If the is a custom item from divinity without "DIVINITY_" prefix, return true
-            try {
-                return CodexEngine.get().getItemManager().getItemType(item) != null;
-            } catch (MissingItemException | MissingProviderException e1) {
-                return false;
-            }
+            return CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(item).getItemStack()) != null;
         }
     }
 
@@ -461,12 +457,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
             return;
         }
-        try {
-            professionEditor.getTable().setIconItem(CodexEngine.get().getItemManager().getItemType(icon));
-        } catch (CodexItemException e) {
-            MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", icon));
-            return;
-        }
+        professionEditor.getTable().setIconItem(CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(icon).getItemStack()));
         MessageUtil.sendMessage("editor.professionIconChanged", player, new MessageData("oldIcon", oldIcon), new MessageData("newIcon", icon));
         professionEditor.reload(true);
     }
@@ -496,14 +487,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             professionEditor.getTable().getCategories().get(categoryName).setName(categoryName);
             ItemType oldIcon = professionEditor.getTable().getCategories().get(categoryName).getIconItem();
-            try {
-                professionEditor.getTable().getCategories().get(categoryName).setIconItem(CodexEngine.get().getItemManager().getItemType(categoryIcon));
-                MessageUtil.sendMessage("editor.categoryEdited", player, new MessageData("category", categoryName), new MessageData("profession", professionEditor.getTable().getName()));
-            } catch (CodexItemException e) {
-                professionEditor.getTable().getCategories().get(categoryName).setIconItem(oldIcon);
-                MessageUtil.sendMessage("editor.invalidItem", player, new MessageData("item", categoryIcon));
-                return;
-            }
+            professionEditor.getTable().getCategories().get(categoryName).setIconItem(CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(categoryIcon).getItemStack()));
+            MessageUtil.sendMessage("editor.categoryEdited", player, new MessageData("category", categoryName), new MessageData("profession", professionEditor.getTable().getName()));
         }
         professionEditor.getCategoryEditor().reload(true);
     }
@@ -832,7 +817,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             recipeSettings.put("conditions", Map.of("professionLevel", 0, "mastery", false));
             recipeSettings.put("costs", Map.of("items", List.of("STONE:3"), "money", 0.0, "exp", 0));
 
-            professionEditor.getTable().getRecipes().put(recipeName, new Recipe(recipeSettings));
+            professionEditor.getTable().getRecipes().put(recipeName, new Recipe(professionEditor.getTable(), recipeSettings));
             MessageUtil.sendMessage("editor.recipeAdded", player, new MessageData("recipe", recipeName), new MessageData("result", itemName));
             professionEditor.getRecipeEditor().reload(true);
         } catch (NumberFormatException e) {

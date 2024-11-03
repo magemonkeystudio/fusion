@@ -7,12 +7,12 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.fusion.CraftingTable;
 import studio.magemonkey.fusion.Fusion;
-import studio.magemonkey.fusion.Recipe;
-import studio.magemonkey.fusion.RecipeItem;
 import studio.magemonkey.fusion.cfg.YamlParser;
-import studio.magemonkey.fusion.cfg.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.professions.ProfessionConditions;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
 
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class RecipeEditorCfg {
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("recipe.result"),
                             (result != null && !result.getType().isAir()) && result.hasItemMeta() ? result.getItemMeta().getDisplayName() : result.getType().name()))
-                    .replace(MessageUtil.getReplacement("conditionsrank"), String.valueOf(recipe.getConditions().getRank()))
+                    .replace(MessageUtil.getReplacement("conditions.rank"), recipe.getConditions().getRank() == null ? getUnsetFormat() : recipe.getConditions().getRank())
             );
         }
 
@@ -186,10 +186,16 @@ public class RecipeEditorCfg {
                     .replace(MessageUtil.getReplacement("costs.money"), String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.experience"), String.valueOf(conditions.getExpCost()))
                     .replace(MessageUtil.getReplacement("craftingTime"), String.valueOf(recipe.getCraftingTime()))
+                    .replace(MessageUtil.getReplacement("craftingLimit"), String.valueOf(recipe.getCraftingLimit()))
+                    .replace(MessageUtil.getReplacement("craftingLimitCooldown"), String.valueOf(recipe.getCraftingLimitCooldown()))
                     .replace(MessageUtil.getReplacement("conditions.professionLevel"), String.valueOf(recipe.getConditions().getProfessionLevel()))
                     .replace(MessageUtil.getReplacement("conditions.mastery"), String.valueOf(recipe.getConditions().isMastery()))
-                    .replace(MessageUtil.getReplacement("conditionsrank"), String.valueOf(recipe.getConditions().getRank()))
-                    .replace(MessageUtil.getReplacement("category"), recipe.getCategory() == null ? "master" : recipe.getCategory())));
+                    .replace(MessageUtil.getReplacement("conditions.rank"), String.valueOf(recipe.getConditions().getRank()))
+                    .replace(MessageUtil.getReplacement("category"), recipe.getCategory() == null ? "master" : recipe.getCategory()))
+                    .replace(MessageUtil.getReplacement("hidings.noPermission"), recipe.getHideNoPermission() == null ? getUnsetFormat() : String.valueOf(recipe.getHideNoPermission().booleanValue()))
+                    .replace(MessageUtil.getReplacement("hidings.noRank"), recipe.getHideNoRank() == null ? getUnsetFormat() : String.valueOf(recipe.getHideNoRank().booleanValue()))
+                    .replace(MessageUtil.getReplacement("hidings.recipeLimitReached"), recipe.getHideRecipeLimitReached() == null ? getUnsetFormat() : String.valueOf(recipe.getHideRecipeLimitReached().booleanValue()))
+            );
         }
         Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");
         List<ItemFlag> flags = config.getItemFlags("subEditor.icons." + icon + ".flags");
@@ -209,5 +215,9 @@ public class RecipeEditorCfg {
         return config.getString("subEditor.icons.conditions.conditionFormatting." + condition, key + ": " + value)
                 .replace(MessageUtil.getReplacement("condition.name"), key)
                 .replace(MessageUtil.getReplacement("condition.amount"), String.valueOf(value));
+    }
+
+    private String getUnsetFormat() {
+        return config.getString("unset", "&anot set");
     }
 }

@@ -1,0 +1,46 @@
+ItemGenerator:
+  Cache:
+    # How long to cache the item for in minutes without further usage. When someone uses the item, the cache will be kept alive for another 15 minutes.
+    MinutesUntilExpire: 15
+  # This is the icon-template of items from the item generator. If the range is 0, it will be automatically skipped.
+  RecipeIcon:
+    material: $<material>
+    name: $<name>
+    lore:
+    - $<lore>
+    - '&8---------------------'
+    - $<levels>
+    - $<enchants>
+    - $<damage_types>
+    - $<defense_types>
+    - $<item_stats>
+    - $<gem_sockets>
+    - $<essence_sockets>
+    - $<rune_sockets>
+    - $<fabled_attributes>
+    - $<skills>
+    - '&8---------------------'
+    LoreFormatting:
+      single:
+        levels: "&7Level: &a$<amount>"
+        enchants: "&7Enchantments: &a$<amount>"
+        damage_types: "&7Damage Types: &a$<amount>"
+        defense_types: "&7Defense Types: &a$<amount>"
+        item_stats: "&7Item Stats: &a$<amount>"
+        gem_sockets: "&7Gem Sockets: &a$<amount>"
+        essence_sockets: "&7Essence Sockets: &a$<amount>"
+        rune_sockets: "&7Rune Sockets: &a$<amount>"
+        fabled_attributes: "&7Fabled Attributes: &a$<amount>"
+        skills: "&7Skills: $<amount>"
+      range:
+        levels: "&7Level: &a$<min>-$<max>"
+        enchants: "&7Enchantments: &a$<min>-$<max>"
+        damage_types: "&7Damage Types: &a$<min>-$<max>"
+        defense_types: "&7Defense Types: &a$<min>-$<max>"
+        item_stats: "&7Item Stats: &a$<min>-$<max>"
+        gem_sockets: "&7Gem Sockets: &a$<min>-$<max>"
+        essence_sockets: "&7Essence Sockets: &a$<min>-$<max>"
+        rune_sockets: "&7Rune Sockets: &a$<min>-$<max>"
+        fabled_attributes: "&7Fabled Attributes: &a$<min>-$<max>"
+        skills: "&7Skills: &a$<min>-$<max>"
+
