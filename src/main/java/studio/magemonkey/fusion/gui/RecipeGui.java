@@ -30,7 +30,6 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.api.Replacer;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -53,44 +52,44 @@ import java.util.*;
 @Getter
 public class RecipeGui implements Listener {
 
-    private final Player player;
-    private final CraftingTable table;
+    private final   Player                             player;
+    private final   CraftingTable                      table;
     @Getter
-    protected final String name;
+    protected final String                             name;
     @Getter
-    private final String inventoryName;
-    private final Category category;
-    private InventoryPattern pattern;
-    private final HashMap<Integer, CalculatedRecipe> recipes;
+    private final   String                             inventoryName;
+    private final   Category                           category;
+    private         InventoryPattern                   pattern;
+    private final   HashMap<Integer, CalculatedRecipe> recipes;
 
     private int page = 0;
     private int nextPage;
     private int prevPage;
 
     /* Queue Crafting Mode */
-    private int queuePage = 0;
-    private int prevQueuePage;
-    private int nextQueuePage;
+    private int           queuePage = 0;
+    private int           prevQueuePage;
+    private int           nextQueuePage;
     private CraftingQueue queue;
 
     /* Manual Crafting Mode */
-    private BukkitTask craftingTask;
-    private BukkitTask barTask;
-    private BossBar bar;
-    private final Collection<ItemStack> refund = new ArrayList<>();
-    private ItemStack previousCursor;
-    private boolean craftingSuccess = true;
-    private Recipe craftingRecipe = null;
+    private       BukkitTask            craftingTask;
+    private       BukkitTask            barTask;
+    private       BossBar               bar;
+    private final Collection<ItemStack> refund          = new ArrayList<>();
+    private       ItemStack             previousCursor;
+    private       boolean               craftingSuccess = true;
+    private       Recipe                craftingRecipe  = null;
 
 
     /* Inventory Slot Handling */
     @Getter
     @Setter
-    private Inventory inventory;
-    private Slot[] slots;
-    private final ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    private       Inventory          inventory;
+    private       Slot[]             slots;
+    private final ArrayList<Integer> resultSlots  = new ArrayList<>(20);
     private final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
-    private final ArrayList<Integer> queuedSlots = new ArrayList<>(20);
+    private final ArrayList<Integer> queuedSlots  = new ArrayList<>(20);
 
     public RecipeGui(Player player, CraftingTable table, Category category) {
         this.player = player;
@@ -114,8 +113,8 @@ public class RecipeGui implements Listener {
         this.resultSlots.clear();
         this.queuedSlots.clear();
         this.slots = new Slot[pattern.getPattern().length * 9];
-        int k = -1;
-        int prevPage = -1, nextPage = -1;
+        int k             = -1;
+        int prevPage      = -1, nextPage = -1;
         int prevQueuePage = -1, nextQueuePage = -1;
         for (String row : this.pattern.getPattern()) {
             for (char c : row.toCharArray()) {
@@ -159,26 +158,26 @@ public class RecipeGui implements Listener {
     }
 
     public void updateBlockedSlots(MessageData[] data) {
-        int totalItems = category.getRecipes().size();
+        int totalItems       = category.getRecipes().size();
         int queuedTotalItems = queue != null ? queue.getQueue().size() : 0;
-        int fullPages = totalItems / resultSlots.size();
-        int rest = totalItems % resultSlots.size();
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int fullPages        = totalItems / resultSlots.size();
+        int rest             = totalItems % resultSlots.size();
+        int pages            = (rest == 0) ? fullPages : (fullPages + 1);
 
         boolean includeBack = category.hasPrevious();
-        int queuedPages = -1;
+        int     queuedPages = -1;
 
         if (!queuedSlots.isEmpty()) {
             int queuedFullPages = queuedTotalItems / queuedSlots.size();
-            int queuedRest = queuedTotalItems % queuedSlots.size();
+            int queuedRest      = queuedTotalItems % queuedSlots.size();
             queuedPages = (queuedRest == 0) ? queuedFullPages : (queuedFullPages + 1);
         }
 
-        int k = -1;
+        int                           k     = -1;
         HashMap<Character, ItemStack> items = pattern.getItems();
 
         ArrayList<Integer> leaveBlank = new ArrayList<>();
-        ArrayList<Integer> fill = new ArrayList<>();
+        ArrayList<Integer> fill       = new ArrayList<>();
         for (String row : pattern.getPattern()) {
             for (char c : row.toCharArray()) {
                 k++;
@@ -234,17 +233,17 @@ public class RecipeGui implements Listener {
             setPattern();
 
             /* Default setup */
-            ItemStack fill = table.getFillItem();
+            ItemStack          fill       = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
             allRecipes.removeIf(r -> r.isHidden(player));
-            int pageSize = resultSlots.size();
+            int pageSize       = resultSlots.size();
             int allRecipeCount = allRecipes.size();
-            int i = 0;
-            int page = this.page;
+            int i              = 0;
+            int page           = this.page;
 
             int fullPages = allRecipeCount / pageSize;
-            int rest = allRecipeCount % pageSize;
-            int pages = (rest == 0) ? fullPages : (fullPages + 1);
+            int rest      = allRecipeCount % pageSize;
+            int pages     = (rest == 0) ? fullPages : (fullPages + 1);
             if (player.isOnline() && page >= pages) {
                 if (page > 0) {
                     this.page = pages - 1;
@@ -258,7 +257,8 @@ public class RecipeGui implements Listener {
             }
 
             Collection<ItemStack> playerItems = PlayerUtil.getPlayerItems(this.player);
-            CalculatedRecipe[] calculatedRecipes = new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
+            CalculatedRecipe[] calculatedRecipes =
+                    new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
             Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
 
             Integer[] slots = resultSlots.toArray(new Integer[0]);
@@ -269,17 +269,17 @@ public class RecipeGui implements Listener {
             /* Additionally, when crafting_queue: true */
             if (Cfg.craftingQueue) {
                 this.queue.getQueuedItems().clear();
-                Collection<QueueItem> allQueuedItems = queue.getQueue();
-                int queueAllItemsCount = allQueuedItems.size();
+                Collection<QueueItem> allQueuedItems     = queue.getQueue();
+                int                   queueAllItemsCount = allQueuedItems.size();
                 if (!allQueuedItems.isEmpty()) {
                     int queuePageSize = queuedSlots.size();
                     if (queuePageSize > 0) {
-                        int j = 0;
+                        int j         = 0;
                         int queuePage = this.queuePage;
 
                         int queueFullPages = queueAllItemsCount / queuePageSize;
-                        int queueRest = queueAllItemsCount % queuePageSize;
-                        int queuePages = (queueRest == 0) ? queueFullPages : (queueFullPages + 1);
+                        int queueRest      = queueAllItemsCount % queuePageSize;
+                        int queuePages     = (queueRest == 0) ? queueFullPages : (queueFullPages + 1);
                         if (queuePage >= queuePages) {
                             if (queuePage > 0)
                                 this.queuePage = queuePages - 1;
@@ -287,15 +287,15 @@ public class RecipeGui implements Listener {
                             return;
                         }
 
-                        QueueItem[] queuedItems = new QueueItem[queuePageSize];
+                        QueueItem[] queuedItems        = new QueueItem[queuePageSize];
                         QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
-                        Integer[] queuedSlots = this.queuedSlots.toArray(new Integer[0]);
+                        Integer[]   queuedSlots        = this.queuedSlots.toArray(new Integer[0]);
 
                         for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
                              (k < allQueueItemsArray.length) && (j < e);
                              k++, j++) {
                             QueueItem queueItem = allQueueItemsArray[k];
-                            int slot = queuedSlots[j];
+                            int       slot      = queuedSlots[j];
                             this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
                             this.queue.getQueuedItems().get(slot).updateIcon();
 
@@ -320,9 +320,10 @@ public class RecipeGui implements Listener {
                  (k < allRecipesArray.length) && (i < e);
                  k++, i++) {
                 Recipe recipe = allRecipesArray[k];
-                int slot = slots[i];
+                int    slot   = slots[i];
                 try {
-                    CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
+                    CalculatedRecipe calculatedRecipe =
+                            CalculatedRecipe.create(recipe, playerItems, this.player, table);
                     this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                     this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
                 } catch (InvalidPatternItemException ignored) {
@@ -364,14 +365,14 @@ public class RecipeGui implements Listener {
             this.reloadRecipesTask();
             return false;
         }
-        Collection<Recipe> allRecipes = table.getRecipes().values();
-        int pageSize = resultSlots.size();
-        int allRecipeCount = allRecipes.size();
-        int page = this.page;
+        Collection<Recipe> allRecipes     = table.getRecipes().values();
+        int                pageSize       = resultSlots.size();
+        int                allRecipeCount = allRecipes.size();
+        int                page           = this.page;
 
         int fullPages = allRecipeCount / pageSize;
-        int rest = allRecipeCount % pageSize;
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = allRecipeCount % pageSize;
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
         if (page >= pages) {
             this.page = pages;
             this.reloadRecipesTask();
@@ -405,13 +406,13 @@ public class RecipeGui implements Listener {
             return false;
         }
         Collection<QueueItem> allQueuedItems = queue.getQueue();
-        int pageSize = queuedSlots.size();
-        int count = allQueuedItems.size();
-        int page = this.queuePage;
+        int                   pageSize       = queuedSlots.size();
+        int                   count          = allQueuedItems.size();
+        int                   page           = this.queuePage;
 
         int fullPages = count / pageSize;
-        int rest = count % pageSize;
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = count % pageSize;
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
         if (page >= pages) {
             this.queuePage = pages;
             this.reloadRecipesTask();
@@ -465,7 +466,7 @@ public class RecipeGui implements Listener {
         Recipe recipe = calculatedRecipe.getRecipe();
         if (calculatedRecipe.getRecipe().getConditions().isMastery() && !PlayerLoader.getPlayer(player)
                 .hasMastered(table.getName())) {
-            MessageUtil.sendMessage("fusion.error.noMastery",
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noMastery",
                     player,
                     new MessageData("craftingTable", ProfessionsCfg.getTable(table.getName())));
             return false;
@@ -479,15 +480,21 @@ public class RecipeGui implements Listener {
             return false;
         }
         if (LevelFunction.getLevel(player, table) < recipe.getConditions().getProfessionLevel()) {
-            MessageUtil.sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
             return false;
         }
         if (ExperienceManager.getTotalExperience(this.player) < recipe.getConditions().getExpCost()) {
-            MessageUtil.sendMessage("fusion.error.noXP", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noXP", player, new MessageData("recipe", recipe));
             return false;
         }
         if (!CodexEngine.get().getVault().canPay(this.player, recipe.getConditions().getMoneyCost())) {
-            MessageUtil.sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
             return false;
         }
         return true;
@@ -498,7 +505,7 @@ public class RecipeGui implements Listener {
             return false;
         }
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
-        Recipe recipe = calculatedRecipe.getRecipe();
+        Recipe           recipe           = calculatedRecipe.getRecipe();
         if (craftingRecipe != null && craftingRecipe.equals(recipe)) {
             cancel(true);
             return false;
@@ -508,7 +515,7 @@ public class RecipeGui implements Listener {
         if (!canCraft(calculatedRecipe, slot)) return false;
 
         RecipeItem recipeResult = recipe.getResults().getResultItem();
-        ItemStack resultItem = recipeResult.getItemStack();
+        ItemStack  resultItem   = recipeResult.getItemStack();
 
         //Add "Crafted by"
         if (player.hasPermission("fusion.craftedby." + recipe.getName())) {
@@ -532,8 +539,8 @@ public class RecipeGui implements Listener {
         }
 
         Collection<ItemStack> itemsToTake = recipe.getItemsToTake();
-        Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
-        PlayerInventory inventory = this.player.getInventory();
+        Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
+        PlayerInventory       inventory   = this.player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
             ItemStack toTake = iterator.next();
@@ -572,7 +579,9 @@ public class RecipeGui implements Listener {
         refund.addAll(taken);
 
         if (!itemsToTake.isEmpty()) {
-            MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
             cancel(true);
             return false;
         }
@@ -632,7 +641,9 @@ public class RecipeGui implements Listener {
 
                     //Experience
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices()
+                                .getProfessionService()
+                                .giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());
@@ -643,7 +654,7 @@ public class RecipeGui implements Listener {
                         reloadRecipesTask();
                         boolean success = craft(slot, addToCursor); //Call this method again recursively
                         if (!success)
-                            MessageUtil.sendMessage("fusion.autoCancelled", player);
+                            CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
                     }
                 } else {
                     cancel(true);
@@ -710,7 +721,7 @@ public class RecipeGui implements Listener {
             }
 
             if (!craftingSuccess && PlayerLoader.getPlayer(player).isAutoCrafting()) {
-                MessageUtil.sendMessage("fusion.autoCancelled", player);
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
             }
 
             if (player.getOpenInventory().getCursor() != null
@@ -729,8 +740,8 @@ public class RecipeGui implements Listener {
                 return;
 
 
-            PlayerInventory inventory = player.getInventory();
-            Collection<ItemStack> notAdded = inventory.addItem(this.refund.toArray(new ItemStack[0])).values();
+            PlayerInventory       inventory = player.getInventory();
+            Collection<ItemStack> notAdded  = inventory.addItem(this.refund.toArray(new ItemStack[0])).values();
             if (!notAdded.isEmpty()) {
                 for (ItemStack item : notAdded) {
                     player.getLocation().getWorld().dropItemNaturally(player.getLocation(), item);

@@ -20,7 +20,7 @@ import java.util.*;
 
 public class TabCacher {
 
-    public static UUID GlobalUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public static       UUID                 GlobalUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     public static final Map<UUID, TabCacher> PlayerTabs = new TreeMap<>();
 
     public final Map<String, List<String>> CachedTabs = new TreeMap<>();
@@ -57,7 +57,10 @@ public class TabCacher {
                     }
 
                     if (Bukkit.getPluginManager().isPluginEnabled("Divinity")) {
-                        DivinityAPI.getModuleManager().getCustomItemsManager().getItems().forEach((k) -> entries.add("DIVINITY_" + k.getId().toLowerCase()));
+                        DivinityAPI.getModuleManager()
+                                .getCustomItemsManager()
+                                .getItems()
+                                .forEach((k) -> entries.add("DIVINITY_" + k.getId().toLowerCase()));
                     }
                     break;
                 case "professions":
@@ -86,7 +89,8 @@ public class TabCacher {
                 case "aura_mana_abilities":
                 case "aura_skills":
                 case "aura_stats":
-                    if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager().isPluginEnabled("AureliumSkills")) {
+                    if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager()
+                            .isPluginEnabled("AureliumSkills")) {
                         switch (key) {
                             case "aura_abilities":
                                 for (Ability ability : AuraSkillsApi.get().getGlobalRegistry().getAbilities())
@@ -124,7 +128,10 @@ public class TabCacher {
         List<String> entries = new ArrayList<>();
         if (isNotCached(uuid, key)) {
             if (Bukkit.getPluginManager().isPluginEnabled("Divinity")) {
-                DivinityAPI.getModuleManager().getCustomItemsManager().getItems().forEach((k) -> entries.add("DIVINITY_" + k.getId().toLowerCase()));
+                DivinityAPI.getModuleManager()
+                        .getCustomItemsManager()
+                        .getItems()
+                        .forEach((k) -> entries.add("DIVINITY_" + k.getId().toLowerCase()));
             }
             cache(uuid, key, entries);
         }
@@ -149,7 +156,8 @@ public class TabCacher {
                 entries.add("mcmmo");
             if (Bukkit.getPluginManager().isPluginEnabled("Jobs"))
                 entries.add("jobs");
-            if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager().isPluginEnabled("AureliumSkills")) {
+            if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills") || Bukkit.getPluginManager()
+                    .isPluginEnabled("AureliumSkills")) {
                 entries.add("aura_abilities");
                 entries.add("aura_mana_abilities");
                 entries.add("aura_skills");

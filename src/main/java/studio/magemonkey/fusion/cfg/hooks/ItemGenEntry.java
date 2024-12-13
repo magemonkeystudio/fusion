@@ -1,8 +1,7 @@
 package studio.magemonkey.fusion.cfg.hooks;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import studio.magemonkey.codex.items.ItemType;
+import studio.magemonkey.codex.api.items.ItemType;
 import studio.magemonkey.divinity.modules.list.itemgenerator.ItemGeneratorManager;
 import studio.magemonkey.divinity.modules.list.itemgenerator.api.IAttributeGenerator;
 import studio.magemonkey.divinity.stats.items.ItemStats;
@@ -28,18 +27,18 @@ public class ItemGenEntry {
     private final int minEnchantments;
     private final int maxEnchantments;
 
-    private int minDamageTypes = -1;
-    private int maxDamageTypes = -1;
-    private int minDefenseTypes = -1;
-    private int maxDefenseTypes = -1;
-    private int minItemStats = -1;
-    private int maxItemStats = -1;
-    private int minGems = -1;
-    private int maxGems = -1;
-    private int minEssences = -1;
-    private int maxEssences = -1;
-    private int minRunes = -1;
-    private int maxRunes = -1;
+    private int minDamageTypes      = -1;
+    private int maxDamageTypes      = -1;
+    private int minDefenseTypes     = -1;
+    private int maxDefenseTypes     = -1;
+    private int minItemStats        = -1;
+    private int maxItemStats        = -1;
+    private int minGems             = -1;
+    private int maxGems             = -1;
+    private int minEssences         = -1;
+    private int maxEssences         = -1;
+    private int minRunes            = -1;
+    private int maxRunes            = -1;
     private int minFabledAttributes = -1;
     private int maxFabledAttributes = -1;
 
@@ -47,7 +46,7 @@ public class ItemGenEntry {
     private final int maxSkill;
 
     private final Collection<ItemType> materials;
-    private final Tier tier;
+    private final Tier                 tier;
 
 
     public ItemGenEntry(ItemGeneratorManager.GeneratorItem entry) {
@@ -99,7 +98,7 @@ public class ItemGenEntry {
 
     public Map<ItemType, Set<String>> loadNames(ItemType type, int level) {
         Map<ItemType, Set<String>> names = new LinkedHashMap<>();
-        if(type == null) {
+        if (type == null) {
             for (ItemType material : materials) {
                 names.put(material, DivinityUT.getAllCombinations(reference, material.create().getType(), tier, level));
             }

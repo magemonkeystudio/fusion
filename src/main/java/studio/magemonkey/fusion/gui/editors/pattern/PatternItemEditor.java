@@ -25,13 +25,13 @@ import java.util.ArrayList;
 public class PatternItemEditor extends Editor implements Listener {
 
     // Globally used variabled
-    private final Player player;
+    private final Player           player;
     private final InventoryPattern pattern;
-    private final char c;
+    private final char             c;
 
     // Profession only
     private final CraftingTable table;
-    private final boolean isCategoryPattern;
+    private final boolean       isCategoryPattern;
 
     // Browse only
     private final BrowseEditor browseEditor;
@@ -39,7 +39,11 @@ public class PatternItemEditor extends Editor implements Listener {
     @Getter
     private ItemBuilder builder;
 
-    public PatternItemEditor(Editor parentEditor, Player player, CraftingTable table, char c, boolean isCategoryPattern) {
+    public PatternItemEditor(Editor parentEditor,
+                             Player player,
+                             CraftingTable table,
+                             char c,
+                             boolean isCategoryPattern) {
         super(parentEditor, EditorRegistry.getPatternItemEditorCfg().getSubTitle(c), 45);
         this.player = player;
         this.table = table;
@@ -89,12 +93,13 @@ public class PatternItemEditor extends Editor implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Name, "/fusion-editor " + builder.getName());
+            case 10 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Pattern_Edit_Name,
+                    "/fusion-editor " + builder.getName());
             case 11 -> {
                 if (event.isLeftClick()) {
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Lore, "/fusion-editor <lore>");
@@ -106,8 +111,9 @@ public class PatternItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 13 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Edit_Pattern, "/fusion-editor " + builder.getMaterial().name() + " " + builder.getAmount());
+            case 13 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Pattern_Edit_Pattern,
+                    "/fusion-editor " + builder.getMaterial().name() + " " + builder.getAmount());
             case 15 -> {
                 if (!builder.getEnchants().isEmpty()) {
                     builder.clearEnchants();
@@ -120,12 +126,15 @@ public class PatternItemEditor extends Editor implements Listener {
             }
             case 16 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Pattern_Add_Commands,
+                            "/fusion-editor <caster> <delay> <command without />");
                 } else {
                     if (pattern.getCommands(c).isEmpty()) {
                         return;
                     }
-                    DelayedCommand command = new ArrayList<>(pattern.getCommands(c)).get(pattern.getCommands(c).size() - 1);
+                    DelayedCommand command =
+                            new ArrayList<>(pattern.getCommands(c)).get(pattern.getCommands(c).size() - 1);
                     pattern.getCommands(c).remove(command);
                     hasChanges = true;
                 }
@@ -153,13 +162,16 @@ public class PatternItemEditor extends Editor implements Listener {
             }
             case 32 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Pattern_Add_Enchants, "/fusion-editor <enchantment> [level]");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Pattern_Add_Enchants,
+                            "/fusion-editor <enchantment> [level]");
                 } else if (event.isRightClick()) {
                     if (builder.getEnchants().isEmpty()) {
                         return;
                     }
                     // Get last entry and remove it
-                    Enchantment lastEnchantment = new ArrayList<>(builder.getEnchants().keySet()).get(builder.getEnchants().size() - 1);
+                    Enchantment lastEnchantment =
+                            new ArrayList<>(builder.getEnchants().keySet()).get(builder.getEnchants().size() - 1);
                     builder.unEnchant(lastEnchantment);
                     hasChanges = true;
                 }

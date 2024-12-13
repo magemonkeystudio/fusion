@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
@@ -62,12 +62,13 @@ public class RecipeItemEditor extends Editor implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 4 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Name, "/fusion-editor <newName>");
+            case 4 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Profession_Recipe_Edit_Name,
+                    "/fusion-editor <newName>");
             case 10 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -101,7 +102,9 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 14 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_ResultItem, "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
+            case 14 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Profession_Recipe_Edit_ResultItem,
+                    "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
             case 15 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -125,13 +128,13 @@ public class RecipeItemEditor extends Editor implements Listener {
                 }
             }
             case 19 -> {
-                if(event.isLeftClick()) {
+                if (event.isLeftClick()) {
                     if (recipe.getHideNoPermission() == null) {
                         recipe.setHideNoPermission(true);
                     } else {
                         recipe.setHideNoPermission(!recipe.getHideNoPermission());
                     }
-                } else if(event.isRightClick()) {
+                } else if (event.isRightClick()) {
                     recipe.setHideNoPermission(null);
                 }
                 hasChanges = true;
@@ -162,7 +165,9 @@ public class RecipeItemEditor extends Editor implements Listener {
             }
             case 24 -> {
                 if (event.isLeftClick())
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Add_Commands,
+                            "/fusion-editor <caster> <delay> <command without />");
                 else if (event.isRightClick()) {
                     if (recipe.getResults().getCommands().isEmpty())
                         return;
@@ -172,15 +177,21 @@ public class RecipeItemEditor extends Editor implements Listener {
             }
             case 37 -> {
                 if (event.isLeftClick())
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Add_Ingredients,
+                            "/fusion-editor <ingredient> <amount>");
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getRequiredItems().size() == 1) {
-                        MessageUtil.sendMessage("editor.needMinimumOne", player);
-                        FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Ingredients, "/fusion-editor <ingredient> <amount>");
+                        CodexEngine.get().getMessageUtil().sendMessage("editor.needMinimumOne", player);
+                        FusionEditorCommand.suggestUsage(player,
+                                EditorCriteria.Profession_Recipe_Edit_Ingredients,
+                                "/fusion-editor <ingredient> <amount>");
                         return;
                     }
                     hasChanges = true;
-                    recipe.getConditions().getRequiredItems().remove(recipe.getConditions().getRequiredItems().size() - 1);
+                    recipe.getConditions()
+                            .getRequiredItems()
+                            .remove(recipe.getConditions().getRequiredItems().size() - 1);
                 }
             }
             case 38 -> {
@@ -212,7 +223,8 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 } else if (event.isRightClick()) {
                     if (recipe.getConditions().getProfessionLevel() == 0) return;
-                    recipe.getConditions().setProfessionLevel(Math.max(recipe.getConditions().getProfessionLevel() - amount, 0));
+                    recipe.getConditions()
+                            .setProfessionLevel(Math.max(recipe.getConditions().getProfessionLevel() - amount, 0));
                     hasChanges = true;
                 }
             }
@@ -222,7 +234,9 @@ public class RecipeItemEditor extends Editor implements Listener {
             }
             case 42 -> {
                 if (event.isLeftClick())
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Edit_Rank, "/fusion-editor <rank>");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Edit_Rank,
+                            "/fusion-editor <rank>");
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getRank() == null)
                         return;
@@ -232,7 +246,9 @@ public class RecipeItemEditor extends Editor implements Listener {
             }
             case 43 -> {
                 if (event.isLeftClick())
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Add_Conditions,
+                            "/fusion-editor <conditionKey> <conditionValue> <level>");
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getFullConditions().isEmpty())
                         return;
@@ -241,11 +257,11 @@ public class RecipeItemEditor extends Editor implements Listener {
                 }
             }
             case 49 -> {
-                List<String> categories = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
-                String currentCategory = recipe.getCategory();
-                int currentIndex = categories.indexOf(currentCategory);
+                List<String> categories      = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
+                String       currentCategory = recipe.getCategory();
+                int          currentIndex    = categories.indexOf(currentCategory);
                 if (event.isLeftClick()) {
-                    if(currentIndex == categories.size() - 1) {
+                    if (currentIndex == categories.size() - 1) {
                         recipe.setCategory(categories.get(0));
                     } else {
                         recipe.setCategory(categories.get(currentIndex + 1));

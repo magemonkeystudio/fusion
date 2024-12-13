@@ -5,8 +5,9 @@ import java.util.Map;
 
 public class CharacterIncrementer {
 
-    private static final String CUSTOM_ORDER = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final Map<Character, Character> nextCharMap = new HashMap<>();
+    private static final String                    CUSTOM_ORDER =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final Map<Character, Character> nextCharMap  = new HashMap<>();
 
     static {
         for (int i = 0; i < CUSTOM_ORDER.length() - 1; i++) {

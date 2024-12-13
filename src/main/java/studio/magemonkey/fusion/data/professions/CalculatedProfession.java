@@ -19,7 +19,7 @@ import java.util.*;
 public class CalculatedProfession {
 
     private final ProfessionConditions conditions;
-    private final ItemStack icon;
+    private final ItemStack            icon;
 
     private final boolean canJoin;
 
@@ -34,9 +34,9 @@ public class CalculatedProfession {
                                               Player player,
                                               CraftingTable craftingTable) throws InvalidPatternItemException {
         try {
-            StringBuilder lore = new StringBuilder(512);
-            ItemStack defaultIcon = craftingTable.getIconItem().create();
-            List<String> resultLore = defaultIcon.getItemMeta().getLore();
+            StringBuilder lore        = new StringBuilder(512);
+            ItemStack     defaultIcon = craftingTable.getIconItem().create();
+            List<String>  resultLore  = defaultIcon.getItemMeta().getLore();
 
             if ((resultLore != null) && !resultLore.isEmpty()) {
                 resultLore.forEach((str) -> lore.append(str).append('\n'));
@@ -66,7 +66,9 @@ public class CalculatedProfession {
                 if (!CodexEngine.get().getVault().canPay(player, conditions.getMoneyCost())) {
                     canJoin = false;
                 }
-                moneyLine = CraftingRequirementsCfg.getMoney("recipes", CodexEngine.get().getVault().getBalance(player), conditions.getMoneyCost());
+                moneyLine = CraftingRequirementsCfg.getMoney("recipes",
+                        CodexEngine.get().getVault().getBalance(player),
+                        conditions.getMoneyCost());
             }
 
             String expLine = null;
@@ -74,7 +76,9 @@ public class CalculatedProfession {
                 if (ExperienceManager.getTotalExperience(player) < conditions.getExpCost()) {
                     canJoin = false;
                 }
-                expLine = CraftingRequirementsCfg.getExp("recipes", ExperienceManager.getTotalExperience(player), conditions.getExpCost());
+                expLine = CraftingRequirementsCfg.getExp("recipes",
+                        ExperienceManager.getTotalExperience(player),
+                        conditions.getExpCost());
             }
 
             List<Map.Entry<Boolean, String>> conditionLines = conditions.getConditionLines(player);
@@ -87,16 +91,16 @@ public class CalculatedProfession {
 
             List<Pair<ItemStack, Integer>> eqItems = Recipe.getItems(items);
 
-            Collection<RecipeItem> localPattern = new HashSet<>(conditions.getRequiredItems());
-            boolean isExtensionEnabled = CraftingRequirementsCfg.hasExtensionEnabled("professions");
-            boolean isVanillaOnly = CraftingRequirementsCfg.hasOnlyVanillaExtension("professions");
+            Collection<RecipeItem> localPattern       = new HashSet<>(conditions.getRequiredItems());
+            boolean                isExtensionEnabled = CraftingRequirementsCfg.hasExtensionEnabled("professions");
+            boolean                isVanillaOnly      = CraftingRequirementsCfg.hasOnlyVanillaExtension("professions");
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
-                RecipeItem recipeItem = it.next();
-                ItemStack recipeItemStack = recipeItem.getItemStack();
-                ItemStack recipeItemStackOne = recipeItemStack.clone();
+                RecipeItem recipeItem         = it.next();
+                ItemStack  recipeItemStack    = recipeItem.getItemStack();
+                ItemStack  recipeItemStackOne = recipeItemStack.clone();
                 recipeItemStackOne.setAmount(1);
-                Pair<ItemStack, Integer> eqEntry = null;
-                List<String> extensionLines = new ArrayList<>();
+                Pair<ItemStack, Integer> eqEntry        = null;
+                List<String>             extensionLines = new ArrayList<>();
                 for (Pair<ItemStack, Integer> entry : eqItems) {
                     ItemStack item = entry.getKey().clone();
                     if (CalculatedRecipe.isSimilar("professions", recipeItemStackOne, item, extensionLines)) {
@@ -105,13 +109,17 @@ public class CalculatedProfession {
                     }
                 }
 
-                int eqAmount = eqEntry != null ? eqEntry.getValue() : 0;
+                int eqAmount      = eqEntry != null ? eqEntry.getValue() : 0;
                 int patternAmount = recipeItem.getAmount();
                 if (eqAmount < patternAmount) {
                     canJoin = false;
-                    lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount)).append('\n');
+                    lore.append(CraftingRequirementsCfg.getIngredientLine("recipes",
+                            recipeItem,
+                            eqAmount,
+                            patternAmount)).append('\n');
                     if (isExtensionEnabled) {
-                        if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly && (recipeItem instanceof RecipeEconomyItem))) {
+                        if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
+                                && (recipeItem instanceof RecipeEconomyItem))) {
                             for (String extension : extensionLines) {
                                 lore.append(extension).append('\n');
                             }
@@ -127,9 +135,11 @@ public class CalculatedProfession {
                     eqItems.add(Pair.of(eqEntry.getKey(), rest));
                 }
                 it.remove();
-                lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount)).append('\n');
+                lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount))
+                        .append('\n');
                 if (isExtensionEnabled) {
-                    if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly && (recipeItem instanceof RecipeEconomyItem))) {
+                    if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
+                            && (recipeItem instanceof RecipeEconomyItem))) {
                         for (String extension : extensionLines) {
                             lore.append(extension).append('\n');
                         }
@@ -161,14 +171,16 @@ public class CalculatedProfession {
 
             lore.append('\n').append(canJoinLine);
 
-            ItemStack icon = defaultIcon.clone();
-            ItemMeta itemMeta = icon.getItemMeta();
+            ItemStack icon     = defaultIcon.clone();
+            ItemMeta  itemMeta = icon.getItemMeta();
             itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
             icon.setItemMeta(itemMeta);
 
             return new CalculatedProfession(conditions, icon, canJoin);
         } catch (Exception e) {
-            Fusion.getInstance().error("The profession-item seems not to be recognized. Please check your setup on the following profession '" + craftingTable.getName() + "':");
+            Fusion.getInstance()
+                    .error("The profession-item seems not to be recognized. Please check your setup on the following profession '"
+                            + craftingTable.getName() + "':");
             Fusion.getInstance().error("Pattern Items: ");
             for (Object patternItem : conditions.getRequiredItemNames()) {
                 Fusion.getInstance().error("- " + patternItem);

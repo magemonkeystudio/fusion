@@ -33,17 +33,17 @@ import java.util.Map;
 @Getter
 public class CategoryGui implements Listener {
 
-    private final Player player;
+    private final Player        player;
     private final CraftingTable table;
 
-    private Inventory inventory;
+    private       Inventory               inventory;
     private final Map<Integer, RecipeGui> categories = new HashMap<>();
-    private int page = 0;
-    private int nextPage = -1;
-    private int prevPage = -1;
+    private       int                     page       = 0;
+    private       int                     nextPage   = -1;
+    private       int                     prevPage   = -1;
 
-    private Slot[] slots;
-    private final ArrayList<Integer> resultSlots = new ArrayList<>(20);
+    private       Slot[]             slots;
+    private final ArrayList<Integer> resultSlots  = new ArrayList<>(20);
     private final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
 
     public CategoryGui(Player player, CraftingTable table) {
@@ -56,7 +56,9 @@ public class CategoryGui implements Listener {
     public void initialize() {
         this.categories.clear();
         this.resultSlots.clear();
-        this.inventory = Bukkit.createInventory(null, table.getPattern().getInventorySize(), ChatUT.hexString(table.getInventoryName()));
+        this.inventory = Bukkit.createInventory(null,
+                table.getPattern().getInventorySize(),
+                ChatUT.hexString(table.getInventoryName()));
         mapSlots();
         reloadCategories();
     }
@@ -65,16 +67,16 @@ public class CategoryGui implements Listener {
         if (!player.isOnline()) return;
         try {
             /* Default setup */
-            ItemStack fill = table.getFillItem();
-            Collection<Category> allCategories = new ArrayList<>(table.getCategories().values());
-            int pageSize = resultSlots.size();
-            int allCategoryCount = allCategories.size();
-            int i = 0;
-            int page = this.page;
+            ItemStack            fill             = table.getFillItem();
+            Collection<Category> allCategories    = new ArrayList<>(table.getCategories().values());
+            int                  pageSize         = resultSlots.size();
+            int                  allCategoryCount = allCategories.size();
+            int                  i                = 0;
+            int                  page             = this.page;
 
             int fullPages = allCategoryCount / pageSize;
-            int rest = allCategoryCount % pageSize;
-            int pages = (rest == 0) ? fullPages : (fullPages + 1);
+            int rest      = allCategoryCount % pageSize;
+            int pages     = (rest == 0) ? fullPages : (fullPages + 1);
             if (player.isOnline() && page >= pages) {
                 if (page > 0) {
                     this.page = pages - 1;
@@ -104,7 +106,7 @@ public class CategoryGui implements Listener {
                  (k < allCategoryArray.length) && (i < e);
                  k++, i++) {
                 Category category = allCategoryArray[k];
-                int slot = slots[i];
+                int      slot     = slots[i];
                 this.categories.put(slot, new RecipeGui(player, table, category));
                 this.inventory.setItem(slot, category.getIconItem().create());
             }
@@ -119,7 +121,8 @@ public class CategoryGui implements Listener {
                 Exception e) {
             this.inventory.clear();
             this.player.closeInventory();
-            throw new RuntimeException("Exception was thrown when reloading categories for: " + this.player.getName(), e);
+            throw new RuntimeException("Exception was thrown when reloading categories for: " + this.player.getName(),
+                    e);
         }
     }
 
@@ -129,17 +132,17 @@ public class CategoryGui implements Listener {
 
     public void updateBlockedSlots(MessageData[] data) {
         int totalItems = table.getCategories().size();
-        int fullPages = totalItems / resultSlots.size();
-        int rest = totalItems % resultSlots.size();
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int fullPages  = totalItems / resultSlots.size();
+        int rest       = totalItems % resultSlots.size();
+        int pages      = (rest == 0) ? fullPages : (fullPages + 1);
 
         boolean includeBack = false;
 
-        int k = -1;
+        int                           k     = -1;
         HashMap<Character, ItemStack> items = table.getPattern().getItems();
 
         ArrayList<Integer> leaveBlank = new ArrayList<>();
-        ArrayList<Integer> fill = new ArrayList<>();
+        ArrayList<Integer> fill       = new ArrayList<>();
         for (String row : table.getPattern().getPattern()) {
             for (char c : row.toCharArray()) {
                 k++;
@@ -176,7 +179,7 @@ public class CategoryGui implements Listener {
     private void mapSlots() {
         this.resultSlots.clear();
         this.slots = new Slot[table.getPattern().getPattern().length * 9];
-        int k = -1;
+        int k        = -1;
         int prevPage = -1, nextPage = -1;
         for (String row : table.getPattern().getPattern()) {
             for (char c : row.toCharArray()) {
@@ -194,7 +197,8 @@ public class CategoryGui implements Listener {
                         this.slots[k] = Slot.BLOCKED_SLOT;
                         prevPage = k;
                     }
-                    case '{', '}', '-' -> {}
+                    case '{', '}', '-' -> {
+                    }
                     default -> {
                         this.slots[k] = Slot.BLOCKED_SLOT;
                         this.blockedSlots.add(k);
@@ -212,13 +216,13 @@ public class CategoryGui implements Listener {
             return false;
         }
         Collection<Category> allCategories = table.getCategories().values();
-        int pageSize = resultSlots.size();
-        int fullCount = allCategories.size();
-        int page = this.page;
+        int                  pageSize      = resultSlots.size();
+        int                  fullCount     = allCategories.size();
+        int                  page          = this.page;
 
         int fullPages = fullCount / pageSize;
-        int rest = fullCount % pageSize;
-        int pages = (rest == 0) ? fullPages : (fullPages + 1);
+        int rest      = fullCount % pageSize;
+        int pages     = (rest == 0) ? fullPages : (fullPages + 1);
         if (page >= pages) {
             this.page = pages;
             this.reloadCategoriesTask();
@@ -310,7 +314,7 @@ public class CategoryGui implements Listener {
         event.setResult(Event.Result.DENY);
 
         Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
+        int    slot   = event.getSlot();
 
         Character c = table.getPattern().getSlot(slot);
         executeCommands(c, event.getWhoClicked());

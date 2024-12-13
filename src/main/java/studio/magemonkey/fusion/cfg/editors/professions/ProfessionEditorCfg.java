@@ -32,31 +32,37 @@ public class ProfessionEditorCfg {
 
     public Map<String, ItemStack> getIcons(CraftingTable table) {
         Map<String, ItemStack> icons = new HashMap<>();
-        for(String icon : config.getConfigurationSection("icons").getKeys(false)) {
+        for (String icon : config.getConfigurationSection("icons").getKeys(false)) {
             icons.put(icon, getIcon(table, icon));
         }
         return icons;
     }
 
     public ItemStack getIcon(CraftingTable table, String icon) {
-        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE").replace(MessageUtil.getReplacement("material"), table.getIconItem().create().getType().name()).toUpperCase());
-        int amount = config.getInt("icons." + icon + ".amount", 1);
-        int durability = config.getInt("icons." + icon + ".durability", 0);
-        boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
-        String name = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
-        List<String> lore = config.getStringList("icons." + icon + ".lore");
-        for(int i = 0; i < lore.size(); i++) {
+        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE")
+                .replace(MessageUtil.getReplacement("material"),
+                        table.getIconItem().create().getType().name())
+                .toUpperCase());
+        int          amount      = config.getInt("icons." + icon + ".amount", 1);
+        int          durability  = config.getInt("icons." + icon + ".durability", 0);
+        boolean      unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
+        String       name        = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
+        List<String> lore        = config.getStringList("icons." + icon + ".lore");
+        for (int i = 0; i < lore.size(); i++) {
             lore.set(i, ChatUT.hexString(lore.get(i)
-                .replace(MessageUtil.getReplacement("name"), table.getInventoryName())
-                .replace(MessageUtil.getReplacement("icon"), table.getIconItem().getID())
-                .replace(MessageUtil.getReplacement("profession"), table.getName())
-                .replace(MessageUtil.getReplacement("masteryUnlock"), String.valueOf(table.getMasteryUnlock()))
-                .replace(MessageUtil.getReplacement("masteryCost"), String.valueOf(table.getMasteryFee()))
-                .replace(MessageUtil.getReplacement("useCategories"), String.valueOf(table.getUseCategories()))));
+                    .replace(MessageUtil.getReplacement("name"), table.getInventoryName())
+                    .replace(MessageUtil.getReplacement("icon"), table.getIconItem().getID())
+                    .replace(MessageUtil.getReplacement("profession"), table.getName())
+                    .replace(MessageUtil.getReplacement("masteryUnlock"),
+                            String.valueOf(table.getMasteryUnlock()))
+                    .replace(MessageUtil.getReplacement("masteryCost"),
+                            String.valueOf(table.getMasteryFee()))
+                    .replace(MessageUtil.getReplacement("useCategories"),
+                            String.valueOf(table.getUseCategories()))));
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons." + icon + ".enchants");
-        List<ItemFlag> flags = config.getItemFlags("icons." + icon + ".flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("icons." + icon + ".enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("icons." + icon + ".flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)

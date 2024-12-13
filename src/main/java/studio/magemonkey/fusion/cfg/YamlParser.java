@@ -26,9 +26,9 @@ import java.util.logging.Logger;
 @SuppressWarnings("unused")
 public class YamlParser extends YamlConfiguration implements IValuesReloadable {
 
-    private static final Logger logger = Fusion.getInstance().getLogger();
-    private final File file;
-    private boolean isChanged;
+    private static final Logger  logger = Fusion.getInstance().getLogger();
+    private final        File    file;
+    private              boolean isChanged;
 
     private static final List<IValuesReloadable> valuesReloadables = new LinkedList<>();
 
@@ -90,7 +90,7 @@ public class YamlParser extends YamlConfiguration implements IValuesReloadable {
         }
 
         File var10002 = plugin.getDataFolder();
-        File file = new File(var10002 + filePath);
+        File file     = new File(var10002 + filePath);
         if (!file.exists()) {
             FileUT.create(file);
 
@@ -154,11 +154,11 @@ public class YamlParser extends YamlConfiguration implements IValuesReloadable {
 
     public Map<Enchantment, Integer> getEnchantmentSection(@NotNull String path) {
         Map<Enchantment, Integer> entries = new HashMap<>();
-        ConfigurationSection section = getConfigurationSection(path);
+        ConfigurationSection      section = getConfigurationSection(path);
         if (section != null) {
             for (String key : section.getKeys(false)) {
                 Enchantment ench = Enchantment.getByKey(NamespacedKey.fromString(key));
-                if(ench == null) continue;
+                if (ench == null) continue;
                 entries.put(ench, getInt(path + "." + key, 1));
             }
         }
@@ -166,7 +166,7 @@ public class YamlParser extends YamlConfiguration implements IValuesReloadable {
     }
 
     public List<ItemFlag> getItemFlags(@NotNull String path) {
-        List<ItemFlag> entries = new ArrayList<>();
+        List<ItemFlag>       entries = new ArrayList<>();
         ConfigurationSection section = getConfigurationSection(path);
         if (section != null) {
             for (String key : section.getKeys(false)) {

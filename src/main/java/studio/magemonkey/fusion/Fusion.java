@@ -9,12 +9,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.config.legacy.LegacyConfigManager;
 import studio.magemonkey.codex.legacy.RisePlugin;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderRegistry;
 import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -42,17 +42,18 @@ import java.util.UUID;
  * © 2024 MageMonkeyStudio
  */
 public class Fusion extends RisePlugin implements Listener {
-    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM        =
+    public static final PlaceholderType<RecipeItem>       RECIPE_ITEM       =
             PlaceholderType.create("recipeItem", RecipeItem.class);
-    public static final PlaceholderType<Recipe>           RECIPE             =
+    public static final PlaceholderType<Recipe>           RECIPE            =
             PlaceholderType.create("recipe", Recipe.class);
-    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE     =
+    public static final PlaceholderType<CraftingTable>    CRAFTING_TABLE    =
             PlaceholderType.create("craftingTable", CraftingTable.class);
-    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE  =
+    public static final PlaceholderType<CalculatedRecipe> CALCULATED_RECIPE =
             PlaceholderType.create("calculatedRecipe", CalculatedRecipe.class);
 
     @Getter
     private static Fusion instance;
+
     {
         instance = this;
     }
@@ -66,7 +67,7 @@ public class Fusion extends RisePlugin implements Listener {
         FileConfiguration lang =
                 LegacyConfigManager.loadConfigFile(new File(getDataFolder() + File.separator + "lang", "lang_en.yml"),
                         getResource("lang/lang_en.yml"));
-        MessageUtil.reload(lang, this);
+        CodexEngine.get().getMessageUtil().reload(lang, this);
         CraftingRequirementsCfg.init();
         hookManager = new HookManager();
 
@@ -128,7 +129,7 @@ public class Fusion extends RisePlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         runQueueTask();
 
-        if(hookManager.isHooked(HookType.PlaceholderAPI)) {
+        if (hookManager.isHooked(HookType.PlaceholderAPI)) {
             new FusionPlaceholders().register();
         }
 

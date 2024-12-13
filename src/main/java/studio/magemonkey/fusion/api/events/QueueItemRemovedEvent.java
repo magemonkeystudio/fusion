@@ -16,24 +16,24 @@ public class QueueItemRemovedEvent extends FusionEvent {
     /**
      * The crafting queue
      */
-    private final CraftingQueue queue;
+    private final CraftingQueue   queue;
     /**
      * The queue item
      */
-    private final QueueItem queueItem;
+    private final QueueItem       queueItem;
     /**
      * Whether the item was finished
      */
-    private final boolean finished;
+    private final boolean         finished;
     /**
      * Whether the item was refunded
      */
-    private final boolean refunded;
+    private final boolean         refunded;
     /**
      * The refunded items in case `refunded` is `true`
      */
     @Setter
-    private List<ItemStack> refundedItems;
+    private       List<ItemStack> refundedItems;
 
     /**
      * Constructor for the QueueItemRemovedEvent
@@ -46,7 +46,13 @@ public class QueueItemRemovedEvent extends FusionEvent {
      * @param refunded Whether the item was refunded
      * @param refundedItems The refunded items in case `refunded` is `true`
      */
-    public QueueItemRemovedEvent(String professionName, Player player, CraftingQueue queue, QueueItem queueItem, boolean finished, boolean refunded, List<ItemStack> refundedItems) {
+    public QueueItemRemovedEvent(String professionName,
+                                 Player player,
+                                 CraftingQueue queue,
+                                 QueueItem queueItem,
+                                 boolean finished,
+                                 boolean refunded,
+                                 List<ItemStack> refundedItems) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.queue = queue;
         this.queueItem = queueItem;

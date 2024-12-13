@@ -22,7 +22,7 @@ import java.util.List;
 
 public class BrowseProfessionsEditor extends Editor implements Listener {
 
-    private final Player player;
+    private final Player       player;
     private final BrowseEditor browseEditor;
 
     @Getter
@@ -44,14 +44,17 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
         slots.clear();
         getNestedInventories().clear();
 
-        HashMap<Integer, ProfessionConditions> invSlots = new HashMap<>();
-        List<Inventory> inventories = new ArrayList<>();
-        Inventory inv = null;
-        int invSlot = 0;
-        Collection<ProfessionConditions> professions = browseEditor.getProfessionConditions().values();
+        HashMap<Integer, ProfessionConditions> invSlots    = new HashMap<>();
+        List<Inventory>                        inventories = new ArrayList<>();
+        Inventory                              inv         = null;
+        int                                    invSlot     = 0;
+        Collection<ProfessionConditions>       professions = browseEditor.getProfessionConditions().values();
         for (ProfessionConditions entry : professions) {
             if (!ProfessionsCfg.getMap().containsKey(entry.getProfession())) {
-                Fusion.getInstance().getLogger().warning("Profession " + entry.getProfession() + " not found for BrowseEditor. You might want to remove it from browse.yml to avoid problems.");
+                Fusion.getInstance()
+                        .getLogger()
+                        .warning("Profession " + entry.getProfession()
+                                + " not found for BrowseEditor. You might want to remove it from browse.yml to avoid problems.");
                 Fusion.getInstance().getLogger().warning("Skipping profession: " + entry.getProfession());
                 continue;
             }
@@ -59,7 +62,10 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
             if (invDex == 9) {
                 if (inv != null)
                     inventories.add(inv);
-                inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54, getIcons().get("fill"));
+                inv = InventoryUtils.createFilledInventory(null,
+                        EditorRegistry.getBrowseProfessionCfg().getTitle(),
+                        54,
+                        getIcons().get("fill"));
                 inv.setItem(4, getIcons().get("add"));
                 inv.setItem(48, getIcons().get("previous"));
                 inv.setItem(50, getIcons().get("next"));
@@ -72,7 +78,10 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
             invSlot++;
         }
         if (inv == null) {
-            inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54, getIcons().get("fill"));
+            inv = InventoryUtils.createFilledInventory(null,
+                    EditorRegistry.getBrowseProfessionCfg().getTitle(),
+                    54,
+                    getIcons().get("fill"));
             inv.setItem(4, getIcons().get("add"));
             inv.setItem(48, getIcons().get("previous"));
             inv.setItem(50, getIcons().get("next"));
@@ -87,7 +96,8 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
     }
 
     public void open(Player player, int page) {
-        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page) : getNestedInventories().get(page - 1));
+        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page)
+                : getNestedInventories().get(page - 1));
     }
 
     @EventHandler
@@ -95,9 +105,9 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
         int invdex = getNestedInventories().indexOf(event.getInventory());
         if (invdex < 0) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
-        int size = getNestedInventories().size();
+        Player  player     = (Player) event.getWhoClicked();
+        int     slot       = event.getSlot();
+        int     size       = getNestedInventories().size();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
@@ -106,7 +116,8 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
             case 50 -> open(player, (invdex + 1) % size);
             case 53 -> openParent(player);
             default -> {
-                if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
+                if (slots.containsKey(getNestedInventories().get(invdex))
+                        && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
                     ProfessionConditions entry = slots.get(getNestedInventories().get(invdex)).get(slot);
                     if (!event.isShiftClick()) {
                         if (event.isLeftClick()) {
@@ -118,12 +129,13 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
                             hasChanges = true;
                         }
                     } else {
-                        ProfessionConditions conditions = browseEditor.getProfessionConditions().get(entry.getProfession());
-                        if(event.isLeftClick()) {
+                        ProfessionConditions conditions =
+                                browseEditor.getProfessionConditions().get(entry.getProfession());
+                        if (event.isLeftClick()) {
                             // Put the Recipe one more to the left in the Map
                             browseEditor.moveEntry(conditions, -1);
                             hasChanges = true;
-                        } else if(event.isRightClick()) {
+                        } else if (event.isRightClick()) {
                             // Put the Recipe one more to the right in the Map
                             browseEditor.moveEntry(conditions, 1);
                             hasChanges = true;

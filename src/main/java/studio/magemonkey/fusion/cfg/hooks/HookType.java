@@ -18,5 +18,5 @@ public enum HookType {
     }
 
     @Override
-    public String toString() { return pluginName; }
+    public String toString() {return pluginName;}
 }

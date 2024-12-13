@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class CategoryEditor extends Editor implements Listener {
 
-    private final Player player;
+    private final Player        player;
     private final CraftingTable table;
 
     @Getter
@@ -72,41 +72,49 @@ public class CategoryEditor extends Editor implements Listener {
         if (event.getClickedInventory() == getInventory()) {
             event.setCancelled(true);
             switch (event.getSlot()) {
-                case 4 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Category_Add, "/fusion-editor <categoryName> <categoryIcon>");
+                case 4 -> FusionEditorCommand.suggestUsage(player,
+                        EditorCriteria.Profession_Category_Add,
+                        "/fusion-editor <categoryName> <categoryIcon>");
                 case 53 -> openParent(player);
                 default -> {
                     if (slots.containsKey(event.getSlot())) {
-                        if(!event.isShiftClick()) {
+                        if (!event.isShiftClick()) {
                             if (event.isLeftClick()) {
                                 lastEditedCategoryName = slots.get(event.getSlot()).getName();
-                                FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Category_Edit, "/fusion-editor " + slots.get(event.getSlot()).getName() + " <categoryIcon>");
+                                FusionEditorCommand.suggestUsage(player,
+                                        EditorCriteria.Profession_Category_Edit,
+                                        "/fusion-editor " + slots.get(event.getSlot()).getName() + " <categoryIcon>");
                             } else if (event.isRightClick()) {
                                 table.getCategories().remove(slots.get(event.getSlot()).getName());
                                 hasChanges = true;
                             }
                         } else {
-                            if(event.isLeftClick()) {
+                            if (event.isLeftClick()) {
                                 // Decrease the order by 1, increase everyone elses order by 1 if needed (in the LinkedHashMap)
                                 int order = slots.get(event.getSlot()).getOrder();
-                                if(order > 0) {
+                                if (order > 0) {
                                     for (Category category : table.getCategories().values()) {
                                         if (category.getOrder() == order - 1) {
                                             category.setOrder(order);
-                                            table.getCategories().get(slots.get(event.getSlot()).getName()).setOrder(order - 1);
+                                            table.getCategories()
+                                                    .get(slots.get(event.getSlot()).getName())
+                                                    .setOrder(order - 1);
                                             table.updateCategoryOrder();
                                             hasChanges = true;
                                             break;
                                         }
                                     }
                                 }
-                            } else if(event.isRightClick()) {
+                            } else if (event.isRightClick()) {
                                 // Increase the order by 1, increase everyone elses order by 1 if needed (in the LinkedHashMap)
                                 int order = slots.get(event.getSlot()).getOrder();
-                                if(order <= table.getCategories().size() - 1) {
+                                if (order <= table.getCategories().size() - 1) {
                                     for (Category category : table.getCategories().values()) {
                                         if (category.getOrder() == order + 1) {
                                             category.setOrder(order);
-                                            table.getCategories().get(slots.get(event.getSlot()).getName()).setOrder(order + 1);
+                                            table.getCategories()
+                                                    .get(slots.get(event.getSlot()).getName())
+                                                    .setOrder(order + 1);
                                             table.updateCategoryOrder();
                                             hasChanges = true;
                                             break;
@@ -128,7 +136,7 @@ public class CategoryEditor extends Editor implements Listener {
     public void reload(boolean open) {
         setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
         initialize();
-        if(open)
+        if (open)
             open(player);
     }
 }

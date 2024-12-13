@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class DivinityService {
 
-    public static DivinityCfg divinityCfg;
+    public static DivinityCfg               divinityCfg;
     public static Map<String, ItemGenEntry> ItemGenResults = new HashMap<>();
 
     public static boolean isCached(String namespace) {
@@ -19,9 +19,12 @@ public class DivinityService {
     }
 
     public static boolean cache(String namespace, Consumer<ItemGenEntry> callback) {
-        ItemGeneratorManager.GeneratorItem item = Divinity.getInstance().getModuleCache().getTierManager().getItemById(namespace);
+        ItemGeneratorManager.GeneratorItem item =
+                Divinity.getInstance().getModuleCache().getTierManager().getItemById(namespace);
         if (item == null) {
-            Fusion.getInstance().getLogger().warning("Failed to cache item " + namespace + " from Divinity as it does not exist.");
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("Failed to cache item " + namespace + " from Divinity as it does not exist.");
             return false;
         }
         ItemGenResults.put(namespace, new ItemGenEntry(item));

@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
@@ -21,12 +21,12 @@ import java.util.*;
 public class PatternItemsEditor extends Editor implements Listener {
 
     // Globally used variabled
-    private final Player player;
-    private InventoryPattern pattern;
+    private final Player           player;
+    private       InventoryPattern pattern;
 
     // Profession only
     private final CraftingTable table;
-    private final boolean isCategoryPattern;
+    private final boolean       isCategoryPattern;
 
     // Browse only
     private final BrowseEditor browseEditor;
@@ -35,7 +35,7 @@ public class PatternItemsEditor extends Editor implements Listener {
     @Getter
     private PatternItemEditor patternItemEditor;
 
-    private final Map<Integer, Character> slots = new HashMap<>();
+    private final Map<Integer, Character>   slots              = new HashMap<>();
     private final Map<Character, ItemStack> visualPatternItems = new HashMap<>();
 
     List<Map.Entry<Boolean, Map.Entry<Character, ItemStack>>> clipboardUndo = new ArrayList<>();
@@ -86,7 +86,8 @@ public class PatternItemsEditor extends Editor implements Listener {
 
         for (Map.Entry<Character, ItemStack> entry : pattern.getItems().entrySet()) {
             if (entry.getValue() == null || entry.getValue().getType().isAir()) continue;
-            visualPatternItems.put(entry.getKey(), EditorRegistry.getPatternItemEditorCfg().getPatternItemIcon(entry.getKey(), entry.getValue()));
+            visualPatternItems.put(entry.getKey(),
+                    EditorRegistry.getPatternItemEditorCfg().getPatternItemIcon(entry.getKey(), entry.getValue()));
             visualPatternItemsList.add(Map.entry(entry.getKey(), visualPatternItems.get(entry.getKey())));
         }
 
@@ -125,7 +126,8 @@ public class PatternItemsEditor extends Editor implements Listener {
             switch (event.getSlot()) {
                 case 3 -> {
                     if (clipboardUndo.isEmpty()) return;
-                    Map.Entry<Boolean, Map.Entry<Character, ItemStack>> entry = clipboardUndo.get(clipboardUndo.size() - 1);
+                    Map.Entry<Boolean, Map.Entry<Character, ItemStack>> entry =
+                            clipboardUndo.get(clipboardUndo.size() - 1);
                     if (entry.getKey()) {
                         pattern.getItems().put(entry.getValue().getKey(), entry.getValue().getValue());
                     } else {
@@ -153,21 +155,32 @@ public class PatternItemsEditor extends Editor implements Listener {
                         if (event.isLeftClick()) {
                             if (patternItemEditor == null) {
                                 if (table != null)
-                                    patternItemEditor = new PatternItemEditor(this, player, table, slots.get(event.getSlot()), isCategoryPattern);
+                                    patternItemEditor = new PatternItemEditor(this,
+                                            player,
+                                            table,
+                                            slots.get(event.getSlot()),
+                                            isCategoryPattern);
                                 else if (browseEditor != null)
-                                    patternItemEditor = new PatternItemEditor(this, browseEditor, player, slots.get(event.getSlot()));
+                                    patternItemEditor = new PatternItemEditor(this,
+                                            browseEditor,
+                                            player,
+                                            slots.get(event.getSlot()));
                             }
                             patternItemEditor.open(player);
                         } else {
                             char c = slots.get(event.getSlot());
                             switch (c) {
                                 case 'o', '-', '<', '>', '{', '}', 'f' -> {
-                                    MessageUtil.sendMessage("editor.patternItemPredefined", player);
+                                    CodexEngine.get()
+                                            .getMessageUtil()
+                                            .sendMessage("editor.patternItemPredefined", player);
                                     return;
                                 }
                                 default -> {
-                                    if(pattern.isUsed(c)) {
-                                        MessageUtil.sendMessage("editor.patternItemUsed", player);
+                                    if (pattern.isUsed(c)) {
+                                        CodexEngine.get()
+                                                .getMessageUtil()
+                                                .sendMessage("editor.patternItemUsed", player);
                                         return;
                                     }
                                     clipboardUndo.add(Map.entry(true, Map.entry(c, pattern.getItems().get(c))));

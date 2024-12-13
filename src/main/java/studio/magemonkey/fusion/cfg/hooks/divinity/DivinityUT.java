@@ -14,10 +14,13 @@ import java.util.Set;
 
 public class DivinityUT {
 
-    public static Set<String> getAllCombinations(ItemGeneratorManager.GeneratorItem item, Material material, Tier tier, int level) {
-        String name = item.getName();
-        String itemGroupName = ItemUtils.getItemGroupNameFor(new ItemStack(material));
-        Set<String> names = new HashSet<>();
+    public static Set<String> getAllCombinations(ItemGeneratorManager.GeneratorItem item,
+                                                 Material material,
+                                                 Tier tier,
+                                                 int level) {
+        String      name          = item.getName();
+        String      itemGroupName = ItemUtils.getItemGroupNameFor(new ItemStack(material));
+        Set<String> names         = new HashSet<>();
 
         // Create maps for prefixes and suffixes for each category
         Map<ResourceManager.ResourceCategory, Set<String>> prefixes = new LinkedHashMap<>();
@@ -29,7 +32,7 @@ public class DivinityUT {
         // Process all combinations
         generatePrefixSuffixCombinations(names, name, itemGroupName, prefixes, suffixes);
 
-        if(level > 0) {
+        if (level > 0) {
             // Replace %ITEM_LEVEL% with level
             Set<String> newNames = new HashSet<>();
             for (String n : names) {
@@ -43,13 +46,19 @@ public class DivinityUT {
     private static void populateAffixes(Map<ResourceManager.ResourceCategory, Set<String>> prefixes,
                                         Map<ResourceManager.ResourceCategory, Set<String>> suffixes,
                                         Material material, Tier tier) {
-        prefixes.put(ResourceManager.ResourceCategory.TIER, new HashSet<>(ItemGeneratorManager.getMatchingTierPrefixes(tier)));
-        prefixes.put(ResourceManager.ResourceCategory.MATERIAL, new HashSet<>(ItemGeneratorManager.getMatchingMaterialPrefixes(material)));
-        prefixes.put(ResourceManager.ResourceCategory.SUBTYPE, new HashSet<>(ItemGeneratorManager.getMatchingTypePrefixes(new ItemStack(material))));
+        prefixes.put(ResourceManager.ResourceCategory.TIER,
+                new HashSet<>(ItemGeneratorManager.getMatchingTierPrefixes(tier)));
+        prefixes.put(ResourceManager.ResourceCategory.MATERIAL,
+                new HashSet<>(ItemGeneratorManager.getMatchingMaterialPrefixes(material)));
+        prefixes.put(ResourceManager.ResourceCategory.SUBTYPE,
+                new HashSet<>(ItemGeneratorManager.getMatchingTypePrefixes(new ItemStack(material))));
 
-        suffixes.put(ResourceManager.ResourceCategory.TIER, new HashSet<>(ItemGeneratorManager.getMatchingTierSuffixes(tier)));
-        suffixes.put(ResourceManager.ResourceCategory.MATERIAL, new HashSet<>(ItemGeneratorManager.getMatchingMaterialSuffixes(material)));
-        suffixes.put(ResourceManager.ResourceCategory.SUBTYPE, new HashSet<>(ItemGeneratorManager.getMatchingTypeSuffixes(new ItemStack(material))));
+        suffixes.put(ResourceManager.ResourceCategory.TIER,
+                new HashSet<>(ItemGeneratorManager.getMatchingTierSuffixes(tier)));
+        suffixes.put(ResourceManager.ResourceCategory.MATERIAL,
+                new HashSet<>(ItemGeneratorManager.getMatchingMaterialSuffixes(material)));
+        suffixes.put(ResourceManager.ResourceCategory.SUBTYPE,
+                new HashSet<>(ItemGeneratorManager.getMatchingTypeSuffixes(new ItemStack(material))));
     }
 
     private static void generatePrefixSuffixCombinations(Set<String> names, String name, String itemGroupName,
@@ -85,8 +94,8 @@ public class DivinityUT {
 
         // For each affix category, replace placeholders if affixes exist
         for (Map.Entry<ResourceManager.ResourceCategory, Set<String>> entry : affixes.entrySet()) {
-            String placeholder = getPlaceholder(entry.getKey(), isPrefix);
-            Set<String> values = entry.getValue();
+            String      placeholder = getPlaceholder(entry.getKey(), isPrefix);
+            Set<String> values      = entry.getValue();
 
             if (!values.isEmpty()) {
                 Set<String> newCombinations = new HashSet<>();

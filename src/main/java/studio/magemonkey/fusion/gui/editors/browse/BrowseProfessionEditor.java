@@ -21,7 +21,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
     private ProfessionConditions conditions;
 
     public BrowseProfessionEditor(Editor editor, Player player, ProfessionConditions conditions) {
-        super(editor, EditorRegistry.getBrowseProfessionCfg().getSubTitle(conditions.getProfession()),36);
+        super(editor, EditorRegistry.getBrowseProfessionCfg().getSubTitle(conditions.getProfession()), 36);
         this.player = player;
         this.conditions = conditions;
         setIcons(EditorRegistry.getBrowseProfessionCfg().getSubIcons(conditions));
@@ -43,7 +43,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
@@ -70,8 +70,10 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                 }
             }
             case 15 -> {
-                if(event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Edit_Rank, "/fusion-editor <rank>");
+                if (event.isLeftClick()) {
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Browse_Profession_Edit_Rank,
+                            "/fusion-editor <rank>");
                 } else if (event.isRightClick()) {
                     if (conditions.getRank() == null)
                         return;
@@ -79,8 +81,12 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 21 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Ingredients, "/fusion-editor <ingredient> <amount>");
-            case 23 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Profession_Add_Conditions, "/fusion-editor <conditionKey> <conditionValue> <level>");
+            case 21 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Browse_Profession_Add_Ingredients,
+                    "/fusion-editor <ingredient> <amount>");
+            case 23 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Browse_Profession_Add_Conditions,
+                    "/fusion-editor <conditionKey> <conditionValue> <level>");
             case 35 -> {
                 reload(false);
                 ((BrowseProfessionsEditor) getParentEditor()).reload(true);
@@ -95,7 +101,7 @@ public class BrowseProfessionEditor extends Editor implements Listener {
     public void reload(boolean open) {
         setIcons(EditorRegistry.getBrowseProfessionCfg().getSubIcons(conditions));
         initialize();
-        if(open)
+        if (open)
             open(player);
     }
 }

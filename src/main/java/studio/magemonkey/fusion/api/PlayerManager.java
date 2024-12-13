@@ -17,7 +17,7 @@ public class PlayerManager {
      */
     public FusionPlayer getPlayer(String playerName) {
         Player player = Bukkit.getPlayer(playerName);
-        if(player == null) return null;
+        if (player == null) return null;
         return getPlayer(player);
     }
 
@@ -49,12 +49,14 @@ public class PlayerManager {
      */
     public void savePlayer(Player player) {
         FusionPlayer fusionPlayer = getPlayer(player);
-        if(fusionPlayer != null) {
+        if (fusionPlayer != null) {
             fusionPlayer.save();
             PlayerLoader.unloadPlayer(player);
             PlayerLoader.loadPlayer(player);
         } else {
-            FusionAPI.getInstance().getLogger().warning("Failed to save player " + player.getName() + " because he is not loaded.");
+            FusionAPI.getInstance()
+                    .getLogger()
+                    .warning("Failed to save player " + player.getName() + " because he is not loaded.");
         }
     }
 

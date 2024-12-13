@@ -6,7 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import studio.magemonkey.codex.util.messages.MessageUtil;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
@@ -20,12 +20,12 @@ import java.util.Map;
 public class PatternEditor extends Editor implements Listener {
 
     // Globally used variabled
-    private final Player player;
-    private InventoryPattern pattern;
+    private final Player           player;
+    private       InventoryPattern pattern;
 
     // Profession only
     private final CraftingTable table;
-    private final boolean isCategoryPattern;
+    private final boolean       isCategoryPattern;
 
     // Browse only
     private final BrowseEditor browseEditor;
@@ -33,7 +33,10 @@ public class PatternEditor extends Editor implements Listener {
     private final Map<Integer, Character> slots = new HashMap<>();
 
     public PatternEditor(Editor parentEditor, Player player, CraftingTable table, boolean isCategoryPattern) {
-        super(parentEditor, EditorRegistry.getPatternEditorCfg().getTitle(isCategoryPattern ? "Category" : "Master"), (isCategoryPattern && table.getCatPattern() != null) ? table.getCatPattern().getInventorySize() : table.getPattern().getInventorySize());
+        super(parentEditor,
+                EditorRegistry.getPatternEditorCfg().getTitle(isCategoryPattern ? "Category" : "Master"),
+                (isCategoryPattern && table.getCatPattern() != null) ? table.getCatPattern().getInventorySize()
+                        : table.getPattern().getInventorySize());
         this.player = player;
         this.table = table;
         this.isCategoryPattern = isCategoryPattern;
@@ -44,7 +47,7 @@ public class PatternEditor extends Editor implements Listener {
         if (isCategoryPattern && this.pattern == null) {
             table.setCatPattern(InventoryPattern.copy(table.getPattern()));
             this.pattern = table.getCatPattern();
-            MessageUtil.sendMessage("editor.defaultCategoryPattern", player);
+            CodexEngine.get().getMessageUtil().sendMessage("editor.defaultCategoryPattern", player);
         }
 
         initialize();
@@ -52,7 +55,9 @@ public class PatternEditor extends Editor implements Listener {
     }
 
     public PatternEditor(BrowseEditor browseEditor, Player player) {
-        super(browseEditor, EditorRegistry.getPatternEditorCfg().getTitle("Browse"), browseEditor.getBrowsePattern().getInventorySize());
+        super(browseEditor,
+                EditorRegistry.getPatternEditorCfg().getTitle("Browse"),
+                browseEditor.getBrowsePattern().getInventorySize());
         this.player = player;
         this.browseEditor = browseEditor;
         this.table = null;

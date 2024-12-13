@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
@@ -29,14 +29,14 @@ public class BrowseEditor extends Editor implements Listener {
 
     // The settings that will be overriden before saving into browse.yml
     @Setter
-    private String name;
-    private final LinkedList<String> professions = new LinkedList<>();
+    private       String                                      name;
+    private final LinkedList<String>                          professions          = new LinkedList<>();
     @Getter
     private final LinkedHashMap<String, ProfessionConditions> professionConditions = new LinkedHashMap<>();
-    private final InventoryPattern browsePattern;
+    private final InventoryPattern                            browsePattern;
 
-    private PatternItemsEditor patternItemsEditor;
-    private PatternEditor patternEditor;
+    private PatternItemsEditor      patternItemsEditor;
+    private PatternEditor           patternEditor;
     private BrowseProfessionsEditor browseProfessionsEditor;
 
     public BrowseEditor(Player player, String name, LinkedList<String> professions, InventoryPattern browsePattern) {
@@ -46,7 +46,8 @@ public class BrowseEditor extends Editor implements Listener {
         this.name = name;
         this.professions.addAll(professions);
         for (String profession : BrowseConfig.getProfessions())
-            this.professionConditions.put(profession, ProfessionConditions.copy(BrowseConfig.getProfessionConditions().get(profession)));
+            this.professionConditions.put(profession,
+                    ProfessionConditions.copy(BrowseConfig.getProfessionConditions().get(profession)));
         this.browsePattern = InventoryPattern.copy(browsePattern);
 
         setIcons(EditorRegistry.getBrowseEditorCfg().getIcons(this));
@@ -68,12 +69,13 @@ public class BrowseEditor extends Editor implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Browse_Edit_Name, "/fusion-editor <newName>");
+            case 10 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Browse_Edit_Name,
+                    "/fusion-editor <newName>");
             case 12 -> {
                 if (patternItemsEditor == null)
                     patternItemsEditor = new PatternItemsEditor(this, player);
@@ -92,7 +94,9 @@ public class BrowseEditor extends Editor implements Listener {
             case 18 -> {
                 player.closeInventory();
                 BrowseConfig.save(this);
-                MessageUtil.sendMessage("editor.changesSaved", player, new MessageData("file", "browse.yml"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.changesSaved", player, new MessageData("file", "browse.yml"));
                 EditorRegistry.removeCurrentEditor(player);
                 FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
                 BrowseConfig.load();
@@ -122,7 +126,7 @@ public class BrowseEditor extends Editor implements Listener {
         }
 
         List<Map.Entry<String, ProfessionConditions>> entries = new ArrayList<>(professionConditions.entrySet());
-        int index = -1;
+        int                                           index   = -1;
 
         // Find the index of the current entry
         for (int i = 0; i < entries.size(); i++) {

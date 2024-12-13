@@ -20,10 +20,10 @@ public class FileUT {
     public static void copy(@NotNull InputStream inputStream, @NotNull File file) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            byte[] array = new byte[1024];
+            byte[]           array            = new byte[1024];
 
             int read;
-            while((read = inputStream.read(array)) > 0) {
+            while ((read = inputStream.read(array)) > 0) {
                 fileOutputStream.write(array, 0, read);
             }
 
@@ -49,7 +49,7 @@ public class FileUT {
     public static void create(@NotNull File file) {
         if (!file.exists()) {
             File parent = file.getParentFile();
-            if (parent != null)  {
+            if (parent != null) {
                 parent.mkdirs();
                 try {
                     file.createNewFile();
@@ -61,9 +61,9 @@ public class FileUT {
     }
 
     public static @NotNull List<File> getFiles(@NotNull String path) {
-        List<File> names = new ArrayList<>();
-        File folder = new File(path);
-        File[] listOfFiles = folder.listFiles();
+        List<File> names       = new ArrayList<>();
+        File       folder      = new File(path);
+        File[]     listOfFiles = folder.listFiles();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isFile()) {
@@ -78,9 +78,9 @@ public class FileUT {
     }
 
     public static @NotNull List<File> getFolders(@NotNull String path) {
-        List<File> dirs = new ArrayList<>();
-        File folder = new File(path);
-        File[] listOfFiles = folder.listFiles();
+        List<File> dirs        = new ArrayList<>();
+        File       folder      = new File(path);
+        File[]     listOfFiles = folder.listFiles();
         if (listOfFiles != null) {
             for (File f : listOfFiles) {
                 if (f.isDirectory()) {

@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.api.events.QueueItemAddedEvent;
@@ -50,8 +49,15 @@ public class QueueService {
      * @param refunded If the item ingredients will be refunded.
      * @param refundItems The items that will be refunded in case `refunded=true`.
      */
-    public void cancelQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, boolean finished, boolean refunded, List<ItemStack> refundItems) {
-        QueueItemRemovedEvent event = new QueueItemRemovedEvent(table.getName(), player, queue, item, finished, refunded, refundItems);
+    public void cancelQueueItem(Player player,
+                                CraftingTable table,
+                                CraftingQueue queue,
+                                QueueItem item,
+                                boolean finished,
+                                boolean refunded,
+                                List<ItemStack> refundItems) {
+        QueueItemRemovedEvent event =
+                new QueueItemRemovedEvent(table.getName(), player, queue, item, finished, refunded, refundItems);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if (event.isRefunded()) {
@@ -60,7 +66,7 @@ public class QueueService {
                 Collection<ItemStack> refunds = event.getRefundedItems();
                 for (ItemStack refundItem : refunds) {
                     // If those are not stacked natively, we need to give them one by one
-                    if(refundItem.getMaxStackSize() < refundItem.getAmount()) {
+                    if (refundItem.getMaxStackSize() < refundItem.getAmount()) {
                         for (int i = 0; i < refundItem.getAmount(); i++) {
                             ItemStack singleItem = refundItem.clone();
                             singleItem.setAmount(1);
@@ -105,16 +111,29 @@ public class QueueService {
      * @param resultItem The result item of the queue item.
      * @param resultAmount The amount of the result item.
      */
-    public void finishQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item, ItemStack resultItem, int resultAmount) {
-        QueueItemFinishedEvent event = new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
+    public void finishQueueItem(Player player,
+                                CraftingTable table,
+                                CraftingQueue queue,
+                                QueueItem item,
+                                ItemStack resultItem,
+                                int resultAmount) {
+        QueueItemFinishedEvent event =
+                new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
-            if(event.getFusionPlayer().hasRecipeLimitReached(event.getQueueItem().getRecipe())) {
-                cancelQueueItem(player, table, queue, item, false, true, event.getQueueItem().getRecipe().getItemsToTake());
+            if (event.getFusionPlayer().hasRecipeLimitReached(event.getQueueItem().getRecipe())) {
+                cancelQueueItem(player,
+                        table,
+                        queue,
+                        item,
+                        false,
+                        true,
+                        event.getQueueItem().getRecipe().getItemsToTake());
                 event.setCancelled(true);
-                MessageUtil.sendMessage("fusion.error.recipeLimitReached", player,
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.error.recipeLimitReached", player,
                         new MessageData("recipe", event.getQueueItem().getRecipe().getName()),
-                        new MessageData("amount", event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe()).getLimit()),
+                        new MessageData("amount",
+                                event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe()).getLimit()),
                         new MessageData("recipe.limit", event.getQueueItem().getRecipe().getCraftingLimit()),
                         new MessageData("limit", event.getQueueItem().getRecipe().getCraftingLimit()));
                 return;
@@ -124,22 +143,28 @@ public class QueueService {
             //Experience
 
             if (item.getRecipe().getResults().getProfessionExp() > 0) {
-                FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, event.getCraftingTable(), event.getQueueItem().getRecipe().getResults().getProfessionExp());
+                FusionAPI.getEventServices()
+                        .getProfessionService()
+                        .giveProfessionExp(player,
+                                event.getCraftingTable(),
+                                event.getQueueItem().getRecipe().getResults().getProfessionExp());
             }
-            if(item.getRecipe().getResults().getVanillaExp() > 0) {
+            if (item.getRecipe().getResults().getVanillaExp() > 0) {
                 player.giveExp(event.getQueueItem().getRecipe().getResults().getVanillaExp());
             }
 
-            ItemStack  result     = event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getResultItem() : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
+            ItemStack result = event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getResultItem()
+                    : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
             result.setAmount(event.getResultAmount());
             // If there is no space in the inventory, drop the items
             Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
             if (!notAdded.isEmpty()) {
                 for (ItemStack _item : notAdded) {
-                    Objects.requireNonNull(player.getLocation().getWorld()).dropItemNaturally(player.getLocation(), _item);
+                    Objects.requireNonNull(player.getLocation().getWorld())
+                            .dropItemNaturally(player.getLocation(), _item);
                 }
             }
-            if(event.getQueueItem().getRecipe().getCraftingLimit() > 0)
+            if (event.getQueueItem().getRecipe().getCraftingLimit() > 0)
                 event.getFusionPlayer().incrementLimit(event.getQueueItem().getRecipe());
 
             event.getQueue().removeRecipe(event.getQueueItem(), false);

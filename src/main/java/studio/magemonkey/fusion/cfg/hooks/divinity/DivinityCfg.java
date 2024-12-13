@@ -3,18 +3,15 @@ package studio.magemonkey.fusion.cfg.hooks.divinity;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.codex.legacy.item.DataBuilder;
+import studio.magemonkey.codex.api.items.ItemType;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
-import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 import studio.magemonkey.fusion.util.ChatUT;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class DivinityCfg {
@@ -26,25 +23,34 @@ public class DivinityCfg {
     }
 
     public ItemStack getRecipeIcon(ItemGenEntry entry, String name, ItemType type, int level) {
-        Material material = Material.valueOf(config.getString("ItemGenerator.RecipeIcon.material", "$<material>").replace(MessageUtil.getReplacement("material"), type.create().getType().toString()));
-        String itemName = ChatUT.hexString(config.getString("ItemGenerator.RecipeIcon.name", "$<name>").replace(MessageUtil.getReplacement("name"), name));
+        Material material = Material.valueOf(config.getString("ItemGenerator.RecipeIcon.material", "$<material>")
+                .replace(MessageUtil.getReplacement("material"),
+                        type.create().getType().toString()));
+        String itemName = ChatUT.hexString(config.getString("ItemGenerator.RecipeIcon.name", "$<name>")
+                .replace(MessageUtil.getReplacement("name"), name));
 
         int customModelData = -1;
-        if(entry.getReference().create(level, -1, type).getItemMeta().hasCustomModelData()) {
+        if (entry.getReference().create(level, -1, type).getItemMeta().hasCustomModelData()) {
             customModelData = entry.getReference().create(level, -1, type).getItemMeta().getCustomModelData();
         }
 
         List<String> lore = config.getStringList("ItemGenerator.RecipeIcon.lore");
 
-        String chanceLevels = level < 0 ? getValueFormat("levels", entry.getMinLevel(), entry.getMaxLevel()) : getSingleValueFormat("levels", level);
-        String chanceEnchants = getValueFormat("enchants", entry.getMinEnchantments(), entry.getMaxEnchantments());
-        String chanceDamageTypes = getValueFormat("damage_types", entry.getMinDamageTypes(), entry.getMaxDamageTypes());
-        String chanceDefenseTypes = getValueFormat("defense_types", entry.getMinDefenseTypes(), entry.getMaxDefenseTypes());
-        String chanceItemStats = getValueFormat("item_stats", entry.getMinItemStats(), entry.getMaxItemStats());
+        String chanceLevels = level < 0 ? getValueFormat("levels", entry.getMinLevel(), entry.getMaxLevel())
+                : getSingleValueFormat("levels", level);
+        String chanceEnchants =
+                getValueFormat("enchants", entry.getMinEnchantments(), entry.getMaxEnchantments());
+        String chanceDamageTypes =
+                getValueFormat("damage_types", entry.getMinDamageTypes(), entry.getMaxDamageTypes());
+        String chanceDefenseTypes =
+                getValueFormat("defense_types", entry.getMinDefenseTypes(), entry.getMaxDefenseTypes());
+        String chanceItemStats  = getValueFormat("item_stats", entry.getMinItemStats(), entry.getMaxItemStats());
         String chanceGemSockets = getValueFormat("gem_sockets", entry.getMinGems(), entry.getMaxGems());
-        String chanceEssenceSockets = getValueFormat("essence_sockets", entry.getMinEssences(), entry.getMaxEssences());
+        String chanceEssenceSockets =
+                getValueFormat("essence_sockets", entry.getMinEssences(), entry.getMaxEssences());
         String chanceRuneSockets = getValueFormat("rune_sockets", entry.getMinRunes(), entry.getMaxRunes());
-        String chanceFabledAttributes = getValueFormat("fabled_attributes", entry.getMinFabledAttributes(), entry.getMaxFabledAttributes());
+        String chanceFabledAttributes =
+                getValueFormat("fabled_attributes", entry.getMinFabledAttributes(), entry.getMaxFabledAttributes());
         String chanceSkills = getValueFormat("skills", entry.getMinSkill(), entry.getMaxSkill());
 
         for (int i = 0; i < lore.size(); i++) {
@@ -55,7 +61,7 @@ public class DivinityCfg {
                 for (String line : entry.getReference().getLore()) {
                     // If the lore has any placeholder with '%<placeholder>%' it will be skipped since it is something dynamical that cant be defined yet.
                     Pattern pattern = Pattern.compile("%[a-zA-Z0-9_]+%");
-                    if(line.isEmpty()) continue;
+                    if (line.isEmpty()) continue;
                     if (pattern.matcher(line).find()) continue;
                     lore.add(i - newLines, ChatUT.hexString(line));
                     newLines++;
@@ -72,7 +78,9 @@ public class DivinityCfg {
                     continue;
                 }
 
-                lore.set(i, loreEntry.replace(MessageUtil.getReplacement("levels"), ChatUT.hexString(chanceLevels)));
+                lore.set(i,
+                        loreEntry.replace(MessageUtil.getReplacement("levels"),
+                                ChatUT.hexString(chanceLevels)));
                 continue;
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("enchants"))) {
@@ -82,7 +90,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("enchants"), ChatUT.hexString(chanceEnchants)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("enchants"),
+                                    ChatUT.hexString(chanceEnchants)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("damage_types"))) {
@@ -93,7 +103,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("damage_types"), ChatUT.hexString(chanceDamageTypes)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("damage_types"),
+                                    ChatUT.hexString(chanceDamageTypes)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("defense_types"))) {
@@ -104,7 +116,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("defense_types"), ChatUT.hexString(chanceDefenseTypes)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("defense_types"),
+                                    ChatUT.hexString(chanceDefenseTypes)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("item_stats"))) {
@@ -114,7 +128,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("item_stats"), ChatUT.hexString(chanceItemStats)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("item_stats"),
+                                    ChatUT.hexString(chanceItemStats)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("gem_sockets"))) {
@@ -125,7 +141,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("gem_sockets"), ChatUT.hexString(chanceGemSockets)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("gem_sockets"),
+                                    ChatUT.hexString(chanceGemSockets)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("essence_sockets"))) {
@@ -136,7 +154,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("essence_sockets"), ChatUT.hexString(chanceEssenceSockets)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("essence_sockets"),
+                                    ChatUT.hexString(chanceEssenceSockets)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("rune_sockets"))) {
@@ -147,7 +167,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("rune_sockets"), ChatUT.hexString(chanceRuneSockets)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("rune_sockets"),
+                                    ChatUT.hexString(chanceRuneSockets)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("fabled_attributes"))) {
@@ -158,7 +180,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("fabled_attributes"), ChatUT.hexString(chanceFabledAttributes)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("fabled_attributes"),
+                                    ChatUT.hexString(chanceFabledAttributes)));
                 }
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("skills"))) {
@@ -169,7 +193,9 @@ public class DivinityCfg {
                     i--;
                     continue;
                 } else {
-                    lore.set(i, loreEntry.replace(MessageUtil.getReplacement("skills"), ChatUT.hexString(chanceSkills)));
+                    lore.set(i,
+                            loreEntry.replace(MessageUtil.getReplacement("skills"),
+                                    ChatUT.hexString(chanceSkills)));
                 }
             }
 
@@ -177,7 +203,7 @@ public class DivinityCfg {
         }
 
         ItemStack item = ItemBuilder.newItem(material).name(itemName).lore(lore).build();
-        if(customModelData > 0) {
+        if (customModelData > 0) {
             ItemMeta meta = item.getItemMeta();
             meta.setCustomModelData(customModelData);
             item.setItemMeta(meta);
@@ -193,10 +219,13 @@ public class DivinityCfg {
     }
 
     private String getSingleValueFormat(String path, int amount) {
-        return config.getString("ItemGenerator.RecipeIcon.LoreFormatting.single." + path, path + " $<amount>").replace(MessageUtil.getReplacement("amount"), String.valueOf(amount));
+        return config.getString("ItemGenerator.RecipeIcon.LoreFormatting.single." + path, path + " $<amount>")
+                .replace(MessageUtil.getReplacement("amount"), String.valueOf(amount));
     }
 
     private String getRangeValueFormat(String path, int min, int max) {
-        return config.getString("ItemGenerator.RecipeIcon.LoreFormatting.range." + path, path + " $<min> - $<max>").replace(MessageUtil.getReplacement("min"), String.valueOf(min)).replace(MessageUtil.getReplacement("max"), String.valueOf(max));
+        return config.getString("ItemGenerator.RecipeIcon.LoreFormatting.range." + path, path + " $<min> - $<max>")
+                .replace(MessageUtil.getReplacement("min"), String.valueOf(min))
+                .replace(MessageUtil.getReplacement("max"), String.valueOf(max));
     }
 }

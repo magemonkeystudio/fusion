@@ -42,9 +42,9 @@ public class RecipeCustomItem implements RecipeItem {
                     ":" + this.amount) : "");
         }
         ItemBuilder builder = ItemBuilder.newItem(this.item);
-        if(item.getType() == Material.ENCHANTED_BOOK) {
+        if (item.getType() == Material.ENCHANTED_BOOK) {
             // Reapply enchants to the item, if its an enchanted book
-            if(item.getItemMeta() instanceof EnchantmentStorageMeta storage) {
+            if (item.getItemMeta() instanceof EnchantmentStorageMeta storage) {
                 builder.clearEnchants();
                 Map<Enchantment, Integer> enchants = new LinkedHashMap<>(storage.getStoredEnchants());
                 builder.enchant(enchants);

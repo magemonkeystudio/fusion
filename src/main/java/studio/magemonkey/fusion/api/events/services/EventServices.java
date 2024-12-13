@@ -6,7 +6,7 @@ import lombok.Getter;
 public class EventServices {
 
     private final ProfessionService professionService;
-    private final QueueService queueService;
+    private final QueueService      queueService;
 
     public EventServices() {
         professionService = new ProfessionService();

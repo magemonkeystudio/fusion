@@ -6,13 +6,12 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.codex.items.exception.CodexItemException;
-import studio.magemonkey.codex.items.providers.VanillaProvider;
+import studio.magemonkey.codex.api.items.ItemType;
+import studio.magemonkey.codex.api.items.providers.VanillaProvider;
+import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
-import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,19 +21,19 @@ import java.util.Map;
 public class Category implements ConfigurationSerializable {
     @Getter
     @Setter
-    private String name;
+    private       String             name;
     @Getter
     @Setter
-    private ItemType iconItem;
+    private       ItemType           iconItem;
     @Getter
-    private final Collection<Recipe> recipes = new ArrayList<>();
+    private final Collection<Recipe> recipes     = new ArrayList<>();
     @Setter
     @Getter
-    private InventoryPattern pattern;
+    private       InventoryPattern   pattern;
     @Getter
     @Setter
-    private int order;
-    private boolean hasPrevious = true;
+    private       int                order;
+    private       boolean            hasPrevious = true;
 
     @Getter
     private final String iconName;
@@ -49,7 +48,8 @@ public class Category implements ConfigurationSerializable {
     public Category(String name, String iconName, InventoryPattern pattern, int order) {
         this.name = name;
         this.iconName = iconName;
-        this.iconItem = CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(iconName).getItemStack());
+        this.iconItem =
+                CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(iconName).getItemStack());
         this.pattern = pattern;
         this.order = order;
     }
@@ -96,6 +96,9 @@ public class Category implements ConfigurationSerializable {
     }
 
     public static Category copy(Category category) {
-        return new Category(category.getName(), category.getIconName(), InventoryPattern.copy(category.getPattern()), category.getOrder());
+        return new Category(category.getName(),
+                category.getIconName(),
+                InventoryPattern.copy(category.getPattern()),
+                category.getOrder());
     }
 }

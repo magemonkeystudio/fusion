@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -46,7 +45,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
                 ProfessionGuiRegistry eq = ProfessionsCfg.getGuiMap().get(args[1]);
                 if (eq == null) {
-                    MessageUtil.sendMessage("fusion.notACrafting",
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                             sender,
                             new MessageData("name", args[1]),
                             new MessageData("sender", sender));
@@ -58,7 +57,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     }
                     Player target = Bukkit.getPlayer(args[2]);
                     if (target == null) {
-                        MessageUtil.sendMessage("notAPlayer",
+                        CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
                                 sender,
                                 new MessageData("name", args[2]),
                                 new MessageData("sender", sender));
@@ -68,7 +67,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     //TODO ?? Make sure they have unlocked this crafting menu
 
                     eq.open(target);
-                    MessageUtil.sendMessage("fusion.useConfirmOther",
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.useConfirmOther",
                             sender,
                             new MessageData("craftingInventory", eq),
                             new MessageData("sender", sender),
@@ -81,34 +80,36 @@ public class Commands implements CommandExecutor, TabCompleter {
                         }
                         //Make sure they have unlocked this crafting menu
                         if (!PlayerLoader.getPlayer(player).hasProfession(eq.getProfession())) {
-                            if(player.isOp()) {
+                            if (player.isOp()) {
                                 eq.open(player);
-                                MessageUtil.sendMessage("fusion.useConfirm",
+                                CodexEngine.get().getMessageUtil().sendMessage("fusion.useConfirm",
                                         sender,
                                         new MessageData("craftingInventory", eq),
                                         new MessageData("player", sender));
                                 return true;
                             }
-                            MessageUtil.sendMessage("fusion.error.notUnlocked", sender);
+                            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.notUnlocked", sender);
                             return true;
                         }
                         eq.open((Player) sender);
-                        MessageUtil.sendMessage("fusion.useConfirm",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.useConfirm",
                                 sender,
                                 new MessageData("craftingInventory", eq),
                                 new MessageData("player", sender));
                         return true;
                     } else {
-                        MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
-                                new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                        CodexEngine.get()
+                                .getMessageUtil()
+                                .sendMessage("fusion.help", sender, new MessageData("sender", sender),
+                                        new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                     }
                 }
             } else if (args[0].equalsIgnoreCase("master")) {
                 if (sender instanceof Player player) {
-                    String guiName = args[1];
-                    CraftingTable table = ProfessionsCfg.getTable(guiName);
+                    String        guiName = args[1];
+                    CraftingTable table   = ProfessionsCfg.getTable(guiName);
                     if (table == null) {
-                        MessageUtil.sendMessage("fusion.notACrafting",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                                 sender,
                                 new MessageData("name", args[1]),
                                 new MessageData("sender", sender));
@@ -116,7 +117,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     }
 
                     if (PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasMastered(table.getName())) {
-                        MessageUtil.sendMessage("fusion.error.alreadyMastered",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.error.alreadyMastered",
                                 sender,
                                 new MessageData("sender", sender),
                                 new MessageData("craftingTable", table));
@@ -124,7 +125,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     }
 
                     if (LevelFunction.getLevel(player, table) < table.getMasteryUnlock()) {
-                        MessageUtil.sendMessage("fusion.error.noMasteryLevel",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noMasteryLevel",
                                 sender,
                                 new MessageData("sender", sender),
                                 new MessageData("craftingTable", table));
@@ -132,7 +133,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                     }
 
                     if (!CodexEngine.get().getVault().canPay(player, table.getMasteryFee())) {
-                        MessageUtil.sendMessage("fusion.error.noMasteryFunds",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noMasteryFunds",
                                 sender,
                                 new MessageData("sender", sender),
                                 new MessageData("craftingTable", table));
@@ -140,29 +141,32 @@ public class Commands implements CommandExecutor, TabCompleter {
                     }
                     FusionAPI.getEventServices().getProfessionService().masterProfession(table.getName(), player, true);
                     PlayerLoader.getPlayer(((Player) sender).getUniqueId()).setMastered(table.getName(), true);
-                    MessageUtil.sendMessage("fusion.mastered",
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.mastered",
                             sender,
                             new MessageData("sender", sender),
                             new MessageData("craftingTable", table));
                     return true;
                 } else {
-                    MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
-                            new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("fusion.help", sender, new MessageData("sender", sender),
+                                    new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             } else if (args[0].equalsIgnoreCase("forget")) {
                 if (sender instanceof Player player) {
                     CraftingTable table = ProfessionsCfg.getTable(args[1]);
                     if (table == null) {
-                        MessageUtil.sendMessage("fusion.notACrafting",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                                 sender,
                                 new MessageData("name", args[1]),
                                 new MessageData("sender", sender));
                         return true;
                     }
-                    ConfirmationAction action = () -> FusionAPI.getEventServices().getProfessionService().leaveProfession(table, player);
+                    ConfirmationAction action =
+                            () -> FusionAPI.getEventServices().getProfessionService().leaveProfession(table, player);
 
                     confirmation.put(player.getUniqueId().toString(), action);
-                    MessageUtil.sendMessage("fusion.forget.confirm",
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.forget.confirm",
                             sender,
                             new MessageData("sender", sender),
                             new MessageData("craftingTable", table));
@@ -172,36 +176,44 @@ public class Commands implements CommandExecutor, TabCompleter {
 
                     return true;
                 } else {
-                    MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
-                            new MessageData("text", label + " " + StringUtils.join(args, ' ')));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("fusion.help", sender, new MessageData("sender", sender),
+                                    new MessageData("text", label + " " + StringUtils.join(args, ' ')));
                 }
             } else if (args[0].equalsIgnoreCase("storage")) {
                 String storage = args[1];
                 DatabaseType type =
-                        DatabaseType.valueOf(Objects.requireNonNull(Cfg.getConfig()).getString("storage.type", "LOCALE").toUpperCase());
+                        DatabaseType.valueOf(Objects.requireNonNull(Cfg.getConfig())
+                                .getString("storage.type", "LOCALE")
+                                .toUpperCase());
                 switch (storage.toLowerCase()) {
                     case "local":
                         if (type == DatabaseType.LOCAL) {
-                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.alreadyUsedStorage",
                                     sender,
                                     new MessageData("storage", storage));
                             return true;
                         }
                         SQLManager.swapToLocal();
-                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        CodexEngine.get()
+                                .getMessageUtil()
+                                .sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
                         break;
                     case "sql":
                         if (type == DatabaseType.MARIADB || type == DatabaseType.MYSQL) {
-                            MessageUtil.sendMessage("fusion.error.alreadyUsedStorage",
+                            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.alreadyUsedStorage",
                                     sender,
                                     new MessageData("storage", storage));
                             return true;
                         }
                         SQLManager.swapToSql();
-                        MessageUtil.sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
+                        CodexEngine.get()
+                                .getMessageUtil()
+                                .sendMessage("fusion.storageChanged", sender, new MessageData("storage", storage));
                         break;
                     default:
-                        MessageUtil.sendMessage("fusion.error.invalidStorage",
+                        CodexEngine.get().getMessageUtil().sendMessage("fusion.error.invalidStorage",
                                 sender,
                                 new MessageData("storage", storage));
                         break;
@@ -212,31 +224,42 @@ public class Commands implements CommandExecutor, TabCompleter {
                     if (ProfessionsCfg.getGuiMap().containsKey(args[1])) {
                         BrowseGUI.joinProfession(player, ProfessionsCfg.getGUI(args[1]));
                     } else {
-                        MessageUtil.sendMessage("fusion.notACrafting", sender, new MessageData("name", args[1]), new MessageData("sender", sender));
+                        CodexEngine.get()
+                                .getMessageUtil()
+                                .sendMessage("fusion.notACrafting",
+                                        sender,
+                                        new MessageData("name", args[1]),
+                                        new MessageData("sender", sender));
                     }
                 } else {
-                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                 }
                 return true;
             }
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("browse")) {
                 if (!(sender instanceof Player player)) {
-                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                if(player.isPermissionSet("fusion.browse") && !player.hasPermission("fusion.browse")) {
+                if (player.isPermissionSet("fusion.browse") && !player.hasPermission("fusion.browse")) {
                     return true;
                 }
                 BrowseGUI.open(player);
                 return true;
             } else if (args[0].equalsIgnoreCase("level")) {
                 if (!(sender instanceof Player)) {
-                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
-                for(Profession profession : PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions()) {
-                    MessageUtil.sendMessage("fusion.level.format", sender,
+                for (Profession profession : PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions()) {
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.level.format", sender,
                             new MessageData("category", profession.getName()),
                             new MessageData("level", profession.getLevel()),
                             new MessageData("experience",
@@ -247,11 +270,13 @@ public class Commands implements CommandExecutor, TabCompleter {
                 return true;
             } else if (args[0].equalsIgnoreCase("auto")) {
                 if (!(sender instanceof Player player)) {
-                    MessageUtil.sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("senderIsNotPlayer", sender, new MessageData("sender", sender));
                     return true;
                 }
                 if (Cfg.craftingQueue) {
-                    MessageUtil.sendMessage("fusion.error.autoDisabled", sender);
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.error.autoDisabled", sender);
                     return true;
                 }
                 if (!instance.checkPermission(sender, "fusion.auto")) {
@@ -261,7 +286,9 @@ public class Commands implements CommandExecutor, TabCompleter {
                 boolean autoOn = PlayerLoader.getPlayer(player).isAutoCrafting();
 
                 PlayerLoader.getPlayer(player).setAutoCrafting((autoOn = !autoOn));
-                MessageUtil.sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
 
                 return true;
             } else if (args[0].equalsIgnoreCase("confirm")) {
@@ -271,7 +298,9 @@ public class Commands implements CommandExecutor, TabCompleter {
                     confirmation.get(id).doAction();
                     confirmation.remove(id);
                 } else {
-                    MessageUtil.sendMessage("fusion.nothingToConfirm", sender, new MessageData("sender", sender));
+                    CodexEngine.get()
+                            .getMessageUtil()
+                            .sendMessage("fusion.nothingToConfirm", sender, new MessageData("sender", sender));
                 }
 
                 return true;
@@ -282,11 +311,13 @@ public class Commands implements CommandExecutor, TabCompleter {
                 instance.closeAll();
                 instance.reloadConfig();
                 instance.reloadLang();
-                MessageUtil.sendMessage("fusion.reload", sender, new MessageData("sender", sender));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("fusion.reload", sender, new MessageData("sender", sender));
                 return true;
             }
         }
-        MessageUtil.sendMessage("fusion.help", sender, new MessageData("sender", sender),
+        CodexEngine.get().getMessageUtil().sendMessage("fusion.help", sender, new MessageData("sender", sender),
                 new MessageData("text", label + " " + StringUtils.join(args, ' ')));
         return true;
     }
@@ -336,8 +367,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                         if (name.startsWith(args[1])) entries.add(name);
                     }
                 }
-            }
-            else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
+            } else if (args[0].equalsIgnoreCase("storage") && Fusion.getInstance()
                     .checkPermission(sender, "fusion.admin")) {
                 if ("local".startsWith(args[1])) entries.add("local");
                 if ("sql".startsWith(args[1])) entries.add("sql");

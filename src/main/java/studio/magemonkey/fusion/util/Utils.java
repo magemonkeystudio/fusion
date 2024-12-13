@@ -34,7 +34,7 @@ public final class Utils {
     }
 
     public static String getItemName(ItemStack item) {
-        if(!item.hasItemMeta()) {
+        if (!item.hasItemMeta()) {
             String name = item.getType().name().replace("_", " ").toLowerCase();
             return name.substring(0, 1).toUpperCase() + name.substring(1);
         } else {

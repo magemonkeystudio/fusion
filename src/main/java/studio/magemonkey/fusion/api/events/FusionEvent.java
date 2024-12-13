@@ -19,7 +19,7 @@ public class FusionEvent extends Event implements Cancellable {
     /**
      * The name of the profession
      */
-    private final String professionName;
+    private final String        professionName;
     /**
      * The crafting table
      */
@@ -27,11 +27,11 @@ public class FusionEvent extends Event implements Cancellable {
     /**
      * The player
      */
-    private final Player player;
+    private final Player        player;
     /**
      * The fusion player instance of the player
      */
-    private final FusionPlayer fusionPlayer;
+    private final FusionPlayer  fusionPlayer;
 
     /**
      * Constructor for the FusionEvent

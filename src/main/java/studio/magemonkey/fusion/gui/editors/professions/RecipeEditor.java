@@ -15,11 +15,14 @@ import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class RecipeEditor extends Editor implements Listener {
 
-    private final Player player;
+    private final Player        player;
     @Getter
     private final CraftingTable table;
 
@@ -42,17 +45,20 @@ public class RecipeEditor extends Editor implements Listener {
         slots.clear();
         getNestedInventories().clear();
 
-        HashMap<Integer, Recipe> invSlots = new HashMap<>();
-        List<Inventory> inventories = new ArrayList<>();
-        Inventory inv = null;
-        int invSlot = 0;
-        Collection<Recipe> recipes = table.getRecipes().values();
+        HashMap<Integer, Recipe> invSlots    = new HashMap<>();
+        List<Inventory>          inventories = new ArrayList<>();
+        Inventory                inv         = null;
+        int                      invSlot     = 0;
+        Collection<Recipe>       recipes     = table.getRecipes().values();
         for (Recipe entry : recipes) {
             int invDex = invSlot % 36 + 9;
             if (invDex == 9) {
                 if (inv != null)
                     inventories.add(inv);
-                inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
+                inv = InventoryUtils.createFilledInventory(null,
+                        EditorRegistry.getRecipeEditorCfg().getTitle(),
+                        54,
+                        getIcons().get("fill"));
                 inv.setItem(4, getIcons().get("add"));
                 inv.setItem(48, getIcons().get("previous"));
                 inv.setItem(50, getIcons().get("next"));
@@ -65,7 +71,10 @@ public class RecipeEditor extends Editor implements Listener {
             invSlot++;
         }
         if (inv == null) {
-            inv = InventoryUtils.createFilledInventory(null, EditorRegistry.getRecipeEditorCfg().getTitle(), 54, getIcons().get("fill"));
+            inv = InventoryUtils.createFilledInventory(null,
+                    EditorRegistry.getRecipeEditorCfg().getTitle(),
+                    54,
+                    getIcons().get("fill"));
             inv.setItem(4, getIcons().get("add"));
             inv.setItem(48, getIcons().get("previous"));
             inv.setItem(50, getIcons().get("next"));
@@ -80,7 +89,8 @@ public class RecipeEditor extends Editor implements Listener {
     }
 
     public void open(Player player, int page) {
-        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page) : getNestedInventories().get(page - 1));
+        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page)
+                : getNestedInventories().get(page - 1));
     }
 
     @EventHandler
@@ -88,19 +98,21 @@ public class RecipeEditor extends Editor implements Listener {
         int invdex = getNestedInventories().indexOf(event.getInventory());
         if (invdex < 0) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
-        int slot = event.getSlot();
-        int size = getNestedInventories().size();
+        Player  player     = (Player) event.getWhoClicked();
+        int     slot       = event.getSlot();
+        int     size       = getNestedInventories().size();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 4 ->
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Recipe_Add, "/fusion-editor <recipeName> <resultItem> <amount>");
+            case 4 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Profession_Recipe_Add,
+                    "/fusion-editor <recipeName> <resultItem> <amount>");
             case 48 -> open(player, (size + invdex - 1) % size);
             case 50 -> open(player, (invdex + 1) % size);
             case 53 -> openParent(player);
             default -> {
-                if (slots.containsKey(getNestedInventories().get(invdex)) && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
+                if (slots.containsKey(getNestedInventories().get(invdex))
+                        && slots.get(getNestedInventories().get(invdex)).containsKey(slot)) {
                     Recipe entry = slots.get(getNestedInventories().get(invdex)).get(slot);
                     if (!event.isShiftClick()) {
                         if (event.isLeftClick()) {

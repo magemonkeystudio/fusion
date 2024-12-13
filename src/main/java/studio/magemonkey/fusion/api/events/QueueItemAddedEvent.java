@@ -16,7 +16,7 @@ public class QueueItemAddedEvent extends FusionEvent {
     /**
      * The queue item
      */
-    private final QueueItem queueItem;
+    private final QueueItem     queueItem;
 
     /**
      * Constructor for the QueueItemAddedEvent

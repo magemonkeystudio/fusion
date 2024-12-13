@@ -39,7 +39,7 @@ public class CustomGUI implements Listener {
     protected final     String             inventoryName;
     @Getter
     @Setter
-    protected Inventory inventory;
+    protected           Inventory          inventory;
     protected           Slot[]             slots;
     protected final     ArrayList<Integer> resultSlots  = new ArrayList<>(20);
     protected final     ArrayList<Integer> blockedSlots = new ArrayList<>(20);
@@ -275,7 +275,7 @@ public class CustomGUI implements Listener {
         if (!(e.getWhoClicked() instanceof Player)) {
             return;
         }
-        if(e.getInventory().equals(this.inventory)) {
+        if (e.getInventory().equals(this.inventory)) {
             if (e.getOldCursor().getType() == Material.BARRIER)
                 e.setCancelled(true);
             if (e.getRawSlots()
@@ -296,7 +296,7 @@ public class CustomGUI implements Listener {
     @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if(this.getInventory().getViewers().contains(player)) {
+        if (this.getInventory().getViewers().contains(player)) {
             ItemStack stack = event.getItemDrop().getItemStack();
             if (stack.getType() == Material.BARRIER) {
                 event.getItemDrop().remove();
@@ -319,7 +319,7 @@ public class CustomGUI implements Listener {
             return;
         }
         Inventory pInventory = p.getInventory();
-        if(inv.equals(this.inventory)) {
+        if (inv.equals(this.inventory)) {
             for (int i = 0; i < this.slots.length; i++) {
                 if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT)
                         || this.slots[i].equals(Slot.QUEUED_SLOT)) {

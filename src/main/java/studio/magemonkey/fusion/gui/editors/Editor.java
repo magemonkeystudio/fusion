@@ -14,15 +14,15 @@ import java.util.Map;
 @Getter
 public class Editor {
 
-    private final Editor parentEditor;
-    private final String title;
-    private final int size;
+    private final Editor                 parentEditor;
+    private final String                 title;
+    private final int                    size;
     @Setter
-    private Map<String, ItemStack> icons;
+    private       Map<String, ItemStack> icons;
 
-    private final Inventory inventory;
+    private final Inventory       inventory;
     @Setter
-    private List<Inventory> nestedInventories;
+    private       List<Inventory> nestedInventories;
 
     public Editor(Editor parentEditor, String title, int size) {
         this.parentEditor = parentEditor;

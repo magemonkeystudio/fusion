@@ -12,21 +12,20 @@ import java.util.List;
 import java.util.Map;
 
 public final class Cfg {
-    public static String  recursive                 = "floor(n+300^(n/7)^2)";
-    public static String  finalMod                  = "floor(x)/4";
-    public static long    dataSaveInterval          = 12000;
-    public static double  forgetPenalty             = 0.2d;
-    public static boolean craftingQueue             = true;
-    public static int     finishedMessageInterval   = 300;
-    public static boolean updateQueueOffline        = true;
-    public static boolean showRequirementsOnBrowse  = true;
+    public static String  recursive                = "floor(n+300^(n/7)^2)";
+    public static String  finalMod                 = "floor(x)/4";
+    public static long    dataSaveInterval         = 12000;
+    public static double  forgetPenalty            = 0.2d;
+    public static boolean craftingQueue            = true;
+    public static int     finishedMessageInterval  = 300;
+    public static boolean updateQueueOffline       = true;
+    public static boolean showRequirementsOnBrowse = true;
 
-    public static boolean hideRecipesNoPermission   = false;
-    public static boolean hideRecipesNoRank   = false;
-    public static boolean hideRecipesLimitReached   = false;
+    public static boolean hideRecipesNoPermission = false;
+    public static boolean hideRecipesNoRank       = false;
+    public static boolean hideRecipesLimitReached = false;
 
-    public static String  finishMessage             = "&aYou have crafting items ready for pickup! ($<amount>)";
-
+    public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
 
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
@@ -78,9 +77,11 @@ public final class Cfg {
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
         if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
-        if (!cfg.isSet("hideRecipesDefault.noPermission")) cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
+        if (!cfg.isSet("hideRecipesDefault.noPermission"))
+            cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
         if (!cfg.isSet("hideRecipesDefault.noRank")) cfg.set("hideRecipesDefault.noRank", hideRecipesNoRank);
-        if (!cfg.isSet("hideRecipesDefault.recipeLimitReached")) cfg.set("hideRecipesDefault.recipeLimitReached", hideRecipesLimitReached);
+        if (!cfg.isSet("hideRecipesDefault.recipeLimitReached"))
+            cfg.set("hideRecipesDefault.recipeLimitReached", hideRecipesLimitReached);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
         if (!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);

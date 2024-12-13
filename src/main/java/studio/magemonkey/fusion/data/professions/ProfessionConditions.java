@@ -21,9 +21,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
+import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fabled.Fabled;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
@@ -34,7 +34,6 @@ import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,27 +46,27 @@ public class ProfessionConditions implements ConfigurationSerializable {
 
     // Costs
     @Setter
-    private double moneyCost;
+    private   double                 moneyCost;
     @Setter
-    private int expCost;
+    private   int                    expCost;
     protected LinkedList<RecipeItem> requiredItems = new LinkedList<>();
 
     // Conditions
     @Setter
-    private int professionLevel;
+    private int     professionLevel;
     @Setter
     private boolean isMastery;
     @Setter
-    private String rank;
+    private String  rank;
 
-    private final Map<String, Integer> professionConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> fabledClassConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> mcMMOConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> jobsConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> auraAbilityConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> professionConditions      = new LinkedHashMap<>();
+    private final Map<String, Integer> fabledClassConditions     = new LinkedHashMap<>();
+    private final Map<String, Integer> mcMMOConditions           = new LinkedHashMap<>();
+    private final Map<String, Integer> jobsConditions            = new LinkedHashMap<>();
+    private final Map<String, Integer> auraAbilityConditions     = new LinkedHashMap<>();
     private final Map<String, Integer> auraManaAbilityConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> auraSkillsConditions = new LinkedHashMap<>();
-    private final Map<String, Integer> auraStatsConditions = new LinkedHashMap<>();
+    private final Map<String, Integer> auraSkillsConditions      = new LinkedHashMap<>();
+    private final Map<String, Integer> auraStatsConditions       = new LinkedHashMap<>();
 
     @Getter
     protected List<Object> requiredItemNames = new LinkedList<>();
@@ -91,7 +90,9 @@ public class ProfessionConditions implements ConfigurationSerializable {
         this.moneyCost = moneyCost;
         this.expCost = expCost;
         this.requiredItemNames = requiredItemNames;
-        this.requiredItems = requiredItemNames.stream().map(RecipeItem::fromConfig).collect(Collectors.toCollection(LinkedList::new));
+        this.requiredItems = requiredItemNames.stream()
+                .map(RecipeItem::fromConfig)
+                .collect(Collectors.toCollection(LinkedList::new));
         this.professionLevel = professionLevel;
         this.isMastery = isMastery;
         this.rank = rank;
@@ -120,50 +121,58 @@ public class ProfessionConditions implements ConfigurationSerializable {
         this.rank = config.getString("conditions.rank");
 
         if (config.isSet("conditions.professions")) {
-            for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.professions")).getKeys(false)) {
+            for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.professions"))
+                    .getKeys(false)) {
                 professionConditions.put(key, config.getInt("conditions.professions." + key));
             }
         }
 
         if (config.isSet("conditions.fabled")) {
             if (Fusion.getHookManager().isHooked(HookType.Fabled)) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.fabled")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.fabled"))
+                        .getKeys(false)) {
                     fabledClassConditions.put(key, config.getInt("conditions.fabled." + key));
                 }
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.mcMMO)) {
             if (config.isSet("conditions.mcmmo")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.mcmmo")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.mcmmo"))
+                        .getKeys(false)) {
                     mcMMOConditions.put(key, config.getInt("conditions.mcmmo." + key));
                 }
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.Jobs)) {
             if (config.isSet("conditions.jobs")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.jobs")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.jobs"))
+                        .getKeys(false)) {
                     jobsConditions.put(key, config.getInt("conditions.jobs." + key));
                 }
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.AuraSkills)) {
             if (config.isSet("conditions.aura_abilities")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_abilities")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_abilities"))
+                        .getKeys(false)) {
                     auraAbilityConditions.put(key, config.getInt("conditions.aura_abilities." + key));
                 }
             }
             if (config.isSet("conditions.aura_mana_abilities")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_mana_abilities")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_mana_abilities"))
+                        .getKeys(false)) {
                     auraAbilityConditions.put(key, config.getInt("conditions.aura_mana_abilities." + key));
                 }
             }
             if (config.isSet("conditions.aura_skills")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_skills")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_skills"))
+                        .getKeys(false)) {
                     auraSkillsConditions.put(key, config.getInt("conditions.aura_skills." + key));
                 }
             }
             if (config.isSet("conditions.aura_stats")) {
-                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_stats")).getKeys(false)) {
+                for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.aura_stats"))
+                        .getKeys(false)) {
                     auraSkillsConditions.put(key, config.getInt("conditions.aura_stats." + key));
                 }
             }
@@ -254,9 +263,9 @@ public class ProfessionConditions implements ConfigurationSerializable {
     }
 
     public boolean isValid(FusionPlayer player) {
-        Player _player = player.getPlayer();
-        int unlocked = player.getJoinedProfessions().size();
-        int allowed = PlayerUtil.getPermOption(_player, "fusion.limit");
+        Player _player  = player.getPlayer();
+        int    unlocked = player.getJoinedProfessions().size();
+        int    allowed  = PlayerUtil.getPermOption(_player, "fusion.limit");
 
         MessageData[] data = {
                 new MessageData("profession", profession),
@@ -275,57 +284,64 @@ public class ProfessionConditions implements ConfigurationSerializable {
 
         if (player.hasProfession(profession)) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.browse.alreadyUnlocked", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.alreadyUnlocked", _player, data);
             return false;
         }
 
         if (unlocked >= allowed) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.limitReached", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.limitReached", _player, data);
             return false;
         }
 
         if (moneyCost > 0 && !CodexEngine.get().getVault().canPay(_player, moneyCost)) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.browse.noFundsMoney", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noFundsMoney", _player, data);
             return false;
         }
 
 
         if (expCost > 0 && ExperienceManager.getTotalExperience(_player) < expCost) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.browse.noFundsExperience", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noFundsExperience", _player, data);
             return false;
         }
 
         if (professionLevel > 0 && player.getProfession(profession).getLevel() < professionLevel) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.noLevel", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noLevel", _player, data);
             return false;
         }
 
         if (isMastery && !player.getProfession(profession).isMastered()) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.noMastery", _player, data);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noMastery", _player, data);
             return false;
         }
 
         if (rank != null && !player.getPlayer().hasPermission("fusion.rank." + rank)) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.gui.professions.rank." + rank, player.getPlayer());
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.gui.professions.rank." + rank, player.getPlayer());
             return false;
         }
 
         for (Map.Entry<String, Integer> entry : professionConditions.entrySet()) {
             if (!BrowseConfig.getProfessions().contains(entry.getKey())) {
-                Fusion.getInstance().getLogger().warning("Invalid profession-condition in browse.yml: " + entry.getKey());
+                Fusion.getInstance()
+                        .getLogger()
+                        .warning("Invalid profession-condition in browse.yml: " + entry.getKey());
                 continue;
             }
             if (player.getProfession(entry.getKey()).getLevel() < entry.getValue()) {
                 _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                 data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.profession", entry.getKey(), new MessageData("profession", entry.getKey())));
-                MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                data[data.length - 1] = new MessageData("condition.name",
+                        CodexEngine.get()
+                                .getMessageUtil()
+                                .getMessageAsString("fusion.conditionFormatting.profession",
+                                        entry.getKey(),
+                                        new MessageData("profession", entry.getKey())));
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                 return false;
             }
         }
@@ -333,15 +349,23 @@ public class ProfessionConditions implements ConfigurationSerializable {
         if (Fusion.getHookManager().isHooked(HookType.Fabled)) {
             for (Map.Entry<String, Integer> entry : fabledClassConditions.entrySet()) {
                 if (!Fabled.getClasses().containsKey(entry.getKey())) {
-                    Fusion.getInstance().getLogger().warning("Invalid fabled-class condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid fabled-class condition in browse.yml: " + entry.getKey());
                     continue;
                 }
                 int level = Fabled.getPlayerAccounts(_player).getActiveData().getClass(entry.getKey()).getLevel();
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.fabled", entry.getKey(), new MessageData("class", Fabled.getClasses().get(entry.getKey()).getName())));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.fabled",
+                                            entry.getKey(),
+                                            new MessageData("class",
+                                                    Fabled.getClasses().get(entry.getKey()).getName())));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -351,7 +375,9 @@ public class ProfessionConditions implements ConfigurationSerializable {
             for (Map.Entry<String, Integer> entry : mcMMOConditions.entrySet()) {
                 PrimarySkillType skill = PrimarySkillType.getSkill(entry.getKey().toUpperCase());
                 if (skill == null) {
-                    Fusion.getInstance().getLogger().warning("Invalid mcmmo-skill condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid mcmmo-skill condition in browse.yml: " + entry.getKey());
                     continue;
                 }
 
@@ -359,8 +385,13 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.mcmmo", entry.getKey(), new MessageData("skill", skill.getName())));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.mcmmo",
+                                            entry.getKey(),
+                                            new MessageData("skill", skill.getName())));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -374,12 +405,17 @@ public class ProfessionConditions implements ConfigurationSerializable {
                     continue;
                 }
                 JobProgression progression = Jobs.getPlayerManager().getJobsPlayer(_player).getJobProgression(job);
-                int level = progression != null ? progression.getLevel() : 0;
+                int            level       = progression != null ? progression.getLevel() : 0;
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.jobs", entry.getKey(), new MessageData("job", job.getDisplayName())));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.jobs",
+                                            entry.getKey(),
+                                            new MessageData("job", job.getDisplayName())));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -388,9 +424,12 @@ public class ProfessionConditions implements ConfigurationSerializable {
         if (Fusion.getHookManager().isHooked(HookType.AuraSkills)) {
             SkillsUser user = AuraSkillsApi.get().getUser(_player.getUniqueId());
             for (Map.Entry<String, Integer> entry : auraAbilityConditions.entrySet()) {
-                Ability ability = AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(entry.getKey()));
+                Ability ability =
+                        AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) {
-                    Fusion.getInstance().getLogger().warning("Invalid aura-ability condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid aura-ability condition in browse.yml: " + entry.getKey());
                     continue;
                 }
 
@@ -398,16 +437,24 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.auraAbility", entry.getKey(), new MessageData("ability", ability.getDisplayName(Locale.ENGLISH))));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.auraAbility",
+                                            entry.getKey(),
+                                            new MessageData("ability", ability.getDisplayName(Locale.ENGLISH))));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
 
             for (Map.Entry<String, Integer> entry : auraManaAbilityConditions.entrySet()) {
-                ManaAbility ability = AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(entry.getKey()));
+                ManaAbility ability =
+                        AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) {
-                    Fusion.getInstance().getLogger().warning("Invalid aura-mana-ability condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid aura-mana-ability condition in browse.yml: " + entry.getKey());
                     continue;
                 }
 
@@ -415,8 +462,13 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.auraManaAbility", entry.getKey(), new MessageData("ability", ability.getDisplayName(Locale.ENGLISH))));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.auraManaAbility",
+                                            entry.getKey(),
+                                            new MessageData("ability", ability.getDisplayName(Locale.ENGLISH))));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -424,15 +476,22 @@ public class ProfessionConditions implements ConfigurationSerializable {
             for (Map.Entry<String, Integer> entry : auraSkillsConditions.entrySet()) {
                 Skill skill = AuraSkillsApi.get().getGlobalRegistry().getSkill(NamespacedId.fromString(entry.getKey()));
                 if (skill == null) {
-                    Fusion.getInstance().getLogger().warning("Invalid aura-skill condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid aura-skill condition in browse.yml: " + entry.getKey());
                     continue;
                 }
                 int level = user.getSkillLevel(skill);
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.auraSkill", entry.getKey(), new MessageData("skill", skill.getDisplayName(Locale.ENGLISH))));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.auraSkill",
+                                            entry.getKey(),
+                                            new MessageData("skill", skill.getDisplayName(Locale.ENGLISH))));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -440,15 +499,22 @@ public class ProfessionConditions implements ConfigurationSerializable {
             for (Map.Entry<String, Integer> entry : auraStatsConditions.entrySet()) {
                 Stat stat = AuraSkillsApi.get().getGlobalRegistry().getStat(NamespacedId.fromString(entry.getKey()));
                 if (stat == null) {
-                    Fusion.getInstance().getLogger().warning("Invalid aura-stat condition in browse.yml: " + entry.getKey());
+                    Fusion.getInstance()
+                            .getLogger()
+                            .warning("Invalid aura-stat condition in browse.yml: " + entry.getKey());
                     continue;
                 }
                 double level = user.getStatLevel(stat);
                 if (level < entry.getValue()) {
                     _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
                     data[data.length - 2] = new MessageData("condition.level", entry.getValue());
-                    data[data.length - 1] = new MessageData("condition.name", MessageUtil.getMessageAsString("fusion.conditionFormatting.auraSkill", entry.getKey(), new MessageData("skill", stat.name())));
-                    MessageUtil.sendMessage("fusion.browse.noConditionLevel", _player, data);
+                    data[data.length - 1] = new MessageData("condition.name",
+                            CodexEngine.get()
+                                    .getMessageUtil()
+                                    .getMessageAsString("fusion.conditionFormatting.auraSkill",
+                                            entry.getKey(),
+                                            new MessageData("skill", stat.name())));
+                    CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.noConditionLevel", _player, data);
                     return false;
                 }
             }
@@ -470,59 +536,108 @@ public class ProfessionConditions implements ConfigurationSerializable {
     }
 
     public List<Map.Entry<Boolean, String>> getConditionLines(Player player) {
-        FusionPlayer fusionPlayer = PlayerLoader.getPlayer(player.getUniqueId());
-        List<Map.Entry<Boolean, String>> lines = new ArrayList<>();
+        FusionPlayer                     fusionPlayer = PlayerLoader.getPlayer(player.getUniqueId());
+        List<Map.Entry<Boolean, String>> lines        = new ArrayList<>();
 
         for (Map.Entry<String, Integer> entry : professionConditions.entrySet()) {
             Profession profession = fusionPlayer.getProfession(entry.getKey());
-            boolean condition = profession != null && profession.getLevel() >= entry.getValue();
-            lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "profession", entry.getKey(), profession != null ? profession.getLevel() : 0, entry.getValue())));
+            boolean    condition  = profession != null && profession.getLevel() >= entry.getValue();
+            lines.add(Map.entry(condition,
+                    CraftingRequirementsCfg.getConditionLine("recipes",
+                            "profession",
+                            entry.getKey(),
+                            profession != null ? profession.getLevel() : 0,
+                            entry.getValue())));
         }
         if (Fusion.getHookManager().isHooked(HookType.Fabled)) {
             for (Map.Entry<String, Integer> entry : fabledClassConditions.entrySet()) {
-                boolean condition = Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel() >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "fabled", entry.getKey(), Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel(), entry.getValue())));
+                boolean condition = Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel()
+                        >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "fabled",
+                                entry.getKey(),
+                                Fabled.getPlayerAccounts(player).getActiveData().getClass(entry.getKey()).getLevel(),
+                                entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.mcMMO)) {
             for (Map.Entry<String, Integer> entry : mcMMOConditions.entrySet()) {
-                PrimarySkillType skill = PrimarySkillType.getSkill(entry.getKey().toUpperCase());
-                boolean condition = ExperienceAPI.getLevel(player, skill) >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "mcmmo", entry.getKey(), ExperienceAPI.getLevel(player, skill), entry.getValue())));
+                PrimarySkillType skill     = PrimarySkillType.getSkill(entry.getKey().toUpperCase());
+                boolean          condition = ExperienceAPI.getLevel(player, skill) >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "mcmmo",
+                                entry.getKey(),
+                                ExperienceAPI.getLevel(player, skill),
+                                entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.Jobs)) {
             for (Map.Entry<String, Integer> entry : jobsConditions.entrySet()) {
-                Job job = Jobs.getJob(entry.getKey());
+                Job            job         = Jobs.getJob(entry.getKey());
                 JobProgression progression = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job);
-                boolean condition = progression != null && Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job).getLevel() >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "jobs", entry.getKey(), progression != null ? progression.getLevel() : 0, entry.getValue())));
+                boolean condition = progression != null
+                        && Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression(job).getLevel()
+                        >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "jobs",
+                                entry.getKey(),
+                                progression != null ? progression.getLevel() : 0,
+                                entry.getValue())));
             }
         }
         if (Fusion.getHookManager().isHooked(HookType.AuraSkills)) {
             for (Map.Entry<String, Integer> entry : auraAbilityConditions.entrySet()) {
-                Ability ability = AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(entry.getKey()));
+                Ability ability =
+                        AuraSkillsApi.get().getGlobalRegistry().getAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) continue;
-                boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability) >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraAbility", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability), entry.getValue())));
+                boolean condition =
+                        AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability) >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "auraAbility",
+                                entry.getKey(),
+                                AuraSkillsApi.get().getUser(player.getUniqueId()).getAbilityLevel(ability),
+                                entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraManaAbilityConditions.entrySet()) {
-                ManaAbility ability = AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(entry.getKey()));
+                ManaAbility ability =
+                        AuraSkillsApi.get().getGlobalRegistry().getManaAbility(NamespacedId.fromString(entry.getKey()));
                 if (ability == null) continue;
-                boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability) >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraManaAbility", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability), entry.getValue())));
+                boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability)
+                        >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "auraManaAbility",
+                                entry.getKey(),
+                                AuraSkillsApi.get().getUser(player.getUniqueId()).getManaAbilityLevel(ability),
+                                entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraSkillsConditions.entrySet()) {
                 Skill skill = AuraSkillsApi.get().getGlobalRegistry().getSkill(NamespacedId.fromString(entry.getKey()));
                 if (skill == null) continue;
-                boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill) >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraSkill", entry.getKey(), AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill), entry.getValue())));
+                boolean condition =
+                        AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill) >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "auraSkill",
+                                entry.getKey(),
+                                AuraSkillsApi.get().getUser(player.getUniqueId()).getSkillLevel(skill),
+                                entry.getValue())));
             }
             for (Map.Entry<String, Integer> entry : auraStatsConditions.entrySet()) {
                 Stat stat = AuraSkillsApi.get().getGlobalRegistry().getStat(NamespacedId.fromString(entry.getKey()));
                 if (stat == null) continue;
-                boolean condition = AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat) >= entry.getValue();
-                lines.add(Map.entry(condition, CraftingRequirementsCfg.getConditionLine("recipes", "auraStat", entry.getKey(), (int) AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat), entry.getValue())));
+                boolean condition =
+                        AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat) >= entry.getValue();
+                lines.add(Map.entry(condition,
+                        CraftingRequirementsCfg.getConditionLine("recipes",
+                                "auraStat",
+                                entry.getKey(),
+                                (int) AuraSkillsApi.get().getUser(player.getUniqueId()).getStatLevel(stat),
+                                entry.getValue())));
             }
         }
         return lines;
@@ -587,14 +702,14 @@ public class ProfessionConditions implements ConfigurationSerializable {
     }
 
     public static ProfessionConditions copy(ProfessionConditions conditions) {
-        Map<String, Integer> professionConditions = new LinkedHashMap<>(conditions.getProfessionConditions());
-        Map<String, Integer> fabledClassConditions = new LinkedHashMap<>(conditions.getFabledClassConditions());
-        Map<String, Integer> mcMMOConditions = new LinkedHashMap<>(conditions.getMcMMOConditions());
-        Map<String, Integer> jobsConditions = new LinkedHashMap<>(conditions.getJobsConditions());
-        Map<String, Integer> auraAbilityConditions = new LinkedHashMap<>(conditions.getAuraAbilityConditions());
+        Map<String, Integer> professionConditions      = new LinkedHashMap<>(conditions.getProfessionConditions());
+        Map<String, Integer> fabledClassConditions     = new LinkedHashMap<>(conditions.getFabledClassConditions());
+        Map<String, Integer> mcMMOConditions           = new LinkedHashMap<>(conditions.getMcMMOConditions());
+        Map<String, Integer> jobsConditions            = new LinkedHashMap<>(conditions.getJobsConditions());
+        Map<String, Integer> auraAbilityConditions     = new LinkedHashMap<>(conditions.getAuraAbilityConditions());
         Map<String, Integer> auraManaAbilityConditions = new LinkedHashMap<>(conditions.getAuraManaAbilityConditions());
-        Map<String, Integer> auraSkillsConditions = new LinkedHashMap<>(conditions.getAuraSkillsConditions());
-        Map<String, Integer> auraStatsConditions = new LinkedHashMap<>(conditions.getAuraStatsConditions());
+        Map<String, Integer> auraSkillsConditions      = new LinkedHashMap<>(conditions.getAuraSkillsConditions());
+        Map<String, Integer> auraStatsConditions       = new LinkedHashMap<>(conditions.getAuraStatsConditions());
 
 
         return new ProfessionConditions(conditions.getProfession(),

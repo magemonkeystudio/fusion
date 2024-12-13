@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
@@ -21,16 +21,16 @@ import studio.magemonkey.fusion.util.InventoryUtils;
 @Getter
 public class ProfessionEditor extends Editor implements Listener {
 
-    private final Player player;
-    private final String profession;
+    private final Player        player;
+    private final String        profession;
     private final CraftingTable table;
 
     private PatternItemsEditor patternItemsEditor;
-    private PatternEditor patternEditor;
+    private PatternEditor      patternEditor;
     private PatternItemsEditor categoryPatternItemEditor;
-    private PatternEditor categoryPatternEditor;
-    private CategoryEditor categoryEditor;
-    private RecipeEditor recipeEditor;
+    private PatternEditor      categoryPatternEditor;
+    private CategoryEditor     categoryEditor;
+    private RecipeEditor       recipeEditor;
 
     public ProfessionEditor(Player player, String profession) {
         super(null, EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);
@@ -67,12 +67,16 @@ public class ProfessionEditor extends Editor implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory() != getInventory()) return;
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
+        Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Name, "/fusion-editor " + table.getName());
-            case 11 -> FusionEditorCommand.suggestUsage(player, EditorCriteria.Profession_Edit_Icon, "/fusion-editor DIVINITY_" + table.getIconItem().getID());
+            case 10 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Profession_Edit_Name,
+                    "/fusion-editor " + table.getName());
+            case 11 -> FusionEditorCommand.suggestUsage(player,
+                    EditorCriteria.Profession_Edit_Icon,
+                    "/fusion-editor DIVINITY_" + table.getIconItem().getID());
             case 12 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -125,19 +129,23 @@ public class ProfessionEditor extends Editor implements Listener {
                 categoryPatternItemEditor.open(player);
             }
             case 34 -> {
-                if(event.isLeftClick()) {
+                if (event.isLeftClick()) {
                     if (categoryPatternEditor == null)
                         categoryPatternEditor = new PatternEditor(this, player, table, true);
                     categoryPatternEditor.open(player);
-                } else if(event.isRightClick()) {
-                    if(table.getCatPattern() != null) {
+                } else if (event.isRightClick()) {
+                    if (table.getCatPattern() != null) {
                         table.getCatPattern().clear();
                     }
                 }
             }
             case 36 -> table.save(() -> {
                 player.closeInventory();
-                MessageUtil.sendMessage("editor.changesSaved", player, new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.changesSaved",
+                                player,
+                                new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
                 EditorRegistry.removeCurrentEditor(player);
                 FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
                 ProfessionsCfg.init();
@@ -156,7 +164,7 @@ public class ProfessionEditor extends Editor implements Listener {
     public void reload(boolean open) {
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
         initialize();
-        if(open)
+        if (open)
             open(player);
     }
 }

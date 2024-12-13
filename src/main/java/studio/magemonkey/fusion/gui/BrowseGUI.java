@@ -17,9 +17,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.BrowseConfig;
@@ -44,11 +44,11 @@ public class BrowseGUI implements Listener {
     private static final HashMap<UUID, BrowseGUI> map = new HashMap<>();
 
 
-    private Inventory inventory;
-    private final Map<Integer, String> slotMap = new HashMap<>();
-    private final Map<Integer, CalculatedProfession> calculatedProfessionMap = new HashMap<>();
-    protected final String inventoryName;
-    private final Player player;
+    private         Inventory                          inventory;
+    private final   Map<Integer, String>               slotMap                 = new HashMap<>();
+    private final   Map<Integer, CalculatedProfession> calculatedProfessionMap = new HashMap<>();
+    protected final String                             inventoryName;
+    private final   Player                             player;
 
     private final ArrayList<Integer> slots = new ArrayList<>();
 
@@ -97,7 +97,7 @@ public class BrowseGUI implements Listener {
             int k = this.slots.get(i);
 
             HashMap<Character, ItemStack> specItems = BrowseConfig.getBrowsePattern().getItems();
-            int slot = 0;
+            int                           slot      = 0;
             for (String pat : BrowseConfig.getBrowsePattern().getPattern()) {
                 for (char c : pat.toCharArray()) {
                     if (specItems.containsKey(c))
@@ -116,7 +116,11 @@ public class BrowseGUI implements Listener {
 
 
                 Collection<ItemStack> playerItems = PlayerUtil.getPlayerItems(player);
-                CalculatedProfession calculatedProfession = CalculatedProfession.create(BrowseConfig.getProfessionConditions(table.getName()), playerItems, player, table);
+                CalculatedProfession calculatedProfession =
+                        CalculatedProfession.create(BrowseConfig.getProfessionConditions(table.getName()),
+                                playerItems,
+                                player,
+                                table);
                 calculatedProfessionMap.put(k, calculatedProfession);
 
                 ItemStack item;
@@ -125,15 +129,15 @@ public class BrowseGUI implements Listener {
                 } else {
                     item = table.getIconItem() != null ? table.getIconItem().create()
                             : ItemBuilder.newItem(Material.BEDROCK)
-                            .name(ChatColor.RED + table.getName())
-                            .newLoreLine(ChatColor.RED + "Missing icon in config.")
-                            .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
-                            .build();
+                                    .name(ChatColor.RED + table.getName())
+                                    .newLoreLine(ChatColor.RED + "Missing icon in config.")
+                                    .newLoreLine(ChatColor.RED + "Add 'icon: econ-item' under the profession.")
+                                    .build();
                 }
 
                 // Set the profession name manually
                 ItemMeta meta = item.getItemMeta();
-                if(meta != null)
+                if (meta != null)
                     meta.setDisplayName(ChatUT.hexString(table.getInventoryName()));
                 item.setItemMeta(meta);
 
@@ -163,14 +167,16 @@ public class BrowseGUI implements Listener {
     public static void joinProfession(Player player, ProfessionGuiRegistry gui) {
         if (gui == null) return;
 
-        String profession = gui.getProfession();
+        String       profession   = gui.getProfession();
         FusionPlayer fusionPlayer = PlayerLoader.getPlayer(player.getUniqueId());
 
         ProfessionConditions conditions = BrowseConfig.getProfessionConditions(profession);
 
         if (conditions == null) {
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.profNotAvailable", player, new MessageData("profession", profession));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.profNotAvailable", player, new MessageData("profession", profession));
             return;
         }
 
@@ -178,11 +184,12 @@ public class BrowseGUI implements Listener {
             return;
 
         double moneyCost = conditions.getMoneyCost();
-        int expCost = conditions.getExpCost();
+        int    expCost   = conditions.getExpCost();
 
-        Collection<ItemStack> itemsToTake = new ArrayList<>(conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).toList());
-        Collection<ItemStack> taken = new ArrayList<>(itemsToTake.size());
-        PlayerInventory inventory = player.getInventory();
+        Collection<ItemStack> itemsToTake =
+                new ArrayList<>(conditions.getRequiredItems().stream().map(RecipeItem::getItemStack).toList());
+        Collection<ItemStack> taken     = new ArrayList<>(itemsToTake.size());
+        PlayerInventory       inventory = player.getInventory();
 
         for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
             ItemStack toTake = iterator.next();
@@ -219,7 +226,9 @@ public class BrowseGUI implements Listener {
 
         if (!itemsToTake.isEmpty()) {
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
-            MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("profession", profession));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.insufficientItems", player, new MessageData("profession", profession));
             return;
         }
 

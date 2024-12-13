@@ -18,10 +18,10 @@ public class SQLManager {
     @Getter
     private static volatile Connection connection;
 
-    private static FusionPlayersSQL         fusionPlayersSQL;
-    private static FusionProfessionsSQL     fusionProfessionsSQL;
-    private static FusionQueuesSQL          fusionQueuesSQL;
-    private static FusionRecipeLimitsSQL    fusionRecipeLimitsSQL;
+    private static FusionPlayersSQL      fusionPlayersSQL;
+    private static FusionProfessionsSQL  fusionProfessionsSQL;
+    private static FusionQueuesSQL       fusionQueuesSQL;
+    private static FusionRecipeLimitsSQL fusionRecipeLimitsSQL;
 
     private static String host;
     private static int    port;

@@ -19,7 +19,7 @@ import studio.magemonkey.fusion.util.Utils;
 import java.util.*;
 
 public class PlayerInitialGUI extends PlayerCustomGUI {
-    private final CustomGUI gui;
+    private final CustomGUI              gui;
     private final Map<Integer, Category> slotMap = new HashMap<>();
     private       boolean                isBase  = false;
 

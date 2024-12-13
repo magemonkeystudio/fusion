@@ -25,7 +25,6 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.codex.util.messages.MessageData;
-import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -48,11 +47,11 @@ import java.util.*;
 
 public class PlayerCustomGUI implements Listener {
     @Getter
-    private final CustomGUI gui;
+    private final CustomGUI                          gui;
     private final Player                             player;
     private final Inventory                          inventory;
     @Getter
-    private final Category category;
+    private final Category                           category;
     private final HashMap<Integer, CalculatedRecipe> recipes;
     private       int                                page   = 0;
     private       BukkitTask                         craftingTask;
@@ -62,7 +61,7 @@ public class PlayerCustomGUI implements Listener {
     private       ItemStack                          previousCursor;
 
     private boolean craftingSuccess = true;
-    private Recipe craftingRecipe  = null;
+    private Recipe  craftingRecipe  = null;
 
     /* Specifics if crafting_queue: true */
     private CraftingQueue queue;
@@ -151,7 +150,7 @@ public class PlayerCustomGUI implements Listener {
             else
                 gui.resetPattern();
             /* Default setup */
-            CraftingTable table      = ProfessionsCfg.getTable(this.gui.name);
+            CraftingTable      table      = ProfessionsCfg.getTable(this.gui.name);
             ItemStack          fill       = table.getFillItem();
             Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
             allRecipes.removeIf(r -> !Utils.hasCraftingPermission(player, r.getName()));
@@ -175,10 +174,10 @@ public class PlayerCustomGUI implements Listener {
                 return;
             }
 
-            Collection<ItemStack> playerItems       = getPlayerItems(this.player);
-            CalculatedRecipe[]    calculatedRecipes =
+            Collection<ItemStack> playerItems = getPlayerItems(this.player);
+            CalculatedRecipe[] calculatedRecipes =
                     new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
-            Recipe[]              allRecipesArray   = allRecipes.toArray(new Recipe[allRecipeCount]);
+            Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
 
             Integer[] slots = this.gui.resultSlots.toArray(new Integer[0]);
             for (int slot : slots) {
@@ -251,10 +250,11 @@ public class PlayerCustomGUI implements Listener {
             for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length);
                  (k < allRecipesArray.length) && (i < e);
                  k++, i++) {
-                Recipe           recipe           = allRecipesArray[k];
-                int              slot             = slots[i];
+                Recipe recipe = allRecipesArray[k];
+                int    slot   = slots[i];
                 try {
-                    CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
+                    CalculatedRecipe calculatedRecipe =
+                            CalculatedRecipe.create(recipe, playerItems, this.player, table);
                     this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                     this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
                 } catch (InvalidPatternItemException ignored) {
@@ -455,29 +455,36 @@ public class PlayerCustomGUI implements Listener {
         Recipe recipe = calculatedRecipe.getRecipe();
         if (calculatedRecipe.getRecipe().getConditions().isMastery() && !PlayerLoader.getPlayer(player)
                 .hasMastered(this.gui.getName())) {
-            MessageUtil.sendMessage("fusion.error.noMastery",
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.error.noMastery",
                     player,
                     new MessageData("craftingTable", ProfessionsCfg.getTable(gui.getName())));
             return false;
         }
         if (!calculatedRecipe.isCanCraft()) {
-            MessageUtil.sendMessage("fusion.gui.recipes.canCraft.false", player);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.gui.recipes.canCraft.false", player);
             return false;
         }
 //        this.reloadRecipes();
         if (!Objects.equals(this.recipes.get(slot), calculatedRecipe)) {
             return false;
         }
-        if (LevelFunction.getLevel(player, ProfessionsCfg.getTable(this.gui.name)) < recipe.getConditions().getProfessionLevel()) {
-            MessageUtil.sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
+        if (LevelFunction.getLevel(player, ProfessionsCfg.getTable(this.gui.name)) < recipe.getConditions()
+                .getProfessionLevel()) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noLevel", player, new MessageData("recipe", recipe));
             return false;
         }
         if (ExperienceManager.getTotalExperience(this.player) < recipe.getConditions().getExpCost()) {
-            MessageUtil.sendMessage("fusion.error.noXP", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noXP", player, new MessageData("recipe", recipe));
             return false;
         }
         if (!CodexEngine.get().getVault().canPay(this.player, recipe.getConditions().getMoneyCost())) {
-            MessageUtil.sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
             return false;
         }
         return true;
@@ -485,7 +492,7 @@ public class PlayerCustomGUI implements Listener {
 
     private boolean craft(int slot, boolean addToCursor) {
         /* if (craftingTask != null) {
-            MessageUtil.sendMessage("fusion.alreadyCrafting", player);
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.alreadyCrafting", player);
             return false;
         }*/
         if (!recipes.containsKey(slot)) {
@@ -566,7 +573,9 @@ public class PlayerCustomGUI implements Listener {
         refund.addAll(taken);
 
         if (!itemsToTake.isEmpty()) {
-            MessageUtil.sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
             cancel();
             return false;
         }
@@ -628,7 +637,9 @@ public class PlayerCustomGUI implements Listener {
                     CraftingTable table = ProfessionsCfg.getTable(this.gui.name);
 
                     if (recipe.getResults().getProfessionExp() > 0) {
-                        FusionAPI.getEventServices().getProfessionService().giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
+                        FusionAPI.getEventServices()
+                                .getProfessionService()
+                                .giveProfessionExp(player, table, recipe.getResults().getProfessionExp());
                     }
                     if (recipe.getResults().getVanillaExp() > 0) {
                         player.giveExp(recipe.getResults().getVanillaExp());
@@ -639,7 +650,7 @@ public class PlayerCustomGUI implements Listener {
                         reloadRecipesTask();
                         boolean success = craft(slot, addToCursor); //Call this method again recursively
                         if (!success)
-                            MessageUtil.sendMessage("fusion.autoCancelled", player);
+                            CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
                     }
                 } else {
                     cancel();
@@ -700,7 +711,7 @@ public class PlayerCustomGUI implements Listener {
             }
 
             if (!craftingSuccess && PlayerLoader.getPlayer(player).isAutoCrafting()) {
-                MessageUtil.sendMessage("fusion.autoCancelled", player);
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
             }
 
             if (player.getOpenInventory().getCursor() != null

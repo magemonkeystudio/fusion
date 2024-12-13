@@ -49,23 +49,27 @@ public class PatternItemEditorCfg {
     }
 
     public ItemStack getIcon(CraftingTable table, String icon) {
-        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
-        int amount = config.getInt("icons." + icon + ".amount", 1);
-        int durability = config.getInt("icons." + icon + ".durability", 0);
-        boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
-        String name = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
-        List<String> lore = config.getStringList("icons." + icon + ".lore");
+        Material material =
+                Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
+        int          amount      = config.getInt("icons." + icon + ".amount", 1);
+        int          durability  = config.getInt("icons." + icon + ".durability", 0);
+        boolean      unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
+        String       name        = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
+        List<String> lore        = config.getStringList("icons." + icon + ".lore");
         for (int i = 0; i < lore.size(); i++) {
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), table.getInventoryName())
                     .replace(MessageUtil.getReplacement("profession"), table.getName())
-                    .replace(MessageUtil.getReplacement("masteryUnlock"), String.valueOf(table.getMasteryUnlock()))
-                    .replace(MessageUtil.getReplacement("masteryCost"), String.valueOf(table.getMasteryFee()))
-                    .replace(MessageUtil.getReplacement("useCategories"), String.valueOf(table.getUseCategories()))));
+                    .replace(MessageUtil.getReplacement("masteryUnlock"),
+                            String.valueOf(table.getMasteryUnlock()))
+                    .replace(MessageUtil.getReplacement("masteryCost"),
+                            String.valueOf(table.getMasteryFee()))
+                    .replace(MessageUtil.getReplacement("useCategories"),
+                            String.valueOf(table.getUseCategories()))));
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons." + icon + ".enchants");
-        List<ItemFlag> flags = config.getItemFlags("icons." + icon + ".flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("icons." + icon + ".enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("icons." + icon + ".flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)
@@ -78,19 +82,20 @@ public class PatternItemEditorCfg {
     }
 
     public ItemStack getIcon(BrowseEditor browseEditor, String icon) {
-        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
-        int amount = config.getInt("icons." + icon + ".amount", 1);
-        int durability = config.getInt("icons." + icon + ".durability", 0);
-        boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
-        String name = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
-        List<String> lore = config.getStringList("icons." + icon + ".lore");
+        Material material =
+                Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
+        int          amount      = config.getInt("icons." + icon + ".amount", 1);
+        int          durability  = config.getInt("icons." + icon + ".durability", 0);
+        boolean      unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
+        String       name        = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
+        List<String> lore        = config.getStringList("icons." + icon + ".lore");
         for (int i = 0; i < lore.size(); i++) {
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), browseEditor.getName())));
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons." + icon + ".enchants");
-        List<ItemFlag> flags = config.getItemFlags("icons." + icon + ".flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("icons." + icon + ".enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("icons." + icon + ".flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)
@@ -104,9 +109,12 @@ public class PatternItemEditorCfg {
 
     public ItemStack getPatternItemIcon(char c, ItemStack item) {
         String itemName = ItemBuilder.newItem(item).getName();
-        Material material = Material.valueOf(config.getString("icons.patternItem.material", "STONE").replace(MessageUtil.getReplacement("material"), item.getType().name().toUpperCase()).toUpperCase());
-        int amount = config.getInt("icons.patternItem.amount", 1);
-        int durability = config.getInt("icons.patternItem.durability", 0);
+        Material material = Material.valueOf(config.getString("icons.patternItem.material", "STONE")
+                .replace(MessageUtil.getReplacement("material"),
+                        item.getType().name().toUpperCase())
+                .toUpperCase());
+        int     amount      = config.getInt("icons.patternItem.amount", 1);
+        int     durability  = config.getInt("icons.patternItem.durability", 0);
         boolean unbreakable = config.getBoolean("icon.patternItem.unbreakable", false);
         String name = config.getString("icons.patternItem.name", "$<id>")
                 .replace(MessageUtil.getReplacement("id"), String.valueOf(c))
@@ -129,9 +137,9 @@ public class PatternItemEditorCfg {
                     .replace(MessageUtil.getReplacement("pattern.name"), itemName)
                     .replace(MessageUtil.getReplacement("pattern.id"), String.valueOf(c))));
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons.patternItem.enchants");
-        List<ItemFlag> flags = config.getItemFlags("icons.patternItem.flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("icons.patternItem.enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("icons.patternItem.flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)
@@ -144,7 +152,8 @@ public class PatternItemEditorCfg {
     }
 
     public String getSubTitle(char c) {
-        return ChatUT.hexString(config.getString("subEditor.title", "&2Pattern Item &a$<id>").replace(MessageUtil.getReplacement("id"), String.valueOf(c)));
+        return ChatUT.hexString(config.getString("subEditor.title", "&2Pattern Item &a$<id>")
+                .replace(MessageUtil.getReplacement("id"), String.valueOf(c)));
     }
 
     public Map<String, ItemStack> getSubIcons(char c, ItemBuilder builder, Collection<DelayedCommand> commands) {
@@ -156,13 +165,18 @@ public class PatternItemEditorCfg {
     }
 
     public ItemStack getSubIcon(char c, ItemBuilder builder, Collection<DelayedCommand> commands, String icon) {
-        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "STONE").replace(MessageUtil.getReplacement("material"), builder.getMaterial().name()).toUpperCase());
+        Material material = Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "STONE")
+                .replace(MessageUtil.getReplacement("material"), builder.getMaterial().name())
+                .toUpperCase());
         int amount = config.getInt("subEditor.icons." + icon + ".amount", 1);
         int durability = config.isString("subEditor.icons." + icon + ".durability") ?
-                Integer.parseInt(config.getString("subEditor.icons." + icon + ".durability", "$<durability>").replace(MessageUtil.getReplacement("durability"), String.valueOf(builder.getDurability()))) :
+                Integer.parseInt(config.getString("subEditor.icons." + icon + ".durability", "$<durability>")
+                        .replace(MessageUtil.getReplacement("durability"),
+                                String.valueOf(builder.getDurability()))) :
                 config.getInt("subEditor.icons." + icon + ".durability", 0);
         boolean unbreakable = config.getBoolean("subEditor.icon." + icon + ".unbreakable", false);
-        String name = config.getString("subEditor.icons." + icon + ".name", "&cInvalid Item: &4" + icon).replace(MessageUtil.getReplacement("id"), String.valueOf(c));
+        String name = config.getString("subEditor.icons." + icon + ".name", "&cInvalid Item: &4" + icon)
+                .replace(MessageUtil.getReplacement("id"), String.valueOf(c));
         List<String> lore = config.getStringList("subEditor.icons." + icon + ".lore");
         for (int i = 0; i < lore.size(); i++) {
             if (lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
@@ -179,33 +193,41 @@ public class PatternItemEditorCfg {
                 int newLines = 1;
 
                 for (DelayedCommand line : commands) {
-                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.commands.commandPrefix", "&7- &a$<command>")
-                            .replace(MessageUtil.getReplacement("command"), line.getCmd())
-                            .replace(MessageUtil.getReplacement("delay"), String.valueOf(line.getDelay()))
-                            .replace(MessageUtil.getReplacement("caster"), line.getAs().name())
+                    lore.add(i - 1 + newLines,
+                            config.getString("subEditor.icons.commands.commandPrefix", "&7- &a$<command>")
+                                    .replace(MessageUtil.getReplacement("command"),
+                                            line.getCmd())
+                                    .replace(MessageUtil.getReplacement("delay"),
+                                            String.valueOf(line.getDelay()))
+                                    .replace(MessageUtil.getReplacement("caster"),
+                                            line.getAs().name())
                     );
                     newLines++;
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("enchants"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("enchants"))) {
                 lore.remove(i);
                 int newLines = 1;
                 for (Enchantment enchant : builder.getEnchants().keySet()) {
-                    lore.add(i - 1 + newLines, config.getString("subEditor.icons.enchants.enchantPrefix", "&7- &a$<enchant> $<level>")
-                            .replace(MessageUtil.getReplacement("enchant"), enchant.getKey().getKey())
-                            .replace(MessageUtil.getReplacement("level"), String.valueOf(builder.getEnchants().get(enchant)))
+                    lore.add(i - 1 + newLines,
+                            config.getString("subEditor.icons.enchants.enchantPrefix", "&7- &a$<enchant> $<level>")
+                                    .replace(MessageUtil.getReplacement("enchant"),
+                                            enchant.getKey().getKey())
+                                    .replace(MessageUtil.getReplacement("level"),
+                                            String.valueOf(builder.getEnchants().get(enchant)))
                     );
                     newLines++;
                 }
                 i += newLines;
                 continue;
-            } else if(lore.get(i).contains(MessageUtil.getReplacement("flags"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("flags"))) {
                 lore.remove(i);
                 int newLines = 1;
                 for (ItemFlag flag : builder.getFlags()) {
                     lore.add(i - 1 + newLines, config.getString("subEditor.icons.flags.flagPrefix", "&7- &a$<flag>")
-                            .replace(MessageUtil.getReplacement("flag"), flag.name().toLowerCase())
+                            .replace(MessageUtil.getReplacement("flag"),
+                                    flag.name().toLowerCase())
                     );
                     newLines++;
                 }
@@ -216,16 +238,21 @@ public class PatternItemEditorCfg {
             lore.set(i, ChatUT.hexString(lore.get(i)
                             .replace(MessageUtil.getReplacement("id"), String.valueOf(c))
                             .replace(MessageUtil.getReplacement("name"), builder.getName())
-                            .replace(MessageUtil.getReplacement("unbreakable"), String.valueOf(builder.isUnbreakable()))
-                            .replace(MessageUtil.getReplacement("durability"), String.valueOf(builder.getDurability()))
-                            .replace(MessageUtil.getReplacement("glowing"), String.valueOf(!builder.getEnchants().isEmpty())))
-                    .replace(MessageUtil.getReplacement("material"), builder.getMaterial().name())
-                    .replace(MessageUtil.getReplacement("amount"), String.valueOf(builder.getAmount()))
+                            .replace(MessageUtil.getReplacement("unbreakable"),
+                                    String.valueOf(builder.isUnbreakable()))
+                            .replace(MessageUtil.getReplacement("durability"),
+                                    String.valueOf(builder.getDurability()))
+                            .replace(MessageUtil.getReplacement("glowing"),
+                                    String.valueOf(!builder.getEnchants().isEmpty())))
+                    .replace(MessageUtil.getReplacement("material"),
+                            builder.getMaterial().name())
+                    .replace(MessageUtil.getReplacement("amount"),
+                            String.valueOf(builder.getAmount()))
             );
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");
-        List<ItemFlag> flags = config.getItemFlags("subEditor.icons." + icon + ".flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("subEditor.icons." + icon + ".enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("subEditor.icons." + icon + ".flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)

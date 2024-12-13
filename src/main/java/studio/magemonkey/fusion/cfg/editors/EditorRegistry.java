@@ -28,19 +28,19 @@ public class EditorRegistry {
     @Getter
     private static ProfessionEditorCfg professionEditorCfg;
     @Getter
-    private static BrowseEditorCfg browseEditorCfg;
+    private static BrowseEditorCfg     browseEditorCfg;
 
     /* Sub Editor Configs */
     @Getter
     private static PatternItemEditorCfg patternItemEditorCfg;
     @Getter
-    private static PatternEditorCfg patternEditorCfg;
+    private static PatternEditorCfg     patternEditorCfg;
     @Getter
-    private static RecipeEditorCfg recipeEditorCfg;
+    private static RecipeEditorCfg      recipeEditorCfg;
     @Getter
-    private static CategoryEditorCfg categoryEditorCfg;
+    private static CategoryEditorCfg    categoryEditorCfg;
     @Getter
-    private static BrowseProfessionCfg browseProfessionCfg;
+    private static BrowseProfessionCfg  browseProfessionCfg;
 
 
     public static void reload() {
@@ -58,15 +58,19 @@ public class EditorRegistry {
     }
 
     public static Editor getProfessionEditor(Player player, String profession) {
-        if(!editors.containsKey(player.getUniqueId()) && profession != null)
+        if (!editors.containsKey(player.getUniqueId()) && profession != null)
             editors.put(player.getUniqueId(), new ProfessionEditor(player, profession));
         return editors.get(player.getUniqueId());
     }
 
     public static Editor getBrowseEditor(Player player) {
-        if(!editors.containsKey(player.getUniqueId())) {
+        if (!editors.containsKey(player.getUniqueId())) {
             LinkedList<String> professions = new LinkedList<>(BrowseConfig.getProfessions());
-            editors.put(player.getUniqueId(), new BrowseEditor(player, BrowseConfig.getBrowseName(), professions, InventoryPattern.copy(BrowseConfig.getBrowsePattern())));
+            editors.put(player.getUniqueId(),
+                    new BrowseEditor(player,
+                            BrowseConfig.getBrowseName(),
+                            professions,
+                            InventoryPattern.copy(BrowseConfig.getBrowsePattern())));
         }
         return editors.get(player.getUniqueId());
     }

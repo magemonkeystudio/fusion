@@ -5,8 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.items.ItemType;
-import studio.magemonkey.codex.items.exception.CodexItemException;
+import studio.magemonkey.codex.api.items.ItemType;
 import studio.magemonkey.fusion.Fusion;
 
 public class RecipeEconomyItem implements RecipeItem {

@@ -9,13 +9,13 @@ import studio.magemonkey.fusion.api.events.services.EventServices;
 public class FusionAPI {
 
     @Getter
-    private static final JavaPlugin instance = Fusion.getInstance();
+    private static final JavaPlugin        instance = Fusion.getInstance();
     @Getter
-    private static ProfessionManager professionManager;
+    private static       ProfessionManager professionManager;
     @Getter
-    private static PlayerManager playerManager;
+    private static       PlayerManager     playerManager;
     @Getter
-    private static EventServices eventServices;
+    private static       EventServices     eventServices;
 
     public static void init() {
         professionManager = new ProfessionManager();

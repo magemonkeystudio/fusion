@@ -18,17 +18,17 @@ public class QueueItemFinishedEvent extends FusionEvent {
     /**
      * The queue item
      */
-    private final QueueItem queueItem;
+    private final QueueItem     queueItem;
     /**
      * The result item
      */
     @Setter
-    private ItemStack resultItem;
+    private       ItemStack     resultItem;
     /**
      * The amount of the result item
      */
     @Setter
-    private int resultAmount;
+    private       int           resultAmount;
 
     /**
      * Constructor for the QueueItemFinishedEvent
@@ -40,7 +40,12 @@ public class QueueItemFinishedEvent extends FusionEvent {
      * @param resultItem The result item
      * @param resultAmount The amount of the result item
      */
-    public QueueItemFinishedEvent(String professionName, Player player, CraftingQueue queue, QueueItem queueItem, ItemStack resultItem, int resultAmount) {
+    public QueueItemFinishedEvent(String professionName,
+                                  Player player,
+                                  CraftingQueue queue,
+                                  QueueItem queueItem,
+                                  ItemStack resultItem,
+                                  int resultAmount) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.queue = queue;
         this.queueItem = queueItem;

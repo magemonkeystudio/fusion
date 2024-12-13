@@ -10,7 +10,7 @@ public class InventoryUtils {
 
     public static void fillInventory(Inventory inventory, ItemStack item) {
         for (int i = 0; i < inventory.getSize(); i++) {
-            if(inventory.getItem(i) == null || inventory.getItem(i).getType().equals(Material.AIR))
+            if (inventory.getItem(i) == null || inventory.getItem(i).getType().equals(Material.AIR))
                 inventory.setItem(i, item);
         }
     }

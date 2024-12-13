@@ -27,21 +27,21 @@ import java.util.Map;
 public class BrowseConfig implements ConfigurationSerializable {
 
     private static FileConfiguration config;
-    private static File file;
+    private static File              file;
 
     @Getter
     @Setter
-    private static final LinkedList<String> professions = new LinkedList<>();
+    private static final LinkedList<String>                    professions          = new LinkedList<>();
     @Getter
     @Setter
     private static final HashMap<String, ProfessionConditions> professionConditions = new HashMap<>();
 
     @Getter
     @Setter
-    private static String browseName = ChatColor.DARK_AQUA + "Browse";
+    private static String           browseName = ChatColor.DARK_AQUA + "Browse";
     @Getter
     @Setter
-    private static ItemStack browseFill;
+    private static ItemStack        browseFill;
     @Getter
     @Setter
     private static InventoryPattern browsePattern;
@@ -141,7 +141,8 @@ public class BrowseConfig implements ConfigurationSerializable {
 
         for (String prof : config.getConfigurationSection("professions").getValues(false).keySet()) {
             professions.add(prof.toLowerCase());
-            professionConditions.put(prof.toLowerCase(), new ProfessionConditions(prof, config.getConfigurationSection("professions." + prof)));
+            professionConditions.put(prof.toLowerCase(),
+                    new ProfessionConditions(prof, config.getConfigurationSection("professions." + prof)));
             Fusion.getInstance().log.info("Loaded info for profession '" + prof + "'");
         }
     }

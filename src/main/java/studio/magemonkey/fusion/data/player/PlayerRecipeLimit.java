@@ -6,8 +6,8 @@ import lombok.Getter;
 public class PlayerRecipeLimit {
 
     private final String recipeName;
-    private int limit;
-    private long cooldownTimestamp;
+    private       int    limit;
+    private       long   cooldownTimestamp;
 
     public PlayerRecipeLimit(String recipeName, int limit, long cooldownTimestamp) {
         this.recipeName = recipeName;

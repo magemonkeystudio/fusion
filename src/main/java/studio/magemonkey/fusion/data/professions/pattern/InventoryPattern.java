@@ -8,8 +8,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
-import studio.magemonkey.risecore.legacy.util.DeserializationWorker;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 
 public class InventoryPattern implements ConfigurationSerializable {
     @Getter
-    private final String[] pattern; // - for ingredients, = for result.
+    private final String[]                                 pattern; // - for ingredients, = for result.
     @Getter
-    private final HashMap<Character, ItemStack> items;
-    private final HashMap<Character, List<DelayedCommand>> commands = new HashMap<>();
+    private final HashMap<Character, ItemStack>            items;
+    private final HashMap<Character, List<DelayedCommand>> commands          = new HashMap<>();
     @Getter
-    private final List<Character> closeOnClickSlots = new ArrayList<>();
+    private final List<Character>                          closeOnClickSlots = new ArrayList<>();
 
     public InventoryPattern(String[] pattern, HashMap<Character, ItemStack> items) {
         this.pattern = pattern;
@@ -31,8 +31,8 @@ public class InventoryPattern implements ConfigurationSerializable {
     }
 
     public InventoryPattern(Map<String, Object> map) {
-        DeserializationWorker dw = DeserializationWorker.start(map);
-        List<String> temp = dw.getStringList("pattern");
+        DeserializationWorker dw   = DeserializationWorker.start(map);
+        List<String>          temp = dw.getStringList("pattern");
         this.pattern = temp.toArray(new String[0]);
         this.items = new HashMap<>();
         DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
@@ -54,7 +54,7 @@ public class InventoryPattern implements ConfigurationSerializable {
                 DeserializationWorker.start(dw.getSection("commands", new HashMap<>(2)));
         for (Map.Entry<String, Object> entry : commandsTemp.getMap().entrySet()) {
             List<DelayedCommand> commands = new ArrayList<>();
-            for(Object cmd : commandsTemp.getList(entry.getKey())) {
+            for (Object cmd : commandsTemp.getList(entry.getKey())) {
                 commands.add(new DelayedCommand((Map<String, Object>) cmd));
             }
             this.commands.put(entry.getKey().charAt(0), commands);
@@ -85,7 +85,7 @@ public class InventoryPattern implements ConfigurationSerializable {
 
     public Character getCycledCharacter(char c, boolean forward) {
         List<Map.Entry<Character, ItemStack>> entries = getItemsAsList();
-        int size = entries.size();
+        int                                   size    = entries.size();
 
         for (int i = 0; i < size; i++) {
             if (entries.get(i).getKey() == c) {
@@ -106,7 +106,10 @@ public class InventoryPattern implements ConfigurationSerializable {
     }
 
     public List<Map.Entry<Character, ItemStack>> getItemsAsList() {
-        return items.entrySet().stream().map(e -> new SimpleEntry<>(e.getKey(), e.getValue())).collect(Collectors.toList());
+        return items.entrySet()
+                .stream()
+                .map(e -> new SimpleEntry<>(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -119,22 +122,23 @@ public class InventoryPattern implements ConfigurationSerializable {
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        Map<String, Object> itemsMap = new LinkedHashMap<>();
+        Map<String, Object> itemsMap      = new LinkedHashMap<>();
         Map<String, Object> queueItemsMap = new LinkedHashMap<>();
 
-        if(items.containsKey('f')) {
-            itemsMap.put("fillItem", new SimpleEntry<>('f', ItemBuilder.newItem(items.get('f'))).getValue().serialize());
+        if (items.containsKey('f')) {
+            itemsMap.put("fillItem",
+                    new SimpleEntry<>('f', ItemBuilder.newItem(items.get('f'))).getValue().serialize());
         }
-        if(items.containsKey('<')) {
+        if (items.containsKey('<')) {
             itemsMap.put("<", new SimpleEntry<>('<', ItemBuilder.newItem(items.get('<'))).getValue().serialize());
         }
-        if(items.containsKey('>')) {
+        if (items.containsKey('>')) {
             itemsMap.put(">", new SimpleEntry<>('>', ItemBuilder.newItem(items.get('>'))).getValue().serialize());
         }
-        if(items.containsKey('{')) {
+        if (items.containsKey('{')) {
             itemsMap.put("{", new SimpleEntry<>('{', ItemBuilder.newItem(items.get('{'))).getValue().serialize());
         }
-        if(items.containsKey('}')) {
+        if (items.containsKey('}')) {
             itemsMap.put("}", new SimpleEntry<>('}', ItemBuilder.newItem(items.get('}'))).getValue().serialize());
         }
         for (Map.Entry<Character, ItemStack> entry : this.items.entrySet()) {
@@ -152,9 +156,11 @@ public class InventoryPattern implements ConfigurationSerializable {
                     itemsMap.put(entry.getKey().toString(), ItemBuilder.newItem(entry.getValue()).serialize());
                     break;
             }
-            itemsMap.put(entry.getKey().toString(), new SimpleEntry<>(entry.getKey().toString(), ItemBuilder.newItem(entry.getValue())).getValue().serialize());
+            itemsMap.put(entry.getKey().toString(),
+                    new SimpleEntry<>(entry.getKey().toString(), ItemBuilder.newItem(entry.getValue())).getValue()
+                            .serialize());
         }
-        if(items.containsKey('-')) {
+        if (items.containsKey('-')) {
             queueItemsMap.put("-", ItemBuilder.newItem(items.get('-')).serialize());
             itemsMap.put("queue-items", queueItemsMap);
         }
@@ -162,7 +168,7 @@ public class InventoryPattern implements ConfigurationSerializable {
         Map<String, Object> commandMap = new LinkedHashMap<>();
         for (Map.Entry<Character, List<DelayedCommand>> entry : this.commands.entrySet()) {
             List<Map<String, Object>> commands = new ArrayList<>();
-            for(DelayedCommand cmd : entry.getValue()) {
+            for (DelayedCommand cmd : entry.getValue()) {
                 commands.add(cmd.serialize());
             }
             commandMap.put(entry.getKey().toString(), commands);
@@ -189,9 +195,9 @@ public class InventoryPattern implements ConfigurationSerializable {
     }
 
     public boolean isUsed(char c) {
-        for(String row : pattern) {
-            for(char ch : row.toCharArray()) {
-                if(ch == c) return true;
+        for (String row : pattern) {
+            for (char ch : row.toCharArray()) {
+                if (ch == c) return true;
             }
         }
         return false;
@@ -203,8 +209,8 @@ public class InventoryPattern implements ConfigurationSerializable {
         System.arraycopy(pattern.pattern, 0, patternCopy, 0, pattern.pattern.length);
 
         Map<Character, ItemStack> itemsCopy = new HashMap<>();
-        for(Map.Entry<Character, ItemStack> item : pattern.items.entrySet()) {
-            if(item.getValue() == null) {
+        for (Map.Entry<Character, ItemStack> item : pattern.items.entrySet()) {
+            if (item.getValue() == null) {
                 continue;
             }
             itemsCopy.put(item.getKey(), item.getValue().clone());
