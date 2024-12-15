@@ -11,6 +11,7 @@ import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.cfg.hooks.ItemGenEntry;
 import studio.magemonkey.fusion.util.ChatUT;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -57,16 +58,17 @@ public class DivinityCfg {
             if (lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
                 lore.remove(i);
 
-                int newLines = 0;
+                Pattern pattern = Pattern.compile("%[a-zA-Z0-9_]+%");
+                List<String> newLore = new ArrayList<>();
                 for (String line : entry.getReference().getLore()) {
-                    // If the lore has any placeholder with '%<placeholder>%' it will be skipped since it is something dynamical that cant be defined yet.
-                    Pattern pattern = Pattern.compile("%[a-zA-Z0-9_]+%");
+                    // If the lore has any placeholder with '%<placeholder>%' it will be skipped since it is dynamic and cannot be defined yet.
                     if (line.isEmpty()) continue;
                     if (pattern.matcher(line).find()) continue;
-                    lore.add(i - newLines, ChatUT.hexString(line));
-                    newLines++;
+                    newLore.add(ChatUT.hexString(line));
                 }
-                i += newLines;
+
+                lore.addAll(i, newLore); // Add all new lore lines at the current index
+                i += newLore.size() - 1; // Adjust the loop index
                 continue;
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("levels"))) {
