@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.items.ItemType;
+import studio.magemonkey.codex.api.items.exception.MissingItemException;
+import studio.magemonkey.codex.api.items.exception.MissingProviderException;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.fusion.Fusion;
@@ -33,8 +35,7 @@ public interface RecipeItem {
             int       amount = 1;
 
             if (obj instanceof String args) {
-                args = args.toUpperCase();
-                if (args.startsWith("VANILLA_")) {
+                if (args.toUpperCase().startsWith("VANILLA_")) {
                     String material = args.split("_", 2)[1];
                     amount = Integer.parseInt(material.split(":")[1]);
                     material = material.split(":")[0];
@@ -47,7 +48,7 @@ public interface RecipeItem {
                         return null;
                     }
                     result = new RecipeCustomItem(ItemBuilder.newItem(mat).build(), amount, false);
-                } else if (args.startsWith("DIVINITY_")) {
+                } else if (args.toUpperCase().startsWith("DIVINITY_")) {
                     if (!Fusion.getHookManager().isHooked(HookType.Divinity)) {
                         Fusion.getInstance()
                                 .getLogger()
@@ -255,7 +256,36 @@ public interface RecipeItem {
                     }
 
                     result = new RecipeCustomItem(item, amount, false);
-                } else {
+                } else if (args.toUpperCase().startsWith("ORAXEN_")) {
+                    if (!Fusion.getHookManager().isHooked(HookType.Oraxen)) {
+                        Fusion.getInstance()
+                                .getLogger()
+                                .warning("Oraxen is not hooked, but an Oraxen item was found in the configuration. Skipping...");
+                        return null;
+                    }
+                    String[] oraxenArgs = args.split(":");
+                    String   namespace  = oraxenArgs[0];
+
+                    if (oraxenArgs.length > 1) {
+                        amount = Integer.parseInt(oraxenArgs[1]);
+                    }
+
+                    try {
+                        ItemType type = CodexEngine.get().getItemManager().getItemType(namespace);
+                        if(type != null) {
+                            item = type.create();
+                            item.setAmount(amount);
+                            Fusion.getInstance()
+                                    .getLogger()
+                                    .warning("Oraxen item " + namespace + " found: " + ItemBuilder.newItem(item).build().getItemMeta().getDisplayName() + ItemBuilder.newItem(item).getName());
+                        }
+
+                    } catch (MissingProviderException | MissingItemException e) {
+                        Fusion.getInstance().getLogger().warning("Invalid Oraxen item found in configuration: " + namespace);
+                    }
+                    result = new RecipeCustomItem(item, amount, false);
+                }
+                else {
                     String[] itemArgs   = args.split(":");
                     Material mat        = Material.matchMaterial(itemArgs[0]);
                     int      durability = -1;
