@@ -35,7 +35,18 @@ public class DivinityCfg {
         }
 
         List<String> lore = config.getStringList("ItemGenerator.RecipeIcon.lore");
+        replaceLore(entry, level, lore);
 
+        ItemStack item = ItemBuilder.newItem(material).name(itemName).lore(lore).build();
+        if (customModelData > 0) {
+            ItemMeta meta = item.getItemMeta();
+            meta.setCustomModelData(customModelData);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    protected void replaceLore(ItemGenEntry entry, int level, List<String> lore) {
         String chanceLevels = level < 0 ? getValueFormat("levels", entry.getMinLevel(), entry.getMaxLevel())
                 : getSingleValueFormat("levels", level);
         String chanceEnchants =
@@ -57,16 +68,18 @@ public class DivinityCfg {
             if (lore.get(i).contains(MessageUtil.getReplacement("lore"))) {
                 lore.remove(i);
 
-                int newLines = 0;
+                // Here, `i` is the index of the removed line.
+                // We need to add the lore lines from the actual Divinity item starting there
+                // and moving forward.
                 for (String line : entry.getReference().getLore()) {
-                    // If the lore has any placeholder with '%<placeholder>%' it will be skipped since it is something dynamical that cant be defined yet.
+                    // If the lore has any placeholder with '%<placeholder>%',
+                    // it will be skipped since it is something dynamic that can't be defined yet.
                     Pattern pattern = Pattern.compile("%[a-zA-Z0-9_]+%");
                     if (line.isEmpty()) continue;
                     if (pattern.matcher(line).find()) continue;
-                    lore.add(i - newLines, ChatUT.hexString(line));
-                    newLines++;
+                    lore.add(i++, ChatUT.hexString(line));
                 }
-                i += newLines;
+                i--;
                 continue;
             }
             if (lore.get(i).contains(MessageUtil.getReplacement("levels"))) {
@@ -201,14 +214,6 @@ public class DivinityCfg {
 
             lore.set(i, ChatUT.hexString(lore.get(i)));
         }
-
-        ItemStack item = ItemBuilder.newItem(material).name(itemName).lore(lore).build();
-        if (customModelData > 0) {
-            ItemMeta meta = item.getItemMeta();
-            meta.setCustomModelData(customModelData);
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     private String getValueFormat(String path, int min, int max) {
