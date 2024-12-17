@@ -246,7 +246,6 @@ public interface RecipeItem {
                                 level = Integer.parseInt(itemArgs[0]);
                                 amount = Integer.parseInt(itemArgs[1]);
                             }
-
                             item = Divinity.getInstance()
                                     .getModuleCache()
                                     .getRuneManager()
@@ -272,9 +271,9 @@ public interface RecipeItem {
 
                     try {
                         ItemType type = CodexEngine.get().getItemManager().getItemType(namespace);
+
                         if(type != null) {
                             item = type.create();
-                            item.setAmount(amount);
                             Fusion.getInstance()
                                     .getLogger()
                                     .warning("Oraxen item " + namespace + " found: " + ItemBuilder.newItem(item).build().getItemMeta().getDisplayName() + ItemBuilder.newItem(item).getName());

@@ -144,7 +144,7 @@ public class CalculatedRecipe {
             List<Pair<ItemStack, Integer>> eqItems = Recipe.getItems(items);
 
 
-            Collection<RecipeItem> localPattern       = new HashSet<>(recipe.getConditions().getRequiredItems());
+            Collection<RecipeItem> localPattern       = new LinkedHashSet<>(recipe.getConditions().getRequiredItems());
             boolean                isExtensionEnabled = CraftingRequirementsCfg.hasExtensionEnabled("recipes");
             boolean                isVanillaOnly      = CraftingRequirementsCfg.hasOnlyVanillaExtension("recipes");
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
