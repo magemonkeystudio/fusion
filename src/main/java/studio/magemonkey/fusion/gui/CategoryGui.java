@@ -323,11 +323,6 @@ public class CategoryGui implements Listener {
             Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> event.getWhoClicked().closeInventory());
         }
 
-        Bukkit.getConsoleSender().sendMessage("Slot: " + slot);
-        Bukkit.getConsoleSender().sendMessage("Next Page: " + nextPage);
-        Bukkit.getConsoleSender().sendMessage("Prev Page: " + prevPage);
-        Bukkit.getConsoleSender().sendMessage("Page: " + page);
-
         if ((nextPage != -1) && (event.getSlot() == nextPage)) {
             this.nextPage();
             return;
