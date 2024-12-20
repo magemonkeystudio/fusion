@@ -407,7 +407,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             Material.valueOf(item.toUpperCase());
             return true;
         } catch (IllegalArgumentException e) {
-            // If the is a custom item from divinity without "DIVINITY_" prefix, return true
+            // If this is a custom item from divinity without "DIVINITY_" prefix, return true
             return CodexEngine.get().getItemManager().getMainItemType(RecipeItem.fromConfig(item).getItemStack())
                     != null;
         }

@@ -99,7 +99,9 @@ public class CategoryGui implements Listener {
                     new MessageData("level", LevelFunction.getLevel(player, ProfessionsCfg.getTable(table.getName()))),
                     new MessageData("gui", table.getName()),
                     new MessageData("player", player.getName()),
-                    new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
+                    new MessageData("bal",
+                            CodexEngine.get().getVault() == null ? 0
+                                    : CodexEngine.get().getVault().getBalance(player))
             });
 
             for (int k = (page * pageSize), e = Math.min(slots.length, allCategoryArray.length);

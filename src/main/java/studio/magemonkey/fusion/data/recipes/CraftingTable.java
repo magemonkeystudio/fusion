@@ -27,6 +27,8 @@ import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Getter
@@ -126,87 +128,112 @@ public class CraftingTable implements ConfigurationSerializable {
             try {
                 Map<?, ?> results    = (Map<?, ?>) recipeData.get("results");
                 String    itemResult = (String) results.get("item");
-                if (itemResult.startsWith("DIVINITY_ITEMGEN") || itemResult.startsWith("DIVINITY_IT")) {
-                    String[] itemArgs = itemResult.split("_", 3);
-                    if (itemArgs.length < 3) {
-                        Fusion.getInstance()
-                                .error("Invalid entry in config of " + this.name
-                                        + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
+                if (itemResult.startsWith("DIVINITY_item_generator")) {
+                    buildDivinityResultItem(recipeData, itemResult);
+                    continue;
+                }
+
+                Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData);
+                this.recipes.put(recipe.getName(), recipe);
+
+                if (recipeData.containsKey("category")
+                        && recipeData.get("category") instanceof String categoryStr) {
+                    Category category = categories.get(categoryStr);
+
+                    if (category == null) {
                         continue;
                     }
-                    String[] params    = itemArgs[2].split(":");
-                    String   namespace = params[0];
-                    if (!DivinityService.isCached(namespace)) {
-                        if (!DivinityService.cache(namespace, null)) {
-                            Fusion.getInstance()
-                                    .error("Invalid entry in config of " + this.name
-                                            + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
-                            continue;
-                        }
-                    }
 
-                    int      level  = -1;
-                    int      amount = 1;
-                    ItemType type   = null;
-
-                    if (params.length >= 2) {
-                        level = Integer.parseInt(params[1]);
-                    }
-                    if (params.length >= 3) {
-                        amount = Integer.parseInt(params[2]);
-                    }
-                    if (params.length >= 4) {
-                        type = CodexEngine.get().getItemManager().getItemType(params[3]);
-                    }
-
-                    ItemGenEntry entry = DivinityService.ItemGenResults.get(namespace);
-                    if (entry == null) {
-                        Fusion.getInstance()
-                                .error("Invalid entry in config of " + this.name
-                                        + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
-                        continue;
-                    }
-                    Map<ItemType, Set<String>> names = entry.loadNames(type, level);
-
-                    Category category = null;
-                    if (recipeData.containsKey("category") && recipeData.get("category") instanceof String) {
-                        category = categories.get(recipeData.get("category"));
-                    }
-
-                    String recipeName = (String) recipeData.get("name");
-                    int    i          = 0;
-                    for (Map.Entry<ItemType, Set<String>> nameEntry : names.entrySet()) {
-                        for (String name : nameEntry.getValue()) {
-                            DivinityRecipeMeta meta =
-                                    new DivinityRecipeMeta(recipeName, entry, level, amount, nameEntry.getKey(), name);
-                            Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData, meta);
-                            recipe.setName(recipe.getName() + "::" + i);
-                            recipes.put(recipe.getName(), recipe);
-                            if (category != null) {
-                                category.getRecipes().add(recipe);
-                            }
-                            i++;
-                        }
-                    }
-                } else {
-                    Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData);
-                    this.recipes.put(recipe.getName(), recipe);
-
-                    if (recipeData.containsKey("category") && recipeData.get("category") instanceof String) {
-                        Category category = categories.get(recipeData.get("category"));
-
-                        if (category == null) {
-                            continue;
-                        }
-
-                        category.getRecipes().add(recipe);
-                    }
+                    category.getRecipes().add(recipe);
                 }
             } catch (Exception e) {
                 Fusion.getInstance()
                         .error("Exception when reading config, Invalid entry in config of " + this.name
                                 + " crafting table. Value: " + recipeData);
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private static Pattern levelPattern    = Pattern.compile(".*~level:(\\d+).*");
+    private static     Pattern materialPattern = Pattern.compile(".*~material:(\\w+).*");
+
+    private void buildDivinityResultItem(Map<?, ?> recipeData, String itemResult) {
+        // Divinity format is: DIVINITY_<module>:<id>[~level:<level>][~material:<material>][:<amount>]
+        int level = -1;
+        int amount = 1;
+        ItemType type = null;
+
+        Matcher levelMatcher = levelPattern.matcher(itemResult);
+        if (levelMatcher.matches()) {
+            try {
+                level = Integer.parseInt(levelMatcher.group(1));
+            } catch (NumberFormatException ignored) {
+                Fusion.getInstance().getLogger().warning("Failed to get level for Divinity item " + itemResult + ". Using -1 instead.");
+            }
+            itemResult = itemResult.replace("~level:" + levelMatcher.group(1), "");
+        }
+
+        Matcher materialMatcher = materialPattern.matcher(itemResult);
+        if (materialMatcher.matches()) {
+            try {
+                type = CodexEngine.get().getItemManager().getItemType(materialMatcher.group(1));
+            } catch (MissingProviderException | MissingItemException ignored) {
+                Fusion.getInstance().getLogger().warning("Failed to get material item for Divinity item " + itemResult + ". Using the item's configuration instead.");
+            }
+            itemResult = itemResult.replace("~material:" + materialMatcher.group(1), "");
+        }
+
+        // itemResult should be in the format of DIVINITY_<module>:<id>[:<amount>] at this point
+        String[] itemArgs = itemResult.split(":", 3);
+        if (itemArgs.length < 2) {
+            Fusion.getInstance()
+                    .error("Invalid entry in config of " + this.name
+                            + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
+            return;
+        }
+
+        String itemId    = itemArgs[1];
+        if (!DivinityService.isCached(itemId)) {
+            if (!DivinityService.cache(itemId, null)) {
+                Fusion.getInstance()
+                        .error("Invalid entry in config of " + this.name
+                                + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
+                return;
+            }
+        }
+
+        if (itemArgs.length >= 3) {
+            amount = Integer.parseInt(itemArgs[2]);
+        }
+
+        ItemGenEntry entry = DivinityService.itemGenResults.get(itemId);
+        if (entry == null) {
+            Fusion.getInstance()
+                    .error("Invalid entry in config of " + this.name
+                            + " (ItemGenerator entry) in crafting table. Value: " + recipeData);
+            return;
+        }
+        Map<ItemType, Set<String>> names = entry.loadNames(type, level);
+
+        Category category = null;
+        if (recipeData.containsKey("category") && recipeData.get("category") instanceof String categoryStr) {
+            category = categories.get(categoryStr);
+        }
+
+        String recipeName = (String) recipeData.get("name");
+        int    i          = 0;
+        for (Map.Entry<ItemType, Set<String>> nameEntry : names.entrySet()) {
+            for (String name : nameEntry.getValue()) {
+                DivinityRecipeMeta meta =
+                        new DivinityRecipeMeta(recipeName, entry, level, amount, nameEntry.getKey(), name);
+                Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData, meta);
+                recipe.setName(recipe.getName() + "::" + i);
+                recipes.put(recipe.getName(), recipe);
+                if (category != null) {
+                    category.getRecipes().add(recipe);
+                }
+                i++;
             }
         }
     }

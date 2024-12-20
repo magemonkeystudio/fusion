@@ -228,7 +228,7 @@ public class RecipeGui implements Listener {
     }
 
     public void reloadRecipes() {
-        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () ->  {
+        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
             if (!player.isOnline()) return;
             try {
                 setPattern();
@@ -314,7 +314,9 @@ public class RecipeGui implements Listener {
                         new MessageData("category", category),
                         new MessageData("gui", getName()),
                         new MessageData("player", player.getName()),
-                        new MessageData("bal", CodexEngine.get().getVault().getBalance(player))
+                        new MessageData("bal",
+                                CodexEngine.get().getVault() == null ? 0
+                                        : CodexEngine.get().getVault().getBalance(player))
                 });
 
                 for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length);
@@ -339,8 +341,9 @@ public class RecipeGui implements Listener {
             } catch (
                     Exception e) {
                 this.inventory.clear();
-                this.player.closeInventory();
-                throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(), e);
+                Bukkit.getScheduler().runTask(Fusion.getInstance(), this.player::closeInventory);
+                throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(),
+                        e);
             } finally {
                 if (Cfg.craftingQueue && !queue.getQueuedItems().isEmpty()) {
                     boolean requiresUpdate = false;
