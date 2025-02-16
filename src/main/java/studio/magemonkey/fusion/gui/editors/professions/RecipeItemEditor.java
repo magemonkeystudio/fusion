@@ -128,7 +128,8 @@ public class RecipeItemEditor extends Editor implements Listener {
                 }
             }
             case 19 -> {
-                recipe.getSettings().setEnableLore(!recipe.getSettings().isEnableLore());
+                // TODO Icon modification instead
+                //recipe.getSettings().setEnableLore(!recipe.getSettings().isEnableLore());
                 hasChanges = true;
             }
             case 20 -> {
@@ -289,10 +290,10 @@ public class RecipeItemEditor extends Editor implements Listener {
     }
 
     public String getRecipeName() {
-        return recipe.getResults().getResultName().split(":")[0];
+        return recipe.getSettings().getIconNamespace().split(":")[0];
     }
 
     public int getRecipeAmount() {
-        return Integer.parseInt(recipe.getResults().getResultName().split(":")[1]);
+        return Integer.parseInt(recipe.getSettings().getIconNamespace().split(":")[1]);
     }
 }

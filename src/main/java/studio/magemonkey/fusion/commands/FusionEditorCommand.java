@@ -1152,16 +1152,17 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
             switch (criteria) {
                 case Profession_Recipe_Edit_ResultItem:
+                    // TODO Update editor for new way of handling recipe icons
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
-                            .getResults()
-                            .setResultItem(RecipeItem.fromConfig(itemName + ":" + amount));
+                            .getSettings()
+                            .setRecipeItem(RecipeItem.fromConfig(itemName + ":" + amount));
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
-                            .getResults()
-                            .setResultName(itemName + ":" + amount);
+                            .getSettings()
+                            .setIconNamespace(itemName + ":" + amount);
                     CodexEngine.get()
                             .getMessageUtil()
                             .sendMessage("editor.resultEdited",

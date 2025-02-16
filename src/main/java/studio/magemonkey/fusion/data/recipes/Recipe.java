@@ -82,7 +82,7 @@ public class Recipe implements ConfigurationSerializable {
 
         if (meta != null) {
             this.divinityRecipeMeta = meta;
-            this.results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
+            this.settings.setRecipeItem(RecipeItem.fromDivinityRecipeMeta(meta));
         }
     }
 
@@ -107,7 +107,7 @@ public class Recipe implements ConfigurationSerializable {
         this.settings = settings;
         if (meta != null) {
             this.divinityRecipeMeta = meta;
-            this.results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
+            this.settings.setRecipeItem(RecipeItem.fromDivinityRecipeMeta(meta));
         }
     }
 
@@ -211,7 +211,7 @@ public class Recipe implements ConfigurationSerializable {
                 .append("costs.money", this.conditions.getMoneyCost())
                 .append("costs.experience", this.conditions.getExpCost())
                 .append("costs.items", this.conditions.getRequiredItemNames())
-                .append("results.item", this.getResults().getResultItem())
+                .append("results.item", this.getSettings().getRecipeItem())
                 .append("results.professionExp", this.getResults().getProfessionExp())
                 .append("results.vanillaExp", this.getResults().getVanillaExp())
                 .append("results.commands", this.getResults().getCommands())
@@ -291,6 +291,6 @@ public class Recipe implements ConfigurationSerializable {
 
     public void appendDivinityRecipeMeta(DivinityRecipeMeta meta) {
         this.divinityRecipeMeta = meta;
-        results.setResultItem(RecipeItem.fromDivinityRecipeMeta(meta));
+        settings.setRecipeItem(RecipeItem.fromDivinityRecipeMeta(meta));
     }
 }

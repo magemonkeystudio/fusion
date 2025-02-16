@@ -101,7 +101,8 @@ public class CraftingQueue {
 
     public void finishRecipe(QueueItem item) {
         if (item.isDone()) {
-            RecipeItem recipeItem = item.getRecipe().getResults().getResultItem();
+            // TODO consider getting the item back from CodexEngine in case the icon is modified
+            RecipeItem recipeItem = item.getRecipe().getSettings().getRecipeItem();
             FusionAPI.getEventServices()
                     .getQueueService()
                     .finishQueueItem(player,

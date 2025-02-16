@@ -442,8 +442,8 @@ public class ProfessionsCfg {
             return null;
         }
         ItemStack result = item.getRecipe().getDivinityRecipeMeta() == null ? item.getRecipe()
-                .getResults()
-                .getResultItem()
+                .getSettings()
+                .getRecipeItem()
                 .getItemStack() : item.getRecipe().getDivinityRecipeMeta().getIcon();
         Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())

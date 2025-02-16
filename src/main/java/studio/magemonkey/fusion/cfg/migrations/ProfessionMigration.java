@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class ProfessionMigration {
     // Update this when there are new migrations available
-    public static final  String                                         VERSION    = "1.2";
+    public static final  String                                         VERSION    = "1.3";
     private static final Map<String, Function<FileConfiguration, Void>> migrations = new HashMap<>();
 
     private static boolean compareVersions(String version, String compareTo) {
@@ -117,6 +117,31 @@ public class ProfessionMigration {
                 }
                 recipe.remove("hiding");
 
+                ((Map<String, Object>) recipe).put("settings", settings);
+            }
+            return null;
+        });
+
+        migrations.put("1.3", (config) -> {
+            List<Map<?, ?>> recipes = config.getMapList("recipes");
+            for (Map<?, ?> recipe : recipes) {
+                Map<String, Object> results = (Map<String, Object>) recipe.get("results");
+                Map<String, Object> settings = (Map<String, Object>) recipe.get("settings");
+                if(results == null) continue;
+                if(settings == null)
+                    settings = new LinkedHashMap<>();
+
+                String namespace = (String) results.get("item");
+                if(namespace == null) continue;
+
+                Map<String, Object> iconSettings = new LinkedHashMap<>();
+                iconSettings.put("item", namespace);
+                iconSettings.put("optionals", new LinkedHashMap<>());
+
+                settings.put("icon", iconSettings);
+                results.put("item", null);
+
+                ((Map<String, Object>) recipe).put("results", results);
                 ((Map<String, Object>) recipe).put("settings", settings);
             }
             return null;
