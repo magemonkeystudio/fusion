@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
-import studio.magemonkey.fusion.data.recipes.RecipeItem;
 
 import java.util.*;
 import java.util.stream.Collectors;

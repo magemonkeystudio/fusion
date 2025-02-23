@@ -267,7 +267,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 meta = potionMeta;
             }
             builder = builder.data(meta);
-            this.recipeItem = new RecipeCustomItem(builder.build(), iconReference.getAmount(), false);
+            this.recipeItem = new RecipeCustomItem(builder, iconReference.getAmount(), false);
         }
     }
 
