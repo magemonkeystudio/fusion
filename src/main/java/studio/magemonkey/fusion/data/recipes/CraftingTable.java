@@ -266,7 +266,6 @@ public class CraftingTable implements ConfigurationSerializable {
                     category.getRecipes().add(recipe);
                 }
                 i++;
-                long end = System.currentTimeMillis();
             }
         }
     }

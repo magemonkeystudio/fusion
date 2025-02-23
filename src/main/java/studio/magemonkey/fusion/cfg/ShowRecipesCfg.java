@@ -63,7 +63,7 @@ public class ShowRecipesCfg {
 
     private static void setDefaults() {
         // Show Recipe: GUI Mechanic
-        config.addDefault("name", "&8Ingredient: &a&7<ingredient>");
+        config.addDefault("name", "&8Recipes for ingredient: &a&7<ingredient>");
         HashMap<Character, ItemStack> showItems = new HashMap<>();
         showItems.put('0', ItemBuilder.newItem(Material.BIRCH_SIGN)
                 .name("&8Possible Recipes")
@@ -84,7 +84,7 @@ public class ShowRecipesCfg {
         recipeItem.put("name", "&7<name>");
         recipeItem.put("lore", new String[]{"&8[&a$<amount>x &7<ingredient>&8]", "&7Click to navigate to recipe"});
         config.addDefault("recipeItem", recipeItem);
-        config.addDefault("fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build().serialize());
+        config.addDefault("fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
 
     }
 
@@ -96,7 +96,7 @@ public class ShowRecipesCfg {
     }
 
     public static ItemStack getRecipeIcon(Recipe recipe, RecipeItem ingredient) {
-        String       itemName = Utils.getItemName(recipe.getSettings().getRecipeItem().getItemStack());
+        String       itemName = Utils.getItemName(recipe.getResults().getResultItem().getItemStack());
         String       name     = ChatUT.hexString(config.getString("recipeItem.name", "&7$<name>")
                 .replace(MessageUtil.getReplacement("name"), itemName));
         List<String> lore     = config.getStringList("recipeItem.lore");
@@ -106,7 +106,7 @@ public class ShowRecipesCfg {
                 .replace(MessageUtil.getReplacement("amount"), String.valueOf(ingredient.getAmount()))
                 .replace(MessageUtil.getReplacement("name"), name)));
 
-        ItemStack icon = recipe.getSettings().getRecipeItem().getItemStack().clone();
+        ItemStack icon = recipe.getResults().getResultItem().getItemStack().clone();
         ItemMeta  meta = icon.getItemMeta();
         meta.setDisplayName(name);
         meta.setLore(lore);
