@@ -94,7 +94,8 @@ subEditor:
         - '&7Result: &a$<results.resultItem>'
         - '$<result.lore>'
         - '&8--------------------'
-        - '&aLeft click &7to modify the result.'
+        - '&aLeft click &7to edit the recipe icon.'
+        - '&aRight click &7to edit optional icon-settings.'
     professionExp:
       material: EXPERIENCE_BOTTLE
       amount: 1
@@ -108,7 +109,7 @@ subEditor:
         - '&8--------------------'
         - '&aLeft click &7to increase the xp.'
         - '&aRight click &7to decrease the xp.'
-        - '&aShift click &7each to increase by 10.'
+        - '&aShift click &7each to modify by 10.'
       flags: [ ]
       enchants: { }
     vanillaExp:

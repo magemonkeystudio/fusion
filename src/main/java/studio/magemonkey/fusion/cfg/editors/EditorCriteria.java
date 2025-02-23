@@ -28,6 +28,14 @@ public enum EditorCriteria {
     Profession_Recipe_Add_Conditions,
     Profession_Recipe_Edit_Rank,
 
+    // Recipe Icon
+    RecipeIcon_Edit_Name,
+    RecipeIcon_Edit_Lore,
+    RecipeIcon_Edit_Color,
+    RecipeIcon_Add_Commands,
+    RecipeIcon_Add_Enchants,
+    RecipeIcon_Add_Flags,
+
     /* Browse */
     Browse_Edit_Name,
     Browse_Add_Profession,

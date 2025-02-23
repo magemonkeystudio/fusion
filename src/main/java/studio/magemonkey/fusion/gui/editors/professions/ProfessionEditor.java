@@ -16,6 +16,7 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternEditor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternItemsEditor;
+import studio.magemonkey.fusion.gui.editors.professions.recipes.RecipeEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 @Getter
@@ -30,7 +31,7 @@ public class ProfessionEditor extends Editor implements Listener {
     private PatternItemsEditor categoryPatternItemEditor;
     private PatternEditor      categoryPatternEditor;
     private CategoryEditor     categoryEditor;
-    private RecipeEditor       recipeEditor;
+    private RecipeEditor recipeEditor;
 
     public ProfessionEditor(Player player, String profession) {
         super(null, EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);

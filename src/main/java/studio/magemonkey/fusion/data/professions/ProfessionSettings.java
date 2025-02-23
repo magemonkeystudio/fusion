@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.data.professions;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
+import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
@@ -20,38 +22,36 @@ import studio.magemonkey.fusion.data.recipes.RecipeCustomItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
+@Setter
 public class ProfessionSettings implements ConfigurationSerializable {
 
     private final String profession;
 
     // Icon related fields
-    @Setter
     private RecipeItem recipeItem;
-    @Setter
     private String iconNamespace;
 
     // Optional item fields
     private String name;
     private int customModelData = -1;
-    private List<String> lore;
+    private List<String> lore = new ArrayList<>();
     private boolean unbreakable;
-    private Map<Enchantment, Integer> enchantments;
-    private Set<ItemFlag> flags;
+    private Map<Enchantment, Integer> enchantments = new HashMap<>();
+    private Set<ItemFlag> flags = new HashSet<>();
     private String color;
     private boolean cancelDrop;
-    private List<String> commandsOnClick;
+    private List<DelayedCommand> commandsOnClick = new LinkedList<>();
 
 
     // Hiding related fields
-    @Setter
     private Boolean hideNoPermission;
-    @Setter
     private Boolean hideRecipeLimitReached;
 
     public ProfessionSettings(String profession, Boolean hideNoPermission,
-                              Boolean hideRecipeLimitReached, String iconNamespace, String name, int customModelData, List<String> lore, boolean unbreakable, Map<Enchantment, Integer> enchantments, Set<ItemFlag> flags, String color, boolean cancelDrop, List<String> commandsOnClick) {
+                              Boolean hideRecipeLimitReached, String iconNamespace, String name, int customModelData, List<String> lore, boolean unbreakable, Map<Enchantment, Integer> enchantments, Set<ItemFlag> flags, String color, boolean cancelDrop, List<DelayedCommand> commandsOnClick) {
         this.profession = profession;
         this.hideNoPermission = hideNoPermission;
         this.hideRecipeLimitReached = hideRecipeLimitReached;
@@ -99,7 +99,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
             }
             color = config.getString("settings.icon.optionals.color");
             cancelDrop = config.getBoolean("settings.icon.optionals.cancelDrop");
-            commandsOnClick = config.getStringList("settings.icon.optionals.commandsOnClick");
+            this.commandsOnClick = config.getList("settings.icon.optionals.commandsOnClick", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
         }
         generateIcon(iconNamespace);
     }
@@ -156,8 +156,13 @@ public class ProfessionSettings implements ConfigurationSerializable {
                     color = (String) optionalIconSettings.get("color");
                 if (optionalIconSettings.get("cancelDrop") != null)
                     cancelDrop = (boolean) optionalIconSettings.get("cancelDrop");
-                if (optionalIconSettings.get("commandsOnClick") != null)
-                    commandsOnClick = (List<String>) optionalIconSettings.get("commandsOnClick");
+
+                List<Map<String, Object>> commands = (List<Map<String, Object>>) optionalIconSettings.getOrDefault("commandsOnClick", new ArrayList<>());
+                if (commands != null) {
+                    for (Map<String, Object> command : commands) {
+                        this.commandsOnClick.add(new DelayedCommand(command));
+                    }
+                }
             }
             generateIcon(iconNamespace);
         }
@@ -179,16 +184,16 @@ public class ProfessionSettings implements ConfigurationSerializable {
         Map<String, Object> optionalIconSettings = new HashMap<>(10);
         if (name != null) optionalIconSettings.put("name", name);
         if (customModelData >= 0) optionalIconSettings.put("customModelData", customModelData);
-        if (lore != null) optionalIconSettings.put("lore", lore);
+        if (lore != null && !lore.isEmpty()) optionalIconSettings.put("lore", lore);
         if (unbreakable) optionalIconSettings.put("unbreakable", unbreakable);
-        if (enchantments != null) {
+        if (enchantments != null && !enchantments.isEmpty()) {
             Map<String, Integer> enchantmentsSection = new HashMap<>(enchantments.size());
             for (Map.Entry<Enchantment, Integer> enchantment : enchantments.entrySet()) {
                 enchantmentsSection.put(enchantment.getKey().getName(), enchantment.getValue());
             }
             optionalIconSettings.put("enchantments", enchantmentsSection);
         }
-        if (flags != null) {
+        if (flags != null && !flags.isEmpty()) {
             List<String> flagsList = new ArrayList<>(flags.size());
             for (ItemFlag flag : flags) {
                 flagsList.add(flag.name());
@@ -197,8 +202,9 @@ public class ProfessionSettings implements ConfigurationSerializable {
         }
         if (color != null) optionalIconSettings.put("color", color);
         if (cancelDrop) optionalIconSettings.put("cancelDrop", cancelDrop);
-        if (commandsOnClick != null) optionalIconSettings.put("commandsOnClick", commandsOnClick);
-        iconSettings.put("optionals", optionalIconSettings);
+        if (commandsOnClick != null && !commandsOnClick.isEmpty()) optionalIconSettings.put("commandsOnClick", new ArrayList<>(this.commandsOnClick.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
+        if(!optionalIconSettings.isEmpty())
+            iconSettings.put("optionals", optionalIconSettings);
         settingsMap.put("icon", iconSettings);
 
         return SerializationBuilder.start(4).append("settings", settingsMap).build();
@@ -266,6 +272,6 @@ public class ProfessionSettings implements ConfigurationSerializable {
     }
 
     private boolean hasAnyOptionalFields() {
-        return name != null || customModelData >= 0 || lore != null || enchantments != null || flags != null || color != null;
+        return name != null || customModelData >= 0 || (lore != null && lore.isEmpty()) || (enchantments != null && enchantments.isEmpty()) || (flags != null && flags.isEmpty()) || color != null;
     }
 }

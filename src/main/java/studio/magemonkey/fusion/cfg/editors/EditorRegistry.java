@@ -10,6 +10,7 @@ import studio.magemonkey.fusion.cfg.editors.pattern.PatternItemEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.CategoryEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.ProfessionEditorCfg;
 import studio.magemonkey.fusion.cfg.editors.professions.RecipeEditorCfg;
+import studio.magemonkey.fusion.cfg.editors.professions.RecipeIconEditorCfg;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
@@ -38,6 +39,8 @@ public class EditorRegistry {
     @Getter
     private static RecipeEditorCfg      recipeEditorCfg;
     @Getter
+    private static RecipeIconEditorCfg recipeIconEditorCfg;
+    @Getter
     private static CategoryEditorCfg    categoryEditorCfg;
     @Getter
     private static BrowseProfessionCfg  browseProfessionCfg;
@@ -48,6 +51,7 @@ public class EditorRegistry {
 
         professionEditorCfg = new ProfessionEditorCfg();
         recipeEditorCfg = new RecipeEditorCfg();
+        recipeIconEditorCfg = new RecipeIconEditorCfg();
         categoryEditorCfg = new CategoryEditorCfg();
 
         browseEditorCfg = new BrowseEditorCfg();

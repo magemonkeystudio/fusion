@@ -130,8 +130,8 @@ subEditor:
       name: '&9Glowing'
       lore:
         - '&7Current: &a$<glowing>'
-        - 'Puts Unbreaking I on the item and'
-        - 'hides the enchantments.'
+        - '&7Puts Unbreaking I on the item and'
+        - '&7hides the enchantments.'
         - '&8--------------------'
         - '&7Click to toggle glowing.'
       flags: [ ]

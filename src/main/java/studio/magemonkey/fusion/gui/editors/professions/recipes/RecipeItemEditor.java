@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.professions;
+package studio.magemonkey.fusion.gui.editors.professions.recipes;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -21,6 +21,9 @@ public class RecipeItemEditor extends Editor implements Listener {
     private final Player player;
     @Getter
     private final Recipe recipe;
+
+    @Getter
+    private RecipeIconEditor recipeIconEditor;
 
     public RecipeItemEditor(Editor parentEditor, Player player, Recipe recipe) {
         super(parentEditor, EditorRegistry.getRecipeEditorCfg().getSubTitle(recipe.getName()), 54);
@@ -102,9 +105,16 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 14 -> FusionEditorCommand.suggestUsage(player,
-                    EditorCriteria.Profession_Recipe_Edit_ResultItem,
-                    "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
+            case 14 -> {
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Edit_ResultItem,
+                            "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
+                else if (event.isRightClick()) {
+                    recipeIconEditor = new RecipeIconEditor(this, player, recipe);
+                    recipeIconEditor.open(player);
+                }
+            }
             case 15 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {

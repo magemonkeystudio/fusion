@@ -38,7 +38,7 @@ public class ProfessionResults implements ConfigurationSerializable {
         this.profession = profession;
         this.professionExp = config.getLong("rewards.professionExp");
         this.vanillaExp = config.getInt("rewards.vanillaExp");
-        //this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
+        this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
     }
 
     public ProfessionResults(String profession, DeserializationWorker dw) {
@@ -60,8 +60,7 @@ public class ProfessionResults implements ConfigurationSerializable {
                 this.vanillaExp = 0;
             }
 
-            List<Map<String, Object>> commands =
-                    (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
+            List<Map<String, Object>> commands = (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
             if (commands != null) {
                 for (Map<String, Object> command : commands) {
                     this.commands.add(new DelayedCommand(command));

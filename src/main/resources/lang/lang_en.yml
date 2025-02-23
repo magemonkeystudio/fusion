@@ -105,6 +105,11 @@ editor:
   professionAlreadyExists: "&cThe profession &3$<profession> &calready exists and cannot be overridden by other profession."
   flagAlreadyExists: "&cThe flag &3$<flag> &calready exists."
 
+  recipeIconRenamed: "&aYou renamed the recipe icon &3$<oldName> &ato &3$<newName>"
+  recipeIconLoreAdded: "&aYou added a new lore line to the recipe icon"
+  recipeIconFlagAdded: "&aYou added a new flag to the recipe icon"
+  recipeIconColorUpdated: "&aYou updated the color of the recipe icon &3$<color>"
+
 player:
   professionNotAvailable: "&cThe player &3$<player> &cdoes not have the profession &3$<profession>"
 
