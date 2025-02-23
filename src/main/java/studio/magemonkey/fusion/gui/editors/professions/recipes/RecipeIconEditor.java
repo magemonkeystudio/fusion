@@ -57,13 +57,20 @@ public class RecipeIconEditor extends Editor implements Listener {
         boolean hasChanges = false;
 
         switch (event.getSlot()) {
-            case 10 -> FusionEditorCommand.suggestUsage(player,
-                    EditorCriteria.RecipeIcon_Edit_Name,
-                    "/fusion-editor " + recipe.getSettings().getName());
+            case 10 -> {
+                if(event.isLeftClick()) {
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.RecipeIcon_Edit_Name,
+                            "/fusion-editor " + recipe.getSettings().getName());
+                } else if(event.isRightClick()){
+                    recipe.getSettings().setName(null);
+                    hasChanges = true;
+                }
+            }
             case 11 -> {
                 if (event.isLeftClick()) {
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.RecipeIcon_Edit_Lore, "/fusion-editor <lore>");
-                } else {
+                } else if(event.isRightClick()){
                     if (recipe.getSettings().getLore().isEmpty()) {
                         return;
                     }
@@ -79,15 +86,15 @@ public class RecipeIconEditor extends Editor implements Listener {
                 if (event.isLeftClick()) {
                     recipe.getSettings().setCustomModelData(recipe.getSettings().getCustomModelData() + amount);
                 } else if (event.isRightClick()) {
-                    if (recipe.getSettings().getCustomModelData() == 0) return;
-                    recipe.getSettings().setCustomModelData(Math.max(recipe.getSettings().getCustomModelData() - amount, 0));
+                    if (recipe.getSettings().getCustomModelData() == -1) return;
+                    recipe.getSettings().setCustomModelData(Math.max(recipe.getSettings().getCustomModelData() - amount, -1));
                 }
                 hasChanges = true;
             }
             case 16 -> {
                 if (event.isLeftClick()) {
                     FusionEditorCommand.suggestUsage(player, EditorCriteria.RecipeIcon_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
-                } else {
+                } else if(event.isRightClick()){
                     if (recipe.getSettings().getCommandsOnClick().isEmpty()) {
                         return;
                     }
@@ -98,14 +105,18 @@ public class RecipeIconEditor extends Editor implements Listener {
             }
             case 26 -> {
                 reload(false);
-                ((PatternItemsEditor) getParentEditor()).reload(true);
+                openParent(player);
                 return;
             }
             case 29 -> {
-                FusionEditorCommand.suggestUsage(player,
-                        EditorCriteria.RecipeIcon_Edit_Color,
-                        "/fusion-editor " + recipe.getSettings().getColor());
-                hasChanges = true;
+                if(event.isLeftClick()) {
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.RecipeIcon_Edit_Color,
+                            "/fusion-editor " + recipe.getSettings().getColor());
+                } else if(event.isRightClick()){
+                    recipe.getSettings().setColor(null);
+                    hasChanges = true;
+                }
             }
             case 30 -> {
                 recipe.getSettings().setUnbreakable(!recipe.getSettings().isUnbreakable());

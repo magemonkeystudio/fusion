@@ -41,10 +41,9 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(10, getIcons().get("craftingTime"));
         setItem(11, getIcons().get("craftingLimit"));
         setItem(12, getIcons().get("craftingLimitCooldown"));
-        setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
-        setItem(19, getIcons().get("enableItemLore"));
+        setItem(19, getIcons().get("resultItem"));
         setItem(20, getIcons().get("hiding_noPermission"));
         setItem(21, getIcons().get("hiding_recipeLimitReached"));
         setItem(24, getIcons().get("commands"));
@@ -105,16 +104,6 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 14 -> {
-                if (event.isLeftClick())
-                    FusionEditorCommand.suggestUsage(player,
-                            EditorCriteria.Profession_Recipe_Edit_ResultItem,
-                            "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
-                else if (event.isRightClick()) {
-                    recipeIconEditor = new RecipeIconEditor(this, player, recipe);
-                    recipeIconEditor.open(player);
-                }
-            }
             case 15 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -138,9 +127,14 @@ public class RecipeItemEditor extends Editor implements Listener {
                 }
             }
             case 19 -> {
-                // TODO Icon modification instead
-                //recipe.getSettings().setEnableLore(!recipe.getSettings().isEnableLore());
-                hasChanges = true;
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Edit_ResultItem,
+                            "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
+                else if (event.isRightClick()) {
+                    recipeIconEditor = new RecipeIconEditor(this, player, recipe);
+                    recipeIconEditor.open(player);
+                }
             }
             case 20 -> {
                 if (event.isLeftClick()) {

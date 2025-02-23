@@ -1876,7 +1876,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .sendMessage("editor.recipeIconFlagAdded",
                             player,
                             new MessageData("flag", flag.name()));
-            professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
         } catch (Exception e) {
             CodexEngine.get()
                     .getMessageUtil()
@@ -1904,7 +1904,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .sendMessage("editor.recipeIconColorUpdated",
                             player,
                             new MessageData("color", color.asRGB()));
-            professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
         } catch (NumberFormatException e) {
             CodexEngine.get()
                     .getMessageUtil()
@@ -1940,7 +1940,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             commandType.name(),
                             "cmd",
                             commandBuilder.toString())));
-            professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
         } catch (Exception e) {
             e.printStackTrace();
             CodexEngine.get()
@@ -1974,7 +1974,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .getSettings()
                     .getEnchantments()
                     .put(enchantment, level);
-            professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             CodexEngine.get()
