@@ -95,7 +95,7 @@ recipes:
   canCraft:
     'true': "&aYou can craft this item."
     'false': "&cYou can't craft this item."
-  # The message that is displayed when the player needs a specific rank to craft the item
+  # The message that is displayed when the player needs a specific permission to craft the item
   permission:
     'true': "&aPermission granted"
     'false': "&cPermission denied"
@@ -181,6 +181,3 @@ professions:
   canJoin:
     'true': "&aYou can join this profession."
     'false': "&cYou can't join this profession."
-  # The message that is displayed when the player needs a specific rank to craft the item
-  rank:
-    epic: "&cEpic rank needed to craft this item!"

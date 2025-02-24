@@ -49,14 +49,6 @@ public class CalculatedProfession {
 
             boolean canJoin = true;
 
-            //Rank line
-            String rankLine = null;
-            if (conditions.getPermission() != null && !player.hasPermission(
-                    "fusion.rank." + conditions.getPermission())) {
-                canJoin = false;
-                rankLine = CraftingRequirementsCfg.getRank("recipes", conditions.getPermission());
-            }
-
             // TODO: Might consider to make professions controllable by permissions
             String permissionLine;
             permissionLine = CraftingRequirementsCfg.getLearned("professions", true);
@@ -165,11 +157,6 @@ public class CalculatedProfession {
             }
 
             lore.append("\n").append(permissionLine);
-
-            if (rankLine != null) {
-                lore.append('\n').append(rankLine);
-            }
-
             lore.append('\n').append(canJoinLine);
 
             ItemStack icon     = defaultIcon.clone();

@@ -95,7 +95,7 @@ public class RecipeEditorCfg {
                             .replace(MessageUtil.getReplacement("recipe.result"),
                                     (result != null && !result.getType().isAir()) && result.hasItemMeta() ? result.getItemMeta()
                                             .getDisplayName() : result.getType().name()))
-                    .replace(MessageUtil.getReplacement("conditions.rank"),
+                    .replace(MessageUtil.getReplacement("conditions.permission"),
                             recipe.getConditions().getPermission() == null ? getUnsetFormat()
                                     : recipe.getConditions().getPermission())
             );
@@ -224,7 +224,7 @@ public class RecipeEditorCfg {
                                     String.valueOf(recipe.getConditions().getProfessionLevel()))
                             .replace(MessageUtil.getReplacement("conditions.mastery"),
                                     String.valueOf(recipe.getConditions().isMastery()))
-                            .replace(MessageUtil.getReplacement("conditions.rank"),
+                            .replace(MessageUtil.getReplacement("conditions.permission"),
                                     String.valueOf(recipe.getConditions().getPermission()))
                             .replace(MessageUtil.getReplacement("category"),
                                     recipe.getCategory() == null ? "master" : recipe.getCategory()))

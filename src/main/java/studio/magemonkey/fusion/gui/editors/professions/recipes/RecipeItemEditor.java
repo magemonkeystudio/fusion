@@ -53,7 +53,7 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(39, getIcons().get("expCost"));
         setItem(40, getIcons().get("professionLevel"));
         setItem(41, getIcons().get("mastery"));
-        setItem(42, getIcons().get("rank"));
+        setItem(42, getIcons().get("permission"));
         setItem(43, getIcons().get("conditions"));
         setItem(49, getIcons().get("category"));
 
@@ -233,8 +233,8 @@ public class RecipeItemEditor extends Editor implements Listener {
             case 42 -> {
                 if (event.isLeftClick())
                     FusionEditorCommand.suggestUsage(player,
-                            EditorCriteria.Profession_Recipe_Edit_Rank,
-                            "/fusion-editor <rank>");
+                            EditorCriteria.Profession_Recipe_Edit_Permission,
+                            "/fusion-editor <permission>");
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getPermission() == null)
                         return;

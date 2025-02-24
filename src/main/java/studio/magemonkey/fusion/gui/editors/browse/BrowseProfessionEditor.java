@@ -33,7 +33,6 @@ public class BrowseProfessionEditor extends Editor implements Listener {
         InventoryUtils.fillInventory(getInventory(), getIcons().get("fill"));
         setItem(11, getIcons().get("moneyCost"));
         setItem(13, getIcons().get("expCost"));
-        setItem(15, getIcons().get("rank"));
         setItem(21, getIcons().get("ingredients"));
         setItem(23, getIcons().get("conditions"));
         setItem(35, getIcons().get("back"));
@@ -66,18 +65,6 @@ public class BrowseProfessionEditor extends Editor implements Listener {
                 } else if (event.isRightClick()) {
                     if (conditions.getExpCost() == 0) return;
                     conditions.setExpCost(Math.max(conditions.getExpCost() - amount, 0));
-                    hasChanges = true;
-                }
-            }
-            case 15 -> {
-                if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player,
-                            EditorCriteria.Browse_Profession_Edit_Rank,
-                            "/fusion-editor <rank>");
-                } else if (event.isRightClick()) {
-                    if (conditions.getPermission() == null)
-                        return;
-                    conditions.setPermission(null);
                     hasChanges = true;
                 }
             }

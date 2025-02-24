@@ -326,7 +326,6 @@ following functionalities:
 - **Hiding Options** Those are options to hide the recipe if specific conditions occur.
    - Shown as: Levers
    - **Hiding if no permission** Rather the recipe is hidden if the player has no permission to craft it.
-   - **Hiding if no rank** Rather the recipe is hidden if the player has not the rank to craft it.
    - **Hiding if limit reached** Rather the recipe is hidden if the player has reached the limit of crafting this recipe.
    - Usage:
         - Left Click: Toggle between `true` and `false`
@@ -377,11 +376,6 @@ following functionalities:
   Enabling means you need to have mastered the profession before crafting.
     - Shown as: Diamond
     - Usage: Click on the item to toggle between `true` and `false`
-<br><br>
-- **Rank**: The rank that is required to join the profession. You will be forwarded to a click message in the chat in
-  order to type in a new rank for the profession. (`/fusion-editor <rank>`)
-    - Shown as: Emerald
-    - Usage: Click on the item to type in a new rank.
 <br><br>
 - **Conditions**: The conditions that are required to craft the recipe. You will be forwarded to a click message in the
   chat in order to type in a new condition for the recipe. (`/fusion-editor <conditionKey> <conditionValue> <level>`).
@@ -461,10 +455,6 @@ Here you can configure each profession-icon individually. The gui provides you t
         - **Left Click**: Add a new ingredient
         - **Right Click**: Remove the last ingredient
 <br><br>
-- **Rank**: The rank that is required to join the profession. You will be forwarded to a click message in the chat in
-  order to type in a new rank for the profession. (`/fusion-editor <rank>`)
-    - Shown as: Emerald
-    - Usage: Click on the item to type in a new rank.
 - **Conditions**: The conditions that are required to join the profession. You will be forwarded to a click message in the
   chat in order to type in a new condition for the profession. (`/fusion-editor <conditionKey> <conditionValue> <level>`).
   The specific conditions that are possible will be listed under [Conditions](#conditions).

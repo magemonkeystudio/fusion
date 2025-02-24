@@ -10,7 +10,6 @@ The following examples provides you parameters that are used in the recipes-sect
   category: stone_weapons # Which category this item belongs to (only of category usage is active)
   hiding: # Hiding the recipe from the player by specific occurences
     noPermission: true # If the player has no permission to see this recipe
-    noRank: true # If the player has not the rank of the conditions to see this recipe
     recipeLimitReached: true # If the player has reached the crafting limit of this recipe
   results: {...} # Shown below
   costs: {...} # Shown below
@@ -97,7 +96,6 @@ Those are things like levels in professions, a mastery or even [supported plugin
 ```yaml
     professionLevel: 15 # The profession level that needs to be achieved first (similar like under the professions-section below where you could modify the same, just for the current profession only)
     mastery: false # Rather this profession has to be mastered first
-    rank: null # The rank that is used for the condition (Achievable through `craft.rank.<rank>` permissions)
     professions: {} # There are no profession conditions. (This has to be a '{}' if not used!)
 ```
 </details>
@@ -108,7 +106,6 @@ Those are things like levels in professions, a mastery or even [supported plugin
 ```yaml
     professionLevel: 0 # The profession level that needs to be achieved first (similar like under the professions-section below where you could modify the same, just for the current profession only)
     mastery: false # Rather this profession has to be mastered first
-    rank: null # The rank that is used for the condition (Achievable through `craft.rank.<rank>` permissions)
     professions:
       armor_smithing: 5 # You additionally need to be armor_smithing level 5 or greater
       weapon_smithing: 15 # Here we replaced 'professionLevel' now
@@ -121,7 +118,6 @@ Those are things like levels in professions, a mastery or even [supported plugin
 ```yaml
     professionLevel: 0 # The profession level that needs to be achieved first (similar like under the professions-section below where you could modify the same, just for the current profession only)
     mastery: false # Rather this profession has to be mastered first
-    rank: null # The rank that is used for the condition (Achievable through `craft.rank.<rank>` permissions)
     professions:
       armor_smithing: 5 # You additionally need to be armor_smithing level 5 or greater
       weapon_smithing: 15 # Here we replaced 'professionLevel' now

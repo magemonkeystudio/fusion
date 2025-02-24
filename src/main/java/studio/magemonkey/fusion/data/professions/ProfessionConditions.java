@@ -76,7 +76,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
                                 LinkedList<Object> requiredItemNames,
                                 int professionLevel,
                                 boolean isMastery,
-                                String rank,
+                                String permission,
                                 Map<String, Integer> professionConditions,
                                 Map<String, Integer> fabledClassConditions,
                                 Map<String, Integer> mcMMOConditions,
@@ -94,7 +94,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 .collect(Collectors.toCollection(LinkedList::new));
         this.professionLevel = professionLevel;
         this.isMastery = isMastery;
-        this.permission = rank;
+        this.permission = permission;
         this.professionConditions.putAll(professionConditions);
         this.fabledClassConditions.putAll(fabledClassConditions);
         this.mcMMOConditions.putAll(mcMMOConditions);
@@ -117,7 +117,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
 
         this.professionLevel = config.getInt("conditions.professionLevel", 0);
         this.isMastery = config.getBoolean("conditions.mastery", false);
-        this.permission = config.getString("conditions.rank");
+        this.permission = config.getString("conditions.permission");
 
         if (config.isSet("conditions.professions")) {
             for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.professions"))
@@ -201,7 +201,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
         if (conditionsSection != null) {
             this.professionLevel = (int) conditionsSection.getOrDefault("professionLevel", 0);
             this.isMastery = (boolean) conditionsSection.getOrDefault("mastery", false);
-            this.permission = (String) conditionsSection.getOrDefault("rank", null);
+            this.permission = (String) conditionsSection.getOrDefault("permission", null);
 
             Map<String, Object> conditions = (Map<String, Object>) conditionsSection.get("professions");
             if (conditions != null) {
@@ -319,11 +319,11 @@ public class ProfessionConditions implements ConfigurationSerializable {
             return false;
         }
 
-        if (permission != null && !player.getPlayer().hasPermission("fusion.rank." + permission)) {
+        if (permission != null && !player.getPlayer().hasPermission(permission)) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             CodexEngine.get()
                     .getMessageUtil()
-                    .sendMessage("fusion.gui.professions.rank." + permission, player.getPlayer());
+                    .sendMessage("fusion.gui.professions.permission", player.getPlayer());
             return false;
         }
 
@@ -655,7 +655,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
         Map<String, Object> conditionsMap = new LinkedHashMap<>();
         conditionsMap.put("professionLevel", this.professionLevel);
         conditionsMap.put("mastery", this.isMastery);
-        conditionsMap.put("rank", this.permission);
+        conditionsMap.put("permission", this.permission);
         if (!professionConditions.isEmpty())
             conditionsMap.put("professions", this.professionConditions);
         if (!fabledClassConditions.isEmpty())

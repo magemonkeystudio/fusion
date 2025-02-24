@@ -117,7 +117,7 @@ public class BrowseProfessionCfg {
                             String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.exp"),
                             String.valueOf(conditions.getExpCost()))
-                    .replace(MessageUtil.getReplacement("conditions.rank"),
+                    .replace(MessageUtil.getReplacement("conditions.permission"),
                             String.valueOf(conditions.getPermission()))
             ));
         }
@@ -199,7 +199,7 @@ public class BrowseProfessionCfg {
                             String.valueOf(conditions.getMoneyCost()))
                     .replace(MessageUtil.getReplacement("costs.exp"),
                             String.valueOf(conditions.getExpCost()))
-                    .replace(MessageUtil.getReplacement("conditions.rank"),
+                    .replace(MessageUtil.getReplacement("conditions.permission"),
                             String.valueOf(conditions.getPermission()))
             ));
         }

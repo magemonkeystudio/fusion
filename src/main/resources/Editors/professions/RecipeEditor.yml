@@ -323,18 +323,18 @@ subEditor:
       flags: [ ]
       enchants: { }
       commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
-    rank:
+    permission:
       material: EMERALD
       amount: 1
       durability: 0
       unbreakable: false
-      name: '&9Rank'
+      name: '&9Permission'
       lore:
-        - '&7Current: &a$<conditions.rank>'
-        - '&7The rank required to craft this recipe.'
-        - '&7You will cast a command to change the rank.'
+        - '&7Current: &a$<conditions.permission>'
+        - '&7The permission required to craft this recipe.'
+        - '&7You will cast a command to change the permission.'
         - '&8--------------------'
-        - '&aClick &7to change the rank.'
+        - '&aClick &7to change the permission.'
       flags: [ ]
       enchants: { }
     conditions:

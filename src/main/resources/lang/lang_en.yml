@@ -82,7 +82,7 @@ editor:
 
   recipeRenamed: "&aYou renamed the recipe &3$<oldName> &ato &3$<newName>"
   recipeAdded: "&aYou created the recipe &3$<recipe> &awith result &3$<result>"
-  recipeRankUpdated: "&aYou updated the recipes rank &ato &3$<rank>"
+  recipePermissionUpdated: "&aYou updated the recipes permission &ato &3$<permission>"
   resultEdited: "&aYou edited the recipe &3$<recipe> &awith result &3$<result>"
   invalidConditionKey: "&cYou tried to parse an invalid condition key: &3$<key>"
   invalidConditionValue: "&cYou tried to parse an invalid condition value: &3$<value>"
@@ -96,7 +96,6 @@ editor:
   patternItemUpdated: "&aYou updated the pattern item &3$<item> with amount &3$<amount>"
   professionIconChanged: "&aYou changed the profession icon from &3$<oldIcon> &ato &3$<newIcon>"
   browserRenamed: "&aYou renamed the browser from &3$<oldName> &ato &3$<newName>"
-  browseRankUpdated: "&aYou updated the professions rank &ato &3$<rank>"
   addedProfessionToBrowse: "&aYou added the profession &3$<profession> &ato the browser"
   patternItemUsed: "§cThis item is used in the pattern. You can't remove it util changed."
   patternItemPredefined: "§cYou can't remove this item. Its predefined."

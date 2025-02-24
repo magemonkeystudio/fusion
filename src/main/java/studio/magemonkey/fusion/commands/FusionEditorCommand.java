@@ -166,7 +166,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Add -> addNewRecipe(professionEditor, args);
                 case Profession_Recipe_Edit_ResultItem, Profession_Recipe_Add_Ingredients,
                      Profession_Recipe_Edit_Ingredients -> updateRecipeItems(professionEditor, args, criteria);
-                case Profession_Recipe_Edit_Rank -> updateRecipeRank(professionEditor, args);
+                case Profession_Recipe_Edit_Permission-> updateRecipePermission(professionEditor, args);
                 case Profession_Recipe_Add_Conditions -> addRecipeConditions(professionEditor, args);
 
                 case RecipeIcon_Edit_Name -> updateRecipeIconName(professionEditor, args);
@@ -189,7 +189,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Add_Enchants -> addPatternEnchants(browseEditor, args);
                 case Pattern_Add_Flags -> addPatternFlags(browseEditor, args);
                 case Browse_Profession_Add_Ingredients -> addBrowseIngredient(browseEditor, args);
-                case Browse_Profession_Edit_Rank -> updateBrowseRank(browseEditor, args);
                 case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
             }
@@ -283,16 +282,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("64");
                     }
                     break;
-                case Browse_Profession_Edit_Rank:
-                    if (args.length == 1) {
-                        entries.add("<rank>");
-                        entries.add(professionEditor.getRecipeEditor()
-                                .getRecipeItemEditor()
-                                .getRecipe()
-                                .getConditions()
-                                .getPermission());
-                    }
-                    break;
                 case Profession_Recipe_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newRecipeName>");
@@ -363,15 +352,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Browse_Add_Profession:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[0]));
-                    }
-                    break;
-                case Browse_Profession_Edit_Rank:
-                    if (args.length == 1) {
-                        entries.add("<rank>");
-                        entries.add(browseEditor.getBrowseProfessionsEditor()
-                                .getBrowseProfessionEditor()
-                                .getConditions()
-                                .getPermission());
                     }
                     break;
                 case Pattern_Edit_Name:
@@ -1273,19 +1253,19 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void updateRecipeRank(ProfessionEditor professionEditor, String[] args) {
+    private void updateRecipePermission(ProfessionEditor professionEditor, String[] args) {
         Player player = professionEditor.getPlayer();
         if (args.length != 1) {
             CodexEngine.get()
                     .getMessageUtil()
-                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
+                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<permission>"));
             return;
         }
-        String rank = args[0];
-        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setPermission(rank);
+        String permission = args[0];
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setPermission(permission);
         CodexEngine.get()
                 .getMessageUtil()
-                .sendMessage("editor.recipeRankUpdated", player, new MessageData("rank", rank));
+                .sendMessage("editor.recipePermissionUpdated", player, new MessageData("permission", permission));
         professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
     }
 
@@ -1593,22 +1573,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .getMessageUtil()
                     .sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
         }
-    }
-
-    private void updateBrowseRank(BrowseEditor browseEditor, String[] args) {
-        Player player = browseEditor.getPlayer();
-        if (args.length != 1) {
-            CodexEngine.get()
-                    .getMessageUtil()
-                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
-            return;
-        }
-        String rank = args[0];
-        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().setPermission(rank);
-        CodexEngine.get()
-                .getMessageUtil()
-                .sendMessage("editor.browseRankUpdated", player, new MessageData("rank", rank));
-        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
     }
 
     private void addBrowseConditions(BrowseEditor browseEditor, String[] args) {
