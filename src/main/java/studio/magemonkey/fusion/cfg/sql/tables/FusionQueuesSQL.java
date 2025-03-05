@@ -8,6 +8,7 @@ import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.Recipe;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,11 +113,22 @@ public class FusionQueuesSQL {
             select.setString(2, "%" + profession + "." + category.getName() + "%");
             try (ResultSet result = select.executeQuery()) {
                 while (result.next()) {
+                    String recipeStr = result.getString("RecipePath").split("\\.")[2];
+                    Recipe recipe    = category.getRecipe(recipeStr);
+
+                    if (recipe == null) {
+                        Fusion.getInstance()
+                                .getLogger()
+                                .warning("Unable to locate recipe: " + recipeStr + " for " + profession + "."
+                                        + category.getName() + " while loading queue for " + uuid + ". Does it exist?");
+                        continue;
+                    }
+
                     entries.add(new QueueItem(
                             result.getInt("Id"),
                             profession,
                             category,
-                            category.getRecipe(result.getString("RecipePath").split("\\.")[2]),
+                            recipe,
                             result.getLong("Timestamp"),
                             result.getInt("SavedSeconds")
                     ));

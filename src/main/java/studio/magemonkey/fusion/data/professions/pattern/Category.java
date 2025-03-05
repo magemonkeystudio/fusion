@@ -7,6 +7,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.items.ItemType;
 import studio.magemonkey.codex.api.items.exception.CodexItemException;
@@ -109,6 +110,7 @@ public class Category implements ConfigurationSerializable {
         return hasPrevious;
     }
 
+    @Nullable
     public Recipe getRecipe(String name) {
         for (Recipe recipe : recipes) {
             if (recipe.getName().equals(name)) {
