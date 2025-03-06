@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.professions;
+package studio.magemonkey.fusion.gui.editors.professions.recipes;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;

@@ -333,7 +333,9 @@ public class CommandMechanics {
 
     public static void setProfessionExp(CommandSender sender, String[] args) {
         String profession = args[2];
-
+        if (!Fusion.getInstance().checkPermission(sender, "fusion.admin")) {
+            return;
+        }
         if (profession == null || !ProfessionsCfg.getMap().containsKey(profession)) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.error.invalidProfession", sender);
             return;
@@ -378,12 +380,16 @@ public class CommandMechanics {
 
     public static void setProfessionLevel(CommandSender sender, String[] args) {
         String profession = args[2];
-
+        if (!Fusion.getInstance().checkPermission(sender, "fusion.admin")) {
+            return;
+        }
         if (profession == null || !ProfessionsCfg.getMap().containsKey(profession)) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.error.invalidProfession", sender);
             return;
         }
-
+        if (!Fusion.getInstance().checkPermission(sender, "fusion.level")) {
+            return;
+        }
         Player player = Bukkit.getPlayer(args[3]);
         if (player == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer", sender, new MessageData("name", args[2]));

@@ -81,11 +81,6 @@ public class CraftingRequirementsCfg {
         return ChatUT.hexString(line);
     }
 
-    public static String getRank(String path, String rank) {
-        return ChatUT.hexString(config.getString(path + ".rank." + rank,
-                "&c" + rank + " rank needed to craft this item!"));
-    }
-
     public static String getConditionLine(String path, String condition, String key, int level, int required) {
         boolean fulfilled = level >= required;
         String line = config.getString(path + ".conditions." + (fulfilled ? "true" : "false"),

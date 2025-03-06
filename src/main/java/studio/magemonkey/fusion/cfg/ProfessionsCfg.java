@@ -327,10 +327,10 @@ public class ProfessionsCfg {
                             mutableRecipeData.remove("neededLevels");
                             conditions.put("professionLevel", neededLevels);
                         }
-                        if (mutableRecipeData.containsKey("rank")) {
-                            String rank = (String) mutableRecipeData.getOrDefault("rank", null);
-                            mutableRecipeData.remove("rank");
-                            conditions.put("rank", rank);
+                        if (mutableRecipeData.containsKey("permission")) {
+                            String permission = (String) mutableRecipeData.getOrDefault("permission", null);
+                            mutableRecipeData.remove("permission");
+                            conditions.put("permission", permission);
                         }
 
                         // Results
@@ -411,7 +411,7 @@ public class ProfessionsCfg {
         String       name = cfgs.get(key).getString("recipePattern.items.fillItem.name", " ");
         List<String> lore = cfgs.get(key).getStringList("recipePattern.items.fillItem.lore");
         Material material = Material.getMaterial(cfgs.get(key)
-                .getString("recipePattern.items.fillItem.material", "BLACK_STAINED_GLASS_PANE"));
+                .getString("recipePattern.items.fillItem.material", "BLACK_STAINED_GLASS_PANE").toUpperCase());
         return ItemBuilder.newItem(material).name(name).lore(lore).build();
     }
 
@@ -428,7 +428,7 @@ public class ProfessionsCfg {
         }
         Material material =
                 Material.getMaterial(cfg.getString("recipePattern.items.queue-items.-.material",
-                        "GRAY_STAINED_GLASS_PANE"));
+                        "GRAY_STAINED_GLASS_PANE").toUpperCase());
         return ItemBuilder.newItem(material)
                 .name(cfg.getString("recipePattern.items.queue-items.-.name", "&cQueue Slot"))
                 .lore(cfg.getStringList("recipePattern.items.queue-items.-.lore"))
@@ -449,10 +449,10 @@ public class ProfessionsCfg {
             return null;
         }
         ItemStack result = item.getRecipe().getDivinityRecipeMeta() == null ? item.getRecipe()
-                .getResults()
-                .getResultItem()
+                .getSettings()
+                .getRecipeItem()
                 .getItemStack() : item.getRecipe().getDivinityRecipeMeta().getIcon();
-        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE")
+        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE").toUpperCase()
                 .replace("%material%", result.getType().toString())
                 .toUpperCase());
         List<String> lore = cfg.getStringList(path + ".lore");

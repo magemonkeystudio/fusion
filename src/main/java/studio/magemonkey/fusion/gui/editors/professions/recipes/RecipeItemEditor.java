@@ -1,4 +1,4 @@
-package studio.magemonkey.fusion.gui.editors.professions;
+package studio.magemonkey.fusion.gui.editors.professions.recipes;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -22,6 +22,9 @@ public class RecipeItemEditor extends Editor implements Listener {
     @Getter
     private final Recipe recipe;
 
+    @Getter
+    private RecipeIconEditor recipeIconEditor;
+
     public RecipeItemEditor(Editor parentEditor, Player player, Recipe recipe) {
         super(parentEditor, EditorRegistry.getRecipeEditorCfg().getSubTitle(recipe.getName()), 54);
         this.player = player;
@@ -38,10 +41,9 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(10, getIcons().get("craftingTime"));
         setItem(11, getIcons().get("craftingLimit"));
         setItem(12, getIcons().get("craftingLimitCooldown"));
-        setItem(14, getIcons().get("resultItem"));
         setItem(15, getIcons().get("professionExp"));
         setItem(16, getIcons().get("vanillaExp"));
-        setItem(19, getIcons().get("enableItemLore"));
+        setItem(19, getIcons().get("resultItem"));
         setItem(20, getIcons().get("hiding_noPermission"));
         setItem(21, getIcons().get("hiding_recipeLimitReached"));
         setItem(24, getIcons().get("commands"));
@@ -51,7 +53,7 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(39, getIcons().get("expCost"));
         setItem(40, getIcons().get("professionLevel"));
         setItem(41, getIcons().get("mastery"));
-        setItem(42, getIcons().get("rank"));
+        setItem(42, getIcons().get("permission"));
         setItem(43, getIcons().get("conditions"));
         setItem(49, getIcons().get("category"));
 
@@ -102,9 +104,6 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
-            case 14 -> FusionEditorCommand.suggestUsage(player,
-                    EditorCriteria.Profession_Recipe_Edit_ResultItem,
-                    "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
             case 15 -> {
                 int amount = event.isShiftClick() ? 10 : 1;
                 if (event.isLeftClick()) {
@@ -128,8 +127,14 @@ public class RecipeItemEditor extends Editor implements Listener {
                 }
             }
             case 19 -> {
-                recipe.getSettings().setEnableLore(!recipe.getSettings().isEnableLore());
-                hasChanges = true;
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Edit_ResultItem,
+                            "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
+                else if (event.isRightClick()) {
+                    recipeIconEditor = new RecipeIconEditor(this, player, recipe);
+                    recipeIconEditor.open(player);
+                }
             }
             case 20 -> {
                 if (event.isLeftClick()) {
@@ -228,8 +233,8 @@ public class RecipeItemEditor extends Editor implements Listener {
             case 42 -> {
                 if (event.isLeftClick())
                     FusionEditorCommand.suggestUsage(player,
-                            EditorCriteria.Profession_Recipe_Edit_Rank,
-                            "/fusion-editor <rank>");
+                            EditorCriteria.Profession_Recipe_Edit_Permission,
+                            "/fusion-editor <permission>");
                 else if (event.isRightClick()) {
                     if (recipe.getConditions().getPermission() == null)
                         return;
@@ -289,10 +294,10 @@ public class RecipeItemEditor extends Editor implements Listener {
     }
 
     public String getRecipeName() {
-        return recipe.getResults().getResultName().split(":")[0];
+        return recipe.getSettings().getIconNamespace().split(":")[0];
     }
 
     public int getRecipeAmount() {
-        return Integer.parseInt(recipe.getResults().getResultName().split(":")[1]);
+        return Integer.parseInt(recipe.getSettings().getIconNamespace().split(":")[1]);
     }
 }

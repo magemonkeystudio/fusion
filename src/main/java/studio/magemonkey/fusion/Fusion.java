@@ -106,7 +106,7 @@ public class Fusion extends RisePlugin implements Listener {
                     });
         }
         RECIPE_ITEM.registerChild("item", PlaceholderRegistry.ITEM, RecipeItem::getItemStack);
-        RECIPE.registerChild("results", RECIPE_ITEM, entry -> entry.getResults().getResultItem());
+        RECIPE.registerChild("results", RECIPE_ITEM, entry -> entry.getSettings().getRecipeItem());
         CALCULATED_RECIPE.registerChild("recipe", RECIPE, CalculatedRecipe::getRecipe);
         CALCULATED_RECIPE.registerChild("icon", PlaceholderRegistry.ITEM, CalculatedRecipe::getIcon);
 

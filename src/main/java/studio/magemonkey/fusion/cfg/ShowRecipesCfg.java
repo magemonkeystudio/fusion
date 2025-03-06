@@ -96,7 +96,7 @@ public class ShowRecipesCfg {
     }
 
     public static ItemStack getRecipeIcon(Recipe recipe, RecipeItem ingredient) {
-        String       itemName = Utils.getItemName(recipe.getResults().getResultItem().getItemStack());
+        String       itemName = Utils.getItemName(recipe.getSettings().getRecipeItem().getItemStack());
         String       name     = ChatUT.hexString(config.getString("recipeItem.name", "&7$<name>")
                 .replace(MessageUtil.getReplacement("name"), itemName));
         List<String> lore     = config.getStringList("recipeItem.lore");
@@ -106,7 +106,7 @@ public class ShowRecipesCfg {
                 .replace(MessageUtil.getReplacement("amount"), String.valueOf(ingredient.getAmount()))
                 .replace(MessageUtil.getReplacement("name"), name)));
 
-        ItemStack icon = recipe.getResults().getResultItem().getItemStack().clone();
+        ItemStack icon = recipe.getSettings().getRecipeItem().getItemStack().clone();
         ItemMeta  meta = icon.getItemMeta();
         meta.setDisplayName(name);
         meta.setLore(lore);

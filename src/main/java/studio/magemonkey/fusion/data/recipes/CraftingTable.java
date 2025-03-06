@@ -138,8 +138,11 @@ public class CraftingTable implements ConfigurationSerializable {
         for (Map<?, ?> recipeData : recipesSection) {
             long rStart = System.currentTimeMillis();
             try {
-                Map<?, ?> results    = (Map<?, ?>) recipeData.get("results");
-                String    itemResult = (String) results.get("item");
+                Map<?, ?> settings    = (Map<?, ?>) recipeData.get("settings");
+                Map<?, ?> iconSettings    = (Map<?, ?>) settings.get("icon");
+
+                String    itemResult = (String) iconSettings.get("item");
+                // TODO First contact with ResultItem / Icon
                 if (itemResult.startsWith("DIVINITY_item_generator")) {
                     buildDivinityResultItem(recipeData, itemResult);
                     continue;
@@ -252,11 +255,10 @@ public class CraftingTable implements ConfigurationSerializable {
         }
 
         String recipeName = (String) recipeData.get("name");
-        int    i          = 0;
+        int i = 0;
         for (Map.Entry<ItemType, Set<String>> nameEntry : names.entrySet()) {
             for (String name : nameEntry.getValue()) {
-                DivinityRecipeMeta meta =
-                        new DivinityRecipeMeta(recipeName, entry, level, amount, nameEntry.getKey(), name);
+                DivinityRecipeMeta meta = new DivinityRecipeMeta(recipeName, entry, level, amount, nameEntry.getKey(), name);
                 Recipe recipe = new Recipe(this, (Map<String, Object>) recipeData, meta);
                 recipe.setName(recipe.getName() + "::" + i);
                 recipes.put(recipe.getName(), recipe);

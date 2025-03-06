@@ -18,7 +18,6 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.player.PlayerRecipeLimit;
-import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.InvalidPatternItemException;
 import studio.magemonkey.fusion.util.Utils;
@@ -43,14 +42,13 @@ public class CalculatedRecipe {
                                           Player player,
                                           CraftingTable craftingTable) throws InvalidPatternItemException {
         try {
-            Fusion pl = Fusion.getInstance();
-
             StringBuilder lore = new StringBuilder(512);
-            ItemStack result =
-                    recipe.getDivinityRecipeMeta() == null ? recipe.getResults().getResultItem().getItemStack()
-                            : recipe.getDivinityRecipeMeta().getIcon();
+            // TODO Make sure this icon is always applied. Also on Divinity Item Meta existent
+            ItemStack result = recipe.getSettings().getRecipeItem().getItemStack();
             List<String> resultLore = result.getItemMeta().getLore();
 
+            /*
+            TODO This part is natively provided through the settings section soon
             if (!recipe.getSettings().isEnableLore()) {
                 if ((resultLore != null) && !resultLore.isEmpty()) {
                     resultLore.forEach((str) -> lore.append(str).append('\n'));
@@ -59,7 +57,7 @@ public class CalculatedRecipe {
             } else if (recipe.getSettings().getLore() != null && !recipe.getSettings().getLore().isEmpty()) {
                 recipe.getSettings().getLore().forEach((str) -> lore.append(ChatUT.hexString(str)).append('\n'));
                 lore.append('\n');
-            }
+            }*/
 
             String requirementLine = CraftingRequirementsCfg.getCraftingRequirementLine("recipes");
             if (!requirementLine.isEmpty())
@@ -244,7 +242,7 @@ public class CalculatedRecipe {
             Fusion.getInstance()
                     .error("The recipe-item seems not to be recognized. Please check your setup on the following recipe '"
                             + recipe.getName());
-            Fusion.getInstance().error("Result: " + recipe.getResults().getResultName());
+            Fusion.getInstance().error("Result: " + recipe.getSettings().getIconNamespace());
             Fusion.getInstance().error("Pattern Items: ");
             for (Object patternItem : recipe.getConditions().getRequiredItemNames()) {
                 Fusion.getInstance().error("- " + patternItem);

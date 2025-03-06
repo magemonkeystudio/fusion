@@ -8,6 +8,7 @@ import dev.aurelium.auraskills.api.registry.NamespacedId;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -51,8 +52,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                              @NotNull Command command,
                              @NotNull String label,
                              @NotNull String[] args) {
-        if (!(sender instanceof Player)) return true;
-        Player player = (Player) sender;
+        if (!(sender instanceof Player player)) return true;
         Editor editor = EditorRegistry.getCurrentEditor(player);
         if (args.length == 0) {
             if (editor != null) {
@@ -166,8 +166,15 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Add -> addNewRecipe(professionEditor, args);
                 case Profession_Recipe_Edit_ResultItem, Profession_Recipe_Add_Ingredients,
                      Profession_Recipe_Edit_Ingredients -> updateRecipeItems(professionEditor, args, criteria);
-                case Profession_Recipe_Edit_Rank -> updateRecipeRank(professionEditor, args);
+                case Profession_Recipe_Edit_Permission-> updateRecipePermission(professionEditor, args);
                 case Profession_Recipe_Add_Conditions -> addRecipeConditions(professionEditor, args);
+
+                case RecipeIcon_Edit_Name -> updateRecipeIconName(professionEditor, args);
+                case RecipeIcon_Edit_Lore -> addRecipeIconLore(professionEditor, args);
+                case RecipeIcon_Edit_Color -> updateRecipeIconColor(professionEditor, args);
+                case RecipeIcon_Add_Commands -> addRecipeIconCommand(professionEditor, args);
+                case RecipeIcon_Add_Enchants -> addRecipeIconEnchants(professionEditor, args);
+                case RecipeIcon_Add_Flags -> addRecipeIconFlags(professionEditor, args);
                 default -> editor.open(player);
             }
         } else if (editor instanceof BrowseEditor) {
@@ -182,7 +189,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Pattern_Add_Enchants -> addPatternEnchants(browseEditor, args);
                 case Pattern_Add_Flags -> addPatternFlags(browseEditor, args);
                 case Browse_Profession_Add_Ingredients -> addBrowseIngredient(browseEditor, args);
-                case Browse_Profession_Edit_Rank -> updateBrowseRank(browseEditor, args);
                 case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
             }
@@ -276,16 +282,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("64");
                     }
                     break;
-                case Browse_Profession_Edit_Rank:
-                    if (args.length == 1) {
-                        entries.add("<rank>");
-                        entries.add(professionEditor.getRecipeEditor()
-                                .getRecipeItemEditor()
-                                .getRecipe()
-                                .getConditions()
-                                .getPermission());
-                    }
-                    break;
                 case Profession_Recipe_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newRecipeName>");
@@ -294,6 +290,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     break;
                 case Profession_Recipe_Add_Commands:
                 case Pattern_Add_Commands:
+                case RecipeIcon_Add_Commands:
                     if (args.length == 1) {
                         if ("console".startsWith(args[0].toUpperCase())) entries.add("console");
                         if ("player".startsWith(args[0].toUpperCase())) entries.add("player");
@@ -314,15 +311,32 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     entries.addAll(TabCacher.getConditionsTabs(args));
                     break;
                 case Pattern_Edit_Lore:
+                case RecipeIcon_Edit_Lore:
                     if (args.length == 1) {
                         entries.add("<lore>");
                     }
                     break;
                 case Pattern_Add_Enchants:
+                case RecipeIcon_Add_Enchants:
                     entries.addAll(TabCacher.getEnchantmentsTab(args));
                     break;
                 case Pattern_Add_Flags:
+                case RecipeIcon_Add_Flags:
                     entries.addAll(TabCacher.getFlagsTab(args));
+                    break;
+                case RecipeIcon_Edit_Name:
+                    if (args.length == 1) {
+                        entries.add("<newName>");
+                        entries.add(professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().getRecipe().getSettings().getName());
+                    }
+                    break;
+                case RecipeIcon_Edit_Color:
+                    if (args.length == 1) {
+                        entries.add("0,0,0");
+                        entries.add("255,255,255");
+                        entries.add("0,0,255");
+                        entries.add("255,0,0");
+                    }
                     break;
             }
         } else if (editor instanceof BrowseEditor) {
@@ -338,15 +352,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Browse_Add_Profession:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "professions", args[0]));
-                    }
-                    break;
-                case Browse_Profession_Edit_Rank:
-                    if (args.length == 1) {
-                        entries.add("<rank>");
-                        entries.add(browseEditor.getBrowseProfessionsEditor()
-                                .getBrowseProfessionEditor()
-                                .getConditions()
-                                .getPermission());
                     }
                     break;
                 case Pattern_Edit_Name:
@@ -423,15 +428,10 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             case Profession_Edit_Name:
             case Pattern_Edit_Name:
             case Browse_Edit_Name:
+            case RecipeIcon_Edit_Name:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<newName>"));
-                break;
-            case Browse_Profession_Edit_Rank:
-            case Profession_Recipe_Edit_Rank:
-                CodexEngine.get()
-                        .getMessageUtil()
-                        .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<rank>"));
                 break;
             case Profession_Recipe_Add_Ingredients:
             case Profession_Recipe_Edit_Ingredients:
@@ -458,6 +458,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 break;
             case Pattern_Add_Commands:
             case Profession_Recipe_Add_Commands:
+            case RecipeIcon_Add_Commands:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage",
@@ -475,6 +476,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<item> <amount>"));
                 break;
             case Pattern_Edit_Lore:
+            case RecipeIcon_Edit_Lore:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<lore>"));
@@ -502,14 +504,21 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<professionName>"));
                 break;
             case Pattern_Add_Enchants:
+            case RecipeIcon_Add_Enchants:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<enchantment> [level]"));
                 break;
             case Pattern_Add_Flags:
+            case RecipeIcon_Add_Flags:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<flag>"));
+                break;
+            case RecipeIcon_Edit_Color:
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<color>"));
                 break;
         }
         sendSuggestMessage(player, suggestCommand);
@@ -1152,16 +1161,17 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
             switch (criteria) {
                 case Profession_Recipe_Edit_ResultItem:
+                    // TODO Update editor for new way of handling recipe icons
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
-                            .getResults()
-                            .setResultItem(RecipeItem.fromConfig(itemName + ":" + amount));
+                            .getSettings()
+                            .setRecipeItem(RecipeItem.fromConfig(itemName + ":" + amount));
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
-                            .getResults()
-                            .setResultName(itemName + ":" + amount);
+                            .getSettings()
+                            .setIconNamespace(itemName + ":" + amount);
                     CodexEngine.get()
                             .getMessageUtil()
                             .sendMessage("editor.resultEdited",
@@ -1243,19 +1253,19 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void updateRecipeRank(ProfessionEditor professionEditor, String[] args) {
+    private void updateRecipePermission(ProfessionEditor professionEditor, String[] args) {
         Player player = professionEditor.getPlayer();
         if (args.length != 1) {
             CodexEngine.get()
                     .getMessageUtil()
-                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
+                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<permission>"));
             return;
         }
-        String rank = args[0];
-        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setPermission(rank);
+        String permission = args[0];
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setPermission(permission);
         CodexEngine.get()
                 .getMessageUtil()
-                .sendMessage("editor.recipeRankUpdated", player, new MessageData("rank", rank));
+                .sendMessage("editor.recipePermissionUpdated", player, new MessageData("permission", permission));
         professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
     }
 
@@ -1565,22 +1575,6 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void updateBrowseRank(BrowseEditor browseEditor, String[] args) {
-        Player player = browseEditor.getPlayer();
-        if (args.length != 1) {
-            CodexEngine.get()
-                    .getMessageUtil()
-                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<rank>"));
-            return;
-        }
-        String rank = args[0];
-        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().getConditions().setPermission(rank);
-        CodexEngine.get()
-                .getMessageUtil()
-                .sendMessage("editor.browseRankUpdated", player, new MessageData("rank", rank));
-        browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
-    }
-
     private void addBrowseConditions(BrowseEditor browseEditor, String[] args) {
         Player player = browseEditor.getPlayer();
         if (args.length != 3) {
@@ -1768,6 +1762,189 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         new MessageData("value", conditionValue),
                         new MessageData("level", args[2]));
         browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
+    }
+
+    public void updateRecipeIconName(ProfessionEditor professionEditor, String[] args) {
+        if (args.length < 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax",
+                            professionEditor.getPlayer(),
+                            new MessageData("syntax", "<newIconName>"));
+            return;
+        }
+
+        String iconName = args[0];
+        Player player   = professionEditor.getPlayer();
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().setName(iconName);
+        CodexEngine.get()
+                .getMessageUtil()
+                .sendMessage("editor.recipeIconRenamed",
+                        player,
+                        new MessageData("icon", iconName));
+        professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+    }
+
+    public void addRecipeIconLore(ProfessionEditor professionEditor, String[] args) {
+        if (args.length < 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax",
+                            professionEditor.getPlayer(),
+                            new MessageData("syntax", "<lore>"));
+            return;
+        }
+
+        StringBuilder loreBuilder = new StringBuilder();
+        for (String arg : args) {
+            loreBuilder.append(arg).append(" ");
+        }
+        String lore = loreBuilder.toString().trim();
+        Player player = professionEditor.getPlayer();
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().getLore().add(lore);
+        CodexEngine.get()
+                .getMessageUtil()
+                .sendMessage("editor.recipeIconLoreAdded",
+                        player,
+                        new MessageData("lore", lore));
+        professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+    }
+
+    public void addRecipeIconFlags(ProfessionEditor professionEditor, String[] args) {
+        if (args.length < 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax",
+                            professionEditor.getPlayer(),
+                            new MessageData("syntax", "<flag>"));
+            return;
+        }
+
+        Player player = professionEditor.getPlayer();
+        try {
+            ItemFlag flag = ItemFlag.valueOf(args[0].toUpperCase());
+            if (professionEditor.getRecipeEditor()
+                    .getRecipeItemEditor()
+                    .getRecipe()
+                    .getSettings()
+                    .getFlags()
+                    .contains(flag)) {
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.flagAlreadyExists", player, new MessageData("flag", flag.name()));
+                return;
+            }
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().getFlags().add(flag);
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.recipeIconFlagAdded",
+                            player,
+                            new MessageData("flag", flag.name()));
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
+        } catch (Exception e) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidFlag", player, new MessageData("flag", args[0]));
+        }
+    }
+
+    public void updateRecipeIconColor(ProfessionEditor professionEditor, String[] args) {
+        if (args.length < 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax",
+                            professionEditor.getPlayer(),
+                            new MessageData("syntax", "<color> (r,g,b)"));
+            return;
+        }
+
+        Player player = professionEditor.getPlayer();
+        try {
+            String[] data = args[0].split(",");
+            Color color = Color.fromRGB(Integer.parseInt(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]));
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().setColor(args[0]);
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.recipeIconColorUpdated",
+                            player,
+                            new MessageData("color", color.asRGB()));
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
+        } catch (NumberFormatException e) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidNumber", player, new MessageData("number", args[0]));
+        }
+    }
+
+    public void addRecipeIconCommand(ProfessionEditor professionEditor, String[] args) {
+        Player player = professionEditor.getPlayer();
+        if (args.length < 3) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidCommand", player, new MessageData("command", args));
+            return;
+        }
+        StringBuilder commandBuilder = new StringBuilder();
+        try {
+            CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
+            int         delay       = Integer.parseInt(args[1]);
+            commandBuilder = new StringBuilder();
+            for (int i = 2; i < args.length; i++) {
+                commandBuilder.append(args[i]);
+                if (i < args.length - 1) commandBuilder.append(" ");
+            }
+            professionEditor.getRecipeEditor()
+                    .getRecipeItemEditor()
+                    .getRecipe()
+                    .getSettings()
+                    .getCommandsOnClick()
+                    .add(new DelayedCommand(Map.of("delay",
+                            delay,
+                            "as",
+                            commandType.name(),
+                            "cmd",
+                            commandBuilder.toString())));
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidCommand",
+                            player,
+                            new MessageData("command", args[0] + " " + args[1] + " " + commandBuilder));
+        }
+    }
+
+    public void addRecipeIconEnchants(ProfessionEditor professionEditor, String[] args) {
+        Player player = professionEditor.getPlayer();
+        if (args.length < 2) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<enchantment> <level>"));
+            return;
+        }
+        try {
+            Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase()));
+            int         level       = Integer.parseInt(args[1]);
+            if (enchantment == null) {
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.invalidEnchantment", player, new MessageData("enchantment", args[0]));
+                return;
+            }
+            professionEditor.getRecipeEditor()
+                    .getRecipeItemEditor()
+                    .getRecipe()
+                    .getSettings()
+                    .getEnchantments()
+                    .put(enchantment, level);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().reload(true);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+        }
     }
 
     public static void removeEditorCriteria(UUID uuid) {

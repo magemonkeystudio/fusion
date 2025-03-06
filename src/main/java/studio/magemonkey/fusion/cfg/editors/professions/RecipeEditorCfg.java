@@ -74,7 +74,7 @@ public class RecipeEditorCfg {
     }
 
     public ItemStack getRecipeIcon(Recipe recipe) {
-        ItemStack result = recipe.getResults().getResultItem().getItemStack();
+        ItemStack result = recipe.getSettings().getRecipeItem().getItemStack();
         String name = config.getString("icons.recipeItem.name", "&9$<recipe.name>")
                 .replace(MessageUtil.getReplacement("recipe.name"), recipe.getName());
         List<String> lore = config.getStringList("icons.recipeItem.lore");
@@ -95,7 +95,7 @@ public class RecipeEditorCfg {
                             .replace(MessageUtil.getReplacement("recipe.result"),
                                     (result != null && !result.getType().isAir()) && result.hasItemMeta() ? result.getItemMeta()
                                             .getDisplayName() : result.getType().name()))
-                    .replace(MessageUtil.getReplacement("conditions.rank"),
+                    .replace(MessageUtil.getReplacement("conditions.permission"),
                             recipe.getConditions().getPermission() == null ? getUnsetFormat()
                                     : recipe.getConditions().getPermission())
             );
@@ -123,12 +123,12 @@ public class RecipeEditorCfg {
     }
 
     public ItemStack getSubIcon(Recipe recipe, String icon) {
-        ItemStack result     = recipe.getResults().getResultItem().getItemStack();
-        String    resultName = recipe.getResults().getResultName();
+        ItemStack result     = recipe.getSettings().getRecipeItem().getItemStack();
+        String    resultName = recipe.getSettings().getIconNamespace();
         Material material =
                 Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "$<material>")
                         .replace(MessageUtil.getReplacement("material"),
-                                recipe.getResults().getResultItem().getItemStack().getType().name())
+                                recipe.getSettings().getRecipeItem().getItemStack().getType().name())
                         .toUpperCase());
         int          amount      = config.getInt("subEditor.icons." + icon + ".amount", 1);
         int          durability  = config.getInt("subEditor.icons." + icon + ".durability", 0);
@@ -224,7 +224,7 @@ public class RecipeEditorCfg {
                                     String.valueOf(recipe.getConditions().getProfessionLevel()))
                             .replace(MessageUtil.getReplacement("conditions.mastery"),
                                     String.valueOf(recipe.getConditions().isMastery()))
-                            .replace(MessageUtil.getReplacement("conditions.rank"),
+                            .replace(MessageUtil.getReplacement("conditions.permission"),
                                     String.valueOf(recipe.getConditions().getPermission()))
                             .replace(MessageUtil.getReplacement("category"),
                                     recipe.getCategory() == null ? "master" : recipe.getCategory()))
@@ -240,7 +240,7 @@ public class RecipeEditorCfg {
         List<ItemFlag>            flags     = config.getItemFlags("subEditor.icons." + icon + ".flags");
         ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
-                .amount(icon.equals("resultItem") ? recipe.getResults().getResultItem().getAmount() : amount)
+                .amount(icon.equals("resultItem") ? recipe.getSettings().getRecipeItem().getAmount() : amount)
                 .durability(durability)
                 .unbreakable(unbreakable)
                 .name(ChatUT.hexString(name))

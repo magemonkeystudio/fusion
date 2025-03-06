@@ -373,7 +373,6 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 1
         mastery: false
-        rank: null
     - name: IronChestplate
       craftingTime: 20
       craftingLimit: 2
@@ -390,7 +389,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 5
         mastery: false
-        rank: null
+        
     - name: DiamondLeggings
       craftingTime: 30
       craftingLimit: 0
@@ -407,7 +406,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 10
         mastery: false
-        rank: null
+        
     - name: ChainBoots
       craftingTime: 15
       craftingLimit: 0
@@ -424,7 +423,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 15
         mastery: false
-        rank: null
+        
         professions:
           weapon_smithing: 5
     - name: ChainBoots2
@@ -443,7 +442,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 15
         mastery: false
-        rank: null
+        
         professions:
           weapon_smithing: 5
     - name: ChainBoots3
@@ -474,7 +473,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 15
         mastery: false
-        rank: null
+        
         professions:
           weapon_smithing: 5
     - name: TestOre
@@ -493,7 +492,7 @@ The following part shows you the default configs with some comments to explain t
       conditions:
         professionLevel: 15
         mastery: false
-        rank: null
+        
   ```
 
 </details>

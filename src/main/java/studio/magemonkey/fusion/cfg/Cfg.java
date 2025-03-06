@@ -22,7 +22,6 @@ public final class Cfg {
     public static boolean showRequirementsOnBrowse = true;
 
     public static boolean hideRecipesNoPermission = false;
-    public static boolean hideRecipesNoRank       = false;
     public static boolean hideRecipesLimitReached = false;
 
     public static boolean useCustomFormula = true;
@@ -79,11 +78,8 @@ public final class Cfg {
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
         if (!cfg.isSet("showRequirementsOnBrowse")) cfg.set("showRequirementsOnBrowse", showRequirementsOnBrowse);
-        if (!cfg.isSet("hideRecipesDefault.noPermission"))
-            cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
-        if (!cfg.isSet("hideRecipesDefault.noRank")) cfg.set("hideRecipesDefault.noRank", hideRecipesNoRank);
-        if (!cfg.isSet("hideRecipesDefault.recipeLimitReached"))
-            cfg.set("hideRecipesDefault.recipeLimitReached", hideRecipesLimitReached);
+        if (!cfg.isSet("hideRecipesDefault.noPermission")) cfg.set("hideRecipesDefault.noPermission", hideRecipesNoPermission);
+        if (!cfg.isSet("hideRecipesDefault.recipeLimitReached")) cfg.set("hideRecipesDefault.recipeLimitReached", hideRecipesLimitReached);
 
         if (!cfg.isSet("storage.type")) cfg.set("storage.type", storageType.name());
         if (!cfg.isSet("storage.host")) cfg.set("storage.host", storageHost);
@@ -112,7 +108,6 @@ public final class Cfg {
         finishMessage = cfg.getString("finished_message");
         showRequirementsOnBrowse = cfg.getBoolean("showRequirementsOnBrowse");
         hideRecipesNoPermission = cfg.getBoolean("hideRecipesDefault.noPermission");
-        hideRecipesNoRank = cfg.getBoolean("hideRecipesDefault.noRank");
         hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.recipeLimitReached");
 
         useCustomFormula = cfg.getBoolean("useCustomFormula");

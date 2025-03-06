@@ -68,6 +68,7 @@ public class RecipeGui implements Listener {
     private int page = 0;
     private int nextPage;
     private int prevPage;
+    private boolean isLoaded = false;
 
     /* Queue Crafting Mode */
     private int           queuePage = 0;
@@ -230,7 +231,6 @@ public class RecipeGui implements Listener {
     public void initialize() {
         this.inventory = Bukkit.createInventory(null, pattern.getInventorySize(), inventoryName);
         mapSlots();
-        reloadRecipes();
     }
 
     public void reloadRecipes() {
@@ -333,8 +333,7 @@ public class RecipeGui implements Listener {
                 Recipe recipe = allRecipesArray[k];
                 int    slot   = slots[i];
                 try {
-                    CalculatedRecipe calculatedRecipe =
-                            CalculatedRecipe.create(recipe, playerItems, this.player, table);
+                    CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
                     this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
                     this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
                 } catch (InvalidPatternItemException ignored) {
@@ -346,7 +345,8 @@ public class RecipeGui implements Listener {
                     continue;
                 inventory.setItem(k, fill);
             }
-        } catch (
+            this.isLoaded = true;
+        } catch   (
                 Exception e) {
             this.inventory.clear();
             Bukkit.getScheduler().runTask(Fusion.getInstance(), this.player::closeInventory);
@@ -364,6 +364,7 @@ public class RecipeGui implements Listener {
                 if (requiresUpdate) {
                     Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
                 }
+                isLoaded = true;
             }
         }
     }
@@ -472,6 +473,8 @@ public class RecipeGui implements Listener {
     }
 
     public void open(Player player) {
+        if(!isLoaded)
+            reloadRecipes();
         player.openInventory(inventory);
     }
 
@@ -529,7 +532,7 @@ public class RecipeGui implements Listener {
         cancel(true);
         if (!canCraft(calculatedRecipe, slot)) return false;
 
-        RecipeItem recipeResult = recipe.getResults().getResultItem();
+        RecipeItem recipeResult = recipe.getSettings().getRecipeItem();
         ItemStack  resultItem   = recipeResult.getItemStack();
 
         //Add "Crafted by"
@@ -603,7 +606,7 @@ public class RecipeGui implements Listener {
             int cooldown = modifier == 0d
                     ? recipe.getCraftingTime()
                     : (int) Math.round(recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier));
-            showBossBar(this.player, recipe.getResults().getResultItem().getItemStack(), cooldown);
+            showBossBar(this.player, recipe.getSettings().getRecipeItem().getItemStack(), cooldown);
 
             if (cooldown != 0) {
                 previousCursor = player.getOpenInventory().getCursor();
@@ -617,11 +620,11 @@ public class RecipeGui implements Listener {
                 if (recipe.getResults().getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
-                        if (cursor.isSimilar(recipe.getResults().getResultItem().getItemStack())) {
+                        if (cursor.isSimilar(recipe.getSettings().getRecipeItem().getItemStack())) {
                             if (cursor.getAmount() < cursor.getMaxStackSize()
-                                    && cursor.getAmount() + recipe.getResults().getResultItem().getAmount()
+                                    && cursor.getAmount() + recipe.getSettings().getRecipeItem().getAmount()
                                     <= cursor.getMaxStackSize()) {
-                                cursor.setAmount(cursor.getAmount() + recipe.getResults().getResultItem().getAmount());
+                                cursor.setAmount(cursor.getAmount() + recipe.getSettings().getRecipeItem().getAmount());
                                 this.player.setItemOnCursor(cursor);
                             } else {
                                 craftingSuccess = false;

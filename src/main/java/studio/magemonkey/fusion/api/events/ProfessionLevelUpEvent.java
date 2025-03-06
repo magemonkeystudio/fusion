@@ -15,7 +15,8 @@ public class ProfessionLevelUpEvent extends FusionEvent {
     /**
      * The new level of the profession
      */
-    private int     newLevel;
+    private int newLevel;
+
     private boolean isModified = false;
 
     /**
