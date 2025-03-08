@@ -57,7 +57,7 @@ public class FusionQueuesSQL {
         if (item.getId() == -1) {
             try (PreparedStatement insert = SQLManager.connection()
                     .prepareStatement("INSERT INTO " + Table
-                            + "(Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES(?,?,?,?,?,?)")) {
+                            + "(Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?,?,?,?,?,?)")) {
                 insert.setLong(1, getNextId());
                 insert.setString(2, uuid.toString());
                 insert.setString(3, item.getRecipePath());
@@ -114,13 +114,16 @@ public class FusionQueuesSQL {
             try (ResultSet result = select.executeQuery()) {
                 while (result.next()) {
                     String recipeStr = result.getString("RecipePath").split("\\.")[2];
-                    Recipe recipe    = category.getRecipe(recipeStr);
+                    Recipe recipe = category.getRecipe(recipeStr);
 
                     if (recipe == null) {
                         Fusion.getInstance()
                                 .getLogger()
                                 .warning("Unable to locate recipe: " + recipeStr + " for " + profession + "."
                                         + category.getName() + " while loading queue for " + uuid + ". Does it exist?");
+                        List<String> availableRecipes =
+                                category.getRecipes().stream().map(r -> r.getName().split("::")[0]).toList();
+                        Fusion.getInstance().getLogger().info("Available recipes are " + availableRecipes);
                         continue;
                     }
 

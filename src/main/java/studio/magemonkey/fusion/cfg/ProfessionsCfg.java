@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.migrations.ProfessionMigration;
@@ -435,6 +436,7 @@ public class ProfessionsCfg {
                 .build();
     }
 
+    @NotNull
     public static ItemStack getQueueItem(String key, QueueItem item) {
         /* Fetch stored data to the queued item */
         //System.out.println("Fetching queued item for " + key + " with item " + item.getRecipe().getResult().getItemStack().getType());
@@ -452,9 +454,18 @@ public class ProfessionsCfg {
                 .getSettings()
                 .getRecipeItem()
                 .getItemStack() : item.getRecipe().getDivinityRecipeMeta().getIcon();
-        Material material = Material.getMaterial(cfg.getString(path + ".material", "STONE").toUpperCase()
+        String materialString = cfg.getString(path + ".material", "STONE")
                 .replace("%material%", result.getType().toString())
-                .toUpperCase());
+                .toUpperCase();
+        Material material = Material.getMaterial(materialString);
+
+        if (material == null) {
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("Profession '" + key + "' has an unknown material: " + materialString);
+            return new ItemStack(Material.AIR);
+        }
+
         List<String> lore = cfg.getStringList(path + ".lore");
         lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime())));
         return ItemBuilder.newItem(result).material(material).lore(lore).build();

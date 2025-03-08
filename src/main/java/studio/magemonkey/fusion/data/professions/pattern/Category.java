@@ -112,11 +112,21 @@ public class Category implements ConfigurationSerializable {
 
     @Nullable
     public Recipe getRecipe(String name) {
+        List<Recipe> possibleRecipes = new ArrayList<>();
         for (Recipe recipe : recipes) {
             if (recipe.getName().equals(name)) {
                 return recipe;
+            } else if (recipe.getName().startsWith(name + "::")) {
+                possibleRecipes.add(recipe);
             }
         }
+
+        if (possibleRecipes.size() == 1) {
+            return possibleRecipes.get(0);
+        } else if (possibleRecipes.size() > 1) {
+            Fusion.getInstance().getLogger().warning("Multiple recipes found for: " + name);
+        }
+
         return null;
     }
 

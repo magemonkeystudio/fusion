@@ -652,10 +652,10 @@ public class RecipeGui implements Listener {
                 if (craftingSuccess) {
                     cancel(false);
                     CodexEngine.get().getVault().take(this.player, recipe.getConditions().getMoneyCost());
-                    //Commands
+                    // Commands
                     DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getResults().getCommands());
 
-                    //Experience
+                    // Experience
                     long professionExp =
                             recipe.getResults().getProfessionExp() + (long) (recipe.getResults().getProfessionExp()
                                     * PlayerUtil.getProfessionExpBonusThroughPermissions(player, table.getName()));
@@ -668,7 +668,7 @@ public class RecipeGui implements Listener {
                         player.giveExp(recipe.getResults().getVanillaExp());
                     }
 
-                    //Restart the crafting sequence if auto-crafting is enabled
+                    // Restart the crafting sequence if auto-crafting is enabled
                     if (PlayerLoader.getPlayer(player).isAutoCrafting() && !this.recipes.isEmpty()) {
                         reloadRecipesTask();
                         boolean success = craft(slot, addToCursor); //Call this method again recursively
