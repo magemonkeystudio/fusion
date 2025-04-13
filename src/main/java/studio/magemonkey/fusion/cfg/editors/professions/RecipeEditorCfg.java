@@ -166,6 +166,18 @@ public class RecipeEditorCfg {
                 }
                 i += newLines;
                 continue;
+            }  else if (lore.get(i).contains(MessageUtil.getReplacement("items"))) {
+                lore.remove(i);
+                int newLines = 1;
+                for (String line : recipe.getResults().getItems()) {
+                    lore.add(i - 1 + newLines,
+                            config.getString("subEditor.icons.items.itemPrefix", "&7- &a$<item>")
+                                    .replace(MessageUtil.getReplacement("item"),
+                                            line));
+                    newLines++;
+                }
+                i += newLines;
+                continue;
             } else if (lore.get(i).contains(MessageUtil.getReplacement("ingredients"))) {
                 lore.remove(i);
                 int newLines = 1;

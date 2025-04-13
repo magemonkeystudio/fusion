@@ -25,6 +25,7 @@ public enum EditorCriteria {
     Profession_Recipe_Add_Ingredients,
     Profession_Recipe_Edit_Ingredients,
     Profession_Recipe_Add_Commands,
+    Profession_Recipe_Add_Items,
     Profession_Recipe_Add_Conditions,
     Profession_Recipe_Edit_Permission,
 
@@ -33,6 +34,7 @@ public enum EditorCriteria {
     RecipeIcon_Edit_Lore,
     RecipeIcon_Edit_Color,
     RecipeIcon_Add_Commands,
+    RecipeIcon_Add_,
     RecipeIcon_Add_Enchants,
     RecipeIcon_Add_Flags,
 
