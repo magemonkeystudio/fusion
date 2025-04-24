@@ -45,7 +45,7 @@ public class CalculatedRecipe {
         try {
             StringBuilder lore = new StringBuilder(512);
             // TODO Make sure this icon is always applied. Also on Divinity Item Meta existent
-            ItemStack iconResult = recipe.getSettings().getRecipeItem().getItemStack();
+            ItemStack    iconResult = recipe.getSettings().getRecipeItem().getItemStack();
             List<String> resultLore = iconResult.getItemMeta().getLore();
 
             /*
@@ -357,13 +357,18 @@ public class CalculatedRecipe {
         }
 
         // Check for custom model data
-        if (im1.hasCustomModelData()) {
-            if (im1.getCustomModelData() != im2.getCustomModelData())
-                isValid = false;
+        if (im1.hasCustomModelData() && im2.hasCustomModelData()) {
+                if (im1.getCustomModelData() != im2.getCustomModelData())
+                    isValid = false;
+                checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path,
+                        im2.getCustomModelData(),
+                        im1.getCustomModelData()));
+        } else if (im1.hasCustomModelData() || im2.hasCustomModelData()) {
+            isValid = false;
             checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path,
-                    im2.getCustomModelData(),
-                    im1.getCustomModelData()));
-        }
+                    im2.hasCustomModelData() ? im2.getCustomModelData() : 0,
+                    im1.hasCustomModelData() ? im1.getCustomModelData() : 0));
+            }
         // Check if unbreakable
         if (im1.isUnbreakable()) {
             if (im2.isUnbreakable())
