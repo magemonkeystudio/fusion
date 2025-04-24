@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.data.professions;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -271,6 +272,6 @@ public class ProfessionSettings implements ConfigurationSerializable {
     }
 
     private boolean hasAnyOptionalFields() {
-        return name != null || customModelData >= 0 || (lore != null && lore.isEmpty()) || (enchantments != null && enchantments.isEmpty()) || (flags != null && flags.isEmpty()) || color != null;
+        return name != null || customModelData >= 0 || (lore != null && !lore.isEmpty()) || (enchantments != null && !enchantments.isEmpty()) || (flags != null && !flags.isEmpty()) || color != null;
     }
 }

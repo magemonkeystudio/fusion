@@ -117,7 +117,6 @@ public interface RecipeItem {
                     Fusion.getInstance().error("Amount is invalid (" + srrs[2] + ") for material " + mat.name());
                 }
             }
-
             result = new RecipeCustomItem(itemBuilder, 1, true);
         } else if (srrs.length == 2) {
             try {

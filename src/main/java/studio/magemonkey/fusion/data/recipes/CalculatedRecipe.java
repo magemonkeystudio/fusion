@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -44,8 +45,8 @@ public class CalculatedRecipe {
         try {
             StringBuilder lore = new StringBuilder(512);
             // TODO Make sure this icon is always applied. Also on Divinity Item Meta existent
-            ItemStack    result     = recipe.getSettings().getRecipeItem().getItemStack();
-            List<String> resultLore = result.getItemMeta().getLore();
+            ItemStack    iconResult = recipe.getSettings().getRecipeItem().getItemStack();
+            List<String> resultLore = iconResult.getItemMeta().getLore();
 
             /*
             TODO This part is natively provided through the settings section soon
@@ -232,7 +233,7 @@ public class CalculatedRecipe {
 
             lore.append('\n').append(canCraftLine);
 
-            ItemStack icon     = result.clone();
+            ItemStack icon     = iconResult.clone();
             ItemMeta  itemMeta = icon.getItemMeta();
             itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
             icon.setItemMeta(itemMeta);

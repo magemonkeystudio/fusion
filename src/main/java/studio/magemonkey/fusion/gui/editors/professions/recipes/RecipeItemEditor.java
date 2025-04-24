@@ -47,6 +47,7 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(20, getIcons().get("hiding_noPermission"));
         setItem(21, getIcons().get("hiding_recipeLimitReached"));
         setItem(24, getIcons().get("commands"));
+        setItem(25, getIcons().get("items"));
 
         setItem(37, getIcons().get("ingredients"));
         setItem(38, getIcons().get("moneyCost"));
@@ -171,6 +172,18 @@ public class RecipeItemEditor extends Editor implements Listener {
                         return;
                     hasChanges = true;
                     recipe.getResults().getCommands().remove(recipe.getResults().getCommands().size() - 1);
+                }
+            }
+            case 25 -> {
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Add_Items,
+                            "/fusion-editor <item> <mount>");
+                else if (event.isRightClick()) {
+                    if (recipe.getResults().getItems().isEmpty())
+                        return;
+                    hasChanges = true;
+                    recipe.getResults().getItems().remove(recipe.getResults().getItems().size() - 1);
                 }
             }
             case 37 -> {

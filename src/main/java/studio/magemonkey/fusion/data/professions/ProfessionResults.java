@@ -19,17 +19,20 @@ public class ProfessionResults implements ConfigurationSerializable {
     private final String profession;
 
     // Rewards
-    private long                 professionExp;
-    private int                  vanillaExp;
+    private long professionExp;
+    private int vanillaExp;
+    private List<String> items = new LinkedList<>();
     private List<DelayedCommand> commands = new LinkedList<>();
 
     public ProfessionResults(String profession,
                              long professionExp,
                              int vanillaExp,
+                             List<String> items,
                              List<DelayedCommand> commands) {
         this.profession = profession;
         this.professionExp = professionExp;
         this.vanillaExp = vanillaExp;
+        this.items = items;
         this.commands = commands;
     }
 
@@ -38,6 +41,7 @@ public class ProfessionResults implements ConfigurationSerializable {
         this.professionExp = config.getLong("rewards.professionExp");
         this.vanillaExp = config.getInt("rewards.vanillaExp");
         this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
+        this.items = config.getList("rewards.items", new LinkedList<>()).stream().map(Object::toString).collect(Collectors.toList());
     }
 
     public ProfessionResults(String profession, DeserializationWorker dw) {
@@ -65,6 +69,11 @@ public class ProfessionResults implements ConfigurationSerializable {
                     this.commands.add(new DelayedCommand(command));
                 }
             }
+
+            List<Object> items = (List<Object>) resultsSection.getOrDefault("items", new ArrayList<>());
+            if (items != null) {
+                items.forEach(item -> { this.items.add(item.toString()); });
+            }
         }
     }
 
@@ -74,6 +83,7 @@ public class ProfessionResults implements ConfigurationSerializable {
         resultMap.put("professionExp", this.professionExp);
         resultMap.put("vanillaExp", this.vanillaExp);
         resultMap.put("commands", new ArrayList<>(this.commands.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
+        resultMap.put("items", new ArrayList<>(this.items));
         return SerializationBuilder.start(4).append("results", resultMap).build();
     }
 
@@ -82,9 +92,15 @@ public class ProfessionResults implements ConfigurationSerializable {
         for (DelayedCommand cmd : results.getCommands()) {
             cmds.add(new DelayedCommand(cmd.getAs(), cmd.getCmd(), cmd.getDelay()));
         }
+
         return new ProfessionResults(results.getProfession(),
                 results.getProfessionExp(),
                 results.getVanillaExp(),
+                new ArrayList<>(results.getItems()),
                 cmds);
+    }
+
+    public boolean hasCommandsOrItems() {
+        return professionExp > 0 ||  vanillaExp > 0 || !commands.isEmpty() || !items.isEmpty();
     }
 }

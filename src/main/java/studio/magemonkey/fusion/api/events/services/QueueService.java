@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.api.DelayedCommand;
+import studio.magemonkey.codex.api.items.exception.MissingItemException;
+import studio.magemonkey.codex.api.items.exception.MissingProviderException;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
@@ -17,10 +19,7 @@ import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class QueueService {
 
@@ -140,7 +139,7 @@ public class QueueService {
                 return;
             }
             // Items if no commands exist
-            if (item.getRecipe().getResults().getCommands().isEmpty()) {
+            if(!item.getRecipe().getResults().hasCommandsOrItems()) {
                 ItemStack result =
                         event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getResultItem()
                                 : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
@@ -154,8 +153,27 @@ public class QueueService {
                     }
                 }
             } else {
-                // If there are commands, we need to delay the item giving
-                DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
+                if(!item.getRecipe().getResults().getCommands().isEmpty()) {
+                    // If there are commands, we need to delay the item giving
+                    DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
+                }
+                if(!item.getRecipe().getResults().getItems().isEmpty()) {
+                    // If there are items, we need to delay the item giving
+                    for (String itemString : item.getRecipe().getResults().getItems()) {
+                        try {
+                            ItemStack itemStack = CodexEngine.get().getItemManager().getItemType(itemString).create();
+                            if (itemStack != null) {
+                                Collection<ItemStack> remainings = player.getInventory().addItem(itemStack).values();
+                                if(!remainings.isEmpty()) {
+                                    remainings.forEach(_item -> player.getWorld().dropItemNaturally(player.getLocation(), _item));
+                                }
+                            }
+                        } catch (MissingItemException | MissingProviderException e) {
+                            Fusion.getInstance().getLogger().warning("Failed to give item: " + itemString);
+                            player.sendMessage("§cFailed to give you a specific item from the recipe. Please contact an admin.");
+                        }
+                    }
+                }
             }
 
             //Experience

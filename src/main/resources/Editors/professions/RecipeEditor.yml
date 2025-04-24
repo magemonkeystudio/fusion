@@ -323,6 +323,24 @@ subEditor:
       flags: [ ]
       enchants: { }
       commandPrefix: '&7- &a$<command> &7(&3$<caster> &7- &3$<delay>&7)'
+    items:
+        material: CHEST
+        amount: 1
+        durability: 0
+        unbreakable: false
+        name: '&9Items'
+        lore:
+            - '&7Click to configure the items.'
+            - '&7You will cast commands to add items.'
+            - '&8--------------------'
+            - '&bList of Items:'
+            - '$<items>'
+            - '&8--------------------'
+            - '&aLeft click &7to add an item.'
+            - '&aRight click &7to remove last item.'
+        flags: [ ]
+        enchants: { }
+        itemPrefix: '&7- &2$<item>'
     permission:
       material: EMERALD
       amount: 1
