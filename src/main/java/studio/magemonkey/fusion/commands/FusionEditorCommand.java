@@ -1096,7 +1096,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .getRecipeItemEditor()
                     .getRecipe()
                     .getResults()
-                    .getItems()
+                    .getItemNames()
                     .add(itemName + ":" + amount);
             professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
         } catch (NumberFormatException e) {

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,19 +22,24 @@ public class ProfessionResults implements ConfigurationSerializable {
     // Rewards
     private long professionExp;
     private int vanillaExp;
-    private List<String> items = new LinkedList<>();
+    private List<RecipeItem> items = new LinkedList<>();
+    private List<String> itemNames = new LinkedList<>();
     private List<DelayedCommand> commands = new LinkedList<>();
 
     public ProfessionResults(String profession,
                              long professionExp,
                              int vanillaExp,
-                             List<String> items,
+                             List<String> itemNames,
                              List<DelayedCommand> commands) {
         this.profession = profession;
         this.professionExp = professionExp;
         this.vanillaExp = vanillaExp;
-        this.items = items;
+        this.itemNames = itemNames;
         this.commands = commands;
+
+        for (String itemName : itemNames) {
+            this.items.add(RecipeItem.fromConfig(itemName));
+        }
     }
 
     public ProfessionResults(String profession, ConfigurationSection config) {
@@ -41,7 +47,10 @@ public class ProfessionResults implements ConfigurationSerializable {
         this.professionExp = config.getLong("rewards.professionExp");
         this.vanillaExp = config.getInt("rewards.vanillaExp");
         this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
-        this.items = config.getList("rewards.items", new LinkedList<>()).stream().map(Object::toString).collect(Collectors.toList());
+        this.itemNames = config.getList("rewards.items", new LinkedList<>()).stream().map(Object::toString).collect(Collectors.toList());
+        for (String itemName : itemNames) {
+            this.items.add(RecipeItem.fromConfig(itemName));
+        }
     }
 
     public ProfessionResults(String profession, DeserializationWorker dw) {
@@ -72,7 +81,10 @@ public class ProfessionResults implements ConfigurationSerializable {
 
             List<Object> items = (List<Object>) resultsSection.getOrDefault("items", new ArrayList<>());
             if (items != null) {
-                items.forEach(item -> { this.items.add(item.toString()); });
+                items.forEach(item -> {
+                    this.itemNames.add(item.toString());
+                    this.items.add(RecipeItem.fromConfig(item));
+                });
             }
         }
     }
@@ -83,7 +95,7 @@ public class ProfessionResults implements ConfigurationSerializable {
         resultMap.put("professionExp", this.professionExp);
         resultMap.put("vanillaExp", this.vanillaExp);
         resultMap.put("commands", new ArrayList<>(this.commands.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
-        resultMap.put("items", new ArrayList<>(this.items));
+        resultMap.put("items", new ArrayList<>(this.itemNames));
         return SerializationBuilder.start(4).append("results", resultMap).build();
     }
 
@@ -96,11 +108,11 @@ public class ProfessionResults implements ConfigurationSerializable {
         return new ProfessionResults(results.getProfession(),
                 results.getProfessionExp(),
                 results.getVanillaExp(),
-                new ArrayList<>(results.getItems()),
+                new ArrayList<>(results.getItemNames()),
                 cmds);
     }
 
     public boolean hasCommandsOrItems() {
-        return professionExp > 0 ||  vanillaExp > 0 || !commands.isEmpty() || !items.isEmpty();
+        return professionExp > 0 ||  vanillaExp > 0 || !commands.isEmpty() || !itemNames.isEmpty();
     }
 }

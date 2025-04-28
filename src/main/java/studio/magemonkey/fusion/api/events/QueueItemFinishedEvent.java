@@ -3,10 +3,12 @@ package studio.magemonkey.fusion.api.events;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
+
+import java.util.List;
 
 @Getter
 public class QueueItemFinishedEvent extends FusionEvent {
@@ -23,12 +25,7 @@ public class QueueItemFinishedEvent extends FusionEvent {
      * The result item
      */
     @Setter
-    private       ItemStack     resultItem;
-    /**
-     * The amount of the result item
-     */
-    @Setter
-    private       int           resultAmount;
+    private       List<RecipeItem>     resultItems;
 
     /**
      * Constructor for the QueueItemFinishedEvent
@@ -37,19 +34,16 @@ public class QueueItemFinishedEvent extends FusionEvent {
      * @param player The player that finished the item
      * @param queue The crafting queue
      * @param queueItem The queue item
-     * @param resultItem The result item
-     * @param resultAmount The amount of the result item
+     * @param resultItems The result items
      */
     public QueueItemFinishedEvent(String professionName,
                                   Player player,
                                   CraftingQueue queue,
                                   QueueItem queueItem,
-                                  ItemStack resultItem,
-                                  int resultAmount) {
+                                  List<RecipeItem> resultItems) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.queue = queue;
         this.queueItem = queueItem;
-        this.resultItem = resultItem;
-        this.resultAmount = resultAmount;
+        this.resultItems = resultItems;
     }
 }
