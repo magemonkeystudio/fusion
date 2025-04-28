@@ -147,18 +147,15 @@ public class CalculatedRecipe {
 
 
             Collection<RecipeItem> localPattern       = new LinkedHashSet<>(recipe.getConditions().getRequiredItems());
-            boolean                isExtensionEnabled = CraftingRequirementsCfg.hasExtensionEnabled("recipes");
-            boolean                isVanillaOnly      = CraftingRequirementsCfg.hasOnlyVanillaExtension("recipes");
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem recipeItem         = it.next();
                 ItemStack  recipeItemStack    = recipeItem.getItemStack();
                 ItemStack  recipeItemStackOne = recipeItemStack.clone();
                 recipeItemStackOne.setAmount(1);
                 Pair<ItemStack, Integer> eqEntry        = null;
-                List<String>             extensionLines = new ArrayList<>();
                 for (Pair<ItemStack, Integer> entry : eqItems) {
                     ItemStack item = entry.getKey().clone();
-                    if (CalculatedRecipe.isSimilar("recipes", recipeItemStackOne, item, extensionLines)) {
+                    if (CalculatedRecipe.isSimilar(recipeItemStackOne, item)) {
                         eqEntry = entry;
                         break;
                     }
@@ -172,14 +169,6 @@ public class CalculatedRecipe {
                             recipeItem,
                             eqAmount,
                             patternAmount)).append('\n');
-                    if (isExtensionEnabled) {
-                        if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
-                                && (recipeItem instanceof RecipeEconomyItem))) {
-                            for (String extension : extensionLines) {
-                                lore.append(extension).append('\n');
-                            }
-                        }
-                    }
                     continue;
                 }
                 if (eqAmount == patternAmount) {
@@ -192,14 +181,6 @@ public class CalculatedRecipe {
                 it.remove();
                 lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount))
                         .append('\n');
-                if (isExtensionEnabled) {
-                    if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
-                            && (recipeItem instanceof RecipeEconomyItem))) {
-                        for (String extension : extensionLines) {
-                            lore.append(extension).append('\n');
-                        }
-                    }
-                }
             }
 
             String canCraftLine = CraftingRequirementsCfg.getCanCraft(canCraft);
@@ -268,14 +249,6 @@ public class CalculatedRecipe {
     }
 
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
-        return isSimilar("recipes", is1, is2);
-    }
-
-    public static boolean isSimilar(String path, ItemStack is1, ItemStack is2) {
-        return isSimilar(path, is1, is2, new ArrayList<>());
-    }
-
-    public static boolean isSimilar(String path, ItemStack is1, ItemStack is2, List<String> checkingLines) {
         //More relaxed comparison
         if (is1.getType() != is2.getType())
             return false;
@@ -314,7 +287,6 @@ public class CalculatedRecipe {
                     }
                 }
             }
-            checkingLines.addAll(CraftingRequirementsCfg.getExtensionLoreLine(path, lore2, lore1));
         }
 
         // Check for enchantments
@@ -329,7 +301,6 @@ public class CalculatedRecipe {
                 if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
                     isValid = false;
             }
-            checkingLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine(path, ench2, ench1));
         } else {
             if (im1.hasEnchants()) {
                 Map<Enchantment, Integer> ench1 = im1.getEnchants();
@@ -340,7 +311,6 @@ public class CalculatedRecipe {
                     if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
                         isValid = false;
                 }
-                checkingLines.addAll(CraftingRequirementsCfg.getExtensionEnchantmentLine(path, ench2, ench1));
             }
         }
         // Check for flags
@@ -351,31 +321,19 @@ public class CalculatedRecipe {
                 if (!im2.getItemFlags().contains(flag))
                     isValid = false;
             }
-            checkingLines.addAll(CraftingRequirementsCfg.getExtensionFlagLine(path,
-                    im2.getItemFlags(),
-                    im1.getItemFlags()));
         }
 
         // Check for custom model data
         if (im1.hasCustomModelData() && im2.hasCustomModelData()) {
                 if (im1.getCustomModelData() != im2.getCustomModelData())
                     isValid = false;
-                checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path,
-                        im2.getCustomModelData(),
-                        im1.getCustomModelData()));
         } else if (im1.hasCustomModelData() || im2.hasCustomModelData()) {
             isValid = false;
-            checkingLines.add(CraftingRequirementsCfg.getExtensionCustomModelDataLine(path,
-                    im2.hasCustomModelData() ? im2.getCustomModelData() : 0,
-                    im1.hasCustomModelData() ? im1.getCustomModelData() : 0));
             }
         // Check if unbreakable
         if (im1.isUnbreakable()) {
             if (im2.isUnbreakable())
                 isValid = false;
-            checkingLines.add(CraftingRequirementsCfg.getExtensionUnbreakableLine(path,
-                    im2.isUnbreakable(),
-                    im1.isUnbreakable()));
         }
         // Check for durability if instanceof Damageable
         if (im1 instanceof Damageable dmg && dmg.getDamage() > 0) {
@@ -383,7 +341,6 @@ public class CalculatedRecipe {
             int damage2 = im2 instanceof Damageable dmg2 ? dmg2.getDamage() : 0;
             if (damage1 != damage2)
                 isValid = false;
-            checkingLines.add(CraftingRequirementsCfg.getExtensionDurabilityLine(path, damage2, damage1));
         }
 
         // If all those checks failed, try to check once more through the native item meta check
