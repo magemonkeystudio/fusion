@@ -17,6 +17,7 @@ import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
@@ -25,10 +26,11 @@ public class QueueService {
 
     /**
      * Call the QueueItemAddedEvent.
+     *
      * @param player The player that adds the item to the queue.
-     * @param table The crafting table (profession) the player is using.
-     * @param queue The crafting queue the player is using.
-     * @param item The queue item that is added to the queue.
+     * @param table  The crafting table (profession) the player is using.
+     * @param queue  The crafting queue the player is using.
+     * @param item   The queue item that is added to the queue.
      */
     public void addQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
         QueueItemAddedEvent event = new QueueItemAddedEvent(table.getName(), player, queue, item);
@@ -41,12 +43,13 @@ public class QueueService {
 
     /**
      * Call the QueueItemCanceledEvent.
-     * @param player The player that cancels the item in the queue.
-     * @param table The crafting table (profession) the player is using.
-     * @param queue The crafting queue the player is using.
-     * @param item The queue item that is canceled.
-     * @param finished If the item is finished.
-     * @param refunded If the item ingredients will be refunded.
+     *
+     * @param player      The player that cancels the item in the queue.
+     * @param table       The crafting table (profession) the player is using.
+     * @param queue       The crafting queue the player is using.
+     * @param item        The queue item that is canceled.
+     * @param finished    If the item is finished.
+     * @param refunded    If the item ingredients will be refunded.
      * @param refundItems The items that will be refunded in case `refunded=true`.
      */
     public void cancelQueueItem(Player player,
@@ -104,21 +107,20 @@ public class QueueService {
 
     /**
      * Call the QueueItemFinishedEvent.
-     * @param player The player that finishes the item in the queue.
-     * @param table The crafting table (profession) the player is using.
-     * @param queue The crafting queue the player is using.
-     * @param item The queue item that is finished.
-     * @param resultItem The result item of the queue item.
-     * @param resultAmount The amount of the result item.
+     *
+     * @param player      The player that finishes the item in the queue.
+     * @param table       The crafting table (profession) the player is using.
+     * @param queue       The crafting queue the player is using.
+     * @param item        The queue item that is finished.
+     * @param resultItems The result items of the queue item.
      */
     public void finishQueueItem(Player player,
                                 CraftingTable table,
                                 CraftingQueue queue,
                                 QueueItem item,
-                                ItemStack resultItem,
-                                int resultAmount) {
+                                List<RecipeItem> resultItems) {
         QueueItemFinishedEvent event =
-                new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItem, resultAmount);
+                new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItems);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if (event.getFusionPlayer().hasRecipeLimitReached(event.getQueueItem().getRecipe())) {
@@ -139,11 +141,9 @@ public class QueueService {
                 return;
             }
             // Items if no commands exist
-            if(!item.getRecipe().getResults().hasCommandsOrItems()) {
-                ItemStack result =
-                        event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getResultItem()
+            if (!item.getRecipe().getResults().hasCommandsOrItems()) {
+                ItemStack result = event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getQueueItem().getRecipe().getSettings().getRecipeItem().getItemStack()
                                 : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
-                result.setAmount(event.getResultAmount());
                 // If there is no space in the inventory, drop the items
                 Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
                 if (!notAdded.isEmpty()) {
@@ -153,24 +153,19 @@ public class QueueService {
                     }
                 }
             } else {
-                if(!item.getRecipe().getResults().getCommands().isEmpty()) {
+                if (!item.getRecipe().getResults().getCommands().isEmpty()) {
                     // If there are commands, we need to delay the item giving
                     DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
                 }
-                if(!item.getRecipe().getResults().getItems().isEmpty()) {
+                if (!item.getRecipe().getResults().getItems().isEmpty()) {
                     // If there are items, we need to delay the item giving
-                    for (String itemString : item.getRecipe().getResults().getItems()) {
-                        try {
-                            ItemStack itemStack = CodexEngine.get().getItemManager().getItemType(itemString).create();
-                            if (itemStack != null) {
-                                Collection<ItemStack> remainings = player.getInventory().addItem(itemStack).values();
-                                if(!remainings.isEmpty()) {
-                                    remainings.forEach(_item -> player.getWorld().dropItemNaturally(player.getLocation(), _item));
-                                }
+                    for (RecipeItem resultItem : resultItems) {
+                        ItemStack itemStack = resultItem.getItemStack();
+                        if (itemStack != null) {
+                            Collection<ItemStack> remainings = player.getInventory().addItem(itemStack).values();
+                            if (!remainings.isEmpty()) {
+                                remainings.forEach(_item -> player.getWorld().dropItemNaturally(player.getLocation(), _item));
                             }
-                        } catch (MissingItemException | MissingProviderException e) {
-                            Fusion.getInstance().getLogger().warning("Failed to give item: " + itemString);
-                            player.sendMessage("§cFailed to give you a specific item from the recipe. Please contact an admin.");
                         }
                     }
                 }

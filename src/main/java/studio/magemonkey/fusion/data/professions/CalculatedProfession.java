@@ -85,18 +85,15 @@ public class CalculatedProfession {
             List<Pair<ItemStack, Integer>> eqItems = Recipe.getItems(items);
 
             Collection<RecipeItem> localPattern       = new HashSet<>(conditions.getRequiredItems());
-            boolean                isExtensionEnabled = CraftingRequirementsCfg.hasExtensionEnabled("professions");
-            boolean                isVanillaOnly      = CraftingRequirementsCfg.hasOnlyVanillaExtension("professions");
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem recipeItem         = it.next();
                 ItemStack  recipeItemStack    = recipeItem.getItemStack();
                 ItemStack  recipeItemStackOne = recipeItemStack.clone();
                 recipeItemStackOne.setAmount(1);
                 Pair<ItemStack, Integer> eqEntry        = null;
-                List<String>             extensionLines = new ArrayList<>();
                 for (Pair<ItemStack, Integer> entry : eqItems) {
                     ItemStack item = entry.getKey().clone();
-                    if (CalculatedRecipe.isSimilar("professions", recipeItemStackOne, item, extensionLines)) {
+                    if (CalculatedRecipe.isSimilar(recipeItemStackOne, item)) {
                         eqEntry = entry;
                         break;
                     }
@@ -110,14 +107,6 @@ public class CalculatedProfession {
                             recipeItem,
                             eqAmount,
                             patternAmount)).append('\n');
-                    if (isExtensionEnabled) {
-                        if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
-                                && (recipeItem instanceof RecipeEconomyItem))) {
-                            for (String extension : extensionLines) {
-                                lore.append(extension).append('\n');
-                            }
-                        }
-                    }
                     continue;
                 }
                 if (eqAmount == patternAmount) {
@@ -130,14 +119,6 @@ public class CalculatedProfession {
                 it.remove();
                 lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount))
                         .append('\n');
-                if (isExtensionEnabled) {
-                    if ((isVanillaOnly && !(recipeItem instanceof RecipeEconomyItem)) || (!isVanillaOnly
-                            && (recipeItem instanceof RecipeEconomyItem))) {
-                        for (String extension : extensionLines) {
-                            lore.append(extension).append('\n');
-                        }
-                    }
-                }
             }
 
             String canJoinLine = CraftingRequirementsCfg.getCanJoin(canJoin);
