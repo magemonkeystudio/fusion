@@ -10,11 +10,8 @@ public class FusionAPI {
 
     @Getter
     private static final JavaPlugin        instance = Fusion.getInstance();
-    @Getter
     private static       ProfessionManager professionManager;
-    @Getter
     private static       PlayerManager     playerManager;
-    @Getter
     private static       EventServices     eventServices;
 
     public static void init() {
@@ -24,4 +21,15 @@ public class FusionAPI {
         FusionAPI.getInstance().getLogger().info("FusionAPI has been initialized.");
     }
 
+    public static ProfessionManager getProfessionManager() {
+        return professionManager != null ? professionManager : new ProfessionManager();
+    }
+
+    public static PlayerManager getPlayerManager() {
+        return playerManager != null ? playerManager : new PlayerManager();
+    }
+
+    public static EventServices getEventServices() {
+        return eventServices != null ? eventServices : new EventServices();
+    }
 }
