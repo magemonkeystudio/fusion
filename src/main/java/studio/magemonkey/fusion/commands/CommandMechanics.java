@@ -73,9 +73,9 @@ public class CommandMechanics {
             openGui(target, eq, category);
             CodexEngine.get().getMessageUtil().sendMessage("fusion.useConfirmOther",
                     sender,
-                    new MessageData("craftingInventory", eq),
-                    new MessageData("sender", sender),
-                    new MessageData("target", target));
+                    new MessageData("craftingInventory", eq.getProfession()),
+                    new MessageData("sender", sender.getName()),
+                    new MessageData("target", target.getName()));
         } else {
             if (sender instanceof Player player) {
                 if (!Utils.hasCraftingUsePermission(sender, eq.getProfession())) {
@@ -314,6 +314,7 @@ public class CommandMechanics {
         Fusion.getInstance().closeAll();
         Fusion.getInstance().reloadConfig();
         Fusion.getInstance().reloadLang();
+        ProfessionGuiRegistry.getLatestRecipeGui().clear();
         CodexEngine.get()
                 .getMessageUtil()
                 .sendMessage("fusion.reload", sender, new MessageData("sender", sender));

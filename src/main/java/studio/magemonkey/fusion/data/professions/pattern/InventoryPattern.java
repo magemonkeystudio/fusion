@@ -11,6 +11,7 @@ import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
+import studio.magemonkey.fusion.data.recipes.RecipeItem;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -43,14 +44,14 @@ public class InventoryPattern implements ConfigurationSerializable {
                 continue;
 
             Map<String, Object> section = itemsTemp.getSection(entry);
-            this.items.put(entry.charAt(0), new ItemBuilder(section).build());
+            this.items.put(entry.charAt(0), RecipeItem.fromConfig(section).getItemStack());
 
             if (section.containsKey("closeonclick") && (boolean) section.get("closeonclick")) {
                 closeOnClickSlots.add(entry.charAt(0));
             }
         }
         if (dw.getSection("items.queue-items.-") != null)
-            this.items.put('-', new ItemBuilder(dw.getSection("items.queue-items.-")).build());
+            this.items.put('-', RecipeItem.fromConfig(dw.getSection("items.queue-items.-")).getItemStack());
 
         final DeserializationWorker commandsTemp =
                 DeserializationWorker.start(dw.getSection("commands", new HashMap<>(2)));

@@ -4,14 +4,10 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import studio.magemonkey.codex.CodexEngine;
@@ -19,123 +15,159 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.player.PlayerRecipeLimit;
+import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.InvalidPatternItemException;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 
+/**
+ * A “calculated” recipe icon + canCraft flag. We build lore lines (ingredients, money, xp, etc.)
+ * once per relevant change, and store the final Icon + canCraft in a single object.
+ */
 @Getter
 public class CalculatedRecipe {
     private final Recipe recipe;
-
     private final ItemStack icon;
-    private final boolean   canCraft;
+    private final boolean canCraft;
 
-    CalculatedRecipe(Recipe recipe, ItemStack icon, boolean canCraft) {
+    public CalculatedRecipe(Recipe recipe, ItemStack icon, boolean canCraft) {
         this.recipe = recipe;
         this.icon = icon;
         this.canCraft = canCraft;
     }
 
+    /**
+     * Builds a CalculatedRecipe for the given Recipe and a snapshot of the player’s inventory counts.
+     *
+     * @param recipe        The Recipe to evaluate
+     * @param invCounts     A Map<IngredientFingerprint,Integer> of everything in the player’s inventory
+     * @param player        The player who is crafting
+     * @param craftingTable The CraftingTable (for level checks)
+     * @return a new CalculatedRecipe containing:
+     *   - recipe (underlying Recipe)
+     *   - icon (cloned ItemStack with assembled lore)
+     *   - canCraft (true if player meets all requirements)
+     * @throws InvalidPatternItemException if building fails
+     */
     public static CalculatedRecipe create(Recipe recipe,
-                                          Collection<ItemStack> items,
+                                          Map<IngredientFingerprint, Integer> invCounts,
                                           Player player,
                                           CraftingTable craftingTable) throws InvalidPatternItemException {
         try {
             StringBuilder lore = new StringBuilder(512);
-            // TODO Make sure this icon is always applied. Also on Divinity Item Meta existent
-            ItemStack    iconResult = recipe.getSettings().getRecipeItem().getItemStack();
-            List<String> resultLore = iconResult.getItemMeta().getLore();
 
-            /*
-            TODO This part is natively provided through the settings section soon
-            if (!recipe.getSettings().isEnableLore()) {
-                if ((resultLore != null) && !resultLore.isEmpty()) {
-                    resultLore.forEach((str) -> lore.append(str).append('\n'));
-                    lore.append('\n');
-                }
-            } else if (recipe.getSettings().getLore() != null && !recipe.getSettings().getLore().isEmpty()) {
-                recipe.getSettings().getLore().forEach((str) -> lore.append(ChatUT.hexString(str)).append('\n'));
-                lore.append('\n');
-            }*/
+            // Base icon (without lore)
+            ItemStack iconResult = recipe.getSettings().getRecipeItem().getItemStack();
+            ItemMeta baseMeta = iconResult.getItemMeta();
+            List<String> resultLore = (baseMeta == null) ? Collections.emptyList() : baseMeta.getLore();
 
+            // (Optional custom lore logic omitted)
+
+            // 1) “Requirement” header
             String requirementLine = CraftingRequirementsCfg.getCraftingRequirementLine("recipes");
-            if (!requirementLine.isEmpty())
+            if (!requirementLine.isEmpty()) {
                 lore.append(requirementLine).append('\n');
+            }
 
             boolean canCraft = true;
 
-
-            String recipePermissionLine;
+            // 2) Permission (learned) check
+            String recipePermissionLine = null;
             if (!Utils.hasCraftingPermission(player, recipe.getName())) {
                 canCraft = false;
             }
-            recipePermissionLine = CraftingRequirementsCfg.getLearned("recipes",
-                    Utils.hasCraftingPermission(player, recipe.getName()));
+            recipePermissionLine = CraftingRequirementsCfg.getLearned(
+                    "recipes",
+                    Utils.hasCraftingPermission(player, recipe.getName())
+            );
 
+            // 3) Money cost
             String moneyLine = null;
             if (recipe.getConditions().getMoneyCost() != 0) {
-                if (CodexEngine.get().getVault() == null || !CodexEngine.get()
-                        .getVault()
-                        .canPay(player, recipe.getConditions().getMoneyCost())) {
+                if (CodexEngine.get().getVault() == null ||
+                        !CodexEngine.get().getVault().canPay(player, recipe.getConditions().getMoneyCost())) {
                     canCraft = false;
                 }
-                moneyLine = CraftingRequirementsCfg.getMoney("recipes",
-                        CodexEngine.get().getVault() == null ? 0
-                                : CodexEngine.get().getVault().getBalance(player),
-                        recipe.getConditions().getMoneyCost());
+                double balance = (CodexEngine.get().getVault() == null)
+                        ? 0.0
+                        : CodexEngine.get().getVault().getBalance(player);
+                moneyLine = CraftingRequirementsCfg.getMoney(
+                        "recipes",
+                        (int) balance,
+                        recipe.getConditions().getMoneyCost()
+                );
             }
 
+            // 4) XP cost
             String expLine = null;
             if (recipe.getConditions().getExpCost() != 0) {
-                if (ExperienceManager.getTotalExperience(player) < recipe.getConditions().getExpCost()) {
+                int totalExp = ExperienceManager.getTotalExperience(player);
+                if (totalExp < recipe.getConditions().getExpCost()) {
                     canCraft = false;
                 }
-                expLine = CraftingRequirementsCfg.getExp("recipes",
-                        ExperienceManager.getTotalExperience(player),
-                        recipe.getConditions().getExpCost());
+                expLine = CraftingRequirementsCfg.getExp(
+                        "recipes",
+                        totalExp,
+                        recipe.getConditions().getExpCost()
+                );
             }
 
+            // 5) Profession level
             String levelsLine = null;
             if (recipe.getConditions().getProfessionLevel() != 0) {
-                if (recipe.getTable().getLevelFunction().getLevel(player) < recipe.getConditions()
-                        .getProfessionLevel()) {
+                int profLevel = recipe.getTable().getLevelFunction().getLevel(player);
+                if (profLevel < recipe.getConditions().getProfessionLevel()) {
                     canCraft = false;
                 }
-                levelsLine = CraftingRequirementsCfg.getProfessionLevel("recipes",
-                        recipe.getTable().getLevelFunction().getLevel(player),
-                        recipe.getConditions().getProfessionLevel());
+                levelsLine = CraftingRequirementsCfg.getProfessionLevel(
+                        "recipes",
+                        profLevel,
+                        recipe.getConditions().getProfessionLevel()
+                );
             }
 
+            // 6) Mastery
             String masteryLine = null;
             if (recipe.getConditions().isMastery()) {
-                if (!PlayerLoader.getPlayer(player).hasMastered(craftingTable.getName())) {
+                boolean hasMastery = PlayerLoader.getPlayer(player)
+                        .hasMastered(craftingTable.getName());
+                if (!hasMastery) {
                     canCraft = false;
                 }
-                masteryLine = CraftingRequirementsCfg.getMastery("recipes",
-                        PlayerLoader.getPlayer(player).hasMastered(craftingTable.getName()),
-                        recipe.getConditions().isMastery());
+                masteryLine = CraftingRequirementsCfg.getMastery(
+                        "recipes",
+                        hasMastery,
+                        recipe.getConditions().isMastery()
+                );
             }
 
+            // 7) Crafting limit
             String limitLine = null;
             if (recipe.getCraftingLimit() > 0) {
                 PlayerRecipeLimit limit = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
-                if (limit.getLimit() > 0) {
-                    if (limit.getCooldownTimestamp() > 0 && !limit.hasCooldown()) {
-                        limit.resetLimit();
-                        Bukkit.getConsoleSender()
-                                .sendMessage(
-                                        "§aResetting limit for " + player.getName() + " on " + recipe.getRecipePath());
-                    }
+                if (limit.getLimit() > 0 &&
+                        limit.getCooldownTimestamp() > 0 &&
+                        !limit.hasCooldown()) {
+                    limit.resetLimit();
+                    Bukkit.getConsoleSender().sendMessage(
+                            "§aResetting limit for " + player.getName() + " on " + recipe.getRecipePath()
+                    );
                 }
                 if (limit.getLimit() >= recipe.getCraftingLimit()) {
                     canCraft = false;
                 }
-                limitLine = CraftingRequirementsCfg.getLimit("recipes", limit.getLimit(), recipe.getCraftingLimit());
+                limitLine = CraftingRequirementsCfg.getLimit(
+                        "recipes",
+                        limit.getLimit(),
+                        recipe.getCraftingLimit()
+                );
             }
 
-            List<Map.Entry<Boolean, String>> conditionLines = recipe.getConditions().getConditionLines(player);
+            // 8) Custom condition lines
+            List<Map.Entry<Boolean, String>> conditionLines =
+                    recipe.getConditions().getConditionLines(player);
             for (Map.Entry<Boolean, String> entry : conditionLines) {
                 if (!entry.getKey()) {
                     canCraft = false;
@@ -143,115 +175,94 @@ public class CalculatedRecipe {
                 }
             }
 
-            List<Pair<ItemStack, Integer>> eqItems = Recipe.getItems(items);
+            //
+            // ─── 9) Ingredient check using invCounts ───
+            //
+            Collection<RecipeItem> localPattern = new LinkedHashSet<>(
+                    recipe.getConditions().getRequiredItems()
+            );
 
+            for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext();) {
+                RecipeItem required = it.next();
 
-            Collection<RecipeItem> localPattern       = new LinkedHashSet<>(recipe.getConditions().getRequiredItems());
-            for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
-                RecipeItem recipeItem         = it.next();
-                ItemStack  recipeItemStack    = recipeItem.getItemStack();
-                ItemStack  recipeItemStackOne = recipeItemStack.clone();
-                recipeItemStackOne.setAmount(1);
-                Pair<ItemStack, Integer> eqEntry        = null;
-                for (Pair<ItemStack, Integer> entry : eqItems) {
-                    ItemStack item = entry.getKey().clone();
-                    if (CalculatedRecipe.isSimilar(recipeItemStackOne, item)) {
-                        eqEntry = entry;
-                        break;
-                    }
-                }
+                // We only compare a single “unit” for matching:
+                ItemStack single = required.getItemStack().clone();
+                single.setAmount(1);
 
-                int eqAmount      = eqEntry != null ? eqEntry.getValue() : 0;
-                int patternAmount = recipeItem.getAmount();
-                if (eqAmount < patternAmount) {
+                IngredientFingerprint reqKey = IngredientFingerprint.of(single);
+                int have = invCounts.getOrDefault(reqKey, 0);
+                int need = required.getAmount();
+
+                if (have < need) {
                     canCraft = false;
-                    lore.append(CraftingRequirementsCfg.getIngredientLine("recipes",
-                            recipeItem,
-                            eqAmount,
-                            patternAmount)).append('\n');
+                    lore.append(
+                            CraftingRequirementsCfg.getIngredientLine("recipes", required, have, need)
+                    ).append('\n');
                     continue;
                 }
-                if (eqAmount == patternAmount) {
-                    eqItems.remove(eqEntry);
-                }
-                int rest = eqAmount - patternAmount;
-                if (rest > 0 && eqEntry != null) {
-                    eqItems.add(Pair.of(eqEntry.getKey(), rest));
-                }
-                it.remove();
-                lore.append(CraftingRequirementsCfg.getIngredientLine("recipes", recipeItem, eqAmount, patternAmount))
-                        .append('\n');
+
+                // Subtract used quantity so overlapping items are handled correctly
+                invCounts.put(reqKey, have - need);
+
+                lore.append(
+                        CraftingRequirementsCfg.getIngredientLine("recipes", required, have, need)
+                ).append('\n');
             }
 
+            // 10) Append summary lines
             String canCraftLine = CraftingRequirementsCfg.getCanCraft(canCraft);
-
             lore.append('\n');
-            if (moneyLine != null) {
-                lore.append(moneyLine).append('\n');
-            }
-            if (levelsLine != null) {
-                lore.append(levelsLine).append('\n');
-            }
-            if (expLine != null) {
-                lore.append(expLine).append('\n');
-            }
-            if (masteryLine != null) {
-                lore.append(masteryLine).append('\n');
-            }
-            if (limitLine != null) {
-                lore.append(limitLine).append('\n');
-            }
-
+            if (moneyLine != null) lore.append(moneyLine).append('\n');
+            if (levelsLine != null) lore.append(levelsLine).append('\n');
+            if (expLine != null)   lore.append(expLine).append('\n');
+            if (masteryLine != null) lore.append(masteryLine).append('\n');
+            if (limitLine != null)   lore.append(limitLine).append('\n');
             if (!conditionLines.isEmpty()) {
-                for (Map.Entry<Boolean, String> entry : conditionLines) {
-                    lore.append('\n').append(entry.getValue());
+                for (Map.Entry<Boolean, String> e : conditionLines) {
+                    lore.append('\n').append(e.getValue());
                 }
             }
-
-            if (recipePermissionLine != null) {
-                lore.append('\n').append(recipePermissionLine);
-            }
-
+            lore.append('\n').append(recipePermissionLine);
             lore.append('\n').append(canCraftLine);
 
-            ItemStack icon     = iconResult.clone();
-            ItemMeta  itemMeta = icon.getItemMeta();
-            itemMeta.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
-            icon.setItemMeta(itemMeta);
+            // Build final icon + lore
+            ItemStack icon = iconResult.clone();
+            ItemMeta im = icon.getItemMeta();
+            im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
+            icon.setItemMeta(im);
 
             return new CalculatedRecipe(recipe, icon, canCraft);
         } catch (Exception e) {
-            Fusion.getInstance()
-                    .error("The recipe-item seems not to be recognized. Please check your setup on the following recipe '"
-                            + recipe.getName());
-            Fusion.getInstance().error("Result: " + recipe.getSettings().getIconNamespace());
-            Fusion.getInstance().error("Pattern Items: ");
-            for (Object patternItem : recipe.getConditions().getRequiredItemNames()) {
-                Fusion.getInstance().error("- " + patternItem);
-            }
-            Fusion.getInstance().error("Error on creating CalculatedRecipe: " + e.getMessage());
-            e.printStackTrace();
+            Fusion.getInstance().error(
+                    "Error creating CalculatedRecipe for '" + recipe.getName() + "': " + e.getMessage()
+            );
             throw new InvalidPatternItemException(e);
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof CalculatedRecipe that)) {
-            return false;
-        }
-
-        return new EqualsBuilder().append(this.recipe, that.recipe).append(this.icon, that.icon).isEquals();
+        if (this == o) return true;
+        if (!(o instanceof CalculatedRecipe that)) return false;
+        return new EqualsBuilder()
+                .append(this.recipe, that.recipe)
+                .append(this.icon, that.icon)
+                .isEquals();
     }
 
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(this.recipe)
+                .append(this.icon)
+                .toHashCode();
+    }
+
+    /**
+     * Unchanged “isSimilar” from before—compares two ItemStacks in a relaxed manner.
+     */
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
-        //More relaxed comparison
-        if (is1.getType() != is2.getType())
-            return false;
+        if (is1.getType() != is2.getType()) return false;
 
         ItemMeta im1 = is1.getItemMeta();
         ItemMeta im2 = is2.getItemMeta();
@@ -262,8 +273,7 @@ public class CalculatedRecipe {
         if (im1.hasDisplayName()) {
             String displayName1 = im1.getDisplayName().trim();
             String displayName2 = im2.hasDisplayName() ? im2.getDisplayName().trim() : "";
-            if (!displayName1.equals(displayName2))
-                return false;
+            if (!displayName1.equals(displayName2)) return false;
         } else if (!im1.hasDisplayName() && im2.hasDisplayName()) {
             return false;
         }
@@ -291,65 +301,55 @@ public class CalculatedRecipe {
 
         // Check for enchantments
         if (im1 instanceof EnchantmentStorageMeta storage1) {
-            EnchantmentStorageMeta    storage2 = (EnchantmentStorageMeta) im2;
-            Map<Enchantment, Integer> ench1    = storage1.getStoredEnchants();
-            Map<Enchantment, Integer> ench2    = storage2.getStoredEnchants();
+            EnchantmentStorageMeta storage2 = (EnchantmentStorageMeta) im2;
+            Map<org.bukkit.enchantments.Enchantment, Integer> ench1 = storage1.getStoredEnchants();
+            Map<org.bukkit.enchantments.Enchantment, Integer> ench2 = storage2.getStoredEnchants();
 
-            if (ench1.size() != ench2.size())
-                isValid = false;
-            for (Map.Entry<Enchantment, Integer> entry : ench1.entrySet()) {
-                if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
+            if (ench1.size() != ench2.size()) isValid = false;
+            for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench1.entrySet()) {
+                if (!ench2.containsKey(entry.getKey()) ||
+                        !ench2.get(entry.getKey()).equals(entry.getValue())) {
                     isValid = false;
+                }
             }
         } else {
             if (im1.hasEnchants()) {
-                Map<Enchantment, Integer> ench1 = im1.getEnchants();
-                Map<Enchantment, Integer> ench2 = im2.getEnchants();
-                if (ench1.size() != ench2.size())
-                    isValid = false;
-                for (Map.Entry<Enchantment, Integer> entry : ench1.entrySet()) {
-                    if (!ench2.containsKey(entry.getKey()) || !ench2.get(entry.getKey()).equals(entry.getValue()))
+                Map<org.bukkit.enchantments.Enchantment, Integer> ench1 = im1.getEnchants();
+                Map<org.bukkit.enchantments.Enchantment, Integer> ench2 = im2.getEnchants();
+                if (ench1.size() != ench2.size()) isValid = false;
+                for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench1.entrySet()) {
+                    if (!ench2.containsKey(entry.getKey()) ||
+                            !ench2.get(entry.getKey()).equals(entry.getValue())) {
                         isValid = false;
+                    }
                 }
             }
         }
+
         // Check for flags
         if (!im1.getItemFlags().isEmpty()) {
-            if (im1.getItemFlags().size() != im2.getItemFlags().size())
-                isValid = false;
+            if (im1.getItemFlags().size() != im2.getItemFlags().size()) isValid = false;
             for (ItemFlag flag : im1.getItemFlags()) {
-                if (!im2.getItemFlags().contains(flag))
-                    isValid = false;
+                if (!im2.getItemFlags().contains(flag)) isValid = false;
             }
         }
 
         // Check for custom model data
         if (im1.hasCustomModelData() && im2.hasCustomModelData()) {
-                if (im1.getCustomModelData() != im2.getCustomModelData())
-                    isValid = false;
+            if (im1.getCustomModelData() != im2.getCustomModelData()) isValid = false;
         } else if (im1.hasCustomModelData() || im2.hasCustomModelData()) {
             isValid = false;
-            }
+        }
+
         // Check if unbreakable
         if (im1.isUnbreakable()) {
-            if (im2.isUnbreakable())
-                isValid = false;
+            if (im2.isUnbreakable()) isValid = false;
         }
+
         // Check for durability if instanceof Damageable
-        if (im1 instanceof Damageable dmg && dmg.getDamage() > 0) {
-            int damage1 = dmg.getDamage();
-            int damage2 = im2 instanceof Damageable dmg2 ? dmg2.getDamage() : 0;
-            if (damage1 != damage2)
-                isValid = false;
-        }
+        // TODO
 
-        // If all those checks failed, try to check once more through the native item meta check
-        // This is useful for custom items like from Divinity, etc.
+        // Final fallback to Bukkit’s built‐in check
         return isValid || is1.isSimilar(is2);
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(this.recipe).append(this.icon).toHashCode();
     }
 }

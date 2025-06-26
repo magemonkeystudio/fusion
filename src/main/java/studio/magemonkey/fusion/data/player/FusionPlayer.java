@@ -29,8 +29,6 @@ public class FusionPlayer {
     private       Map<String, CraftingQueue>     cachedQueues       = new TreeMap<>();
     private       Map<String, PlayerRecipeLimit> cachedRecipeLimits = new TreeMap<>();
 
-    private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
-
     @Getter
     @Setter
     private boolean autoCrafting;
@@ -50,18 +48,10 @@ public class FusionPlayer {
     }
 
     public CraftingQueue getQueue(String profession, Category category) {
-        if (!cachedQueues.containsKey(profession)) {
-            cachedQueues.put(profession, new CraftingQueue(getPlayer(), profession, category));
+        if (!cachedQueues.containsKey(profession + "." + category.getName())) {
+            cachedQueues.put(profession + "." + category.getName(), new CraftingQueue(getPlayer(), profession, category));
         }
-        return cachedQueues.get(profession);
-    }
-
-    public void cacheGui(String id, RecipeGui gui) {
-        if (cachedGuis.containsKey(id)) {
-            cachedGuis.get(id).open(getPlayer());
-            return;
-        }
-        cachedGuis.put(id, gui);
+        return cachedQueues.get(profession + "." + category.getName());
     }
 
     public PlayerRecipeLimit getRecipeLimit(Recipe recipe) {
@@ -361,7 +351,6 @@ public class FusionPlayer {
             SQLManager.queues().saveCraftingQueue(queue);
         }
         SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
-        cachedGuis.clear();
         cachedQueues.clear();
         cachedRecipeLimits.clear();
     }
