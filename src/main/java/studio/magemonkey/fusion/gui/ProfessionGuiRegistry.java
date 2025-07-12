@@ -76,4 +76,9 @@ public class ProfessionGuiRegistry {
 
         toClose.forEach(HumanEntity::closeInventory);
     }
+
+    public static void clearLatestRecipeGui() {
+
+        latestRecipeGui.clear();
+    }
 }

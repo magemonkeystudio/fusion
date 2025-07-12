@@ -21,6 +21,7 @@ import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.BrowseGUI;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
+import studio.magemonkey.fusion.gui.RecipeGui;
 import studio.magemonkey.fusion.gui.show.ShowRecipesGui;
 import studio.magemonkey.fusion.util.Utils;
 
@@ -314,7 +315,8 @@ public class CommandMechanics {
         Fusion.getInstance().closeAll();
         Fusion.getInstance().reloadConfig();
         Fusion.getInstance().reloadLang();
-        ProfessionGuiRegistry.getLatestRecipeGui().clear();
+        ProfessionGuiRegistry.clearLatestRecipeGui();
+        RecipeGui.resetRecipeHashes();
         CodexEngine.get()
                 .getMessageUtil()
                 .sendMessage("fusion.reload", sender, new MessageData("sender", sender));

@@ -28,6 +28,7 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.*;
 import studio.magemonkey.fusion.gui.BrowseGUI;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.gui.recipe.RecipeGuiEventRouter;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.LevelFunction;

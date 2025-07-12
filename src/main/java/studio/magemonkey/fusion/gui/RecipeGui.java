@@ -1068,4 +1068,8 @@ public class RecipeGui implements Listener {
             }
         }
     }
+
+    public static void resetRecipeHashes() {
+        recipeCache.clear();
+    }
 }
