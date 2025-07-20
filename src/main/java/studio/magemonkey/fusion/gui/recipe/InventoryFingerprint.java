@@ -37,13 +37,6 @@ public class InventoryFingerprint {
                 // Material
                 md.update((byte) is.getType().ordinal());
                 // Amount (4 bytes)
-                intBuffer.clear();
-                md.update(intBuffer.putInt(is.getAmount()).array());
-                // customModelData
-                if (im != null && im.hasCustomModelData()) {
-                    intBuffer.clear();
-                    md.update(intBuffer.putInt(im.getCustomModelData()).array());
-                }
                 // displayName
                 if (im != null && im.hasDisplayName()) {
                     byte[] nameBytes = im.getDisplayName().getBytes(java.nio.charset.StandardCharsets.UTF_8);
