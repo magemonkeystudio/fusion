@@ -12,6 +12,15 @@ public class RecipeCacheKey {
     private final int playerLevel;
     private final double playerMoney;
 
+    // TODO add:
+    /*
+        * - Vanilla Exp
+        * - Conditions.McMMO Map
+        * - Conditions.Fabled Map
+        * - Conditions.Aura Map
+        * - Conditions.ProfessionLevels Map
+     */
+
     public RecipeCacheKey(String recipeId, byte[] inventoryHash, int playerLevel, double playerMoney) {
         this.recipeId = recipeId;
         this.inventoryHash = Arrays.copyOf(inventoryHash, inventoryHash.length);

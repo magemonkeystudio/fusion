@@ -1,7 +1,6 @@
 package studio.magemonkey.fusion.gui;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import studio.magemonkey.codex.CodexEngine;

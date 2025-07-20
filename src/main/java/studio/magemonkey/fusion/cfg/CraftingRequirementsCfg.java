@@ -1,16 +1,12 @@
 package studio.magemonkey.fusion.cfg;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.compat.VersionManager;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
-
-import java.util.*;
 
 public class CraftingRequirementsCfg {
 

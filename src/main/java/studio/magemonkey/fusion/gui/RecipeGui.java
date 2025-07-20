@@ -13,7 +13,9 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
@@ -41,16 +43,16 @@ import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
+import studio.magemonkey.fusion.gui.recipe.InventoryFingerprint;
+import studio.magemonkey.fusion.gui.recipe.RecipeCacheKey;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
-import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
-import studio.magemonkey.fusion.gui.recipe.InventoryFingerprint;
-import studio.magemonkey.fusion.gui.recipe.RecipeCacheKey;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class RecipeGui implements Listener {

@@ -76,9 +76,6 @@ public class RecipeGuiEventRouter implements Listener {
 
         // If the player closes this GUI, perform cleanup
         gui.close(p, inv);
-
-        // Also remove it from the player’s cache so it won’t be routed again
-        // TODO remove from cache if needed
     }
 
     @EventHandler(ignoreCancelled = true)

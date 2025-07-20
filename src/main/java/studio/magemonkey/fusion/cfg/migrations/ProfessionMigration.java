@@ -2,7 +2,6 @@ package studio.magemonkey.fusion.cfg.migrations;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.codex.api.items.PrefixHelper;
 import studio.magemonkey.fusion.Fusion;

@@ -12,7 +12,6 @@ import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
-import studio.magemonkey.fusion.gui.RecipeGui;
 
 import java.util.Collection;
 import java.util.Map;
