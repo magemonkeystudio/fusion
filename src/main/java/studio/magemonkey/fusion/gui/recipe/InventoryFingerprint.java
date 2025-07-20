@@ -37,10 +37,12 @@ public class InventoryFingerprint {
                 // Material
                 md.update((byte) is.getType().ordinal());
                 // Amount (4 bytes)
-                md.update(ByteBuffer.allocate(4).putInt(is.getAmount()).array());
+                intBuffer.clear();
+                md.update(intBuffer.putInt(is.getAmount()).array());
                 // customModelData
                 if (im != null && im.hasCustomModelData()) {
-                    md.update(ByteBuffer.allocate(4).putInt(im.getCustomModelData()).array());
+                    intBuffer.clear();
+                    md.update(intBuffer.putInt(im.getCustomModelData()).array());
                 }
                 // displayName
                 if (im != null && im.hasDisplayName()) {

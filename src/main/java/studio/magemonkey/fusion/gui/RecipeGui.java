@@ -99,8 +99,15 @@ public class RecipeGui implements Listener {
     private final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
     private final ArrayList<Integer> queuedSlots  = new ArrayList<>(20);
 
-    // Caches all previously built CalculatedRecipe objects:
-    private static final Map<RecipeCacheKey, CalculatedRecipe> recipeCache = new ConcurrentHashMap<>();
+    // Caches all previously built CalculatedRecipe objects with a size limit:
+    private static final Map<RecipeCacheKey, CalculatedRecipe> recipeCache = Collections.synchronizedMap(
+        new LinkedHashMap<RecipeCacheKey, CalculatedRecipe>(100, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<RecipeCacheKey, CalculatedRecipe> eldest) {
+                return size() > 100; // Limit cache size to 100 entries
+            }
+        }
+    );
 
     // Last‐seen “inventory fingerprint” so we know if we truly need to recalc:
     private byte[] lastInventoryHash = new byte[0];
