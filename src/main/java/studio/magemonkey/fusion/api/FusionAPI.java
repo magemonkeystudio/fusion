@@ -22,7 +22,10 @@ public class FusionAPI {
     }
 
     public static ProfessionManager getProfessionManager() {
-        return professionManager != null ? professionManager : new ProfessionManager();
+        if (professionManager == null) {
+            professionManager = new ProfessionManager();
+        }
+        return professionManager;
     }
 
     public static PlayerManager getPlayerManager() {
