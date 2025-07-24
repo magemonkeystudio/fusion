@@ -602,9 +602,17 @@ public class CommandMechanics {
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.statsHeader",
                 sender,
                 new MessageData("player", target.getName()));
+        CodexEngine.get().getMessageUtil().sendMessage("fusion.force.statsHeader",
+                target,
+                new MessageData("player", target.getName()));
         
         for (Profession profession : PlayerLoader.getPlayer(target.getUniqueId()).getProfessions()) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.level.format", sender,
+                    new MessageData("category", profession.getName()),
+                    new MessageData("level", profession.getLevel()),
+                    new MessageData("experience",
+                            PlayerLoader.getPlayer(target.getUniqueId()).getExperience(profession)));
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.level.format", target,
                     new MessageData("category", profession.getName()),
                     new MessageData("level", profession.getLevel()),
                     new MessageData("experience",
