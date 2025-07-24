@@ -94,6 +94,12 @@ fusionPlayer.setJoined("weapon_smithing", true);
 - **Issues**: [Report bugs on GitHub](https://github.com/magemonkeystudio/fusion/issues)
 - **Documentation**: Browse the wiki links above for detailed information
 
+## See Also
+
+- **[Force Commands](FORCE_COMMANDS.md)** - Administrative automation commands for NPCs and scripts
+- **[License](LICENSE.md)** - Full project license information
+- **[Releases](https://github.com/magemonkeystudio/fusion/releases)** - Download the latest version
+
 ### A huge thanks to our contributors
 
 <a href="https://github.com/magemonkeystudio/fusion/graphs/contributors">

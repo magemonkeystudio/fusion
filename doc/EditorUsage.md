@@ -1,18 +1,39 @@
-# Fusion Ingame Editor
+# In-Game Editor Guide
 
-The ingame editor of Fusion provides you a very easy to use possibility to edit your professions, recipes and everything
-around those. You may come across one or two questions, which you will hopefully find the answer to here.
+The Fusion in-game editor provides an intuitive GUI-based interface for creating and modifying professions, recipes, and browse configurations without editing YAML files.
 
-## Structure of the Editor
+## Table of Contents
 
-The editor is mainly divided into two editors: **Professions Editor** & **Browse Editor**<br>
-Each of those provide many different and some similar functionalities. Similar ones are mostly in the handling of
-pattern items, which is why you will get a detailed explanation of the **Professions Editor**, **Browse Editor** and
-**Pattern Editor** in the following. Smaller Editors will be explained below as well.
+- [Editor Overview](#editor-overview)
+- [Accessing the Editor](#accessing-the-editor)
+- [Professions Editor](#professions-editor)
+- [Browse Editor](#browse-editor)
+- [Pattern Editor](#pattern-editor)
+- [Recipe Editor](#recipe-editor)
+- [Tips and Best Practices](#tips-and-best-practices)
 
-## Editor Usage
+## Editor Overview
 
-### Professions Editor
+The editor system consists of several interconnected editors:
+
+- **Main Editor** - Entry point for all editing functions
+- **Professions Editor** - Create and modify profession configurations
+- **Browse Editor** - Configure the profession browse GUI
+- **Pattern Editor** - Design GUI layouts and patterns
+- **Recipe Editor** - Create and modify individual recipes
+
+## Accessing the Editor
+
+### Commands
+
+- `/fusion-editor` - Open the main editor menu
+- `/fusion-editor <profession>` - Open specific profession editor
+
+### Permissions
+
+- `fusion.admin` - Required for editor access
+
+## Professions Editor
 
 ![Profession Editor GUI](../images/professions_gui.png)<br>
 The **Profession Editor** starts with a plain gui that allows to configure the following:
