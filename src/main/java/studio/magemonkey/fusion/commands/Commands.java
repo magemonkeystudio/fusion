@@ -77,6 +77,36 @@ public class Commands implements CommandExecutor, TabCompleter {
                     return true;
                 }
             }
+            case "forcejoin" -> {
+                if (args.length == 3) {
+                    CommandMechanics.forceJoinProfession(sender, args);
+                }
+                return true;
+            }
+            case "forceleave" -> {
+                if (args.length == 3) {
+                    CommandMechanics.forceLeaveProfession(sender, args);
+                }
+                return true;
+            }
+            case "forcestats" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceStats(sender, args);
+                }
+                return true;
+            }
+            case "forcemaster" -> {
+                if (args.length == 3) {
+                    CommandMechanics.forceMaster(sender, args);
+                }
+                return true;
+            }
+            case "forceshow" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceShow(sender, args);
+                }
+                return true;
+            }
             default -> CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("fusion.help", sender, new MessageData("sender", sender),
@@ -92,8 +122,10 @@ public class Commands implements CommandExecutor, TabCompleter {
                                       @NotNull String label,
                                       @NotNull String[] args) {
         List<String>     entries     = new ArrayList<>();
-        List<Profession> professions =
-                new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
+        List<Profession> professions = new ArrayList<>();
+        if (sender instanceof Player) {
+            professions = new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
+        }
         if (args.length == 1) {
             if ("browse".startsWith(args[0])) entries.add("browse");
             if ("stats".startsWith(args[0])) entries.add("stats");
@@ -112,6 +144,14 @@ public class Commands implements CommandExecutor, TabCompleter {
                 entries.add("show");
             if (sender.hasPermission("fusion.admin") && "exp".startsWith(args[0])) entries.add("exp");
             if (sender.hasPermission("fusion.admin") && "level".startsWith(args[0])) entries.add("level");
+            // Force commands for administrators
+            if (sender.hasPermission("fusion.admin.force")) {
+                if ("forcejoin".startsWith(args[0])) entries.add("forcejoin");
+                if ("forceleave".startsWith(args[0])) entries.add("forceleave");
+                if ("forcestats".startsWith(args[0])) entries.add("forcestats");
+                if ("forcemaster".startsWith(args[0])) entries.add("forcemaster");
+                if ("forceshow".startsWith(args[0])) entries.add("forceshow");
+            }
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("use")) {
                 for (String name : professions.stream().map(Profession::getName).toList()) {
@@ -153,6 +193,15 @@ public class Commands implements CommandExecutor, TabCompleter {
                 if ("set".startsWith(args[1].toLowerCase())) entries.add("set");
                 if ("take".startsWith(args[1].toLowerCase())) entries.add("take");
             }
+            // Tab completion for force commands - player names
+            else if (sender.hasPermission("fusion.admin.force") && 
+                    (args[0].equalsIgnoreCase("forcejoin") || args[0].equalsIgnoreCase("forceleave") || 
+                     args[0].equalsIgnoreCase("forcestats") || args[0].equalsIgnoreCase("forcemaster") || 
+                     args[0].equalsIgnoreCase("forceshow"))) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getName().startsWith(args[1])) entries.add(player.getName());
+                }
+            }
         } else if (args.length == 3) {
             if (sender.hasPermission("fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
@@ -161,6 +210,14 @@ public class Commands implements CommandExecutor, TabCompleter {
             } else if ((args[0].equalsIgnoreCase("exp") || args[0].equalsIgnoreCase("level")) && sender.hasPermission(
                     "fusion.admin")) {
                 for (String name : professions.stream().map(Profession::getName).toList()) {
+                    if (name.startsWith(args[2])) entries.add(name);
+                }
+            }
+            // Tab completion for force commands - profession names
+            else if (sender.hasPermission("fusion.admin.force") && 
+                    (args[0].equalsIgnoreCase("forcejoin") || args[0].equalsIgnoreCase("forceleave") || 
+                     args[0].equalsIgnoreCase("forcemaster"))) {
+                for (String name : ProfessionsCfg.getGuiMap().keySet()) {
                     if (name.startsWith(args[2])) entries.add(name);
                 }
             }
