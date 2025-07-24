@@ -20,34 +20,9 @@
     </properties>
 
     <repositories>
-        <!-- Paper API -->
         <repository>
-            <id>papermc</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-
-        <!-- Spigot API -->
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-
-        <!-- Central Repository -->
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-
-        <!-- Sonatype Snapshots -->
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/groups/public</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>sonatype</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </repository>
 
         <!-- McMMO -->
@@ -55,91 +30,42 @@
             <id>neetgames</id>
             <url>https://nexus.neetgames.com/repository/maven-releases/</url>
         </repository>
-
         <!-- Zrips Jobs -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-
-        <!-- PlaceholderAPI -->
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/releases/</url>
         </repository>
-
-        <!-- Nexo Repository -->
         <repository>
             <id>nexo</id>
             <name>Nexo Repository</name>
             <url>https://repo.nexomc.com/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-
-        <!-- Citizens -->
-        <repository>
-            <id>everything</id>
-            <url>https://repo.citizensnpcs.co/</url>
-        </repository>
-
-        <!-- WorldEdit/WorldGuard -->
-        <repository>
-            <id>sk89q-repo</id>
-            <url>https://maven.enginehub.org/repo/</url>
-        </repository>
-
-        <!-- MD5 -->
-        <repository>
-            <id>md_5-public</id>
-            <url>https://repo.md-5.net/content/groups/public/</url>
-        </repository>
-
-        <!-- Lumine -->
-        <repository>
-            <id>lumine</id>
-            <url>https://mvn.lumine.io/repository/maven-public/</url>
         </repository>
     </repositories>
 
     <dependencies>
-        <!-- 
-        MageMonkey dependencies - commented out due to unavailable repositories
-        Uncomment these when MageMonkey repositories are accessible
-        
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>codex</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>sapphire</artifactId>
             <version>1.0.1-R0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>divinity</artifactId>
             <version>1.0.2-R0.22-SNAPSHOT</version>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>fabled</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
-        -->
 
-        <!-- 
-        Plugin integration dependencies - commented out due to repository access issues
-        These can be uncommented when the appropriate repositories are accessible
-        
         <dependency>
             <groupId>com.gmail.nossr50.mcMMO</groupId>
             <artifactId>mcMMO</artifactId>
@@ -170,35 +96,12 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
-        -->
 
-        <!-- 
-        Core API dependencies - commented out due to repository access issues
-        These need to be available when deploying the plugin
-        
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.21.3-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.21.3-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
-
-        <!-- 
-        Nexo development dependency - commented out due to unavailable dev version
-        
         <dependency>
             <groupId>com.nexomc</groupId>
             <artifactId>nexo</artifactId>
             <version>0.10.0-dev.27</version>
             <scope>provided</scope>
-            <optional>true</optional>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -206,7 +109,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        -->
 
         <dependency>
             <groupId>org.xerial</groupId>
@@ -239,23 +141,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <!-- Profile for when MageMonkey dependencies are available -->
-        <profile>
-            <id>with-magemonkey-deps</id>
-            <activation>
-                <property>
-                    <name>!skip.magemonkey.deps</name>
-                </property>
-            </activation>
-            <repositories>
-                <!-- MageMonkey specific repositories can be added here -->
-            </repositories>
-            <dependencies>
-                <!-- MageMonkey dependencies that may not be publicly available -->
-                <!-- These will be skipped by default to allow builds to succeed -->
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
