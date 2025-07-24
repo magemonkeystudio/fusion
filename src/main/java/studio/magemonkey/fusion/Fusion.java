@@ -23,7 +23,7 @@ import studio.magemonkey.fusion.cfg.hooks.HookType;
 import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityService;
 import studio.magemonkey.fusion.cfg.migrations.PConfigManager;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.commands.Commands;
+import studio.magemonkey.fusion.commands.CraftCommand;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.*;
@@ -124,7 +124,7 @@ public class Fusion extends RisePlugin implements Listener {
             PConfigManager.migrateIntoSQL();
         });
         LevelFunction.generate(200);
-        this.getCommand("craft").setExecutor(new Commands());
+        this.getCommand("craft").setExecutor(new CraftCommand());
         this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
         getServer().getPluginManager().registerEvents(this, this);
         runQueueTask();

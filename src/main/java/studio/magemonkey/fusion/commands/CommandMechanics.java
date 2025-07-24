@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
@@ -154,7 +155,7 @@ public class CommandMechanics {
 
     public static void forgetProfession(CommandSender sender,
                                         String[] args,
-                                        Map<String, Commands.ConfirmationAction> confirmation) {
+                                        Map<String, CraftCommand.ConfirmationAction> confirmation) {
         if (sender instanceof Player player) {
             CraftingTable table = ProfessionsCfg.getTable(args[1]);
             if (table == null) {
@@ -164,7 +165,7 @@ public class CommandMechanics {
                         new MessageData("sender", sender));
                 return;
             }
-            Commands.ConfirmationAction action =
+            CraftCommand.ConfirmationAction action =
                     () -> FusionAPI.getEventServices().getProfessionService().leaveProfession(table, player);
 
             confirmation.put(player.getUniqueId().toString(), action);
@@ -319,7 +320,7 @@ public class CommandMechanics {
                 .sendMessage("fusion.reload", sender, new MessageData("sender", sender));
     }
 
-    public static void confirmAction(CommandSender sender, Map<String, Commands.ConfirmationAction> confirmation) {
+    public static void confirmAction(CommandSender sender, Map<String, CraftCommand.ConfirmationAction> confirmation) {
         String id = sender instanceof Player ? ((Player) sender).getUniqueId().toString() : "console";
         if (confirmation.containsKey(id)) {
             confirmation.get(id).doAction();
@@ -476,5 +477,20 @@ public class CommandMechanics {
         } else {
             return (long) (expAfter - expBefore);
         }
+    }
+
+    public static void forceJoinProfession(@NotNull CommandSender sender, String[] args) {
+    }
+
+    public static void forceLeaveProfession(@NotNull CommandSender sender, String[] args) {
+    }
+
+    public static void forceStats(@NotNull CommandSender sender, String[] args) {
+    }
+
+    public static void forceMaster(@NotNull CommandSender sender, String[] args) {
+    }
+
+    public static void forceShow(@NotNull CommandSender sender, String[] args) {
     }
 }

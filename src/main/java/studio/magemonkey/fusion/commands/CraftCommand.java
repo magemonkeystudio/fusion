@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Commands implements CommandExecutor, TabCompleter {
+public class CraftCommand implements CommandExecutor, TabCompleter {
 
     private final Map<String, ConfirmationAction> confirmation = new HashMap<>();
 
@@ -77,6 +77,34 @@ public class Commands implements CommandExecutor, TabCompleter {
                     return true;
                 }
             }
+
+            case "forcejoin" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceJoinProfession(sender, args);
+                }
+            }
+            case "forceleave" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceLeaveProfession(sender, args);
+                }
+            }
+            case "forcestats" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceStats(sender, args);
+                }
+            }
+            case "forcemaster" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceMaster(sender, args);
+                }
+            }
+            case "forceshow" -> {
+                if (args.length == 2) {
+                    CommandMechanics.forceShow(sender, args);
+                }
+            }
+
+
             default -> CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("fusion.help", sender, new MessageData("sender", sender),
@@ -112,6 +140,18 @@ public class Commands implements CommandExecutor, TabCompleter {
                 entries.add("show");
             if (sender.hasPermission("fusion.admin") && "exp".startsWith(args[0])) entries.add("exp");
             if (sender.hasPermission("fusion.admin") && "level".startsWith(args[0])) entries.add("level");
+
+            if (sender.hasPermission("fusion.admin") && "forcejoin".startsWith(args[0]))
+                entries.add("forcejoin");
+            if (sender.hasPermission("fusion.admin") && "forceleave".startsWith(args[0]))
+                entries.add("forceleave");
+            if (sender.hasPermission("fusion.admin") && "forcestats".startsWith(args[0]))
+                entries.add("forcestats");
+            if (sender.hasPermission("fusion.admin") && "forcemaster".startsWith(args[0]))
+                entries.add("forcemaster");
+            if (sender.hasPermission("fusion.admin") && "forceshow".startsWith(args[0]))
+                entries.add("forceshow");
+
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("use")) {
                 for (String name : professions.stream().map(Profession::getName).toList()) {
