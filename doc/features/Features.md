@@ -1,7 +1,26 @@
-# Handling Professions
-## General Configuration
+# Features & Configuration
 
-## Browsing
+This comprehensive guide covers all major features of Fusion, including professions, crafting mechanisms, GUI configuration, and detailed setup instructions.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Profession Browsing](#profession-browsing)
+- [Professions & Recipes](#professions--recipes)
+- [Crafting Mechanisms](#crafting-mechanisms)
+- [Configuration Examples](#configuration-examples)
+
+## Overview
+
+Fusion provides a complete custom crafting and profession system with the following key features:
+
+- **Custom Professions** - Create unlimited profession types with unique progression
+- **Two Crafting Mechanisms** - Queue-based background crafting or manual active crafting
+- **Rich GUI System** - Fully customizable interfaces with patterns and categories
+- **Progression System** - Experience, levels, and mastery unlocks
+- **Multi-Plugin Integration** - Works with economy, permissions, and other popular plugins
+
+# Profession Browsing
 ### Usage
 You open the browse gui with the command `/craft browse`.
 
