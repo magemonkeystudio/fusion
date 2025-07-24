@@ -520,7 +520,7 @@ public class CommandMechanics {
         }
         
         // Force join the profession without conditions
-        FusionAPI.getEventServices().getProfessionService().joinProfession(registry, target, true);
+        FusionAPI.getEventServices().getProfessionService().joinProfession(registry.getProfession(), target, 0.0, 0);
         
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.joinSuccess",
                 sender,
