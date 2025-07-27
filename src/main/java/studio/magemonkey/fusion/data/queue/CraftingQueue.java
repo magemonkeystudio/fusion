@@ -9,6 +9,7 @@ import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
@@ -39,9 +40,50 @@ public class CraftingQueue {
         this.profession = profession;
         this.category = category;
         this.queuedItems = new HashMap<>(20);
-        queue.addAll(SQLManager.queues().getQueueItems(player.getUniqueId(), profession, category));
-        queue.forEach(entry -> entry.setCraftinQueue(this));
 
+        // Load items from the database
+        List<QueueItem> loaded = SQLManager.queues().getQueueItems(player.getUniqueId(), profession, category);
+        queue.addAll(loaded);
+
+        /*
+         * If offline progression is enabled, distribute the offline time across the
+         * queue sequentially.  All items are saved with the same timestamp when
+         * saved, so use the first item's timestamp to calculate the offline duration.
+         */
+        if (Cfg.updateQueueOffline && !queue.isEmpty()) {
+            long now = System.currentTimeMillis();
+            // find the first unfinished item
+            QueueItem current = queue.stream()
+                    .filter(item -> !item.isDone())
+                    .findFirst()
+                    .orElse(null);
+            if (current != null) {
+                int offlineSeconds = (int) ((now - current.getTimestamp()) / 1000L);
+                // apply offline progress sequentially
+                for (QueueItem item : queue) {
+                    if (offlineSeconds <= 0) {
+                        break;
+                    }
+                    if (item.isDone()) {
+                        continue;
+                    }
+                    int remaining = item.getRecipe().getCraftingTime() - item.getSavedSeconds();
+                    int apply = Math.min(offlineSeconds, remaining);
+                    item.progressOffline(apply);
+                    offlineSeconds -= apply;
+                }
+            }
+            // normalize timestamps after applying offline progress
+            queue.forEach(item -> item.setTimestamp(now));
+        }
+
+        // Assign the queue and update the icons
+        queue.forEach(entry -> {
+            entry.setCraftinQueue(this);
+            entry.updateIcon();
+        });
+
+        // Start the queue update task
         queueTask = new BukkitRunnable() {
             @Override
             public void run() {

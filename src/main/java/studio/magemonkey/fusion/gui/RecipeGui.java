@@ -101,12 +101,12 @@ public class RecipeGui implements Listener {
 
     // Caches all previously built CalculatedRecipe objects with a size limit:
     private static final Map<RecipeCacheKey, CalculatedRecipe> recipeCache = Collections.synchronizedMap(
-        new LinkedHashMap<RecipeCacheKey, CalculatedRecipe>(100, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<RecipeCacheKey, CalculatedRecipe> eldest) {
-                return size() > 100; // Limit cache size to 100 entries
+            new LinkedHashMap<>(100, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<RecipeCacheKey, CalculatedRecipe> eldest) {
+                    return size() > 100; // Limit cache size to 100 entries
+                }
             }
-        }
     );
 
     // Last‐seen “inventory fingerprint” so we know if we truly need to recalc:
@@ -132,7 +132,7 @@ public class RecipeGui implements Listener {
         }
         setPattern();
         if (Cfg.craftingQueue && pattern != null) {
-            this.queue = PlayerLoader.getPlayer(player).getQueue(table.getName(), this.category);
+            this.queue = FusionAPI.getPlayerManager().getPlayer(player).getQueue(table.getName(), this.category);
         }
         Fusion.registerListener(this);
         initialize();

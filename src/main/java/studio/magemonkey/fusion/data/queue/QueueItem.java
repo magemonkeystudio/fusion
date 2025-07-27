@@ -3,6 +3,7 @@ package studio.magemonkey.fusion.data.queue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.fusion.cfg.Cfg;
@@ -19,6 +20,7 @@ public class QueueItem {
     private          Category  category;
     private @NonNull Recipe    recipe;
     private          ItemStack icon;
+    @Setter
     private          long      timestamp;
     private          boolean   done;
     private          int       savedSeconds;
@@ -41,17 +43,7 @@ public class QueueItem {
         this.recipe = recipe;
         this.timestamp = timestamp;
         this.savedSeconds = savedSeconds;
-        this.visualRemainingItemTime = (recipe.getCraftingTime() - savedSeconds);
-        // If the queue item shall not be working when player is offline, just instantly override the timestamp
-        if (Cfg.updateQueueOffline) {
-            int diff = (int) ((System.currentTimeMillis() - timestamp) / 1000);
-            if (diff + savedSeconds > recipe.getCraftingTime()) {
-                this.savedSeconds = recipe.getCraftingTime();
-                this.done = true;
-            } else {
-                this.savedSeconds += diff;
-            }
-        }
+        this.visualRemainingItemTime = recipe.getCraftingTime() - savedSeconds;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -66,16 +58,27 @@ public class QueueItem {
             int reconstructedCooldown = this.visualRemainingItemTime + savedSeconds;
 
             if (visualRemainingItemTime == recipe.getCraftingTime() + 1) return;
+
             if (reconstructedCooldown <= recipe.getCraftingTime()) {
                 if (!isRunning) {
+                    // Start the item
                     isRunning = true;
+                    this.timestamp = System.currentTimeMillis();
                     return;
                 }
-                this.savedSeconds++;
-                this.done = savedSeconds >= recipe.getCraftingTime();
-                this.icon = ProfessionsCfg.getQueueItem(profession, this);
-                if (this.savedSeconds > 0)
-                    this.visualRemainingItemTime--;
+                // Advance progress
+                savedSeconds++;
+                this.timestamp = System.currentTimeMillis();
+                // Check if finished
+                if (savedSeconds >= recipe.getCraftingTime()) {
+                    done = true;
+                    // Mark finish time to prevent future overcounting
+                    this.timestamp = System.currentTimeMillis();
+                }
+                icon = ProfessionsCfg.getQueueItem(profession, this);
+                if (savedSeconds > 0) {
+                    visualRemainingItemTime--;
+                }
             }
         } else {
             this.icon = ProfessionsCfg.getQueueItem(profession, this);
@@ -88,5 +91,22 @@ public class QueueItem {
 
     public String getRecipePath() {
         return recipe.getRecipePath();
+    }
+
+    public void progressOffline(int offlineSeconds) {
+        if (done || offlineSeconds <= 0) {
+            return;
+        }
+        int remaining = recipe.getCraftingTime() - savedSeconds;
+        if (offlineSeconds >= remaining) {
+            // item has finished offline
+            savedSeconds = recipe.getCraftingTime();
+            done = true;
+        } else {
+            // item partially progressed offline
+            savedSeconds += offlineSeconds;
+        }
+        // update the remaining time for the UI
+        visualRemainingItemTime = recipe.getCraftingTime() - savedSeconds;
     }
 }

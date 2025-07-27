@@ -49,6 +49,7 @@ public class FusionPlayer {
     public CraftingQueue getQueue(String profession, Category category) {
         if (!cachedQueues.containsKey(profession + "." + category.getName())) {
             cachedQueues.put(profession + "." + category.getName(), new CraftingQueue(getPlayer(), profession, category));
+            Bukkit.getConsoleSender().sendMessage("Created new crafting queue for profession " + profession + " and category " + category.getName() + " for player " + getPlayer().getName());
         }
         return cachedQueues.get(profession + "." + category.getName());
     }
@@ -348,6 +349,7 @@ public class FusionPlayer {
         }
         for (CraftingQueue queue : cachedQueues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
+            Bukkit.getConsoleSender().sendMessage("Saved queue for profession " + queue.getProfession() + " and category " + queue.getCategory().getName());
         }
         SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
         cachedQueues.clear();
