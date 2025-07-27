@@ -12,13 +12,12 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -44,13 +43,16 @@ import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
+import studio.magemonkey.fusion.gui.recipe.InventoryFingerprint;
+import studio.magemonkey.fusion.gui.recipe.RecipeCacheKey;
 import studio.magemonkey.fusion.gui.slot.Slot;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
-import studio.magemonkey.fusion.util.InvalidPatternItemException;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class RecipeGui implements Listener {
@@ -75,6 +77,8 @@ public class RecipeGui implements Listener {
     private int           prevQueuePage;
     private int           nextQueuePage;
     private CraftingQueue queue;
+    private int lastQueueSecond = -1;                   // <<< track last‐seen wall‐clock second
+    private int lastQueueSize = 0;                       // <<< track last‐seen queue size
 
     /* Manual Crafting Mode */
     private       BukkitTask            craftingTask;
@@ -95,6 +99,24 @@ public class RecipeGui implements Listener {
     private final ArrayList<Integer> blockedSlots = new ArrayList<>(20);
     private final ArrayList<Integer> queuedSlots  = new ArrayList<>(20);
 
+    // Caches all previously built CalculatedRecipe objects with a size limit:
+    private static final Map<RecipeCacheKey, CalculatedRecipe> recipeCache = Collections.synchronizedMap(
+            new LinkedHashMap<>(100, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<RecipeCacheKey, CalculatedRecipe> eldest) {
+                    return size() > 100; // Limit cache size to 100 entries
+                }
+            }
+    );
+
+    // Last‐seen “inventory fingerprint” so we know if we truly need to recalc:
+    private byte[] lastInventoryHash = new byte[0];
+    private int lastSeenLevel = -1;
+    private double lastSeenMoney = -1.0;
+
+    // Last page counts so we skip redraw unless page or queuePage also changed:
+    private int lastPageCount = -1, lastQueuePageCount = -1;
+
     public RecipeGui(Player player, CraftingTable table, Category category) {
         this.player = player;
         this.table = table;
@@ -110,7 +132,7 @@ public class RecipeGui implements Listener {
         }
         setPattern();
         if (Cfg.craftingQueue && pattern != null) {
-            this.queue = PlayerLoader.getPlayer(player).getQueue(table.getName(), this.category);
+            this.queue = FusionAPI.getPlayerManager().getPlayer(player).getQueue(table.getName(), this.category);
         }
         Fusion.registerListener(this);
         initialize();
@@ -235,125 +257,217 @@ public class RecipeGui implements Listener {
 
     public void reloadRecipes() {
         if (!player.isOnline()) return;
+
         try {
-            setPattern();
+            //
+            // ─── 1) Compute new “fingerprint” of the player’s current inventory + level + money ───
+            //
+            byte[] newHash   = InventoryFingerprint.fingerprint(player);
+            int newLevel     = table.getLevelFunction().getLevel(player);
+            double newMoney  = (CodexEngine.get().getVault() == null)
+                    ? 0.0
+                    : CodexEngine.get().getVault().getBalance(player);
 
-            /* Default setup */
-            ItemStack          fill       = table.getFillItem();
-            Collection<Recipe> allRecipes = new ArrayList<>(category.getRecipes());
-            allRecipes.removeIf(r -> r.isHidden(player));
-            int pageSize       = resultSlots.size();
-            int allRecipeCount = allRecipes.size();
-            int i              = 0;
-            int page           = this.page;
+            boolean invChanged   = !Arrays.equals(newHash, lastInventoryHash);
+            boolean levelChanged = (newLevel != lastSeenLevel);
+            boolean moneyChanged = (newMoney != lastSeenMoney);
 
-            int fullPages = allRecipeCount / pageSize;
-            int rest      = allRecipeCount % pageSize;
+            lastInventoryHash = newHash;
+            lastSeenLevel     = newLevel;
+            lastSeenMoney     = newMoney;
+
+            //
+            // ─── 2) Re-obtain the recipe list & calculate total pages ───
+            //
+            setPattern();  // (exactly as before)
+            ItemStack fill = table.getFillItem();
+
+            Collection<Recipe> allRecipesCollection = new ArrayList<>(category.getRecipes());
+            allRecipesCollection.removeIf(r -> r.isHidden(player));
+
+            int pageSize   = resultSlots.size();
+            int totalItems = allRecipesCollection.size();
+            int page       = this.page;
+
+            int fullPages = (pageSize == 0) ? 0 : totalItems / pageSize;
+            int rest      = (pageSize == 0) ? 0 : totalItems % pageSize;
             int pages     = (rest == 0) ? fullPages : (fullPages + 1);
-            if (player.isOnline() && page >= pages) {
-                if (page > 0) {
-                    this.page = pages - 1;
-                }
 
-                // Add a check to prevent infinite recursion
-                if (this.page != page) {  // Only reload if page has changed
+            if (page >= pages && pages > 0) {
+                // Clamp page if out-of-range
+                this.page = pages - 1;
+                if (this.page != page) {
+                    // Avoid infinite recursion
                     this.reloadRecipes();
                 }
                 return;
             }
 
-            Collection<ItemStack> playerItems = PlayerUtil.getPlayerItems(this.player);
-            CalculatedRecipe[] calculatedRecipes =
-                    new CalculatedRecipe[(page < pages) ? pageSize : ((rest == 0) ? pageSize : rest)];
-            Recipe[] allRecipesArray = allRecipes.toArray(new Recipe[allRecipeCount]);
+            //
+            // ─── 3) Compute total queue pages (if craftingQueue is enabled) ───
+            //
+            List<QueueItem> allQueuedItems = (Cfg.craftingQueue && queue != null)
+                    ? new ArrayList<>(queue.getQueue())
+                    : Collections.emptyList();
+            int queueSize      = allQueuedItems.size();
+            int queuePageSize  = queuedSlots.size();
+            int fullQueuePages = (queuePageSize == 0) ? 0 : queueSize / queuePageSize;
+            int restQueue      = (queuePageSize == 0) ? 0 : queueSize % queuePageSize;
+            int queuePages     = (restQueue == 0) ? fullQueuePages : (fullQueuePages + 1);
 
-            Integer[] slots = resultSlots.toArray(new Integer[0]);
-            for (Integer slot : slots) {
-                if (slot != null) this.inventory.setItem(slot, null);
+            if (queuePage >= queuePages && queuePages > 0) {
+                this.queuePage = queuePages - 1;
+                this.reloadRecipes();
+                return;
             }
 
-            /* Additionally, when crafting_queue: true */
-            if (Cfg.craftingQueue) {
+            //
+            // ─── 4) Bail out early if nothing changed _and_ no unfinished queued items ───
+            //
+            boolean hasUnfinishedQueue = (Cfg.craftingQueue && queue != null && !queue.getQueuedItems().isEmpty());
+            boolean queueSizeChanged   = (queueSize != lastQueueSize);            // <<< check if queue length changed
+            lastQueueSize = queueSize;                                            // <<< update lastQueueSize
 
-                // Clear all queue slots
-                Integer[] _queuedSlots = queuedSlots.toArray(new Integer[0]);
-                for (int slot : _queuedSlots) {
-                    this.inventory.setItem(slot, ProfessionsCfg.getQueueSlot(table.getName()));
+            if (!invChanged && !levelChanged && !moneyChanged
+                    && lastPageCount == page
+                    && lastQueuePageCount == queuePage
+                    && !hasUnfinishedQueue
+                    && !queueSizeChanged)                                            // <<< also require queue size unchanged
+            {
+                return;
+            }
+            lastPageCount      = page;
+            lastQueuePageCount = queuePage;
+
+            //
+            // ─── 5) Build a single Map<IngredientFingerprint,Integer> of the player’s entire inventory ───
+            //
+            Map<IngredientFingerprint, Integer> invCounts = new HashMap<>();
+            for (ItemStack is : player.getInventory().getContents()) {
+                if (is == null || is.getType() == Material.AIR) continue;
+                IngredientFingerprint fp = IngredientFingerprint.of(is);
+                invCounts.merge(fp, is.getAmount(), Integer::sum);
+            }
+
+            //
+            // ─── 6) Clear out any “result” slots from the previous page ───
+            //
+            Integer[] resultSlotArray = resultSlots.toArray(new Integer[0]);
+            for (Integer slotIndex : resultSlotArray) {
+                if (slotIndex != null) {
+                    inventory.setItem(slotIndex, null);
+                }
+            }
+            recipes.clear();
+
+            //
+            // ─── 7) Re-populate this page’s recipe icons, using a cache key to avoid repeated recalculation ───
+            //
+            Recipe[] allRecipesArray = allRecipesCollection.toArray(new Recipe[0]);
+            int startIndex = page * pageSize;
+            int endIndex   = Math.min(startIndex + pageSize, totalItems);
+
+            for (int i = startIndex, idx = 0; i < endIndex; i++, idx++) {
+                Recipe recipe    = allRecipesArray[i];
+                int slotIndex    = resultSlotArray[idx];
+                RecipeCacheKey cacheKey = new RecipeCacheKey(
+                        recipe.getRecipePath(),
+                        newHash,
+                        newLevel,
+                        newMoney
+                );
+
+                CalculatedRecipe calc;
+                if (recipeCache.containsKey(cacheKey)) {
+                    calc = recipeCache.get(cacheKey);
+                } else {
+                    CalculatedRecipe fresh = CalculatedRecipe.create(
+                            recipe,
+                            new HashMap<>(invCounts),
+                            player,
+                            table
+                    );
+                    recipeCache.put(cacheKey, fresh);
+                    calc = fresh;
                 }
 
-                this.queue.getQueuedItems().clear();
-                Collection<QueueItem> allQueuedItems     = queue.getQueue();
-                int                   queueAllItemsCount = allQueuedItems.size();
-                if (!allQueuedItems.isEmpty()) {
-                    int queuePageSize = queuedSlots.size();
-                    if (queuePageSize > 0) {
-                        int j         = 0;
-                        int queuePage = this.queuePage;
+                recipes.put(slotIndex, calc);
+                inventory.setItem(slotIndex, calc.getIcon().clone());
+            }
 
-                        int queueFullPages = queueAllItemsCount / queuePageSize;
-                        int queueRest      = queueAllItemsCount % queuePageSize;
-                        int queuePages     = (queueRest == 0) ? queueFullPages : (queueFullPages + 1);
-                        if (queuePage >= queuePages) {
-                            if (queuePage > 0)
-                                this.queuePage = queuePages - 1;
-                            this.reloadRecipes();
-                            return;
-                        }
+            //
+            // ─── 8) Fill anything not set yet with the “fill” background ───
+            //
+            for (int k = 0; k < inventory.getSize(); k++) {
+                ItemStack it = inventory.getItem(k);
+                if (it == null || it.getType() == Material.AIR) {
+                    inventory.setItem(k, fill.clone());
+                }
+            }
 
-                        QueueItem[] queuedItems        = new QueueItem[queuePageSize];
-                        QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[queueAllItemsCount]);
-                        Integer[]   queuedSlots        = this.queuedSlots.toArray(new Integer[0]);
+            //
+            // ─── 9) If crafting-queue mode is enabled, clear + rebuild queued slots
+            //           ─ only when the wall-clock second or queueSize changed ─
+            //
+            if (Cfg.craftingQueue && queue != null) {
+                int nowSec = (int) (System.currentTimeMillis() / 1000L);
+                if (nowSec != lastQueueSecond || queueSizeChanged) {        // <<< MODIFIED
+                    lastQueueSecond = nowSec;                                // <<< MODIFIED
 
-                        for (int k = (queuePage * queuePageSize), e = queuedSlots.length;
-                             (k < allQueueItemsArray.length) && (j < e);
-                             k++, j++) {
-                            QueueItem queueItem = allQueueItemsArray[k];
-                            int       slot      = queuedSlots[j];
-                            this.queue.getQueuedItems().put(slot, queuedItems[j] = queueItem);
-                            this.queue.getQueuedItems().get(slot).updateIcon();
+                    // 9a) Clear all queue slots to the “empty queue” icon
+                    Integer[] queuedIndices = queuedSlots.toArray(new Integer[0]);
+                    for (int qIndex : queuedIndices) {
+                        inventory.setItem(qIndex, ProfessionsCfg.getQueueSlot(table.getName()));
+                    }
+                    this.queue.getQueuedItems().clear();
 
-                            this.inventory.setItem(slot, queuedItems[j].getIcon().clone());
+                    // 9b) Place each queued item onto its slot for the current queuePage
+                    if (!allQueuedItems.isEmpty() && queuePageSize > 0) {
+                        int j       = 0;
+                        int qStart  = queuePage * queuePageSize;
+                        int qEnd    = Math.min(qStart + queuePageSize, queueSize);
+                        QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[0]);
+                        Integer[] qSlots = queuedIndices;
+
+                        for (int q = qStart; q < qEnd && j < qSlots.length; q++, j++) {
+                            QueueItem qi = allQueueItemsArray[q];
+                            int slot     = qSlots[j];
+                            this.queue.getQueuedItems().put(slot, qi);
+                            qi.updateIcon();
+                            inventory.setItem(slot, qi.getIcon().clone());
                         }
                     }
                 }
+                // (Otherwise, same second / queueSize, so skip rebuilding this block.)
             }
+
+            //
+            // ─── 10) Finally, update “arrows” / “fill” / etc. exactly as before ───
+            //
             updateBlockedSlots(new MessageData[]{
-                    new MessageData("level", table.getLevelFunction().getLevel(player)),
+                    new MessageData("level",    table.getLevelFunction().getLevel(player)),
                     new MessageData("category", category),
-                    new MessageData("gui", getName()),
-                    new MessageData("player", player.getName()),
+                    new MessageData("gui",      getName()),
+                    new MessageData("player",   player.getName()),
                     new MessageData("bal",
-                            CodexEngine.get().getVault() == null ? 0
+                            CodexEngine.get().getVault() == null
+                                    ? 0
                                     : CodexEngine.get().getVault().getBalance(player))
             });
 
-            for (int k = (page * pageSize), e = Math.min(slots.length, calculatedRecipes.length);
-                 (k < allRecipesArray.length) && (i < e);
-                 k++, i++) {
-                Recipe recipe = allRecipesArray[k];
-                int    slot   = slots[i];
-                try {
-                    CalculatedRecipe calculatedRecipe = CalculatedRecipe.create(recipe, playerItems, this.player, table);
-                    this.recipes.put(slot, calculatedRecipes[i] = calculatedRecipe);
-                    this.inventory.setItem(slot, calculatedRecipe.getIcon().clone());
-                } catch (InvalidPatternItemException ignored) {
-                }
-            }
-
-            for (int k = 0; k < inventory.getSize(); k++) {
-                if (inventory.getItem(k) != null && inventory.getItem(k).getType() != Material.AIR)
-                    continue;
-                inventory.setItem(k, fill);
-            }
             this.isLoaded = true;
-        } catch   (
-                Exception e) {
+        }
+        catch (Exception e) {
+            // On any exception, clear the inventory and close it to avoid partial states
             this.inventory.clear();
             Bukkit.getScheduler().runTask(Fusion.getInstance(), this.player::closeInventory);
-            throw new RuntimeException("Exception was thrown when reloading recipes for: " + this.player.getName(),
-                    e);
-        } finally {
-            if (Cfg.craftingQueue && !queue.getQueuedItems().isEmpty()) {
+            throw new RuntimeException(
+                    "Exception was thrown when reloading recipes for: " + this.player.getName(), e
+            );
+        }
+        finally {
+            // If queue-mode is on and there are unfinished items, re-schedule another reload in 1 second
+            if (Cfg.craftingQueue && queue != null && !queue.getQueuedItems().isEmpty()) {
                 boolean requiresUpdate = false;
                 for (Map.Entry<Integer, QueueItem> entry : queue.getQueuedItems().entrySet()) {
                     if (!entry.getValue().isDone()) {
@@ -364,7 +478,7 @@ public class RecipeGui implements Listener {
                 if (requiresUpdate) {
                     Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
                 }
-                isLoaded = true;
+                this.isLoaded = true;
             }
         }
     }
@@ -473,7 +587,8 @@ public class RecipeGui implements Listener {
     }
 
     public void open(Player player) {
-        if(!isLoaded)
+        ProfessionGuiRegistry.getLatestRecipeGui().put(player.getUniqueId(), this);
+        if (!isLoaded)
             reloadRecipes();
         player.openInventory(inventory);
     }
@@ -523,7 +638,7 @@ public class RecipeGui implements Listener {
             return false;
         }
         CalculatedRecipe calculatedRecipe = this.recipes.get(slot);
-        Recipe           recipe           = calculatedRecipe.getRecipe();
+        Recipe recipe = calculatedRecipe.getRecipe();
         if (craftingRecipe != null && craftingRecipe.equals(recipe)) {
             cancel(true);
             return false;
@@ -535,16 +650,16 @@ public class RecipeGui implements Listener {
         RecipeItem recipeResult = recipe.getSettings().getRecipeItem();
         ItemStack  resultItem   = recipeResult.getItemStack();
 
-        //Add "Crafted by"
+        // Add "Crafted by" lore if the player has permission
         if (player.hasPermission("fusion.craftedby." + recipe.getName())) {
             ItemMeta meta = resultItem.getItemMeta();
-
             List<String> lore = (meta != null && meta.hasLore()) ? meta.getLore() : new ArrayList<>();
             lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());
             meta.setLore(lore);
             resultItem.setItemMeta(meta);
         }
 
+        // If adding directly to cursor, ensure enough room
         if (addToCursor) {
             ItemStack cursor = this.player.getItemOnCursor();
             if (resultItem.isSimilar(cursor)) {
@@ -556,56 +671,88 @@ public class RecipeGui implements Listener {
             }
         }
 
-        Collection<ItemStack> itemsToTake = recipe.getItemsToTake();
-        Collection<ItemStack> taken       = new ArrayList<>(itemsToTake.size());
-        PlayerInventory       inventory   = this.player.getInventory();
+        //
+        // ─── 1) Build a local copy of the ingredient list ───
+        //
+        List<ItemStack> requiredItems = new ArrayList<>(recipe.getItemsToTake());
+        // Track exactly what we remove, so we can refund on failure
+        List<ItemStack> removedSoFar = new ArrayList<>();
 
-        for (Iterator<ItemStack> iterator = itemsToTake.iterator(); iterator.hasNext(); ) {
-            ItemStack toTake = iterator.next();
-            for (ItemStack entry : PlayerUtil.getPlayerItems(player)) {
-                ItemStack item = entry.clone();
-                entry = entry.clone();
-                item = item.clone();
-                entry.setAmount(toTake.getAmount());
+        PlayerInventory inv = this.player.getInventory();
+        boolean missingSomething = false;
 
-                if (CalculatedRecipe.isSimilar(toTake, item)) {
-                    toTake = entry;
-                    break;
+        //
+        // ─── 2) For each required ingredient, manually drain across all matching slots ───
+        //
+        for (ItemStack required : requiredItems) {
+            int need = required.getAmount();
+            ItemStack neededTemplate = required.clone(); // same material+meta
+
+            // Iterate through every inventory slot to match via isSimilar()
+            for (int slotIndex = 0; slotIndex < inv.getSize() && need > 0; slotIndex++) {
+                ItemStack slotStack = inv.getItem(slotIndex);
+                if (slotStack == null || slotStack.getType() == Material.AIR) continue;
+
+                // Use CalculatedRecipe.isSimilar() to match custom NBT/lore
+                if (!CalculatedRecipe.isSimilar(neededTemplate, slotStack)) {
+                    continue;
                 }
+
+                int available = slotStack.getAmount();
+                int take = Math.min(available, need);
+                // Subtract “take” from that slot
+                slotStack.setAmount(available - take);
+                if (slotStack.getAmount() <= 0) {
+                    inv.setItem(slotIndex, null);
+                } else {
+                    inv.setItem(slotIndex, slotStack);
+                }
+
+                // Track exactly what we removed
+                ItemStack actuallyTaken = neededTemplate.clone();
+                actuallyTaken.setAmount(take);
+                removedSoFar.add(actuallyTaken);
+
+                need -= take;
             }
 
-            HashMap<Integer, ItemStack> notRemoved = inventory.removeItem(toTake);
-            if (notRemoved.isEmpty()) {
-                taken.add(toTake);
-                iterator.remove();
-                continue;
-            }
-            for (ItemStack itemStack : taken) {
-                HashMap<Integer, ItemStack> notAdded = inventory.addItem(itemStack);
-                if (notAdded.isEmpty()) {
-                    break;
+            if (need > 0) {
+                // Could not find enough of “required” across all slots
+                missingSomething = true;
+
+                // ─── Roll back everything we already removed ───
+                for (ItemStack alreadyRemoved : removedSoFar) {
+                    Map<Integer, ItemStack> overflow = inv.addItem(alreadyRemoved.clone());
+                    for (ItemStack drop : overflow.values()) {
+                        this.player.getWorld().dropItemNaturally(this.player.getLocation(), drop);
+                    }
                 }
-                for (ItemStack stack : notAdded.values()) {
-                    this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
-                }
+                break;
             }
-            break;
         }
 
-        refund.addAll(taken);
-
-        if (!itemsToTake.isEmpty()) {
-            CodexEngine.get()
-                    .getMessageUtil()
+        if (missingSomething) {
+            // At least one ingredient was short → inform player and abort
+            CodexEngine.get().getMessageUtil()
                     .sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
             cancel(true);
             return false;
         }
+
+        // All ingredients were successfully removed; add those to refund list
+        refund.addAll(removedSoFar);
+
+        //
+        // ─── 3) Proceed with cooldown / boss‐bar / giving the result ───
+        //
         if (!Cfg.craftingQueue) {
             double modifier = Fusion.getInstance().getPlayerCooldown(player);
             int cooldown = modifier == 0d
                     ? recipe.getCraftingTime()
-                    : (int) Math.round(recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier));
+                    : (int) Math.round(
+                    recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier)
+            );
+
             showBossBar(this.player, recipe.getSettings().getRecipeItem().getItemStack(), cooldown);
 
             if (cooldown != 0) {
@@ -617,6 +764,7 @@ public class RecipeGui implements Listener {
             craftingRecipe = recipe;
             craftingTask = Fusion.getInstance().runTaskLater(cooldown, () -> {
                 craftingSuccess = true;
+
                 if (recipe.getResults().getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
@@ -637,7 +785,7 @@ public class RecipeGui implements Listener {
                     } else {
                         boolean fits = calcWillFit(resultItem);
                         if (fits) {
-                            HashMap<Integer, ItemStack> notAdded = inventory.addItem(resultItem);
+                            HashMap<Integer, ItemStack> notAdded = inv.addItem(resultItem);
                             if (!notAdded.isEmpty()) {
                                 for (ItemStack stack : notAdded.values()) {
                                     this.player.getWorld().dropItemNaturally(this.player.getLocation(), stack);
@@ -729,7 +877,7 @@ public class RecipeGui implements Listener {
         }.runTaskTimer(Fusion.getInstance(), 1L, 1L);
     }
 
-    private void cancel(boolean refund) {
+    private void cancel(boolean refundAll) {
         if (!Cfg.craftingQueue) {
             if (craftingTask == null) return;
             craftingRecipe = null;
@@ -745,26 +893,27 @@ public class RecipeGui implements Listener {
             }
 
             if (player.getOpenInventory().getCursor() != null
-                    && player.getOpenInventory().getCursor().getType() == Material.BARRIER)
+                    && player.getOpenInventory().getCursor().getType() == Material.BARRIER) {
                 if (previousCursor != null) {
                     player.getOpenInventory().setCursor(previousCursor);
                     previousCursor = null;
-                } else
+                } else {
                     player.getOpenInventory().setCursor(new ItemStack(Material.AIR));
+                }
+            }
 
             if (craftingTask != null)
                 craftingTask.cancel();
             craftingTask = null;
 
-            if (!refund || craftingSuccess)
+            if (!refundAll || craftingSuccess)
                 return;
-
 
             PlayerInventory       inventory = player.getInventory();
             Collection<ItemStack> notAdded  = inventory.addItem(this.refund.toArray(new ItemStack[0])).values();
             if (!notAdded.isEmpty()) {
                 for (ItemStack item : notAdded) {
-                    player.getLocation().getWorld().dropItemNaturally(player.getLocation(), item);
+                    player.getLocation().getWorld().dropItem(player.getLocation(), item);
                 }
             }
             this.refund.clear();
@@ -788,7 +937,7 @@ public class RecipeGui implements Listener {
         Character c = pattern.getSlot(event.getRawSlot());
         executeCommands(c, event.getWhoClicked());
 
-        //Close on click
+        // Close on click
         if (pattern.getCloseOnClickSlots().contains(c)) {
             Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> event.getWhoClicked().closeInventory());
         }
@@ -818,8 +967,7 @@ public class RecipeGui implements Listener {
         if (slots[event.getRawSlot()].equals(Slot.BASE_RESULT_SLOT)) {
             event.setCancelled(true);
             event.setResult(Event.Result.DENY);
-            Fusion.getInstance().runSync(() ->
-            {
+            Fusion.getInstance().runSync(() -> {
                 this.reloadRecipes();
                 this.craft(event.getRawSlot(), false);
                 this.reloadRecipesTask();
@@ -850,7 +998,6 @@ public class RecipeGui implements Listener {
             return;
         }
         if (event.getCursor().getType() != Material.AIR) {
-
             if (Slot.SPECIAL_CRAFTING_SLOT.canHoldItem(event.getCursor()) == null) {
                 event.setResult(Event.Result.DENY);
                 return;
@@ -859,15 +1006,16 @@ public class RecipeGui implements Listener {
         this.reloadRecipesTask();
     }
 
-    private void close(Player p, Inventory inv) {
+    public void close(Player p, Inventory inv) {
         if (inv == null) {
             return;
         }
         Inventory pInventory = p.getInventory();
         if (inv.equals(this.inventory)) {
             for (int i = 0; i < this.slots.length; i++) {
-                if (this.slots[i].equals(Slot.BLOCKED_SLOT) || this.slots[i].equals(Slot.BASE_RESULT_SLOT)
-                        || this.slots[i].equals(Slot.QUEUED_SLOT)) {
+                if (this.slots[i].equals(Slot.BLOCKED_SLOT) ||
+                        this.slots[i].equals(Slot.BASE_RESULT_SLOT) ||
+                        this.slots[i].equals(Slot.QUEUED_SLOT)) {
                     continue;
                 }
                 ItemStack it = inv.getItem(i);
@@ -884,20 +1032,10 @@ public class RecipeGui implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onClick(InventoryClickEvent event) {
-        if (event.getInventory() != getInventory()) return;
-        if (event.getRawSlot() < 0) {
-            return;
-        }
-        click(event);
-    }
-
     /*
      Event to prevent the player from dragging items into the crafting slots
      while doing manual crafting
      */
-    @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent e) {
         if (!(e.getWhoClicked() instanceof Player)) {
             return;
@@ -907,13 +1045,14 @@ public class RecipeGui implements Listener {
                 e.setCancelled(true);
             if (e.getRawSlots()
                     .stream()
-                    .anyMatch(i -> (i < this.slots.length) && (!Objects.equals(this.slots[i],
-                            Slot.SPECIAL_CRAFTING_SLOT)))) {
+                    .anyMatch(i -> (i < this.slots.length) &&
+                            (!Objects.equals(this.slots[i], Slot.SPECIAL_CRAFTING_SLOT)))) {
                 e.setResult(Event.Result.DENY);
                 return;
             }
 
-            if (e.getNewItems().values().stream().anyMatch(i -> Slot.SPECIAL_CRAFTING_SLOT.canHoldItem(i) == null)) {
+            if (e.getNewItems().values().stream().anyMatch(i ->
+                    Slot.SPECIAL_CRAFTING_SLOT.canHoldItem(i) == null)) {
                 e.setResult(Event.Result.DENY);
             }
             reloadRecipesTask();
@@ -924,7 +1063,6 @@ public class RecipeGui implements Listener {
         Event to prevent the player from dropping items into the crafting slots
         while doing manual crafting
      */
-    @EventHandler
     public void drop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         if (this.getInventory().getViewers().contains(player) && !Cfg.craftingQueue) {
@@ -940,25 +1078,7 @@ public class RecipeGui implements Listener {
         }
     }
 
-    // Events to close the players inventory
-    @EventHandler(ignoreCancelled = true)
-    public void onClose(InventoryCloseEvent e) {
-        if (e.getPlayer() instanceof Player) {
-            e.getInventory();
-            close((Player) e.getPlayer(), e.getInventory());
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onClose(EntityPickupItemEvent e) {
-        if (!(e.getEntity() instanceof Player)) {
-            return;
-        }
-        reloadRecipesTask();
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onExit(PlayerQuitEvent e) {
-        close(e.getPlayer(), inventory);
+    public static void resetRecipeHashes() {
+        recipeCache.clear();
     }
 }

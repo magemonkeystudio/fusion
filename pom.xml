@@ -55,6 +55,7 @@
             <groupId>studio.magemonkey</groupId>
             <artifactId>sapphire</artifactId>
             <version>1.0.1-R0.2-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>studio.magemonkey</groupId>

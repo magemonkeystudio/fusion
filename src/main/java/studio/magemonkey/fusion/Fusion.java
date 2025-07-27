@@ -28,6 +28,7 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.recipes.*;
 import studio.magemonkey.fusion.gui.BrowseGUI;
+import studio.magemonkey.fusion.gui.recipe.RecipeGuiEventRouter;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.LevelFunction;
 
@@ -127,6 +128,7 @@ public class Fusion extends RisePlugin implements Listener {
         this.getCommand("craft").setExecutor(new Commands());
         this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
         getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new RecipeGuiEventRouter(), this);
         runQueueTask();
 
         if (hookManager.isHooked(HookType.PlaceholderAPI)) {

@@ -19,6 +19,9 @@ public class ProfessionGuiRegistry {
     private final Map<UUID, CategoryGui> categoryGuis = new TreeMap<>();
     private final Map<UUID, RecipeGui>   recipeGuis   = new TreeMap<>();
 
+    @Getter
+    public static final Map<UUID, RecipeGui> latestRecipeGui = new TreeMap<>();
+
     public ProfessionGuiRegistry(String profession) {
         this.profession = profession;
     }
@@ -29,8 +32,9 @@ public class ProfessionGuiRegistry {
             categoryGuis.put(player.getUniqueId(), new CategoryGui(player, table));
             categoryGuis.get(player.getUniqueId()).open(player);
         } else {
-            recipeGuis.put(player.getUniqueId(),
-                    new RecipeGui(player, table, new Category("master", "PAPER", table.getRecipePattern(), 1)));
+            RecipeGui gui = new RecipeGui(player, table, new Category("master", "PAPER", table.getRecipePattern(), 1));
+
+            recipeGuis.put(player.getUniqueId(), gui);
             recipeGuis.get(player.getUniqueId()).open(player);
         }
     }
@@ -70,5 +74,10 @@ public class ProfessionGuiRegistry {
         }
 
         toClose.forEach(HumanEntity::closeInventory);
+    }
+
+    public static void clearLatestRecipeGui() {
+
+        latestRecipeGui.clear();
     }
 }

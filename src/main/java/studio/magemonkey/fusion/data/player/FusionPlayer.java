@@ -12,7 +12,6 @@ import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
-import studio.magemonkey.fusion.gui.RecipeGui;
 
 import java.util.Collection;
 import java.util.Map;
@@ -28,8 +27,6 @@ public class FusionPlayer {
     private final Map<String, Profession>        professions        = new TreeMap<>();
     private       Map<String, CraftingQueue>     cachedQueues       = new TreeMap<>();
     private       Map<String, PlayerRecipeLimit> cachedRecipeLimits = new TreeMap<>();
-
-    private final Map<String, RecipeGui> cachedGuis = new TreeMap<>();
 
     @Getter
     @Setter
@@ -50,18 +47,11 @@ public class FusionPlayer {
     }
 
     public CraftingQueue getQueue(String profession, Category category) {
-        if (!cachedQueues.containsKey(profession)) {
-            cachedQueues.put(profession, new CraftingQueue(getPlayer(), profession, category));
+        if (!cachedQueues.containsKey(profession + "." + category.getName())) {
+            cachedQueues.put(profession + "." + category.getName(), new CraftingQueue(getPlayer(), profession, category));
+            Bukkit.getConsoleSender().sendMessage("Created new crafting queue for profession " + profession + " and category " + category.getName() + " for player " + getPlayer().getName());
         }
-        return cachedQueues.get(profession);
-    }
-
-    public void cacheGui(String id, RecipeGui gui) {
-        if (cachedGuis.containsKey(id)) {
-            cachedGuis.get(id).open(getPlayer());
-            return;
-        }
-        cachedGuis.put(id, gui);
+        return cachedQueues.get(profession + "." + category.getName());
     }
 
     public PlayerRecipeLimit getRecipeLimit(Recipe recipe) {
@@ -359,9 +349,9 @@ public class FusionPlayer {
         }
         for (CraftingQueue queue : cachedQueues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
+            Bukkit.getConsoleSender().sendMessage("Saved queue for profession " + queue.getProfession() + " and category " + queue.getCategory().getName());
         }
         SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
-        cachedGuis.clear();
         cachedQueues.clear();
         cachedRecipeLimits.clear();
     }
