@@ -44,7 +44,13 @@ public class QueueItem {
         this.timestamp = timestamp;
         this.savedSeconds = savedSeconds;
         this.visualRemainingItemTime = recipe.getCraftingTime() - savedSeconds;
-        this.timestamp = System.currentTimeMillis();
+    }
+
+    public QueueItem(int id,
+                     String profession,
+                     Category category,
+                     @NotNull Recipe recipe) {
+        this(id, profession, category, recipe, System.currentTimeMillis(), 0);
     }
 
     public void setCraftinQueue(CraftingQueue craftingQueue) {
