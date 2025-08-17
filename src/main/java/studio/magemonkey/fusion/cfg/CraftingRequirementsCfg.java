@@ -30,7 +30,7 @@ public class CraftingRequirementsCfg {
     }
 
     public static String getBossBarTitle(ItemStack item) {
-        String itemName = item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName()
+        String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName()
                 : ChatUT.serialize(Component.translatable(item.getTranslationKey()));
         return ChatUT.hexString(config.getString("recipes.bossbar", "&5Crafting $<item>...")
                 .replace(MessageUtil.getReplacement("item"), itemName));

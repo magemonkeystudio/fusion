@@ -1,6 +1,6 @@
-[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/release.yml/badge.svg?branch=main)](https://repo1.maven.org/maven2/studio/magemonkey/fusion/1.0.1-R0.18-SNAPSHOT)
-[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://central.sonatype.com/repository/maven-snapshots/studio/magemonkey/fusion/1.0.1-R0.18-SNAPSHOT)
-[![Discord](https://dcbadge.vercel.app/api/server/6UzkTe6RvW?style=flat)](https://discord.gg/6UzkTe6RvW)
+[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/release.yml/badge.svg?branch=main)](https://repo1.maven.org/maven2/studio/magemonkey/fusion/1.0.1-R0.19-SNAPSHOT)
+[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://central.sonatype.com/repository/maven-snapshots/studio/magemonkey/fusion/1.0.1-R0.19-SNAPSHOT)
+[![Discord](https://dcbadge.limes.pink/api/server/6UzkTe6RvW?style=flat)](https://discord.gg/6UzkTe6RvW)
 
 # Fusion
 
@@ -16,7 +16,7 @@ or snapshots through Sonatype.
 <dependency>
     <groupId>studio.magemonkey</groupId>
     <artifactId>fusion</artifactId>
-    <version>1.0.1-R0.18-SNAPSHOT</version>
+    <version>1.0.1-R0.19-SNAPSHOT</version>
 </dependency>
 ```
 
