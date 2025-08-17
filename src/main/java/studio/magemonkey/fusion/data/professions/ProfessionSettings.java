@@ -92,8 +92,12 @@ public class ProfessionSettings implements ConfigurationSerializable {
             List<String> flagsList = config.getStringList("settings.icon.optionals.flags");
             if(!flagsList.isEmpty()) {
                 flags = new HashSet<>();
-                for (String flag : flagsList) {
-                    flags.add(ItemFlag.valueOf(flag));
+                if(flagsList.contains("*")) {
+                    flags.addAll(Arrays.asList(ItemFlag.values()));
+                } else {
+                    for (String flag : flagsList) {
+                        flags.add(ItemFlag.valueOf(flag));
+                    }
                 }
             }
             color = config.getString("settings.icon.optionals.color");
@@ -147,8 +151,12 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 if (optionalIconSettings.get("flags") != null) {
                     flags = new HashSet<>();
                     List<String> flagsList = (List<String>) optionalIconSettings.get("flags");
-                    for (String flag : flagsList) {
-                        flags.add(ItemFlag.valueOf(flag));
+                    if(flagsList.contains("*")) {
+                        flags.addAll(Arrays.asList(ItemFlag.values()));
+                    } else {
+                        for (String flag : flagsList) {
+                            flags.add(ItemFlag.valueOf(flag));
+                        }
                     }
                 }
                 if (optionalIconSettings.get("color") != null)

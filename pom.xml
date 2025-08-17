@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>16</java.version>
-        <codex.version>1.1.1-R0.3-SNAPSHOT</codex.version>
+        <codex.version>1.1.1-R0.7-SNAPSHOT</codex.version>
     </properties>
 
     <repositories>
