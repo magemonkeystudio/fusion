@@ -28,9 +28,9 @@ import java.util.*;
  */
 @Getter
 public class CalculatedRecipe {
-    private final Recipe recipe;
+    private final Recipe    recipe;
     private final ItemStack icon;
-    private final boolean canCraft;
+    private final boolean   canCraft;
 
     public CalculatedRecipe(Recipe recipe, ItemStack icon, boolean canCraft) {
         this.recipe = recipe;
@@ -42,7 +42,8 @@ public class CalculatedRecipe {
      * Builds a CalculatedRecipe for the given Recipe and a snapshot of the player’s inventory counts.
      *
      * @param recipe        The Recipe to evaluate
-     * @param invCounts     A Map<IngredientFingerprint,Integer> of everything in the player’s inventory
+     * @param invCounts     a {@link java.util.Map}&lt;{@link studio.magemonkey.fusion.gui.recipe.IngredientFingerprint}, {@link java.lang.Integer}&gt;
+     *                     representing the count of each ingredient in the player’s inventory
      * @param player        The player who is crafting
      * @param craftingTable The CraftingTable (for level checks)
      * @return a new CalculatedRecipe containing:
@@ -59,8 +60,8 @@ public class CalculatedRecipe {
             StringBuilder lore = new StringBuilder(512);
 
             // Base icon (without lore)
-            ItemStack iconResult = recipe.getSettings().getRecipeItem().getItemStack();
-            ItemMeta baseMeta = iconResult.getItemMeta();
+            ItemStack    iconResult = recipe.getSettings().getRecipeItem().getItemStack();
+            ItemMeta     baseMeta   = iconResult.getItemMeta();
             List<String> resultLore = (baseMeta == null) ? Collections.emptyList() : baseMeta.getLore();
 
             // (Optional custom lore logic omitted)
@@ -182,7 +183,7 @@ public class CalculatedRecipe {
                     recipe.getConditions().getRequiredItems()
             );
 
-            for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext();) {
+            for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem required = it.next();
 
                 // We only compare a single “unit” for matching:
@@ -190,8 +191,8 @@ public class CalculatedRecipe {
                 single.setAmount(1);
 
                 IngredientFingerprint reqKey = IngredientFingerprint.of(single);
-                int have = invCounts.getOrDefault(reqKey, 0);
-                int need = required.getAmount();
+                int                   have   = invCounts.getOrDefault(reqKey, 0);
+                int                   need   = required.getAmount();
 
                 if (have < need) {
                     canCraft = false;
@@ -214,9 +215,9 @@ public class CalculatedRecipe {
             lore.append('\n');
             if (moneyLine != null) lore.append(moneyLine).append('\n');
             if (levelsLine != null) lore.append(levelsLine).append('\n');
-            if (expLine != null)   lore.append(expLine).append('\n');
+            if (expLine != null) lore.append(expLine).append('\n');
             if (masteryLine != null) lore.append(masteryLine).append('\n');
-            if (limitLine != null)   lore.append(limitLine).append('\n');
+            if (limitLine != null) lore.append(limitLine).append('\n');
             if (!conditionLines.isEmpty()) {
                 for (Map.Entry<Boolean, String> e : conditionLines) {
                     lore.append('\n').append(e.getValue());
@@ -227,7 +228,7 @@ public class CalculatedRecipe {
 
             // Build final icon + lore
             ItemStack icon = iconResult.clone();
-            ItemMeta im = icon.getItemMeta();
+            ItemMeta  im   = icon.getItemMeta();
             im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
             icon.setItemMeta(im);
 
@@ -301,9 +302,9 @@ public class CalculatedRecipe {
 
         // Check for enchantments
         if (im1 instanceof EnchantmentStorageMeta storage1) {
-            EnchantmentStorageMeta storage2 = (EnchantmentStorageMeta) im2;
-            Map<org.bukkit.enchantments.Enchantment, Integer> ench1 = storage1.getStoredEnchants();
-            Map<org.bukkit.enchantments.Enchantment, Integer> ench2 = storage2.getStoredEnchants();
+            EnchantmentStorageMeta                            storage2 = (EnchantmentStorageMeta) im2;
+            Map<org.bukkit.enchantments.Enchantment, Integer> ench1    = storage1.getStoredEnchants();
+            Map<org.bukkit.enchantments.Enchantment, Integer> ench2    = storage2.getStoredEnchants();
 
             if (ench1.size() != ench2.size()) isValid = false;
             for (Map.Entry<org.bukkit.enchantments.Enchantment, Integer> entry : ench1.entrySet()) {

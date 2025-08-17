@@ -412,7 +412,7 @@ public class CommandMechanics {
             long expBefore = (long) ProfessionsCfg.getTable(profession)
                     .getLevelFunction()
                     .getXP(levelBefore); //LevelFunction.getXP(levelBefore);
-            long expAfter  = (long) ProfessionsCfg.getTable(profession).getLevelFunction().getXP(levelAfter);
+            long expAfter = (long) ProfessionsCfg.getTable(profession).getLevelFunction().getXP(levelAfter);
 
             switch (args[1].toLowerCase()) {
                 case "add" -> {
@@ -447,11 +447,8 @@ public class CommandMechanics {
     }
 
     private static void openGui(Player player, ProfessionGuiRegistry registry, Category category) {
-        if (category == null) {
-            registry.open(player);
-        } else {
-            registry.open(player, category);
-        }
+        if (category == null) registry.open(player);
+        else registry.open(player, category);
     }
 
     private static void showIngredientUsage(Player player) {
@@ -487,14 +484,14 @@ public class CommandMechanics {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.admin.force")) {
             return;
         }
-        
+
         if (args.length < 3) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.invalidSyntax",
                     sender,
                     new MessageData("syntax", "/fusion forcejoin <player> <profession>"));
             return;
         }
-        
+
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
@@ -503,7 +500,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         String professionName = args[2];
         if (!ProfessionsCfg.getGuiMap().containsKey(professionName)) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
@@ -512,7 +509,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         ProfessionGuiRegistry registry = ProfessionsCfg.getGUI(professionName);
         if (PlayerLoader.getPlayer(target).hasProfession(registry.getProfession())) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.alreadyHasProfession",
@@ -521,10 +518,10 @@ public class CommandMechanics {
                     new MessageData("profession", professionName));
             return;
         }
-        
+
         // Force join the profession without conditions
         FusionAPI.getEventServices().getProfessionService().joinProfession(registry.getProfession(), target, 0.0, 0);
-        
+
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.joinSuccess",
                 sender,
                 new MessageData("player", target.getName()),
@@ -536,14 +533,14 @@ public class CommandMechanics {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.admin.force")) {
             return;
         }
-        
+
         if (args.length < 3) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.invalidSyntax",
                     sender,
                     new MessageData("syntax", "/fusion forceleave <player> <profession>"));
             return;
         }
-        
+
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
@@ -552,9 +549,9 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
-        String professionName = args[2];
-        CraftingTable table = ProfessionsCfg.getTable(professionName);
+
+        String        professionName = args[2];
+        CraftingTable table          = ProfessionsCfg.getTable(professionName);
         if (table == null) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                     sender,
@@ -562,7 +559,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         if (!PlayerLoader.getPlayer(target).hasProfession(table.getName())) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.doesNotHaveProfession",
                     sender,
@@ -570,10 +567,10 @@ public class CommandMechanics {
                     new MessageData("profession", professionName));
             return;
         }
-        
+
         // Force leave the profession without confirmation
         FusionAPI.getEventServices().getProfessionService().leaveProfession(table, target);
-        
+
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.leaveSuccess",
                 sender,
                 new MessageData("player", target.getName()),
@@ -585,14 +582,14 @@ public class CommandMechanics {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.admin.force")) {
             return;
         }
-        
+
         if (args.length < 2) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.invalidSyntax",
                     sender,
                     new MessageData("syntax", "/fusion forcestats <player>"));
             return;
         }
-        
+
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
@@ -601,14 +598,14 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.statsHeader",
                 sender,
                 new MessageData("player", target.getName()));
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.statsHeader",
                 target,
                 new MessageData("player", target.getName()));
-        
+
         for (Profession profession : PlayerLoader.getPlayer(target.getUniqueId()).getProfessions()) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.level.format", sender,
                     new MessageData("category", profession.getName()),
@@ -627,14 +624,14 @@ public class CommandMechanics {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.admin.force")) {
             return;
         }
-        
+
         if (args.length < 3) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.invalidSyntax",
                     sender,
                     new MessageData("syntax", "/fusion forcemaster <player> <profession>"));
             return;
         }
-        
+
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
@@ -643,9 +640,9 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
-        String professionName = args[2];
-        CraftingTable table = ProfessionsCfg.getTable(professionName);
+
+        String        professionName = args[2];
+        CraftingTable table          = ProfessionsCfg.getTable(professionName);
         if (table == null) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                     sender,
@@ -653,7 +650,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         if (!PlayerLoader.getPlayer(target).hasProfession(table.getName())) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.doesNotHaveProfession",
                     sender,
@@ -661,7 +658,7 @@ public class CommandMechanics {
                     new MessageData("profession", professionName));
             return;
         }
-        
+
         if (PlayerLoader.getPlayer(target.getUniqueId()).hasMastered(table.getName())) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.alreadyMastered",
                     sender,
@@ -669,11 +666,11 @@ public class CommandMechanics {
                     new MessageData("profession", professionName));
             return;
         }
-        
+
         // Force master the profession without requirements or fees
         FusionAPI.getEventServices().getProfessionService().masterProfession(table.getName(), target, true);
         PlayerLoader.getPlayer(target.getUniqueId()).setMastered(table.getName(), true);
-        
+
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.masterSuccess",
                 sender,
                 new MessageData("player", target.getName()),
@@ -685,14 +682,14 @@ public class CommandMechanics {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.admin.force")) {
             return;
         }
-        
+
         if (args.length < 2) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.force.invalidSyntax",
                     sender,
                     new MessageData("syntax", "/fusion forceshow <player>"));
             return;
         }
-        
+
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             CodexEngine.get().getMessageUtil().sendMessage("notAPlayer",
@@ -701,7 +698,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender));
             return;
         }
-        
+
         // Force open the ingredient GUI for the target player
         ItemStack item = target.getInventory().getItemInMainHand();
         if (item.getType().isAir()) {
@@ -723,7 +720,7 @@ public class CommandMechanics {
         }
 
         new ShowRecipesGui(target, recipeUsage).open(target);
-        
+
         CodexEngine.get().getMessageUtil().sendMessage("fusion.force.showSuccess",
                 sender,
                 new MessageData("player", target.getName()),
