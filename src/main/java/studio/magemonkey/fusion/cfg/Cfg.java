@@ -1,5 +1,7 @@
 package studio.magemonkey.fusion.cfg;
 
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -8,8 +10,10 @@ import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class Cfg {
     public static String  recursive                = "floor(n+300^(n/7)^2)";
@@ -28,6 +32,7 @@ public final class Cfg {
 
     public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
 
+    public static List<NamespacedKey> disabledVanillaRecipes = new ArrayList<>();
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
     private static final DatabaseType storageType     = DatabaseType.LOCAL;
@@ -89,6 +94,7 @@ public final class Cfg {
         if (!cfg.isSet("storage.password")) cfg.set("storage.password", storagePassword);
 
         if (!cfg.isSet("useCustomFormula")) cfg.set("useCustomFormula", useCustomFormula);
+        if (!cfg.isSet("disabled_vanilla_recipes")) cfg.set("disabled_vanilla_recipes", disabledVanillaRecipes);
     }
 
     public static void init() {
@@ -111,6 +117,8 @@ public final class Cfg {
         hideRecipesLimitReached = cfg.getBoolean("hideRecipesDefault.recipeLimitReached");
 
         useCustomFormula = cfg.getBoolean("useCustomFormula");
+        List<Material> materials = cfg.getStringList("disabled_vanilla_recipes").stream().map(x -> Material.valueOf(x.toUpperCase())).toList();
+        disabledVanillaRecipes = BukkitRecipeWrapper.getRecipeKeysForMaterials(materials);
 
         migrateOldTypes(cfg);
     }
@@ -124,6 +132,8 @@ public final class Cfg {
             cfg.save(file);
             // Load the config again
             cfg.load(file);
+
+            BukkitRecipeWrapper.disableBukkitRecipes(disabledVanillaRecipes);
         } catch (Exception e) {
             Fusion.getInstance().getLogger().warning("Can't load config file: " + file + ":" + e.getMessage());
         }
