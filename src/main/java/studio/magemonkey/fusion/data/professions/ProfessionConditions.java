@@ -282,7 +282,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 new MessageData("condition.name", null),
         };
 
-        if (player.hasProfession(profession)) {
+        if (player.hasProfession(profession) && player.hasJoined(profession)) {
             _player.playSound(_player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1f, 1f);
             CodexEngine.get().getMessageUtil().sendMessage("fusion.browse.alreadyUnlocked", _player, data);
             return false;

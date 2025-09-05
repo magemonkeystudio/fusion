@@ -121,17 +121,21 @@ public class Commands implements CommandExecutor, TabCompleter {
                                       @NotNull Command command,
                                       @NotNull String label,
                                       @NotNull String[] args) {
+        if(!(sender instanceof  Player player))
+            return List.of();
+
         List<String>     entries     = new ArrayList<>();
         List<Profession> professions = new ArrayList<>();
-        if (sender instanceof Player) {
-            professions = new ArrayList<>(PlayerLoader.getPlayer(((Player) sender).getUniqueId()).getProfessions());
-        }
+        professions = new ArrayList<>(PlayerLoader.getPlayer((player).getUniqueId()).getProfessions());
         if (args.length == 1) {
-            if ("browse".startsWith(args[0])) entries.add("browse");
+            if (sender.hasPermission("fusion.browse")
+                    && "browse".startsWith(args[0])) entries.add("browse");
+            if (confirmation.containsKey(player.getUniqueId().toString())
+                    && "confirm".startsWith(args[0])) entries.add("confirm");
             if ("stats".startsWith(args[0])) entries.add("stats");
-            if ("confirm".startsWith(args[0])) entries.add("confirm");
             if ("use".startsWith(args[0])) entries.add("use");
-            if ("master".startsWith(args[0])) entries.add("master");
+            if (sender.hasPermission("fusion.master") &&
+                    "master".startsWith(args[0])) entries.add("master");
             if ("forget".startsWith(args[0])) entries.add("forget");
             if ("join".startsWith(args[0])) entries.add("join");
             if (sender.hasPermission("fusion.admin.use") && "storage".startsWith(args[0]))
@@ -154,8 +158,8 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("use")) {
-                for (String name : professions.stream().map(Profession::getName).toList()) {
-                    if (name.startsWith(args[1])) entries.add(name);
+                for (String profession : professions.stream().map(Profession::getName).toList()) {
+                    if (ProfessionsCfg.getGuiMap().containsKey(profession) && profession.startsWith(args[1])) entries.add(profession);
 
                 }
                 if (sender.hasPermission("fusion.craft.use.categories") && args[1].contains(":")) {
@@ -198,14 +202,14 @@ public class Commands implements CommandExecutor, TabCompleter {
                     (args[0].equalsIgnoreCase("forcejoin") || args[0].equalsIgnoreCase("forceleave") || 
                      args[0].equalsIgnoreCase("forcestats") || args[0].equalsIgnoreCase("forcemaster") || 
                      args[0].equalsIgnoreCase("forceshow"))) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.getName().startsWith(args[1])) entries.add(player.getName());
+                for (Player _player : Bukkit.getOnlinePlayers()) {
+                    if (_player.getName().startsWith(args[1])) entries.add(_player.getName());
                 }
             }
         } else if (args.length == 3) {
             if (sender.hasPermission("fusion.admin.use") && args[0].equalsIgnoreCase("use")) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.getName().startsWith(args[2])) entries.add(player.getName());
+                for (Player _player : Bukkit.getOnlinePlayers()) {
+                    if (_player.getName().startsWith(args[2])) entries.add(_player.getName());
                 }
             } else if ((args[0].equalsIgnoreCase("exp") || args[0].equalsIgnoreCase("level")) && sender.hasPermission(
                     "fusion.admin")) {
@@ -224,8 +228,8 @@ public class Commands implements CommandExecutor, TabCompleter {
         } else if (args.length == 4) {
             if ((args[0].equalsIgnoreCase("exp") || args[0].equalsIgnoreCase("level")) && sender.hasPermission(
                     "fusion.admin")) {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.getName().startsWith(args[3])) entries.add(player.getName());
+                for (Player _player : Bukkit.getOnlinePlayers()) {
+                    if (_player.getName().startsWith(args[3])) entries.add(_player.getName());
                 }
             }
         }

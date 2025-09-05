@@ -2,14 +2,20 @@ package studio.magemonkey.fusion.cfg;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
+import studio.magemonkey.fusion.commands.CommandMechanics;
+import studio.magemonkey.fusion.data.player.FusionPlayer;
+import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.gui.BrowseGUI;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +39,7 @@ public final class Cfg {
     public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
 
     public static List<NamespacedKey> disabledVanillaRecipes = new ArrayList<>();
+    public static List<String> autoJoinProfessions = new ArrayList<>();
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
     private static final DatabaseType storageType     = DatabaseType.LOCAL;
@@ -95,6 +102,7 @@ public final class Cfg {
 
         if (!cfg.isSet("useCustomFormula")) cfg.set("useCustomFormula", useCustomFormula);
         if (!cfg.isSet("disabled_vanilla_recipes")) cfg.set("disabled_vanilla_recipes", disabledVanillaRecipes);
+        if (!cfg.isSet("auto_join_professions")) cfg.set("auto_join_professions", autoJoinProfessions);
     }
 
     public static void init() {
@@ -119,6 +127,7 @@ public final class Cfg {
         useCustomFormula = cfg.getBoolean("useCustomFormula");
         List<Material> materials = cfg.getStringList("disabled_vanilla_recipes").stream().map(x -> Material.valueOf(x.toUpperCase())).toList();
         disabledVanillaRecipes = BukkitRecipeWrapper.getRecipeKeysForMaterials(materials);
+        autoJoinProfessions = cfg.getStringList("auto_join_professions");
 
         migrateOldTypes(cfg);
     }
@@ -173,6 +182,14 @@ public final class Cfg {
         } catch (IOException e) {
             Fusion.getInstance().getLogger().warning("Can't save config file: " + e.getMessage());
             return false;
+        }
+    }
+
+    public static void autoJoinProfessions(Player player) {
+        FusionPlayer fp = PlayerLoader.getPlayer(player);
+        for (String professionId : autoJoinProfessions) {
+            if(fp.hasProfession(professionId) && fp.hasJoined(professionId)) continue;
+            BrowseGUI.joinProfession(player, ProfessionsCfg.getGuiMap().get(professionId));
         }
     }
 }
