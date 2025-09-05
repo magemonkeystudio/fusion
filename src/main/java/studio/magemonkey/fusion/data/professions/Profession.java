@@ -61,7 +61,7 @@ public class Profession {
     }
 
     public int getLevel() {
-        return ProfessionsCfg.getTable(name).getLevelFunction().getLevel(exp);
+        return ProfessionsCfg.getGuiMap().containsKey(name) ? ProfessionsCfg.getTable(name).getLevelFunction().getLevel(exp) : 0;
     }
 
     public void setLevel(int level) {

@@ -8,11 +8,15 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.api.events.*;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
+
+import java.util.Objects;
 
 public class ProfessionService {
 
@@ -27,8 +31,11 @@ public class ProfessionService {
         ProfessionJoinEvent event = new ProfessionJoinEvent(professionName, player);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
-            event.getFusionPlayer()
-                    .addProfession(new Profession(-1, player.getUniqueId(), professionName, 0, false, true));
+            if(!event.getFusionPlayer().hasProfession(professionName)) {
+                event.getFusionPlayer().addProfession(new Profession(-1, player.getUniqueId(), professionName, 0, false, true));
+            } else {
+                Objects.requireNonNull(event.getFusionPlayer().getProfession(professionName)).setJoined(true);
+            }
             if (moneyCost > 0)
                 CodexEngine.get().getVault().take(player, moneyCost);
             if (expCost > 0)
@@ -36,6 +43,7 @@ public class ProfessionService {
 
             MessageData[] data = {
                     new MessageData("profession", professionName),
+                    new MessageData("inventoryName", ChatUT.hexString(ProfessionsCfg.getTable(professionName).getInventoryName())),
                     new MessageData("costs.money", moneyCost),
                     new MessageData("costs.experience", expCost),
                     new MessageData("unlocked", event.getFusionPlayer().getJoinedProfessions().size()),
@@ -58,6 +66,7 @@ public class ProfessionService {
         ProfessionLeaveEvent event = new ProfessionLeaveEvent(table.getName(), player);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
+            event.getFusionPlayer().setJoined(table, false);
             event.getFusionPlayer().removeProfession(table);
             CodexEngine.get().getMessageUtil().sendMessage("fusion.forgotten",
                     player,

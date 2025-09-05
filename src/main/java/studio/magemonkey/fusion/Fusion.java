@@ -190,6 +190,9 @@ public class Fusion extends RisePlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         PlayerLoader.loadPlayer(event.getPlayer());
+        if(!Cfg.autoJoinProfessions.isEmpty()) {
+            Cfg.autoJoinProfessions(event.getPlayer());
+        }
         if (Cfg.craftingQueue) {
             notifyForQueue(event.getPlayer());
         }
