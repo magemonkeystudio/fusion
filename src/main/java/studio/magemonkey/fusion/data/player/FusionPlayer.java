@@ -349,7 +349,6 @@ public class FusionPlayer {
         }
         for (CraftingQueue queue : cachedQueues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
-            Bukkit.getConsoleSender().sendMessage("Saved queue for profession " + queue.getProfession() + " and category " + queue.getCategory().getName());
         }
         SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
         cachedQueues.clear();
