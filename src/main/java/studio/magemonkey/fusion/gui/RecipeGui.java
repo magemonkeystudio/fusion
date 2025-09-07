@@ -686,21 +686,18 @@ public class RecipeGui implements Listener {
         //
         for (ItemStack required : requiredItems) {
             int need = required.getAmount();
-            ItemStack neededTemplate = required.clone(); // same material+meta
+            IngredientFingerprint neededFingerprint = IngredientFingerprint.of(required);
 
-            // Iterate through every inventory slot to match via isSimilar()
             for (int slotIndex = 0; slotIndex < inv.getSize() && need > 0; slotIndex++) {
                 ItemStack slotStack = inv.getItem(slotIndex);
                 if (slotStack == null || slotStack.getType() == Material.AIR) continue;
 
-                // Use CalculatedRecipe.isSimilar() to match custom NBT/lore
-                if (!CalculatedRecipe.isSimilar(neededTemplate, slotStack)) {
-                    continue;
-                }
+                IngredientFingerprint slotFingerprint = IngredientFingerprint.of(slotStack);
+                if (!neededFingerprint.equals(slotFingerprint)) continue;
 
                 int available = slotStack.getAmount();
                 int take = Math.min(available, need);
-                // Subtract “take” from that slot
+
                 slotStack.setAmount(available - take);
                 if (slotStack.getAmount() <= 0) {
                     inv.setItem(slotIndex, null);
@@ -708,8 +705,7 @@ public class RecipeGui implements Listener {
                     inv.setItem(slotIndex, slotStack);
                 }
 
-                // Track exactly what we removed
-                ItemStack actuallyTaken = neededTemplate.clone();
+                ItemStack actuallyTaken = required.clone();
                 actuallyTaken.setAmount(take);
                 removedSoFar.add(actuallyTaken);
 
