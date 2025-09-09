@@ -114,7 +114,7 @@ public class FusionQueuesSQL {
             try (ResultSet result = select.executeQuery()) {
                 while (result.next()) {
                     String recipeStr = result.getString("RecipePath").split("\\.")[2];
-                    Recipe recipe = category.getRecipe(recipeStr);
+                    Recipe recipe    = category.getRecipe(recipeStr);
 
                     if (recipe == null) {
                         Fusion.getInstance()

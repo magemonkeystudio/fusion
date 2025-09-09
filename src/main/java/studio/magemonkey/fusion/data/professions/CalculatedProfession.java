@@ -87,13 +87,13 @@ public class CalculatedProfession {
 
             List<Pair<ItemStack, Integer>> eqItems = Recipe.getItems(items);
 
-            Collection<RecipeItem> localPattern       = new HashSet<>(conditions.getRequiredItems());
+            Collection<RecipeItem> localPattern = new HashSet<>(conditions.getRequiredItems());
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem recipeItem         = it.next();
                 ItemStack  recipeItemStack    = recipeItem.getItemStack();
                 ItemStack  recipeItemStackOne = recipeItemStack.clone();
                 recipeItemStackOne.setAmount(1);
-                Pair<ItemStack, Integer> eqEntry        = null;
+                Pair<ItemStack, Integer> eqEntry = null;
                 for (Pair<ItemStack, Integer> entry : eqItems) {
                     ItemStack item = entry.getKey().clone();
                     if (CalculatedRecipe.isSimilar(recipeItemStackOne, item)) {

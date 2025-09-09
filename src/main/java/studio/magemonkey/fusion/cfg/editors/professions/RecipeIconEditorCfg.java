@@ -38,12 +38,13 @@ public class RecipeIconEditorCfg {
     }
 
     public ItemStack getIcon(Recipe recipe, String icon) {
-        Material material = Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
-        int amount = config.getInt("icons." + icon + ".amount", 1);
-        int durability = config.getInt("icons." + icon + ".durability", 0);
-        boolean unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
-        String name = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
-        List<String> lore = config.getStringList("icons." + icon + ".lore");
+        Material     material    =
+                Material.valueOf(config.getString("icons." + icon + ".material", "STONE").toUpperCase());
+        int          amount      = config.getInt("icons." + icon + ".amount", 1);
+        int          durability  = config.getInt("icons." + icon + ".durability", 0);
+        boolean      unbreakable = config.getBoolean("icon." + icon + ".unbreakable", false);
+        String       name        = config.getString("icons." + icon + ".name", "&cInvalid Item: &4" + icon);
+        List<String> lore        = config.getStringList("icons." + icon + ".lore");
 
         ProfessionSettings settings = recipe.getSettings();
         for (int i = 0; i < lore.size(); i++) {
@@ -105,14 +106,16 @@ public class RecipeIconEditorCfg {
             }
             lore.set(i, ChatUT.hexString(lore.get(i)
                     .replace(MessageUtil.getReplacement("name"), settings.getName() != null ? settings.getName() : "")
-                    .replace(MessageUtil.getReplacement("customModelData"), String.valueOf(settings.getCustomModelData()))
+                    .replace(MessageUtil.getReplacement("customModelData"),
+                            String.valueOf(settings.getCustomModelData()))
                     .replace(MessageUtil.getReplacement("unbreakable"), String.valueOf(settings.isUnbreakable()))
-                    .replace(MessageUtil.getReplacement("color"), settings.getColor() != null ? settings.getColor() : "")
+                    .replace(MessageUtil.getReplacement("color"),
+                            settings.getColor() != null ? settings.getColor() : "")
                     .replace(MessageUtil.getReplacement("cancelDrop"), String.valueOf(settings.isCancelDrop()))));
         }
-        Map<Enchantment, Integer> enchants = config.getEnchantmentSection("icons." + icon + ".enchants");
-        List<ItemFlag> flags = config.getItemFlags("icons." + icon + ".flags");
-        ItemFlag[] itemFlags = flags.toArray(new ItemFlag[0]);
+        Map<Enchantment, Integer> enchants  = config.getEnchantmentSection("icons." + icon + ".enchants");
+        List<ItemFlag>            flags     = config.getItemFlags("icons." + icon + ".flags");
+        ItemFlag[]                itemFlags = flags.toArray(new ItemFlag[0]);
         return ItemBuilder.newItem(material)
                 .amount(amount)
                 .durability(durability)

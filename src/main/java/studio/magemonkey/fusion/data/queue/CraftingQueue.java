@@ -68,7 +68,7 @@ public class CraftingQueue {
                         continue;
                     }
                     int remaining = item.getRecipe().getCraftingTime() - item.getSavedSeconds();
-                    int apply = Math.min(offlineSeconds, remaining);
+                    int apply     = Math.min(offlineSeconds, remaining);
                     item.progressOffline(apply);
                     offlineSeconds -= apply;
                 }

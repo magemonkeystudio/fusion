@@ -166,7 +166,7 @@ public class RecipeEditorCfg {
                 }
                 i += newLines;
                 continue;
-            }  else if (lore.get(i).contains(MessageUtil.getReplacement("items"))) {
+            } else if (lore.get(i).contains(MessageUtil.getReplacement("items"))) {
                 lore.remove(i);
                 int newLines = 1;
                 for (String line : recipe.getResults().getItemNames()) {

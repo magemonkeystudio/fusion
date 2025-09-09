@@ -48,7 +48,7 @@ public class ProfessionManager {
      * This object handles all players guis individually by caching them in a map.
      *
      * @param profession The name of the profession
-     * @param player The Player object
+     * @param player     The Player object
      * @return The profession gui object
      */
     public ProfessionGuiRegistry openProfessionGui(String profession, Player player) {

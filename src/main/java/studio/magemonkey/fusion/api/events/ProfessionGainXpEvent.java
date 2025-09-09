@@ -18,8 +18,8 @@ public class ProfessionGainXpEvent extends FusionEvent {
      * Constructor for the ProfessionGainXpEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that gained the experience
-     * @param gainedExp The amount of experience gained
+     * @param player         The player that gained the experience
+     * @param gainedExp      The amount of experience gained
      */
     public ProfessionGainXpEvent(String professionName, Player player, long gainedExp) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);

@@ -9,16 +9,16 @@ import java.util.Objects;
 public class RecipeCacheKey {
     private final String recipeId;
     private final byte[] inventoryHash;
-    private final int playerLevel;
+    private final int    playerLevel;
     private final double playerMoney;
 
     // TODO add:
     /*
-        * - Vanilla Exp
-        * - Conditions.McMMO Map
-        * - Conditions.Fabled Map
-        * - Conditions.Aura Map
-        * - Conditions.ProfessionLevels Map
+     * - Vanilla Exp
+     * - Conditions.McMMO Map
+     * - Conditions.Fabled Map
+     * - Conditions.Aura Map
+     * - Conditions.ProfessionLevels Map
      */
 
     public RecipeCacheKey(String recipeId, byte[] inventoryHash, int playerLevel, double playerMoney) {

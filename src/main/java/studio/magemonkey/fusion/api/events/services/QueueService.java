@@ -143,7 +143,12 @@ public class QueueService {
             }
             // Items if no commands exist
             if (!item.getRecipe().getResults().hasCommandsOrItems()) {
-                ItemStack result = event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getQueueItem().getRecipe().getSettings().getRecipeItem().getItemStack()
+                ItemStack result =
+                        event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getQueueItem()
+                                .getRecipe()
+                                .getSettings()
+                                .getRecipeItem()
+                                .getItemStack()
                                 : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
                 // If there is no space in the inventory, drop the items
                 Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
@@ -165,7 +170,8 @@ public class QueueService {
                         if (itemStack != null) {
                             Collection<ItemStack> remainings = player.getInventory().addItem(itemStack).values();
                             if (!remainings.isEmpty()) {
-                                remainings.forEach(_item -> player.getWorld().dropItemNaturally(player.getLocation(), _item));
+                                remainings.forEach(_item -> player.getWorld()
+                                        .dropItemNaturally(player.getLocation(), _item));
                             }
                         }
                     }

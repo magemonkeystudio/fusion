@@ -22,9 +22,9 @@ public class QueueItemAddedEvent extends FusionEvent {
      * Constructor for the QueueItemAddedEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that added the item to the queue
-     * @param queue The crafting queue
-     * @param queueItem The queue item
+     * @param player         The player that added the item to the queue
+     * @param queue          The crafting queue
+     * @param queueItem      The queue item
      */
     public QueueItemAddedEvent(String professionName, Player player, CraftingQueue queue, QueueItem queueItem) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);

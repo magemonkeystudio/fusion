@@ -16,25 +16,25 @@ public class QueueItemFinishedEvent extends FusionEvent {
     /**
      * The crafting queue
      */
-    private final CraftingQueue queue;
+    private final CraftingQueue    queue;
     /**
      * The queue item
      */
-    private final QueueItem     queueItem;
+    private final QueueItem        queueItem;
     /**
      * The result item
      */
     @Setter
-    private       List<RecipeItem>     resultItems;
+    private       List<RecipeItem> resultItems;
 
     /**
      * Constructor for the QueueItemFinishedEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that finished the item
-     * @param queue The crafting queue
-     * @param queueItem The queue item
-     * @param resultItems The result items
+     * @param player         The player that finished the item
+     * @param queue          The crafting queue
+     * @param queueItem      The queue item
+     * @param resultItems    The result items
      */
     public QueueItemFinishedEvent(String professionName,
                                   Player player,

@@ -23,9 +23,9 @@ public class ProfessionLevelUpEvent extends FusionEvent {
      * Constructor for the ProfessionLevelUpEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that leveled up
-     * @param previousLevel The previous level of the profession
-     * @param newLevel The new level of the profession
+     * @param player         The player that leveled up
+     * @param previousLevel  The previous level of the profession
+     * @param newLevel       The new level of the profession
      */
     public ProfessionLevelUpEvent(String professionName, Player player, int previousLevel, int newLevel) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
