@@ -121,7 +121,6 @@ public class ProfessionsCfg {
                     cfgs.put(ct.getName(), cfg);
                     files.put(ct.getName(), file);
                     injectProfessionLevelConfig(ct, file);
-
                 } catch (Exception e) {
                     e.printStackTrace();
                     Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());

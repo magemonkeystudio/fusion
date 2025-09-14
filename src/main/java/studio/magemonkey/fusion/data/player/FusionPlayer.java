@@ -3,6 +3,7 @@ package studio.magemonkey.fusion.data.player;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;

@@ -36,6 +36,7 @@ public class CategoryGui implements Listener {
     private final CraftingTable table;
 
     private       Inventory               inventory;
+    private final Map<String, RecipeGui> allCategoriesMap = new HashMap<>();
     private final Map<Integer, RecipeGui> categories = new HashMap<>();
     private       int                     page       = 0;
     private       int                     nextPage   = -1;
@@ -102,6 +103,8 @@ public class CategoryGui implements Listener {
                             CodexEngine.get().getVault() == null ? 0
                                     : CodexEngine.get().getVault().getBalance(player))
             });
+
+            allCategories.forEach((category) -> allCategoriesMap.putIfAbsent(category.getName(), new RecipeGui(player, table, category)));
 
             for (int k = (page * pageSize), e = Math.min(slots.length, allCategoryArray.length);
                  (k < allCategoryArray.length) && (i < e);
@@ -255,7 +258,7 @@ public class CategoryGui implements Listener {
     public void open(Player player, Category category) {
         if (category == null) open(player);
         else {
-            for (RecipeGui gui : categories.values()) {
+            for (RecipeGui gui : allCategoriesMap.values()) {
                 if (gui.getCategory().equals(category)) {
                     gui.open(player);
                     return;

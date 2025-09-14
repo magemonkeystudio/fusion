@@ -125,8 +125,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             return List.of();
 
         List<String>     entries     = new ArrayList<>();
-        List<Profession> professions = new ArrayList<>();
-        professions = new ArrayList<>(PlayerLoader.getPlayer((player).getUniqueId()).getProfessions());
+        List<Profession> professions = new ArrayList<>(PlayerLoader.getPlayer((player).getUniqueId()).getProfessions());
         if (args.length == 1) {
             if (sender.hasPermission("fusion.browse")
                     && "browse".startsWith(args[0])) entries.add("browse");
