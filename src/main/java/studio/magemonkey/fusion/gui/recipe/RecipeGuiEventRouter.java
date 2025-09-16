@@ -108,5 +108,6 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(p.getUniqueId());
         if (gui == null) return;
         gui.close(p, gui.getInventory());
+        ProfessionGuiRegistry.getLatestRecipeGui().remove(p.getUniqueId());
     }
 }
