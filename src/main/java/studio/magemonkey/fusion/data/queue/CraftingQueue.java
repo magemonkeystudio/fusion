@@ -51,10 +51,6 @@ public class CraftingQueue {
          * queue sequentially.  All items are saved with the same timestamp when
          * saved, so use the first item's timestamp to calculate the offline duration.
          */
-        if(!queue.isEmpty()) {
-            Fusion.getInstance().getLogger().warning("[Debug] Loaded " + queue.size() + " items for " + player.getName() + " in " + profession + " - " + category.getName() + ": ItemPaths:" + queue.stream().map(item -> item.getRecipe().getRecipePath()).toList());
-        }
-        
         if (Cfg.updateQueueOffline && !queue.isEmpty()) {
             long now = System.currentTimeMillis();
             // find the first unfinished item
