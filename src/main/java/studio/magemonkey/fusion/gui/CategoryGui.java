@@ -325,7 +325,7 @@ public class CategoryGui implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getInventory() != getInventory()) return;
+        if (event.getClickedInventory() != getInventory()) return;
         event.setCancelled(true);
         event.setResult(Event.Result.DENY);
 
