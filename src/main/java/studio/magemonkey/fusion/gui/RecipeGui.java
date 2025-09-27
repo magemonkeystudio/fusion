@@ -474,7 +474,7 @@ public class RecipeGui implements Listener {
                     }
                 }
                 if (requiresUpdate) {
-                    Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
+                    Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::updateQueuedSlots, 20L);
                 }
                 this.isLoaded = true;
             }
@@ -483,6 +483,57 @@ public class RecipeGui implements Listener {
 
     public void reloadRecipesTask() {
         Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 1L);
+    }
+
+    // Updates only the queued-slot icons/progress without rebuilding the whole GUI.
+    private void updateQueuedSlots() {
+        if (!player.isOnline()) return;
+        if (!Cfg.craftingQueue || queue == null || queuedSlots.isEmpty()) return;
+
+        // Run the actual inventory updates on the main server thread
+        Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> {
+            List<QueueItem> allQueuedItems = new ArrayList<>(queue.getQueue());
+            int queueSize = allQueuedItems.size();
+            int queuePageSize = queuedSlots.size();
+
+            Integer[] queuedIndices = queuedSlots.toArray(new Integer[0]);
+
+            // Reset all queued slots to the empty queue icon
+            for (int qIndex : queuedIndices) {
+                inventory.setItem(qIndex, ProfessionsCfg.getQueueSlot(table.getName()));
+            }
+
+            // Clear the internal mapping and repopulate for current page only
+            this.queue.getQueuedItems().clear();
+
+            if (!allQueuedItems.isEmpty() && queuePageSize > 0) {
+                int j = 0;
+                int qStart = queuePage * queuePageSize;
+                int qEnd = Math.min(qStart + queuePageSize, queueSize);
+                QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[0]);
+
+                for (int q = qStart; q < qEnd && j < queuedIndices.length; q++, j++) {
+                    QueueItem qi = allQueueItemsArray[q];
+                    int slot = queuedIndices[j];
+                    this.queue.getQueuedItems().put(slot, qi);
+                    qi.updateIcon();
+                    inventory.setItem(slot, qi.getIcon().clone());
+                }
+            }
+
+            // Decide whether we need another update next second (any unfinished item)
+            boolean requiresUpdate = false;
+            for (QueueItem qi : allQueuedItems) {
+                if (!qi.isDone()) {
+                    requiresUpdate = true;
+                    break;
+                }
+            }
+
+            if (requiresUpdate) {
+                Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::updateQueuedSlots, 20L);
+            }
+        });
     }
 
     private boolean validatePageCount() {
