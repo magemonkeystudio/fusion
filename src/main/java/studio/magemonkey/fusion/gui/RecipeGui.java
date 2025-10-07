@@ -864,7 +864,7 @@ public class RecipeGui implements Listener {
                     // Restart the crafting sequence if auto-crafting is enabled
                     if (PlayerLoader.getPlayer(player).isAutoCrafting() && !this.recipes.isEmpty()) {
                         reloadRecipesTask();
-                        boolean success = craft(slot, addToCursor); //Call this method again recursively
+                        boolean success = craft(slot, addToCursor); // Call this method again recursively
                         if (!success)
                             CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
                     }
@@ -1056,7 +1056,7 @@ public class RecipeGui implements Listener {
             return;
         }
         Inventory pInventory = p.getInventory();
-        if (inv.equals(this.inventory)) {
+        if (inv.equals(this.inventory) && !Cfg.craftingQueue) {
             for (int i = 0; i < this.slots.length; i++) {
                 if (this.slots[i].equals(Slot.BLOCKED_SLOT) ||
                         this.slots[i].equals(Slot.BASE_RESULT_SLOT) ||
@@ -1075,6 +1075,7 @@ public class RecipeGui implements Listener {
             cancel(true);
             inv.clear();
         }
+        ProfessionGuiRegistry.getLatestRecipeGui().remove(p.getUniqueId());
     }
 
     /*
