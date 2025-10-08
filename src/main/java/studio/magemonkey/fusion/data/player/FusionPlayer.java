@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
@@ -18,6 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -344,15 +346,21 @@ public class FusionPlayer {
     }
 
     public void save() {
-        SQLManager.players().setAutoCrafting(uuid, autoCrafting);
-        for (Profession profession : professions.values()) {
-            SQLManager.professions().setProfession(uuid, profession);
-        }
-        for (CraftingQueue queue : cachedQueues.values()) {
-            SQLManager.queues().saveCraftingQueue(queue);
-        }
-        SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
-        cachedQueues.clear();
-        cachedRecipeLimits.clear();
+        SQLManager.players().setLocked(uuid, true);
+
+        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
+            SQLManager.players().setAutoCrafting(uuid, autoCrafting);
+            for (Profession profession : professions.values()) {
+                SQLManager.professions().setProfession(uuid, profession);
+            }
+            for (CraftingQueue queue : cachedQueues.values()) {
+                SQLManager.queues().saveCraftingQueue(queue);
+            }
+            SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
+            cachedQueues.clear();
+            cachedRecipeLimits.clear();
+
+            SQLManager.players().setLocked(uuid, false);
+        });
     }
 }

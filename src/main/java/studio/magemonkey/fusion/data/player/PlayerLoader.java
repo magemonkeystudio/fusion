@@ -1,6 +1,7 @@
 package studio.magemonkey.fusion.data.player;
 
 import org.bukkit.entity.Player;
+import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -12,6 +13,7 @@ public class PlayerLoader {
 
     public static FusionPlayer getPlayer(UUID uuid) {
         if (!cachedPlayers.containsKey(uuid)) {
+            if(!SQLManager.players().isLocked(uuid)) return null;
             cachedPlayers.put(uuid, new FusionPlayer(uuid));
         }
         return cachedPlayers.get(uuid);
