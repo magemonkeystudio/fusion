@@ -86,9 +86,10 @@ public class FusionPlayersSQL {
         if (hasPlayer(uuid))
             return;
         try (PreparedStatement insert = SQLManager.connection()
-                .prepareStatement("INSERT INTO " + Table + "(UUID, AutoCrafting) VALUES(?,?)")) {
+                .prepareStatement("INSERT INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?)")) {
             insert.setString(1, uuid.toString());
             insert.setBoolean(2, false);
+            insert.setBoolean(3, false);
             insert.execute();
         } catch (SQLException e) {
             Fusion.getInstance()

@@ -360,6 +360,14 @@ public class FusionPlayer {
             cachedQueues.clear();
             cachedRecipeLimits.clear();
 
+            /*
+            In case of race conditions we wait a bit before unlocking the player. Not required but just to be safe.
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            */
             SQLManager.players().setLocked(uuid, false);
         });
     }
