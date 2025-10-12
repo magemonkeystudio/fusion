@@ -53,6 +53,7 @@ import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class RecipeGui implements Listener {
@@ -447,6 +448,9 @@ public class RecipeGui implements Listener {
                     new MessageData("category", category),
                     new MessageData("gui",      getName()),
                     new MessageData("player",   player.getName()),
+                    new MessageData("queue_done",   queue != null ? queue.getQueue().stream().filter(QueueItem::isDone).toList().size() : 0),
+                    new MessageData("queue_size",   queue != null ? queue.getQueue().size() : 0),
+                    new MessageData("queue_time",   queue != null ? queue.getVisualRemainingTotalTime() : 0),
                     new MessageData("bal",
                             CodexEngine.get().getVault() == null
                                     ? 0
@@ -679,6 +683,34 @@ public class RecipeGui implements Listener {
                     .sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
             return false;
         }
+
+        // Check queue limits
+        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(table.getName(), category);
+        int categoryLimit =
+                PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + "." + category.getName() + ".limit");
+        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + ".limit");
+        int limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+
+        if (categoryLimit > 0 && limits[0] >= categoryLimit) {
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullCategory",
+                    player,
+                    new MessageData("limit", categoryLimit),
+                    new MessageData("category", category.getName()),
+                    new MessageData("profession", table.getName()));
+            return false;
+        } else if (professionLimit > 0 && limits[1] >= professionLimit) {
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullProfession",
+                    player,
+                    new MessageData("limit", professionLimit),
+                    new MessageData("profession", table.getName()));
+            return false;
+        } else if (limit > 0 && limits[2] >= limit) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
+            return false;
+        }
+
         return true;
     }
 
