@@ -18,7 +18,7 @@ public class FusionRecipeLimitsSQL {
     public FusionRecipeLimitsSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "Id long,"
+                        + "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                         + "UUID varchar(36), "
                         + "RecipePath varchar(100),"
                         + "Amount numeric,"
@@ -31,21 +31,6 @@ public class FusionRecipeLimitsSQL {
                             "[SQL:FusionRecipeLimitsSQL:FusionRecipeLimitsSQL] Something went wrong with the sql-connection: "
                                     + e.getMessage());
         }
-    }
-
-    public long getNextId() {
-        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT Count(Id) FROM " + Table)) {
-            ResultSet result = select.executeQuery();
-            if (result.next()) {
-                return result.getLong(1);
-            }
-        } catch (SQLException e) {
-            Fusion.getInstance()
-                    .getLogger()
-                    .warning("[SQL:FusionRecipeLimitsSQL:getNextId] Something went wrong with the sql-connection: "
-                            + e.getMessage());
-        }
-        return 0;
     }
 
     public Map<String, PlayerRecipeLimit> getRecipeLimits(UUID uuid) {
@@ -129,12 +114,11 @@ public class FusionRecipeLimitsSQL {
             } else {
                 // Insert
                 try (PreparedStatement insert = SQLManager.connection().prepareStatement(
-                        "INSERT INTO " + Table + "(Id, UUID, RecipePath, Amount, Timestamp) VALUES(?,?,?,?,?)")) {
-                    insert.setLong(1, getNextId());
-                    insert.setString(2, uuid.toString());
-                    insert.setString(3, recipePath);
-                    insert.setInt(4, limit.getLimit());
-                    insert.setLong(5, limit.getCooldownTimestamp());
+                        "INSERT INTO " + Table + "(UUID, RecipePath, Amount, Timestamp) VALUES(?,?,?,?)")) {
+                    insert.setString(1, uuid.toString());
+                    insert.setString(2, recipePath);
+                    insert.setInt(3, limit.getLimit());
+                    insert.setLong(4, limit.getCooldownTimestamp());
                     insert.execute();
                 } catch (SQLException e) {
                     Fusion.getInstance().getLogger().warning(

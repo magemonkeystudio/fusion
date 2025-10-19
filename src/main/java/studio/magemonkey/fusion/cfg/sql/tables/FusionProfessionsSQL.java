@@ -18,7 +18,7 @@ public class FusionProfessionsSQL {
     public FusionProfessionsSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "Id numeric, "
+                        + "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, "
                         + "UUID varchar(36), "
                         + "Profession varchar(100),"
                         + "Experience numeric,"
@@ -34,21 +34,6 @@ public class FusionProfessionsSQL {
         }
     }
 
-    public long getNextId() {
-        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT COUNT(*) FROM " + Table)) {
-            ResultSet result = select.executeQuery();
-            if (result.next()) {
-                return result.getLong(1);
-            }
-        } catch (SQLException e) {
-            Fusion.getInstance()
-                    .getLogger()
-                    .warning("[SQL:FusionProfessionsSQL:getNextId] Something went wrong with the sql-connection: "
-                            + e.getMessage());
-        }
-        return 0;
-    }
-
     public void setProfession(UUID uuid, Profession profession) {
         if (hasProfession(uuid, profession.getName())) {
             updateProfession(profession);
@@ -60,13 +45,12 @@ public class FusionProfessionsSQL {
     public void addProfession(Profession profession) {
         try (PreparedStatement insert = SQLManager.connection()
                 .prepareStatement("INSERT INTO " + Table
-                        + "(Id, UUID, Profession, Experience, Mastered, Joined) VALUES(?,?,?,?,?,?)")) {
-            insert.setLong(1, getNextId());
-            insert.setString(2, profession.getUuid().toString());
-            insert.setString(3, profession.getName());
-            insert.setDouble(4, profession.getExp());
-            insert.setBoolean(5, profession.isMastered());
-            insert.setBoolean(6, profession.isJoined());
+                        + "(UUID, Profession, Experience, Mastered, Joined) VALUES(?,?,?,?,?)")) {
+            insert.setString(1, profession.getUuid().toString());
+            insert.setString(2, profession.getName());
+            insert.setDouble(3, profession.getExp());
+            insert.setBoolean(4, profession.isMastered());
+            insert.setBoolean(5, profession.isJoined());
             insert.execute();
         } catch (SQLException e) {
             Fusion.getInstance()
