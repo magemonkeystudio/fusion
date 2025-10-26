@@ -13,15 +13,15 @@ import java.util.Objects;
 /**
  * Helper to build a small MD5 fingerprint of an entire PlayerInventory.
  * We incorporate:
- *   - Material ordinal
- *   - amount
- *   - customModelData
- *   - displayName
- *   - lore lines
- *   - enchantments
- *   - unbreakable
- *   - durability if Damageable
- *
+ * - Material ordinal
+ * - amount
+ * - customModelData
+ * - displayName
+ * - lore lines
+ * - enchantments
+ * - unbreakable
+ * - durability if Damageable
+ * <p>
  * If MD5 is not available, we fall back to a simple int‐hash of slot hashCodes.
  */
 public class InventoryFingerprint {

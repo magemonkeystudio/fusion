@@ -31,7 +31,7 @@ public class ProfessionEditor extends Editor implements Listener {
     private PatternItemsEditor categoryPatternItemEditor;
     private PatternEditor      categoryPatternEditor;
     private CategoryEditor     categoryEditor;
-    private RecipeEditor recipeEditor;
+    private RecipeEditor       recipeEditor;
 
     public ProfessionEditor(Player player, String profession) {
         super(null, EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);

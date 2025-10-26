@@ -12,6 +12,7 @@ import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.Recipe;
@@ -68,7 +69,7 @@ public class CraftingQueue {
                         continue;
                     }
                     int remaining = item.getRecipe().getCraftingTime() - item.getSavedSeconds();
-                    int apply = Math.min(offlineSeconds, remaining);
+                    int apply     = Math.min(offlineSeconds, remaining);
                     item.progressOffline(apply);
                     offlineSeconds -= apply;
                 }

@@ -29,6 +29,10 @@ public class CraftingRequirementsCfg {
         return ChatUT.hexString(config.getString(path + ".requirementLine", "&7Crafting Requirements"));
     }
 
+    public static String getCraftingConditionLine(String path) {
+        return ChatUT.hexString(config.getString(path + ".conditionLine", "&7Crafting Conditions"));
+    }
+
     public static String getBossBarTitle(ItemStack item) {
         String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName()
                 : ChatUT.serialize(Component.translatable(item.getTranslationKey()));

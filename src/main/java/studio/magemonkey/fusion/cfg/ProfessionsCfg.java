@@ -1,13 +1,16 @@
 package studio.magemonkey.fusion.cfg;
 
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
+import studio.magemonkey.codex.legacy.item.SkullBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.migrations.ProfessionMigration;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
@@ -15,6 +18,7 @@ import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.hook.NexoHook;
+import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;
@@ -121,7 +125,6 @@ public class ProfessionsCfg {
                     cfgs.put(ct.getName(), cfg);
                     files.put(ct.getName(), file);
                     injectProfessionLevelConfig(ct, file);
-
                 } catch (Exception e) {
                     e.printStackTrace();
                     Fusion.getInstance().getLogger().warning("Can't load crafting table: " + e.getMessage());
@@ -465,10 +468,17 @@ public class ProfessionsCfg {
                     .warning("Profession '" + key + "' has an unknown material: " + materialString);
             return new ItemStack(Material.AIR);
         }
+        if(material != result.getType()) result.setType(material);
+        ItemMeta meta = result.getItemMeta();
+        if(meta != null) {
+            List<String> lore = cfg.getStringList(path + ".lore");
+            lore.replaceAll(s -> ChatUT.hexString(s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime()))));
+            meta.setLore(lore);
+            result.setItemMeta(meta);
+        }
 
-        List<String> lore = cfg.getStringList(path + ".lore");
-        lore.replaceAll(s -> s.replace("%time%", Utils.getFormattedTime(item.getVisualRemainingItemTime())));
-        return ItemBuilder.newItem(result).material(material).lore(lore).build();
+
+        return result;
     }
 
     public static void closeAll() {

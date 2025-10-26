@@ -93,7 +93,7 @@ public abstract class Slot {
 
     /**
      * -- GETTER --
-     *  Returns base slot type.
+     * Returns base slot type.
      *
      */
     protected final SlotType slotType;

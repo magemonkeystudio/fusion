@@ -22,7 +22,7 @@ public class FusionQueuesSQL {
     public FusionQueuesSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "Id long,"
+                        + "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                         + "UUID varchar(36), "
                         + "RecipePath varchar(100),"
                         + "CraftingTime numeric,"
@@ -37,33 +37,17 @@ public class FusionQueuesSQL {
         }
     }
 
-    public long getNextId() {
-        try (PreparedStatement select = SQLManager.connection().prepareStatement("SELECT Count(Id) FROM " + Table)) {
-            ResultSet result = select.executeQuery();
-            if (result.next()) {
-                return result.getLong(1);
-            }
-        } catch (SQLException e) {
-            Fusion.getInstance()
-                    .getLogger()
-                    .warning("[SQL:FusionQueuesSQL:getNextId] Something went wrong with the sql-connection: "
-                            + e.getMessage());
-        }
-        return 0;
-    }
-
     public boolean setQueueItem(UUID uuid, QueueItem item) {
         if (item == null) return false;
         if (item.getId() == -1) {
             try (PreparedStatement insert = SQLManager.connection()
                     .prepareStatement("INSERT INTO " + Table
-                            + "(Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?,?,?,?,?,?)")) {
-                insert.setLong(1, getNextId());
-                insert.setString(2, uuid.toString());
-                insert.setString(3, item.getRecipePath());
-                insert.setLong(4, item.getTimestamp());
-                insert.setLong(5, item.getRecipe().getCraftingTime());
-                insert.setLong(6, item.getSavedSeconds());
+                            + "(UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?,?,?,?,?)")) {
+                insert.setString(1, uuid.toString());
+                insert.setString(2, item.getRecipePath());
+                insert.setLong(3, item.getTimestamp());
+                insert.setLong(4, item.getRecipe().getCraftingTime());
+                insert.setLong(5, item.getSavedSeconds());
                 insert.execute();
                 return true;
             } catch (SQLException e) {
@@ -114,7 +98,7 @@ public class FusionQueuesSQL {
             try (ResultSet result = select.executeQuery()) {
                 while (result.next()) {
                     String recipeStr = result.getString("RecipePath").split("\\.")[2];
-                    Recipe recipe = category.getRecipe(recipeStr);
+                    Recipe recipe    = category.getRecipe(recipeStr);
 
                     if (recipe == null) {
                         Fusion.getInstance()

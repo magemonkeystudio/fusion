@@ -228,7 +228,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
+            EditorCriteria   criteria         = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
                 case Profession_Edit_Name:
                 case Pattern_Edit_Name:
@@ -329,7 +329,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case RecipeIcon_Edit_Name:
                     if (args.length == 1) {
                         entries.add("<newName>");
-                        entries.add(professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeIconEditor().getRecipe().getSettings().getName());
+                        entries.add(professionEditor.getRecipeEditor()
+                                .getRecipeItemEditor()
+                                .getRecipeIconEditor()
+                                .getRecipe()
+                                .getSettings()
+                                .getName());
                     }
                     break;
                 case RecipeIcon_Edit_Color:
@@ -342,8 +347,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     break;
             }
         } else if (editor instanceof BrowseEditor) {
-            BrowseEditor browseEditor = (BrowseEditor) editor;
-            EditorCriteria criteria = editorCriteria.get(player.getUniqueId());
+            BrowseEditor   browseEditor = (BrowseEditor) editor;
+            EditorCriteria criteria     = editorCriteria.get(player.getUniqueId());
             switch (criteria) {
                 case Browse_Edit_Name:
                     if (args.length == 1) {
@@ -544,8 +549,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             professionNameBuilder.append(arg).append(" ");
         }
         String professionName = professionNameBuilder.toString().trim();
-        String oldName = professionEditor.getTable().getName();
-        Player player = professionEditor.getPlayer();
+        String oldName        = professionEditor.getTable().getName();
+        Player player         = professionEditor.getPlayer();
         professionEditor.getTable().setInventoryName(professionName);
         CodexEngine.get()
                 .getMessageUtil()
@@ -557,9 +562,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     }
 
     private void updateProfessionIcon(ProfessionEditor professionEditor, String[] args) {
-        String icon = args[0];
+        String icon    = args[0];
         String oldIcon = professionEditor.getTable().getIconItem().getID();
-        Player player = professionEditor.getPlayer();
+        Player player  = professionEditor.getPlayer();
         if (!isValidItem(icon)) {
             CodexEngine.get().getMessageUtil().sendMessage("editor.invalidItem", player, new MessageData("item", icon));
             return;
@@ -592,7 +597,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
         String categoryName = args[0];
         String categoryIcon = args[1];
-        Player player = professionEditor.getPlayer();
+        Player player       = professionEditor.getPlayer();
         if (!isValidItem(categoryIcon)) {
             CodexEngine.get()
                     .getMessageUtil()
@@ -686,7 +691,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     private void updatePatternItem(Editor editor, String[] args) {
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            Player player = professionEditor.getPlayer();
+            Player           player           = professionEditor.getPlayer();
             if (args.length < 2) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -697,7 +702,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 Material material = Material.valueOf(args[0].toUpperCase());
-                int amount = Integer.parseInt(args[1]);
+                int      amount   = Integer.parseInt(args[1]);
 
                 professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().material(material);
                 professionEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().amount(amount);
@@ -718,7 +723,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
-            Player player = browseEditor.getPlayer();
+            Player       player       = browseEditor.getPlayer();
             if (args.length < 2) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -729,7 +734,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 Material material = Material.valueOf(args[0].toUpperCase());
-                int amount = Integer.parseInt(args[1]);
+                int      amount   = Integer.parseInt(args[1]);
 
                 browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().material(material);
                 browseEditor.getPatternItemsEditor().getPatternItemEditor().getBuilder().amount(amount);
@@ -754,7 +759,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     private void addPatternItemLore(Editor editor, String[] args) {
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            Player player = professionEditor.getPlayer();
+            Player           player           = professionEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -778,7 +783,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new MessageData("lore", ChatUT.hexString(builder.toString())));
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
-            Player player = browseEditor.getPlayer();
+            Player       player       = browseEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -803,7 +808,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     private void addPatternItemCommand(Editor editor, String[] args) {
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            Player player = professionEditor.getPlayer();
+            Player           player           = professionEditor.getPlayer();
             if (args.length < 3) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -813,7 +818,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             StringBuilder commandBuilder = new StringBuilder();
             try {
                 CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
-                int delay = Integer.parseInt(args[1]);
+                int         delay       = Integer.parseInt(args[1]);
                 commandBuilder = new StringBuilder();
                 for (int i = 2; i < args.length; i++) {
                     commandBuilder.append(args[i]);
@@ -838,7 +843,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
-            Player player = browseEditor.getPlayer();
+            Player       player       = browseEditor.getPlayer();
             if (args.length < 3) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -848,7 +853,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             StringBuilder commandBuilder = new StringBuilder();
             try {
                 CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
-                int delay = Integer.parseInt(args[1]);
+                int         delay       = Integer.parseInt(args[1]);
                 commandBuilder = new StringBuilder();
                 for (int i = 2; i < args.length; i++) {
                     commandBuilder.append(args[i]);
@@ -877,7 +882,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     private void addPatternEnchants(Editor editor, String[] args) {
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            Player player = professionEditor.getPlayer();
+            Player           player           = professionEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -910,7 +915,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             professionEditor.getPatternItemsEditor().getPatternItemEditor().reload(true);
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
-            Player player = browseEditor.getPlayer();
+            Player       player       = browseEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -947,7 +952,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
     public void addPatternFlags(Editor editor, String[] args) {
         if (editor instanceof ProfessionEditor) {
             ProfessionEditor professionEditor = (ProfessionEditor) editor;
-            Player player = professionEditor.getPlayer();
+            Player           player           = professionEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -975,7 +980,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             }
         } else if (editor instanceof BrowseEditor) {
             BrowseEditor browseEditor = (BrowseEditor) editor;
-            Player player = browseEditor.getPlayer();
+            Player       player       = browseEditor.getPlayer();
             if (args.length < 1) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1016,8 +1021,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
 
         String recipeName = args[0];
-        Player player = professionEditor.getPlayer();
-        String oldName = professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeName();
+        Player player     = professionEditor.getPlayer();
+        String oldName    = professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipeName();
         for (Recipe recipe : professionEditor.getTable().getRecipes().values()) {
             if (recipe.getName().equalsIgnoreCase(recipeName)) {
                 CodexEngine.get()
@@ -1047,7 +1052,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         StringBuilder commandBuilder = new StringBuilder();
         try {
             CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
-            int delay = Integer.parseInt(args[1]);
+            int         delay       = Integer.parseInt(args[1]);
             commandBuilder = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
                 commandBuilder.append(args[i]);
@@ -1085,7 +1090,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         try {
             String itemName = args[0];
-            int amount = Integer.parseInt(args[1]);
+            int    amount   = Integer.parseInt(args[1]);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1119,8 +1124,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         try {
             String recipeName = args[0];
-            String itemName = args[1];
-            int amount = Integer.parseInt(args[2]);
+            String itemName   = args[1];
+            int    amount     = Integer.parseInt(args[2]);
             for (Recipe recipe : professionEditor.getTable().getRecipes().values()) {
                 if (recipe.getName().equalsIgnoreCase(recipeName)) {
                     CodexEngine.get()
@@ -1188,7 +1193,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         try {
             String itemName = args[0];
-            int amount = Integer.parseInt(args[1]);
+            int    amount   = Integer.parseInt(args[1]);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1316,9 +1321,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
             return;
         }
-        String conditionKey = args[0];
+        String conditionKey   = args[0];
         String conditionValue = args[1];
-        int level = Integer.parseInt(args[2]);
+        int    level          = Integer.parseInt(args[2]);
 
         switch (conditionKey) {
             case "professions":
@@ -1509,9 +1514,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         for (String arg : args) {
             builder.append(arg).append(" ");
         }
-        String name = builder.toString().trim();
+        String name    = builder.toString().trim();
         String oldName = browseEditor.getName();
-        Player player = browseEditor.getPlayer();
+        Player player  = browseEditor.getPlayer();
         browseEditor.setName(name);
         CodexEngine.get()
                 .getMessageUtil()
@@ -1524,7 +1529,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
     private void addNewProfession(BrowseEditor browseEditor, String[] args) {
         String professionName = args[0];
-        Player player = browseEditor.getPlayer();
+        Player player         = browseEditor.getPlayer();
         if (!ProfessionsCfg.getMap().containsKey(professionName)) {
             CodexEngine.get()
                     .getMessageUtil()
@@ -1562,7 +1567,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         try {
             String itemName = args[0];
-            int amount = Integer.parseInt(args[1]);
+            int    amount   = Integer.parseInt(args[1]);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1570,7 +1575,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            int i = 0;
+            int     i     = 0;
             boolean found = false;
             for (RecipeItem ingredient : browseEditor.getBrowseProfessionsEditor()
                     .getBrowseProfessionEditor()
@@ -1622,9 +1627,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new MessageData("syntax", "<conditionKey> <conditionValue> <level>"));
             return;
         }
-        String conditionKey = args[0];
+        String conditionKey   = args[0];
         String conditionValue = args[1];
-        int level = Integer.parseInt(args[2]);
+        int    level          = Integer.parseInt(args[2]);
 
         switch (conditionKey) {
             case "professions":
@@ -1812,7 +1817,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
 
         String iconName = args[0];
-        Player player = professionEditor.getPlayer();
+        Player player   = professionEditor.getPlayer();
         professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().setName(iconName);
         CodexEngine.get()
                 .getMessageUtil()
@@ -1836,7 +1841,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         for (String arg : args) {
             loreBuilder.append(arg).append(" ");
         }
-        String lore = loreBuilder.toString().trim();
+        String lore   = loreBuilder.toString().trim();
         Player player = professionEditor.getPlayer();
         professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().getLore().add(lore);
         CodexEngine.get()
@@ -1897,8 +1902,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
         Player player = professionEditor.getPlayer();
         try {
-            String[] data = args[0].split(",");
-            Color color = Color.fromRGB(Integer.parseInt(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]));
+            String[] data  = args[0].split(",");
+            Color    color =
+                    Color.fromRGB(Integer.parseInt(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]));
             professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getSettings().setColor(args[0]);
             CodexEngine.get()
                     .getMessageUtil()
@@ -1924,7 +1930,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         StringBuilder commandBuilder = new StringBuilder();
         try {
             CommandType commandType = CommandType.valueOf(args[0].toUpperCase());
-            int delay = Integer.parseInt(args[1]);
+            int         delay       = Integer.parseInt(args[1]);
             commandBuilder = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
                 commandBuilder.append(args[i]);
@@ -1962,7 +1968,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         }
         try {
             Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0].toLowerCase()));
-            int level = Integer.parseInt(args[1]);
+            int         level       = Integer.parseInt(args[1]);
             if (enchantment == null) {
                 CodexEngine.get()
                         .getMessageUtil()

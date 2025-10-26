@@ -47,12 +47,12 @@ import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
 import studio.magemonkey.fusion.gui.recipe.InventoryFingerprint;
 import studio.magemonkey.fusion.gui.recipe.RecipeCacheKey;
 import studio.magemonkey.fusion.gui.slot.Slot;
+import studio.magemonkey.fusion.hook.VaultHook;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class RecipeGui implements Listener {
@@ -264,9 +264,7 @@ public class RecipeGui implements Listener {
             //
             byte[] newHash   = InventoryFingerprint.fingerprint(player);
             int newLevel     = table.getLevelFunction().getLevel(player);
-            double newMoney  = (CodexEngine.get().getVault() == null)
-                    ? 0.0
-                    : CodexEngine.get().getVault().getBalance(player);
+            double newMoney  = VaultHook.getBalance(player);
 
             boolean invChanged   = !Arrays.equals(newHash, lastInventoryHash);
             boolean levelChanged = (newLevel != lastSeenLevel);
@@ -686,21 +684,18 @@ public class RecipeGui implements Listener {
         //
         for (ItemStack required : requiredItems) {
             int need = required.getAmount();
-            ItemStack neededTemplate = required.clone(); // same material+meta
+            IngredientFingerprint neededFingerprint = IngredientFingerprint.of(required);
 
-            // Iterate through every inventory slot to match via isSimilar()
             for (int slotIndex = 0; slotIndex < inv.getSize() && need > 0; slotIndex++) {
                 ItemStack slotStack = inv.getItem(slotIndex);
                 if (slotStack == null || slotStack.getType() == Material.AIR) continue;
 
-                // Use CalculatedRecipe.isSimilar() to match custom NBT/lore
-                if (!CalculatedRecipe.isSimilar(neededTemplate, slotStack)) {
-                    continue;
-                }
+                IngredientFingerprint slotFingerprint = IngredientFingerprint.of(slotStack);
+                if (!neededFingerprint.equals(slotFingerprint)) continue;
 
                 int available = slotStack.getAmount();
                 int take = Math.min(available, need);
-                // Subtract “take” from that slot
+
                 slotStack.setAmount(available - take);
                 if (slotStack.getAmount() <= 0) {
                     inv.setItem(slotIndex, null);
@@ -708,8 +703,7 @@ public class RecipeGui implements Listener {
                     inv.setItem(slotIndex, slotStack);
                 }
 
-                // Track exactly what we removed
-                ItemStack actuallyTaken = neededTemplate.clone();
+                ItemStack actuallyTaken = required.clone();
                 actuallyTaken.setAmount(take);
                 removedSoFar.add(actuallyTaken);
 

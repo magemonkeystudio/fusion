@@ -37,8 +37,8 @@ public class CommandMechanics {
             return;
         }
         String[] professionArgs = args[1].split(":");
-        String   profession     = professionArgs[0];
-        Category category       = null;
+        String profession = professionArgs[0];
+        Category category = null;
 
         ProfessionGuiRegistry eq = ProfessionsCfg.getGuiMap().get(profession);
 
@@ -111,8 +111,8 @@ public class CommandMechanics {
 
     public static void masterProfession(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            String        guiName = args[1];
-            CraftingTable table   = ProfessionsCfg.getTable(guiName);
+            String guiName = args[1];
+            CraftingTable table = ProfessionsCfg.getTable(guiName);
             if (table == null) {
                 CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                         sender,
@@ -175,8 +175,7 @@ public class CommandMechanics {
                     new MessageData("sender", sender),
                     new MessageData("craftingTable", table));
 
-            Bukkit.getScheduler().runTaskLater(Fusion.getInstance(),
-                    () -> confirmation.remove(player.getUniqueId().toString()), 15 * 20L);
+            Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> confirmation.remove(player.getUniqueId().toString()), 15 * 20L);
 
         } else {
             CodexEngine.get()
@@ -357,7 +356,7 @@ public class CommandMechanics {
         }
 
         try {
-            long exp       = Long.parseLong(args[4]);
+            long exp = Long.parseLong(args[4]);
             long expBefore = FusionAPI.getPlayerManager().getPlayer(player).getExperience(profession);
             switch (args[1].toLowerCase()) {
                 case "add" -> FusionAPI.getEventServices()
@@ -406,7 +405,7 @@ public class CommandMechanics {
         }
         try {
             int levelBefore = FusionAPI.getPlayerManager().getPlayer(player).getLevel(profession);
-            int levelAfter  = Integer.parseInt(args[4]);
+            int levelAfter = Integer.parseInt(args[4]);
             if (levelAfter <= 0)
                 levelBefore = 1;
             long expBefore = (long) ProfessionsCfg.getTable(profession)
@@ -550,8 +549,8 @@ public class CommandMechanics {
             return;
         }
 
-        String        professionName = args[2];
-        CraftingTable table          = ProfessionsCfg.getTable(professionName);
+        String professionName = args[2];
+        CraftingTable table = ProfessionsCfg.getTable(professionName);
         if (table == null) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                     sender,
@@ -641,8 +640,8 @@ public class CommandMechanics {
             return;
         }
 
-        String        professionName = args[2];
-        CraftingTable table          = ProfessionsCfg.getTable(professionName);
+        String professionName = args[2];
+        CraftingTable table = ProfessionsCfg.getTable(professionName);
         if (table == null) {
             CodexEngine.get().getMessageUtil().sendMessage("fusion.notACrafting",
                     sender,

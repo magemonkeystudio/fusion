@@ -16,8 +16,8 @@ public class ProfessionMasteryEvent extends FusionEvent {
      * Constructor for the ProfessionMasteryEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that has mastered the profession
-     * @param hasMastered Whether the player has mastered the profession
+     * @param player         The player that has mastered the profession
+     * @param hasMastered    Whether the player has mastered the profession
      */
     public ProfessionMasteryEvent(String professionName, Player player, boolean hasMastered) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);

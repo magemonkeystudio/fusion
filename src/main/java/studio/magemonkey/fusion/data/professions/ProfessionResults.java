@@ -20,11 +20,11 @@ public class ProfessionResults implements ConfigurationSerializable {
     private final String profession;
 
     // Rewards
-    private long professionExp;
-    private int vanillaExp;
-    private List<RecipeItem> items = new LinkedList<>();
-    private List<String> itemNames = new LinkedList<>();
-    private List<DelayedCommand> commands = new LinkedList<>();
+    private long                 professionExp;
+    private int                  vanillaExp;
+    private List<RecipeItem>     items     = new LinkedList<>();
+    private List<String>         itemNames = new LinkedList<>();
+    private List<DelayedCommand> commands  = new LinkedList<>();
 
     public ProfessionResults(String profession,
                              long professionExp,
@@ -46,8 +46,14 @@ public class ProfessionResults implements ConfigurationSerializable {
         this.profession = profession;
         this.professionExp = config.getLong("rewards.professionExp");
         this.vanillaExp = config.getInt("rewards.vanillaExp");
-        this.commands = config.getList("rewards.commands", new LinkedList<>()).stream().map(entry -> new DelayedCommand()).collect(Collectors.toList());
-        this.itemNames = config.getList("rewards.items", new LinkedList<>()).stream().map(Object::toString).collect(Collectors.toList());
+        this.commands = config.getList("rewards.commands", new LinkedList<>())
+                .stream()
+                .map(entry -> new DelayedCommand())
+                .collect(Collectors.toList());
+        this.itemNames = config.getList("rewards.items", new LinkedList<>())
+                .stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
         for (String itemName : itemNames) {
             this.items.add(RecipeItem.fromConfig(itemName));
         }
@@ -72,7 +78,8 @@ public class ProfessionResults implements ConfigurationSerializable {
                 this.vanillaExp = 0;
             }
 
-            List<Map<String, Object>> commands = (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
+            List<Map<String, Object>> commands =
+                    (List<Map<String, Object>>) resultsSection.getOrDefault("commands", new ArrayList<>());
             if (commands != null) {
                 for (Map<String, Object> command : commands) {
                     this.commands.add(new DelayedCommand(command));
@@ -94,7 +101,8 @@ public class ProfessionResults implements ConfigurationSerializable {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("professionExp", this.professionExp);
         resultMap.put("vanillaExp", this.vanillaExp);
-        resultMap.put("commands", new ArrayList<>(this.commands.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
+        resultMap.put("commands",
+                new ArrayList<>(this.commands.stream().map(DelayedCommand::serialize).collect(Collectors.toList())));
         resultMap.put("items", new ArrayList<>(this.itemNames));
         return SerializationBuilder.start(4).append("results", resultMap).build();
     }
@@ -113,6 +121,6 @@ public class ProfessionResults implements ConfigurationSerializable {
     }
 
     public boolean hasCommandsOrItems() {
-        return professionExp > 0 ||  vanillaExp > 0 || !commands.isEmpty() || !itemNames.isEmpty();
+        return professionExp > 0 || vanillaExp > 0 || !commands.isEmpty() || !itemNames.isEmpty();
     }
 }

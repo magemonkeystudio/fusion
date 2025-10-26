@@ -29,7 +29,7 @@ public class RecipeGuiEventRouter implements Listener {
      * We fetch that player’s FusionPlayer via PlayerLoader.getPlayer(Player).
      */
     private RecipeGui findGuiFor(Player player, Inventory inv) {
-        if(!ProfessionGuiRegistry.getLatestRecipeGui().containsKey(player.getUniqueId()))
+        if (!ProfessionGuiRegistry.getLatestRecipeGui().containsKey(player.getUniqueId()))
             return null;
         RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(player.getUniqueId());
         if (gui.getInventory().equals(inv)) {
@@ -80,7 +80,7 @@ public class RecipeGuiEventRouter implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDrop(PlayerDropItemEvent event) {
-        Player p = event.getPlayer();
+        Player    p   = event.getPlayer();
         RecipeGui gui = findGuiFor(p, p.getOpenInventory().getTopInventory());
         if (gui == null) return;
 
@@ -100,13 +100,14 @@ public class RecipeGuiEventRouter implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        Player p = event.getPlayer();
+        Player       p  = event.getPlayer();
         FusionPlayer fp = PlayerLoader.getPlayer(p);
         if (fp == null) return;
 
         // On quit, close and remove *all* open RecipeGuis for that player
         RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(p.getUniqueId());
-        if(gui == null) return;
+        if (gui == null) return;
         gui.close(p, gui.getInventory());
+        ProfessionGuiRegistry.getLatestRecipeGui().remove(p.getUniqueId());
     }
 }

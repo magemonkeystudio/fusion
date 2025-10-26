@@ -37,8 +37,8 @@ public class FusionEvent extends Event implements Cancellable {
      * Constructor for the FusionEvent
      *
      * @param professionName The name of the profession
-     * @param craftingTable The crafting table
-     * @param player The player
+     * @param craftingTable  The crafting table
+     * @param player         The player
      */
     public FusionEvent(String professionName, CraftingTable craftingTable, Player player) {
         this.professionName = professionName;

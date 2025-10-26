@@ -219,6 +219,10 @@ public class CalculatedRecipe {
             if (masteryLine != null) lore.append(masteryLine).append('\n');
             if (limitLine != null) lore.append(limitLine).append('\n');
             if (!conditionLines.isEmpty()) {
+                String conditionLine = CraftingRequirementsCfg.getCraftingConditionLine("recipes");
+                if (!conditionLine.isEmpty()) {
+                    lore.append(conditionLine).append('\n');
+                }
                 for (Map.Entry<Boolean, String> e : conditionLines) {
                     lore.append('\n').append(e.getValue());
                 }
@@ -327,13 +331,14 @@ public class CalculatedRecipe {
             }
         }
 
-        // Check for flags
-        if (!im1.getItemFlags().isEmpty()) {
+        // TODO make sure this works with Divinity's specific update logic. Until then, skip it.
+        // Divinity Logic -> https://github.com/magemonkeystudio/divinity/blob/dev/src/main/java/studio/magemonkey/divinity/manager/listener/object/ItemUpdaterListener.java#L95
+        /*if (!im1.getItemFlags().isEmpty()) {
             if (im1.getItemFlags().size() != im2.getItemFlags().size()) isValid = false;
             for (ItemFlag flag : im1.getItemFlags()) {
                 if (!im2.getItemFlags().contains(flag)) isValid = false;
             }
-        }
+        }*/
 
         // Check for custom model data
         if (im1.hasCustomModelData() && im2.hasCustomModelData()) {

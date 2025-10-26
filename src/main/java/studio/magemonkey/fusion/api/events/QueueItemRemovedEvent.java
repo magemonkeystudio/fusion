@@ -39,12 +39,12 @@ public class QueueItemRemovedEvent extends FusionEvent {
      * Constructor for the QueueItemRemovedEvent
      *
      * @param professionName The name of the profession
-     * @param player The player that removed the item from the queue
-     * @param queue The crafting queue
-     * @param queueItem The queue item
-     * @param finished Whether the item was finished
-     * @param refunded Whether the item was refunded
-     * @param refundedItems The refunded items in case `refunded` is `true`
+     * @param player         The player that removed the item from the queue
+     * @param queue          The crafting queue
+     * @param queueItem      The queue item
+     * @param finished       Whether the item was finished
+     * @param refunded       Whether the item was refunded
+     * @param refundedItems  The refunded items in case `refunded` is `true`
      */
     public QueueItemRemovedEvent(String professionName,
                                  Player player,

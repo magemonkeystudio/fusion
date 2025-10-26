@@ -8,24 +8,24 @@ import java.util.*;
 
 /**
  * Immutable fingerprint for an ItemStack that matches CalculatedRecipe.isSimilar(...) logic.
- *
+ * <p>
  * We compare:
- *   - Material
- *   - customModelData (if present)
- *   - displayName (if present)
- *   - lore lines (if present)
- *   - all enchantments (if present)
- *   - unbreakable flag
- *   - durability (if Damageable)
+ * - Material
+ * - customModelData (if present)
+ * - displayName (if present)
+ * - lore lines (if present)
+ * - all enchantments (if present)
+ * - unbreakable flag
+ * - durability (if Damageable)
  */
 public class IngredientFingerprint {
-    private final Material type;
-    private final int customModelData;
-    private final String displayName;
-    private final List<String> lore;
+    private final Material                                          type;
+    private final int                                               customModelData;
+    private final String                                            displayName;
+    private final List<String>                                      lore;
     private final Map<org.bukkit.enchantments.Enchantment, Integer> enchantments;
-    private final boolean unbreakable;
-    private final int durability;
+    private final boolean                                           unbreakable;
+    private final int                                               durability;
 
     public IngredientFingerprint(Material type,
                                  int customModelData,
@@ -43,17 +43,19 @@ public class IngredientFingerprint {
         this.durability = durability;
     }
 
-    /** Build an IngredientFingerprint by examining a live ItemStack. */
+    /**
+     * Build an IngredientFingerprint by examining a live ItemStack.
+     */
     public static IngredientFingerprint of(ItemStack is) {
-        Material mat = is.getType();
+        Material mat  = is.getType();
         ItemMeta meta = is.getItemMeta();
 
-        int cmd = 0;
-        String name = "";
-        List<String> loreList = Collections.emptyList();
+        int                                               cmd         = 0;
+        String                                            name        = "";
+        List<String>                                      loreList    = Collections.emptyList();
         Map<org.bukkit.enchantments.Enchantment, Integer> enchantsMap = Collections.emptyMap();
-        boolean unbreak = false;
-        int dmg = 0;
+        boolean                                           unbreak     = false;
+        int                                               dmg         = 0;
 
         if (meta != null) {
             if (meta.hasCustomModelData()) {
@@ -65,7 +67,7 @@ public class IngredientFingerprint {
             if (meta.hasLore()) {
                 loreList = new ArrayList<>(Objects.requireNonNull(meta.getLore()));
             }
-            Map<org.bukkit.enchantments.Enchantment,Integer> raw = meta.getEnchants();
+            Map<org.bukkit.enchantments.Enchantment, Integer> raw = meta.getEnchants();
             if (!raw.isEmpty()) {
                 enchantsMap = new HashMap<>(raw);
             }

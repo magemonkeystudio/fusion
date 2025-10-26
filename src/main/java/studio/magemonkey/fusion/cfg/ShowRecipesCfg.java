@@ -96,10 +96,10 @@ public class ShowRecipesCfg {
     }
 
     public static ItemStack getRecipeIcon(Recipe recipe, RecipeItem ingredient) {
-        String       itemName = Utils.getItemName(recipe.getSettings().getRecipeItem().getItemStack());
-        String       name     = ChatUT.hexString(config.getString("recipeItem.name", "&7$<name>")
+        String itemName = Utils.getItemName(recipe.getSettings().getRecipeItem().getItemStack());
+        String name = ChatUT.hexString(config.getString("recipeItem.name", "&7$<name>")
                 .replace(MessageUtil.getReplacement("name"), itemName));
-        List<String> lore     = config.getStringList("recipeItem.lore");
+        List<String> lore = config.getStringList("recipeItem.lore");
         lore.replaceAll(s -> ChatUT.hexString(s.replace(MessageUtil.getReplacement("ingredient"),
                         Utils.getItemName(ingredient.getItemStack()))
                 .replace(MessageUtil.getReplacement("profession"), recipe.getTable().getInventoryName())

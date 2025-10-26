@@ -125,14 +125,14 @@ public class ProfessionMigration {
         migrations.put("1.3", (config) -> {
             List<Map<?, ?>> recipes = config.getMapList("recipes");
             for (Map<?, ?> recipe : recipes) {
-                Map<String, Object> results = (Map<String, Object>) recipe.get("results");
+                Map<String, Object> results  = (Map<String, Object>) recipe.get("results");
                 Map<String, Object> settings = (Map<String, Object>) recipe.get("settings");
-                if(results == null) continue;
-                if(settings == null)
+                if (results == null) continue;
+                if (settings == null)
                     settings = new LinkedHashMap<>();
 
                 String namespace = (String) results.get("item");
-                if(namespace == null) continue;
+                if (namespace == null) continue;
 
                 Map<String, Object> iconSettings = new LinkedHashMap<>();
                 iconSettings.put("item", namespace);

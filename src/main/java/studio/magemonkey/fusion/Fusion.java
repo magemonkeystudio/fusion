@@ -127,8 +127,8 @@ public class Fusion extends RisePlugin implements Listener {
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
-        getServer().getPluginManager().registerEvents(this, this);
-        Bukkit.getPluginManager().registerEvents(new RecipeGuiEventRouter(), this);
+        registerListener(this);
+        registerListener(new RecipeGuiEventRouter());
         runQueueTask();
 
         if (hookManager.isHooked(HookType.PlaceholderAPI)) {
@@ -190,6 +190,9 @@ public class Fusion extends RisePlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         PlayerLoader.loadPlayer(event.getPlayer());
+        if(!Cfg.autoJoinProfessions.isEmpty()) {
+            Cfg.autoJoinProfessions(event.getPlayer());
+        }
         if (Cfg.craftingQueue) {
             notifyForQueue(event.getPlayer());
         }

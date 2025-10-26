@@ -3,6 +3,7 @@ package studio.magemonkey.fusion.data.player;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
@@ -349,7 +350,6 @@ public class FusionPlayer {
         }
         for (CraftingQueue queue : cachedQueues.values()) {
             SQLManager.queues().saveCraftingQueue(queue);
-            Bukkit.getConsoleSender().sendMessage("Saved queue for profession " + queue.getProfession() + " and category " + queue.getCategory().getName());
         }
         SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
         cachedQueues.clear();

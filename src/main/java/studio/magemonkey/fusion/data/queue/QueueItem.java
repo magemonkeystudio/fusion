@@ -6,7 +6,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.Recipe;

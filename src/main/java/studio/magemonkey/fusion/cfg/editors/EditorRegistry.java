@@ -39,7 +39,7 @@ public class EditorRegistry {
     @Getter
     private static RecipeEditorCfg      recipeEditorCfg;
     @Getter
-    private static RecipeIconEditorCfg recipeIconEditorCfg;
+    private static RecipeIconEditorCfg  recipeIconEditorCfg;
     @Getter
     private static CategoryEditorCfg    categoryEditorCfg;
     @Getter

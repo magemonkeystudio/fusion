@@ -57,19 +57,21 @@ public class RecipeIconEditor extends Editor implements Listener {
 
         switch (event.getSlot()) {
             case 10 -> {
-                if(event.isLeftClick()) {
+                if (event.isLeftClick()) {
                     FusionEditorCommand.suggestUsage(player,
                             EditorCriteria.RecipeIcon_Edit_Name,
                             "/fusion-editor " + recipe.getSettings().getName());
-                } else if(event.isRightClick()){
+                } else if (event.isRightClick()) {
                     recipe.getSettings().setName(null);
                     hasChanges = true;
                 }
             }
             case 11 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.RecipeIcon_Edit_Lore, "/fusion-editor <lore>");
-                } else if(event.isRightClick()){
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.RecipeIcon_Edit_Lore,
+                            "/fusion-editor <lore>");
+                } else if (event.isRightClick()) {
                     if (recipe.getSettings().getLore().isEmpty()) {
                         return;
                     }
@@ -86,18 +88,22 @@ public class RecipeIconEditor extends Editor implements Listener {
                     recipe.getSettings().setCustomModelData(recipe.getSettings().getCustomModelData() + amount);
                 } else if (event.isRightClick()) {
                     if (recipe.getSettings().getCustomModelData() == -1) return;
-                    recipe.getSettings().setCustomModelData(Math.max(recipe.getSettings().getCustomModelData() - amount, -1));
+                    recipe.getSettings()
+                            .setCustomModelData(Math.max(recipe.getSettings().getCustomModelData() - amount, -1));
                 }
                 hasChanges = true;
             }
             case 16 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.RecipeIcon_Add_Commands, "/fusion-editor <caster> <delay> <command without />");
-                } else if(event.isRightClick()){
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.RecipeIcon_Add_Commands,
+                            "/fusion-editor <caster> <delay> <command without />");
+                } else if (event.isRightClick()) {
                     if (recipe.getSettings().getCommandsOnClick().isEmpty()) {
                         return;
                     }
-                    DelayedCommand command = new ArrayList<>(recipe.getSettings().getCommandsOnClick()).get(recipe.getSettings().getCommandsOnClick().size() - 1);
+                    DelayedCommand command = new ArrayList<>(recipe.getSettings().getCommandsOnClick()).get(
+                            recipe.getSettings().getCommandsOnClick().size() - 1);
                     recipe.getSettings().getCommandsOnClick().remove(command);
                     hasChanges = true;
                 }
@@ -108,11 +114,11 @@ public class RecipeIconEditor extends Editor implements Listener {
                 return;
             }
             case 29 -> {
-                if(event.isLeftClick()) {
+                if (event.isLeftClick()) {
                     FusionEditorCommand.suggestUsage(player,
                             EditorCriteria.RecipeIcon_Edit_Color,
                             "/fusion-editor " + recipe.getSettings().getColor());
-                } else if(event.isRightClick()){
+                } else if (event.isRightClick()) {
                     recipe.getSettings().setColor(null);
                     hasChanges = true;
                 }
@@ -132,20 +138,24 @@ public class RecipeIconEditor extends Editor implements Listener {
                     }
                     // Get last entry and remove it
                     Enchantment lastEnchantment =
-                            new ArrayList<>(recipe.getSettings().getEnchantments().keySet()).get(recipe.getSettings().getEnchantments().size() - 1);
+                            new ArrayList<>(recipe.getSettings().getEnchantments().keySet()).get(
+                                    recipe.getSettings().getEnchantments().size() - 1);
                     recipe.getSettings().getEnchantments().remove(lastEnchantment);
                     hasChanges = true;
                 }
             }
             case 33 -> {
                 if (event.isLeftClick()) {
-                    FusionEditorCommand.suggestUsage(player, EditorCriteria.RecipeIcon_Add_Flags, "/fusion-editor <flag>");
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.RecipeIcon_Add_Flags,
+                            "/fusion-editor <flag>");
                 } else if (event.isRightClick()) {
                     if (recipe.getSettings().getFlags().isEmpty()) {
                         return;
                     }
                     // Remove the last flag from the set
-                    ItemFlag lastFlag = new ArrayList<>(recipe.getSettings().getFlags()).get(recipe.getSettings().getFlags().size() - 1);
+                    ItemFlag lastFlag = new ArrayList<>(recipe.getSettings().getFlags()).get(
+                            recipe.getSettings().getFlags().size() - 1);
                     recipe.getSettings().getFlags().remove(lastFlag);
                     hasChanges = true;
                 }
