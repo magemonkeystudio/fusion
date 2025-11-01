@@ -1,5 +1,5 @@
-[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/release.yml/badge.svg?branch=main)](https://repo1.maven.org/maven2/studio/magemonkey/fusion/1.0.1-R0.19-SNAPSHOT)
-[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://central.sonatype.com/repository/maven-snapshots/studio/magemonkey/fusion/1.0.1-R0.19-SNAPSHOT)
+[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/release.yml/badge.svg?branch=main)](https://repo.travja.dev/releases/studio/magemonkey/fusion/1.0.1-R0.20-SNAPSHOT)
+[![Build](https://github.com/magemonkeystudio/fusion/actions/workflows/devbuild.yml/badge.svg?branch=dev)](https://repo.travja.dev/snapshots/studio/magemonkey/fusion/1.0.1-R0.20-SNAPSHOT)
 [![Discord](https://dcbadge.limes.pink/api/server/6UzkTe6RvW?style=flat)](https://discord.gg/6UzkTe6RvW)
 
 # Fusion
@@ -9,19 +9,19 @@ or snapshots through Sonatype.
 
 ```xml
 <repository>
-    <id>sonatype</id>
-    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <id>magemonkey-snapshots</id>
+    <url>https://repo.travja.dev/snapshots</url>
 </repository>
 ...
 <dependency>
     <groupId>studio.magemonkey</groupId>
     <artifactId>fusion</artifactId>
-    <version>1.0.1-R0.19-SNAPSHOT</version>
+    <version>1.0.1-R0.20-SNAPSHOT</version>
 </dependency>
 ```
 
 ### A huge thanks to our contributors
 
 <a href="https://github.com/magemonkeystudio/fusion/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=magemonkeystudio/fusion"  alt=""/>
+<img src="https://contrib.rocks/image?repo=magemonkeystudio/fusion" />
 </a>
