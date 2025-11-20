@@ -7,17 +7,16 @@
     <parent>
         <groupId>studio.magemonkey</groupId>
         <artifactId>magemonkey-parent</artifactId>
-        <version>1.21.8-R1</version>
+        <version>1.21.10-R1</version>
     </parent>
 
     <artifactId>fusion</artifactId>
     <name>Fusion</name>
-    <version>1.0.1-R0.20-SNAPSHOT</version>
+    <version>1.0.1-R0.21-SNAPSHOT</version>
 
     <properties>
         <java.version>16</java.version>
-        <codex.version>1.1.1-R0.7-SNAPSHOT</codex.version>
-        <fabled.version>1.0.4-R0.63-SNAPSHOT</fabled.version>
+        <codex.version>1.1.1-R0.13-SNAPSHOT</codex.version>
     </properties>
 
     <repositories>
@@ -70,6 +69,7 @@
         <dependency>
             <groupId>studio.magemonkey</groupId>
             <artifactId>fabled</artifactId>
+            <version>1.0.4-R0.63-SNAPSHOT</version>
         </dependency>
 
         <dependency>
