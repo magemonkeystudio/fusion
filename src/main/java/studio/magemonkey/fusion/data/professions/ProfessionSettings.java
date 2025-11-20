@@ -32,6 +32,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
     // Icon related fields
     private RecipeItem recipeItem;
     private String iconNamespace;
+    private boolean includeOriginalLore;
 
     // Optional item fields
     private String name;
@@ -50,12 +51,13 @@ public class ProfessionSettings implements ConfigurationSerializable {
     private Boolean hideRecipeLimitReached;
 
     public ProfessionSettings(String profession, Boolean hideNoPermission,
-                              Boolean hideRecipeLimitReached, String iconNamespace, String name, int customModelData, List<String> lore, boolean unbreakable, Map<Enchantment, Integer> enchantments, Set<ItemFlag> flags, String color, boolean cancelDrop, List<DelayedCommand> commandsOnClick) {
+                              Boolean hideRecipeLimitReached, String iconNamespace, boolean includeOriginalLore, String name, int customModelData, List<String> lore, boolean unbreakable, Map<Enchantment, Integer> enchantments, Set<ItemFlag> flags, String color, boolean cancelDrop, List<DelayedCommand> commandsOnClick) {
         this.profession = profession;
         this.hideNoPermission = hideNoPermission;
         this.hideRecipeLimitReached = hideRecipeLimitReached;
 
         this.iconNamespace = iconNamespace;
+        this.includeOriginalLore = includeOriginalLore;
         this.name = name;
         this.customModelData = customModelData;
         this.lore = lore;
@@ -77,6 +79,8 @@ public class ProfessionSettings implements ConfigurationSerializable {
 
         // Setup of the icon
         String iconNamespace = config.getString("settings.icon.item");
+        includeOriginalLore = config.getBoolean("settings.icon.includeOriginalLore", true);
+
         if (config.isSet("settings.icon.optionals") && !config.getConfigurationSection("settings.icon.optionals").getKeys(false).isEmpty()) {
             name = config.getString("settings.icon.optionals.name");
             customModelData = config.getInt("settings.icon.optionals.customModelData", -1);
@@ -129,6 +133,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 return;
             }
             String iconNamespace = (String) iconSettings.get("item");
+            includeOriginalLore = iconSettings.get("includeOriginalLore") != null && (boolean) iconSettings.get("includeOriginalLore");
             Map<String, Object> optionalIconSettings = (Map<String, Object>) iconSettings.get("optionals");
             if (optionalIconSettings != null && !optionalIconSettings.isEmpty()) {
                 if(optionalIconSettings.get("name") != null)
@@ -188,6 +193,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
 
         Map<String, Object> iconSettings = new HashMap<>(3);
         iconSettings.put("item", iconNamespace);
+        iconSettings.put("includeOriginalLore", includeOriginalLore);
         Map<String, Object> optionalIconSettings = new HashMap<>(10);
         if (name != null) optionalIconSettings.put("name", name);
         if (customModelData >= 0) optionalIconSettings.put("customModelData", customModelData);
@@ -223,6 +229,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 results.hideNoPermission,
                 results.hideRecipeLimitReached,
                 results.iconNamespace,
+                results.includeOriginalLore,
                 results.name,
                 results.customModelData,
                 results.lore,
@@ -248,6 +255,17 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 builder.name(name);
             if (customModelData >= 0)
                 meta.setCustomModelData(customModelData);
+
+            if(includeOriginalLore) {
+                List<String> existingLore = meta.getLore();
+                if (existingLore != null) {
+                    if (lore == null) {
+                        lore = new ArrayList<>();
+                    }
+                    lore.addAll(0, existingLore);
+                }
+            }
+
             if (lore != null)
                 builder = builder.lore(lore);
             if (enchantments != null)

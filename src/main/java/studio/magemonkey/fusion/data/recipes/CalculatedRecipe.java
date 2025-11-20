@@ -64,7 +64,13 @@ public class CalculatedRecipe {
             ItemMeta     baseMeta   = iconResult.getItemMeta();
             List<String> resultLore = (baseMeta == null) ? Collections.emptyList() : baseMeta.getLore();
 
-            // (Optional custom lore logic omitted)
+            // Append resultLore if exists
+            if (resultLore != null && !resultLore.isEmpty()) {
+                for (String line : resultLore) {
+                    lore.append(line).append('\n');
+                }
+                lore.append(" ").append('\n');
+            }
 
             // 1) “Requirement” header
             String requirementLine = CraftingRequirementsCfg.getCraftingRequirementLine("recipes");
