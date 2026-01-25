@@ -467,6 +467,13 @@ public class CommandMechanics {
             }
         }
 
+        if(recipeUsage.isEmpty()) {
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.show.noUsage",
+                    player,
+                    new MessageData("item", item),
+                    new MessageData("sender", player));
+            return;
+        }
         new ShowRecipesGui(player, recipeUsage).open(player);
     }
 
