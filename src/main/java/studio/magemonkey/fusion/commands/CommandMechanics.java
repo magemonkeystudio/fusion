@@ -208,7 +208,7 @@ public class CommandMechanics {
         String storage = args[1];
         DatabaseType type =
                 DatabaseType.valueOf(Objects.requireNonNull(Cfg.getConfig())
-                        .getString("storage.type", "LOCALE")
+                        .getString("storage.type", "LOCAL")
                         .toUpperCase());
         switch (storage.toLowerCase()) {
             case "local":
