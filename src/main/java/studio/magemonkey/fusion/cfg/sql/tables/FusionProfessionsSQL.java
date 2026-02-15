@@ -18,8 +18,7 @@ public class FusionProfessionsSQL {
     public FusionProfessionsSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-                        + "UUID varchar(36), "
+                        + SQLManager.getIdColumn() + " UUID varchar(36), "
                         + "Profession varchar(100),"
                         + "Experience numeric,"
                         + "Mastered boolean,"

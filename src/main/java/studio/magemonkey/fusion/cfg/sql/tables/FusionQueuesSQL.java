@@ -22,8 +22,7 @@ public class FusionQueuesSQL {
     public FusionQueuesSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-                        + "UUID varchar(36), "
+                        + SQLManager.getIdColumn() + " UUID varchar(36), "
                         + "RecipePath varchar(100),"
                         + "CraftingTime numeric,"
                         + "SavedSeconds numeric,"
