@@ -160,7 +160,7 @@ public class SQLManager {
             statement.execute("DROP TABLE IF EXISTS fusion_players");
             statement.execute("DROP TABLE IF EXISTS fusion_professions");
             statement.execute("DROP TABLE IF EXISTS fusion_queues");
-            statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
+            statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
             // Use SQLite-compatible id column definition
             statement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
             statement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
@@ -178,10 +178,16 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)")) {
+                             "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)") ) {
                     while (resultPlayers.next()) {
                         insertStatement.setString(1, resultPlayers.getString("UUID"));
                         insertStatement.setBoolean(2, resultPlayers.getBoolean("AutoCrafting"));
+                        // If source DB doesn't have Locked column, getBoolean will return false; that's acceptable
+                        try {
+                            insertStatement.setBoolean(3, resultPlayers.getBoolean("Locked"));
+                        } catch (SQLException ignored) {
+                            insertStatement.setBoolean(3, false);
+                        }
                         insertStatement.executeUpdate();
                     }
                 } catch (SQLException e) {
@@ -197,7 +203,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)")) {
+                             "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)") ) {
                     insertProfession(resultProfessions, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance()
@@ -240,7 +246,7 @@ public class SQLManager {
 
             // Delete all content of the current database and recreate tables
             sqlStatement.execute("DROP TABLE IF EXISTS fusion_players, fusion_professions, fusion_queues");
-            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
+            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
             // Use MySQL-compatible id column definition
             sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
             sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
@@ -251,7 +257,20 @@ public class SQLManager {
 
                 // Retrieve data from local database
                 ResultSet resultPlayers = localStatement.executeQuery("SELECT * FROM fusion_players");
-                insertPlayers(sqlConnection, resultPlayers);
+                // Ensure we transfer Locked value if present
+                try (PreparedStatement insert = sqlConnection.prepareStatement(
+                        "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)") ) {
+                    while (resultPlayers.next()) {
+                        insert.setString(1, resultPlayers.getString("UUID"));
+                        insert.setBoolean(2, resultPlayers.getBoolean("AutoCrafting"));
+                        try {
+                            insert.setBoolean(3, resultPlayers.getBoolean("Locked"));
+                        } catch (SQLException ignored) {
+                            insert.setBoolean(3, false);
+                        }
+                        insert.executeUpdate();
+                    }
+                }
 
                 ResultSet resultProfessions = localStatement.executeQuery("SELECT * FROM fusion_professions");
                 insertProfessions(sqlConnection, resultProfessions);
@@ -281,11 +300,16 @@ public class SQLManager {
     }
 
     private static void insertPlayers(Connection connection, ResultSet resultSet) throws SQLException {
-        String insertQuery = "INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)";
+        String insertQuery = "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             while (resultSet.next()) {
                 preparedStatement.setString(1, resultSet.getString("UUID"));
                 preparedStatement.setBoolean(2, resultSet.getBoolean("AutoCrafting"));
+                try {
+                    preparedStatement.setBoolean(3, resultSet.getBoolean("Locked"));
+                } catch (SQLException ignored) {
+                    preparedStatement.setBoolean(3, false);
+                }
                 preparedStatement.executeUpdate();
             }
         }
@@ -356,3 +380,4 @@ public class SQLManager {
         return currentType;
     }
 }
+

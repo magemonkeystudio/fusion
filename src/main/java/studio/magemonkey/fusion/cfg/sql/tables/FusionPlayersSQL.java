@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.cfg.sql.tables;
 
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,9 +17,9 @@ public class FusionPlayersSQL {
     public FusionPlayersSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "UUID varchar(36), "
-                        + "AutoCrafting boolean, "
-                        + "Locked boolean)")) {
+                        + "UUID varchar(36) PRIMARY KEY, "
+                        + "AutoCrafting boolean DEFAULT false, "
+                        + "Locked boolean DEFAULT false)")) {
             create.execute();
 
             boolean lockedColumnAdded = alterIfLockedNotExistent();
@@ -27,7 +28,7 @@ public class FusionPlayersSQL {
                         .getLogger()
                         .info("[SQL:FusionPlayersSQL:FusionPlayersSQL] Added 'Locked' column to 'fusion_players' table.");
             }
-            
+
         } catch (SQLException e) {
             Fusion.getInstance()
                     .getLogger()
@@ -83,19 +84,30 @@ public class FusionPlayersSQL {
     }
 
     public void addPlayer(UUID uuid) {
-        if (hasPlayer(uuid))
-            return;
-        try (PreparedStatement insert = SQLManager.connection()
-                .prepareStatement("INSERT INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?)")) {
+        // Use a dialect-aware insert that ignores duplicates to avoid race conditions across nodes
+        DatabaseType dbType = SQLManager.getDatabaseType();
+        String sql;
+        if (dbType == DatabaseType.LOCAL) {
+            // SQLite: INSERT OR IGNORE
+            sql = "INSERT OR IGNORE INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?)";
+        } else {
+            // MySQL/MariaDB: use ON DUPLICATE KEY UPDATE as a no-op
+            sql = "INSERT INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?) ON DUPLICATE KEY UPDATE UUID=UUID";
+        }
+
+        try (PreparedStatement insert = SQLManager.connection().prepareStatement(sql)) {
             insert.setString(1, uuid.toString());
             insert.setBoolean(2, false);
             insert.setBoolean(3, false);
             insert.execute();
         } catch (SQLException e) {
+            // If we still hit a duplicate key exception, ignore it safely
+            if (e.getSQLState() != null && (e.getSQLState().startsWith("23") || e.getMessage().toLowerCase().contains("duplicate"))) {
+                return;
+            }
             Fusion.getInstance()
                     .getLogger()
-                    .warning("[SQL:FusionPlayersSQL:addPlayer] Something went wrong with the sql-connection: "
-                            + e.getMessage());
+                    .warning("[SQL:FusionPlayersSQL:addPlayer] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 

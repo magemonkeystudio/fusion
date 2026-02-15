@@ -3,7 +3,6 @@ package studio.magemonkey.fusion.data.player;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import studio.magemonkey.fusion.Fusion;
@@ -19,7 +18,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -35,8 +33,15 @@ public class FusionPlayer {
     @Setter
     private boolean autoCrafting;
 
+    // Track whether this player is currently locked for saving (in-memory mirror of DB lock)
+    @Getter
+    @Setter
+    private volatile boolean locked;
+
     public FusionPlayer(UUID uuid) {
         this.uuid = uuid;
+        // initialize locked state from DB to reflect current status
+        this.locked = SQLManager.players().isLocked(uuid);
         autoCrafting = SQLManager.players().isAutoCrafting(uuid);
         for (Profession profession : SQLManager.professions().getProfessions(uuid)) {
             professions.put(profession.getName(), profession);
@@ -346,7 +351,9 @@ public class FusionPlayer {
     }
 
     public void save() {
+        // set DB lock and in-memory lock
         SQLManager.players().setLocked(uuid, true);
+        this.locked = true;
 
         Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
             SQLManager.players().setAutoCrafting(uuid, autoCrafting);
@@ -369,6 +376,7 @@ public class FusionPlayer {
             }
             */
             SQLManager.players().setLocked(uuid, false);
+            this.locked = false;
         });
     }
 }
