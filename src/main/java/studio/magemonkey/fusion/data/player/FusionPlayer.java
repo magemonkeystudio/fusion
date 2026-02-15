@@ -355,17 +355,20 @@ public class FusionPlayer {
         SQLManager.players().setLocked(uuid, true);
         this.locked = true;
 
+        Map<String, CraftingQueue> queuesToSave = new TreeMap<>(cachedQueues);
+        Map<String, PlayerRecipeLimit> recipeLimitsToSave = new TreeMap<>(cachedRecipeLimits);
+        cachedQueues.clear();
+        cachedRecipeLimits.clear();
+
         Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
             SQLManager.players().setAutoCrafting(uuid, autoCrafting);
             for (Profession profession : professions.values()) {
                 SQLManager.professions().setProfession(uuid, profession);
             }
-            for (CraftingQueue queue : cachedQueues.values()) {
+            for (CraftingQueue queue : queuesToSave.values()) {
                 SQLManager.queues().saveCraftingQueue(queue);
             }
-            SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
-            cachedQueues.clear();
-            cachedRecipeLimits.clear();
+            SQLManager.recipeLimits().saveRecipeLimits(uuid, recipeLimitsToSave);
 
             /*
             In case of race conditions we wait a bit before unlocking the player. Not required but just to be safe.
