@@ -67,6 +67,19 @@ public class FusionPlayersSQL {
         }
     }
 
+    public void clearAllLocks() {
+        try (PreparedStatement update = SQLManager.connection()
+                .prepareStatement("UPDATE " + Table + " SET Locked=?")) {
+            update.setBoolean(1, false);
+            update.execute();
+        } catch (SQLException e) {
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("[SQL:FusionPlayersSQL:clearAllLocks] Something went wrong with the sql-connection: "
+                            + e.getMessage());
+        }
+    }
+
     public boolean isLocked(UUID uuid) {
         try (PreparedStatement select = SQLManager.connection()
                 .prepareStatement("SELECT Locked FROM " + Table + " WHERE UUID=?")) {

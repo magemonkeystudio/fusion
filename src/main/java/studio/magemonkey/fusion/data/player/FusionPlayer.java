@@ -351,14 +351,21 @@ public class FusionPlayer {
     }
 
     public void save() {
+        save(false);
+    }
+
+    public void save(boolean clearCaches) {
         // set DB lock and in-memory lock
         SQLManager.players().setLocked(uuid, true);
         this.locked = true;
 
         Map<String, CraftingQueue> queuesToSave = new TreeMap<>(cachedQueues);
         Map<String, PlayerRecipeLimit> recipeLimitsToSave = new TreeMap<>(cachedRecipeLimits);
-        cachedQueues.clear();
-        cachedRecipeLimits.clear();
+
+        if (clearCaches) {
+            cachedQueues.clear();
+            cachedRecipeLimits.clear();
+        }
 
         Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
             SQLManager.players().setAutoCrafting(uuid, autoCrafting);

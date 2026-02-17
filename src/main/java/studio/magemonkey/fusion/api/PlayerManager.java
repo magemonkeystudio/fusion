@@ -43,7 +43,7 @@ public class PlayerManager {
 
     /**
      * Save the player data of a player.
-     * This will save the player data to the database and reload the player.
+     * This will save the player data to the database.
      *
      * @param player The Player object of the player.
      */
@@ -51,8 +51,6 @@ public class PlayerManager {
         FusionPlayer fusionPlayer = getPlayer(player);
         if (fusionPlayer != null) {
             fusionPlayer.save();
-            PlayerLoader.unloadPlayer(player);
-            PlayerLoader.loadPlayer(player);
         } else {
             FusionAPI.getInstance()
                     .getLogger()

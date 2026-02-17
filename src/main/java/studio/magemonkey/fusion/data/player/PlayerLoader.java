@@ -17,17 +17,7 @@ public class PlayerLoader {
         // locked in the database (during async save), which caused NullPointerExceptions at many call sites.
         // Returning a FusionPlayer ensures call sites remain stable; the locking is handled at the persistence layer.
         if (!cachedPlayers.containsKey(uuid)) {
-            boolean locked = SQLManager.players().isLocked(uuid);
-            if (locked) {
-                Fusion.getInstance().getLogger().info("Player " + uuid + " is currently locked for saving; returning FusionPlayer instance.");
-            }
             cachedPlayers.put(uuid, new FusionPlayer(uuid));
-        } else {
-            // If we already have a cached player, refresh its in-memory locked state from the DB so
-            // that cross-node changes to the lock are reflected when other nodes fetch the same player.
-            FusionPlayer fp = cachedPlayers.get(uuid);
-            boolean locked = SQLManager.players().isLocked(uuid);
-            fp.setLocked(locked);
         }
         return cachedPlayers.get(uuid);
     }
@@ -59,8 +49,10 @@ public class PlayerLoader {
     public static FusionPlayer getPlayerBlocking(UUID uuid, long timeoutMs) {
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < timeoutMs) {
-            FusionPlayer fp = getPlayer(uuid);
-            if (fp != null && !fp.isLocked()) return fp;
+            boolean locked = SQLManager.players().isLocked(uuid);
+            if (!locked) {
+                return getPlayer(uuid);
+            }
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
@@ -82,14 +74,14 @@ public class PlayerLoader {
     public static void unloadPlayer(Player player) {
         if (cachedPlayers.containsKey(player.getUniqueId())) {
             FusionPlayer fusionPlayer = cachedPlayers.get(player.getUniqueId());
-            fusionPlayer.save();
+            fusionPlayer.save(true);
             cachedPlayers.remove(player.getUniqueId());
         }
     }
 
     public static void clearCache() {
         for (FusionPlayer fusionPlayer : cachedPlayers.values())
-            fusionPlayer.save();
+            fusionPlayer.save(true);
         cachedPlayers.clear();
     }
 }

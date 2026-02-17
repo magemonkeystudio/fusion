@@ -62,6 +62,7 @@ public class SQLManager {
             Fusion.getInstance().getLogger().severe("Failed to initialize the Connection.");
         } else {
             fusionPlayersSQL = new FusionPlayersSQL();
+            fusionPlayersSQL.clearAllLocks();
             fusionProfessionsSQL = new FusionProfessionsSQL();
             fusionQueuesSQL = new FusionQueuesSQL();
             fusionRecipeLimitsSQL = new FusionRecipeLimitsSQL();
