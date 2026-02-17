@@ -48,6 +48,8 @@ fusion:
     fullCategory: "&cYou have reached the category maximum of your queue size. ($<category> of profession $<profession>)"
     finished: "&aYou have crafting items ready for pickup! ($<amount>)"
     cancelled: "&cYour crafting queue has been cancelled."
+  show:
+    noUsage: "&cThere is no usage for this ingredient."
   help: |2-
     You typed: &7$<text>&r
       Valid syntax:

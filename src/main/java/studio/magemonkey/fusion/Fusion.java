@@ -189,13 +189,18 @@ public class Fusion extends RisePlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        PlayerLoader.loadPlayer(event.getPlayer());
-        if(!Cfg.autoJoinProfessions.isEmpty()) {
-            Cfg.autoJoinProfessions(event.getPlayer());
-        }
-        if (Cfg.craftingQueue) {
-            notifyForQueue(event.getPlayer());
-        }
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            PlayerLoader.getPlayerBlocking(player, 5000); // Wait up to 5s for any pending saves to finish
+            Bukkit.getScheduler().runTask(this, () -> {
+                if(!Cfg.autoJoinProfessions.isEmpty()) {
+                    Cfg.autoJoinProfessions(player);
+                }
+                if (Cfg.craftingQueue) {
+                    notifyForQueue(player);
+                }
+            });
+        });
     }
 
     @EventHandler

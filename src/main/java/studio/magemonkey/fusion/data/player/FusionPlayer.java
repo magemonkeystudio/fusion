@@ -3,9 +3,9 @@ package studio.magemonkey.fusion.data.player;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
@@ -33,8 +33,15 @@ public class FusionPlayer {
     @Setter
     private boolean autoCrafting;
 
+    // Track whether this player is currently locked for saving (in-memory mirror of DB lock)
+    @Getter
+    @Setter
+    private volatile boolean locked;
+
     public FusionPlayer(UUID uuid) {
         this.uuid = uuid;
+        // initialize locked state from DB to reflect current status
+        this.locked = SQLManager.players().isLocked(uuid);
         autoCrafting = SQLManager.players().isAutoCrafting(uuid);
         for (Profession profession : SQLManager.professions().getProfessions(uuid)) {
             professions.put(profession.getName(), profession);
@@ -344,15 +351,42 @@ public class FusionPlayer {
     }
 
     public void save() {
-        SQLManager.players().setAutoCrafting(uuid, autoCrafting);
-        for (Profession profession : professions.values()) {
-            SQLManager.professions().setProfession(uuid, profession);
+        save(false);
+    }
+
+    public void save(boolean clearCaches) {
+        // set DB lock and in-memory lock
+        SQLManager.players().setLocked(uuid, true);
+        this.locked = true;
+
+        Map<String, CraftingQueue> queuesToSave = new TreeMap<>(cachedQueues);
+        Map<String, PlayerRecipeLimit> recipeLimitsToSave = new TreeMap<>(cachedRecipeLimits);
+
+        if (clearCaches) {
+            cachedQueues.clear();
+            cachedRecipeLimits.clear();
         }
-        for (CraftingQueue queue : cachedQueues.values()) {
-            SQLManager.queues().saveCraftingQueue(queue);
-        }
-        SQLManager.recipeLimits().saveRecipeLimits(uuid, cachedRecipeLimits);
-        cachedQueues.clear();
-        cachedRecipeLimits.clear();
+
+        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
+            SQLManager.players().setAutoCrafting(uuid, autoCrafting);
+            for (Profession profession : professions.values()) {
+                SQLManager.professions().setProfession(uuid, profession);
+            }
+            for (CraftingQueue queue : queuesToSave.values()) {
+                SQLManager.queues().saveCraftingQueue(queue);
+            }
+            SQLManager.recipeLimits().saveRecipeLimits(uuid, recipeLimitsToSave);
+
+            /*
+            In case of race conditions we wait a bit before unlocking the player. Not required but just to be safe.
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            */
+            SQLManager.players().setLocked(uuid, false);
+            this.locked = false;
+        });
     }
 }

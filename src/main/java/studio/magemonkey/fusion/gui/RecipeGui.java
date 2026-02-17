@@ -53,6 +53,7 @@ import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class RecipeGui implements Listener {
@@ -447,6 +448,9 @@ public class RecipeGui implements Listener {
                     new MessageData("category", category),
                     new MessageData("gui",      getName()),
                     new MessageData("player",   player.getName()),
+                    new MessageData("queue_done",   queue != null ? queue.getQueue().stream().filter(QueueItem::isDone).toList().size() : 0),
+                    new MessageData("queue_size",   queue != null ? queue.getQueue().size() : 0),
+                    new MessageData("queue_time",   queue != null ? queue.getVisualRemainingTotalTime() : 0),
                     new MessageData("bal",
                             CodexEngine.get().getVault() == null
                                     ? 0
@@ -474,7 +478,7 @@ public class RecipeGui implements Listener {
                     }
                 }
                 if (requiresUpdate) {
-                    Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 20L);
+                    Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::updateQueuedSlots, 20L);
                 }
                 this.isLoaded = true;
             }
@@ -483,6 +487,57 @@ public class RecipeGui implements Listener {
 
     public void reloadRecipesTask() {
         Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::reloadRecipes, 1L);
+    }
+
+    // Updates only the queued-slot icons/progress without rebuilding the whole GUI.
+    private void updateQueuedSlots() {
+        if (!player.isOnline()) return;
+        if (!Cfg.craftingQueue || queue == null || queuedSlots.isEmpty()) return;
+
+        // Run the actual inventory updates on the main server thread
+        Bukkit.getScheduler().runTask(Fusion.getInstance(), () -> {
+            List<QueueItem> allQueuedItems = new ArrayList<>(queue.getQueue());
+            int queueSize = allQueuedItems.size();
+            int queuePageSize = queuedSlots.size();
+
+            Integer[] queuedIndices = queuedSlots.toArray(new Integer[0]);
+
+            // Reset all queued slots to the empty queue icon
+            for (int qIndex : queuedIndices) {
+                inventory.setItem(qIndex, ProfessionsCfg.getQueueSlot(table.getName()));
+            }
+
+            // Clear the internal mapping and repopulate for current page only
+            this.queue.getQueuedItems().clear();
+
+            if (!allQueuedItems.isEmpty() && queuePageSize > 0) {
+                int j = 0;
+                int qStart = queuePage * queuePageSize;
+                int qEnd = Math.min(qStart + queuePageSize, queueSize);
+                QueueItem[] allQueueItemsArray = allQueuedItems.toArray(new QueueItem[0]);
+
+                for (int q = qStart; q < qEnd && j < queuedIndices.length; q++, j++) {
+                    QueueItem qi = allQueueItemsArray[q];
+                    int slot = queuedIndices[j];
+                    this.queue.getQueuedItems().put(slot, qi);
+                    qi.updateIcon();
+                    inventory.setItem(slot, qi.getIcon().clone());
+                }
+            }
+
+            // Decide whether we need another update next second (any unfinished item)
+            boolean requiresUpdate = false;
+            for (QueueItem qi : allQueuedItems) {
+                if (!qi.isDone()) {
+                    requiresUpdate = true;
+                    break;
+                }
+            }
+
+            if (requiresUpdate) {
+                Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::updateQueuedSlots, 20L);
+            }
+        });
     }
 
     private boolean validatePageCount() {
@@ -628,6 +683,34 @@ public class RecipeGui implements Listener {
                     .sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
             return false;
         }
+
+        // Check queue limits
+        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(table.getName(), category);
+        int categoryLimit =
+                PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + "." + category.getName() + ".limit");
+        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + ".limit");
+        int limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+
+        if (categoryLimit > 0 && limits[0] >= categoryLimit) {
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullCategory",
+                    player,
+                    new MessageData("limit", categoryLimit),
+                    new MessageData("category", category.getName()),
+                    new MessageData("profession", table.getName()));
+            return false;
+        } else if (professionLimit > 0 && limits[1] >= professionLimit) {
+            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullProfession",
+                    player,
+                    new MessageData("limit", professionLimit),
+                    new MessageData("profession", table.getName()));
+            return false;
+        } else if (limit > 0 && limits[2] >= limit) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
+            return false;
+        }
+
         return true;
     }
 
@@ -813,7 +896,7 @@ public class RecipeGui implements Listener {
                     // Restart the crafting sequence if auto-crafting is enabled
                     if (PlayerLoader.getPlayer(player).isAutoCrafting() && !this.recipes.isEmpty()) {
                         reloadRecipesTask();
-                        boolean success = craft(slot, addToCursor); //Call this method again recursively
+                        boolean success = craft(slot, addToCursor); // Call this method again recursively
                         if (!success)
                             CodexEngine.get().getMessageUtil().sendMessage("fusion.autoCancelled", player);
                     }
@@ -1005,7 +1088,7 @@ public class RecipeGui implements Listener {
             return;
         }
         Inventory pInventory = p.getInventory();
-        if (inv.equals(this.inventory)) {
+        if (inv.equals(this.inventory) && !Cfg.craftingQueue) {
             for (int i = 0; i < this.slots.length; i++) {
                 if (this.slots[i].equals(Slot.BLOCKED_SLOT) ||
                         this.slots[i].equals(Slot.BASE_RESULT_SLOT) ||
@@ -1024,6 +1107,7 @@ public class RecipeGui implements Listener {
             cancel(true);
             inv.clear();
         }
+        ProfessionGuiRegistry.getLatestRecipeGui().remove(p.getUniqueId());
     }
 
     /*

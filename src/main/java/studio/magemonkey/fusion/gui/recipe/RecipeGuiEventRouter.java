@@ -8,6 +8,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -41,9 +42,9 @@ public class RecipeGuiEventRouter implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player p)) return;
-        Inventory inv = event.getInventory();
+        Inventory inv = event.getClickedInventory();
         RecipeGui gui = findGuiFor(p, inv);
-        if (gui == null) return;
+        if (gui == null || inv == null) return;
 
         // Only forward if the clicked inventory is *exactly* the GUI’s inventory
         if (!inv.equals(gui.getInventory())) return;
@@ -108,6 +109,13 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(p.getUniqueId());
         if (gui == null) return;
         gui.close(p, gui.getInventory());
-        ProfessionGuiRegistry.getLatestRecipeGui().remove(p.getUniqueId());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        Player p = event.getPlayer();
+        RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(p.getUniqueId());
+        if (gui == null) return;
+        gui.close(p, gui.getInventory());
     }
 }

@@ -29,6 +29,9 @@ public class SQLManager {
     private static String user;
     private static String password;
 
+    // Track the currently selected database type so we can produce dialect-specific SQL when needed
+    private static DatabaseType currentType;
+
     public static void init() {
         FileConfiguration cfg  = Cfg.getConfig();
         DatabaseType      type = DatabaseType.valueOf(cfg.getString("storage.type", "LOCAL").toUpperCase());
@@ -37,6 +40,9 @@ public class SQLManager {
         database = cfg.getString("storage.database", "fusion");
         user = cfg.getString("storage.user", "root");
         password = cfg.getString("storage.password", "password");
+
+        // store the selected type
+        currentType = type;
 
         Fusion.getInstance().getLogger().info("Initializing SQLManager with type: " + type);
 
@@ -56,6 +62,7 @@ public class SQLManager {
             Fusion.getInstance().getLogger().severe("Failed to initialize the Connection.");
         } else {
             fusionPlayersSQL = new FusionPlayersSQL();
+            fusionPlayersSQL.clearAllLocks();
             fusionProfessionsSQL = new FusionProfessionsSQL();
             fusionQueuesSQL = new FusionQueuesSQL();
             fusionRecipeLimitsSQL = new FusionRecipeLimitsSQL();
@@ -154,11 +161,10 @@ public class SQLManager {
             statement.execute("DROP TABLE IF EXISTS fusion_players");
             statement.execute("DROP TABLE IF EXISTS fusion_professions");
             statement.execute("DROP TABLE IF EXISTS fusion_queues");
-            statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
-            statement.execute(
-                    "CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            statement.execute(
-                    "CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
+            // Use SQLite-compatible id column definition
+            statement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
+            statement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
 
         } catch (SQLException e) {
             Fusion.getInstance().getLogger().severe("Error while dropping tables: " + e.getMessage());
@@ -173,10 +179,16 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)")) {
+                             "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)") ) {
                     while (resultPlayers.next()) {
                         insertStatement.setString(1, resultPlayers.getString("UUID"));
                         insertStatement.setBoolean(2, resultPlayers.getBoolean("AutoCrafting"));
+                        // If source DB doesn't have Locked column, getBoolean will return false; that's acceptable
+                        try {
+                            insertStatement.setBoolean(3, resultPlayers.getBoolean("Locked"));
+                        } catch (SQLException ignored) {
+                            insertStatement.setBoolean(3, false);
+                        }
                         insertStatement.executeUpdate();
                     }
                 } catch (SQLException e) {
@@ -192,7 +204,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)")) {
+                             "INSERT INTO fusion_professions (Id, UUID, Profession, Experience, Mastered, Joined) VALUES (?, ?, ?, ?, ?, ?)") ) {
                     insertProfession(resultProfessions, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance()
@@ -207,7 +219,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)")) {
+                             "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)") ) {
                     insertQueue(resultQueues, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance()
@@ -235,11 +247,10 @@ public class SQLManager {
 
             // Delete all content of the current database and recreate tables
             sqlStatement.execute("DROP TABLE IF EXISTS fusion_players, fusion_professions, fusion_queues");
-            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36), AutoCrafting boolean)");
-            sqlStatement.execute(
-                    "CREATE TABLE IF NOT EXISTS fusion_professions(Id long, UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            sqlStatement.execute(
-                    "CREATE TABLE IF NOT EXISTS fusion_queues(Id long, UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
+            // Use MySQL-compatible id column definition
+            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
+            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
 
             // Get all data from the local database
             try (Connection sqliteConnection = getSQLiteConnection();
@@ -247,7 +258,20 @@ public class SQLManager {
 
                 // Retrieve data from local database
                 ResultSet resultPlayers = localStatement.executeQuery("SELECT * FROM fusion_players");
-                insertPlayers(sqlConnection, resultPlayers);
+                // Ensure we transfer Locked value if present
+                try (PreparedStatement insert = sqlConnection.prepareStatement(
+                        "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)") ) {
+                    while (resultPlayers.next()) {
+                        insert.setString(1, resultPlayers.getString("UUID"));
+                        insert.setBoolean(2, resultPlayers.getBoolean("AutoCrafting"));
+                        try {
+                            insert.setBoolean(3, resultPlayers.getBoolean("Locked"));
+                        } catch (SQLException ignored) {
+                            insert.setBoolean(3, false);
+                        }
+                        insert.executeUpdate();
+                    }
+                }
 
                 ResultSet resultProfessions = localStatement.executeQuery("SELECT * FROM fusion_professions");
                 insertProfessions(sqlConnection, resultProfessions);
@@ -277,11 +301,16 @@ public class SQLManager {
     }
 
     private static void insertPlayers(Connection connection, ResultSet resultSet) throws SQLException {
-        String insertQuery = "INSERT INTO fusion_players (UUID, AutoCrafting) VALUES (?, ?)";
+        String insertQuery = "INSERT INTO fusion_players (UUID, AutoCrafting, Locked) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             while (resultSet.next()) {
                 preparedStatement.setString(1, resultSet.getString("UUID"));
                 preparedStatement.setBoolean(2, resultSet.getBoolean("AutoCrafting"));
+                try {
+                    preparedStatement.setBoolean(3, resultSet.getBoolean("Locked"));
+                } catch (SQLException ignored) {
+                    preparedStatement.setBoolean(3, false);
+                }
                 preparedStatement.executeUpdate();
             }
         }
@@ -327,4 +356,29 @@ public class SQLManager {
             insertStatement.executeUpdate();
         }
     }
+
+    /**
+     * Returns a dialect-specific id column definition including the trailing comma.
+     * For SQLITE (LOCAL) this returns: "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
+     * For MYSQL/MARIADB this returns: "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+     */
+    public static String getIdColumn(DatabaseType type) {
+        if (type == DatabaseType.LOCAL) {
+            return "Id INTEGER PRIMARY KEY AUTOINCREMENT,";
+        }
+        // default to MySQL/MariaDB style
+        return "Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,";
+    }
+
+    /**
+     * Returns the id column definition for the currently configured database type.
+     */
+    public static String getIdColumn() {
+        return getIdColumn(currentType == null ? DatabaseType.MYSQL : currentType);
+    }
+
+    public static DatabaseType getDatabaseType() {
+        return currentType;
+    }
 }
+

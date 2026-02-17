@@ -91,7 +91,7 @@ public class PatternItemEditor extends Editor implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getInventory() != getInventory()) return;
+        if (event.getClickedInventory() != getInventory()) return;
         event.setCancelled(true);
         Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;

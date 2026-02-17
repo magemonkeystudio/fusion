@@ -12,12 +12,9 @@ import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
-import studio.magemonkey.fusion.data.player.FusionPlayer;
-import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
-import studio.magemonkey.fusion.util.PlayerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,32 +101,6 @@ public class CraftingQueue {
     }
 
     public void addRecipe(Recipe recipe) {
-        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(profession, category);
-        int categoryLimit =
-                PlayerUtil.getPermOption(player, "fusion.queue." + profession + "." + category.getName() + ".limit");
-        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + profession + ".limit");
-        int limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
-
-        if (categoryLimit > 0 && limits[0] >= categoryLimit) {
-            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullCategory",
-                    player,
-                    new MessageData("limit", categoryLimit),
-                    new MessageData("category", category.getName()),
-                    new MessageData("profession", profession));
-            return;
-        } else if (professionLimit > 0 && limits[1] >= professionLimit) {
-            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullProfession",
-                    player,
-                    new MessageData("limit", professionLimit),
-                    new MessageData("profession", profession));
-            return;
-        } else if (limit > 0 && limits[2] >= limit) {
-            CodexEngine.get()
-                    .getMessageUtil()
-                    .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
-            return;
-        }
-
         QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
         FusionAPI.getEventServices()
                 .getQueueService()

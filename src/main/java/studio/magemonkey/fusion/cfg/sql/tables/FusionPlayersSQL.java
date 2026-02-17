@@ -2,6 +2,7 @@ package studio.magemonkey.fusion.cfg.sql.tables;
 
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
+import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,9 +17,18 @@ public class FusionPlayersSQL {
     public FusionPlayersSQL() {
         try (PreparedStatement create = SQLManager.connection()
                 .prepareStatement("CREATE TABLE IF NOT EXISTS " + Table + "("
-                        + "UUID varchar(36), "
-                        + "AutoCrafting boolean)")) {
+                        + "UUID varchar(36) PRIMARY KEY, "
+                        + "AutoCrafting boolean DEFAULT false, "
+                        + "Locked boolean DEFAULT false)")) {
             create.execute();
+
+            boolean lockedColumnAdded = alterIfLockedNotExistent();
+            if (lockedColumnAdded) {
+                Fusion.getInstance()
+                        .getLogger()
+                        .info("[SQL:FusionPlayersSQL:FusionPlayersSQL] Added 'Locked' column to 'fusion_players' table.");
+            }
+
         } catch (SQLException e) {
             Fusion.getInstance()
                     .getLogger()
@@ -42,19 +52,75 @@ public class FusionPlayersSQL {
         }
     }
 
-    public void addPlayer(UUID uuid) {
-        if (hasPlayer(uuid))
-            return;
-        try (PreparedStatement insert = SQLManager.connection()
-                .prepareStatement("INSERT INTO " + Table + "(UUID, AutoCrafting) VALUES(?,?)")) {
-            insert.setString(1, uuid.toString());
-            insert.setBoolean(2, false);
-            insert.execute();
+    public void setLocked(UUID uuid, boolean locked) {
+        addPlayer(uuid);
+        try (PreparedStatement update = SQLManager.connection()
+                .prepareStatement("UPDATE " + Table + " SET Locked=? WHERE UUID=?")) {
+            update.setBoolean(1, locked);
+            update.setString(2, uuid.toString());
+            update.execute();
         } catch (SQLException e) {
             Fusion.getInstance()
                     .getLogger()
-                    .warning("[SQL:FusionPlayersSQL:addPlayer] Something went wrong with the sql-connection: "
+                    .warning("[SQL:FusionPlayersSQL:setLocked] Something went wrong with the sql-connection: "
                             + e.getMessage());
+        }
+    }
+
+    public void clearAllLocks() {
+        try (PreparedStatement update = SQLManager.connection()
+                .prepareStatement("UPDATE " + Table + " SET Locked=?")) {
+            update.setBoolean(1, false);
+            update.execute();
+        } catch (SQLException e) {
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("[SQL:FusionPlayersSQL:clearAllLocks] Something went wrong with the sql-connection: "
+                            + e.getMessage());
+        }
+    }
+
+    public boolean isLocked(UUID uuid) {
+        try (PreparedStatement select = SQLManager.connection()
+                .prepareStatement("SELECT Locked FROM " + Table + " WHERE UUID=?")) {
+            select.setString(1, uuid.toString());
+            ResultSet result = select.executeQuery();
+            if (result.next())
+                return result.getBoolean("Locked");
+        } catch (SQLException e) {
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("[SQL:FusionPlayersSQL:isLocked] Something went wrong with the sql-connection: "
+                            + e.getMessage());
+        }
+        return false;
+    }
+
+    public void addPlayer(UUID uuid) {
+        // Use a dialect-aware insert that ignores duplicates to avoid race conditions across nodes
+        DatabaseType dbType = SQLManager.getDatabaseType();
+        String sql;
+        if (dbType == DatabaseType.LOCAL) {
+            // SQLite: INSERT OR IGNORE
+            sql = "INSERT OR IGNORE INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?)";
+        } else {
+            // MySQL/MariaDB: use ON DUPLICATE KEY UPDATE as a no-op
+            sql = "INSERT INTO " + Table + "(UUID, AutoCrafting, Locked) VALUES(?,?,?) ON DUPLICATE KEY UPDATE UUID=UUID";
+        }
+
+        try (PreparedStatement insert = SQLManager.connection().prepareStatement(sql)) {
+            insert.setString(1, uuid.toString());
+            insert.setBoolean(2, false);
+            insert.setBoolean(3, false);
+            insert.execute();
+        } catch (SQLException e) {
+            // If we still hit a duplicate key exception, ignore it safely
+            if (e.getSQLState() != null && (e.getSQLState().startsWith("23") || e.getMessage().toLowerCase().contains("duplicate"))) {
+                return;
+            }
+            Fusion.getInstance()
+                    .getLogger()
+                    .warning("[SQL:FusionPlayersSQL:addPlayer] Something went wrong with the sql-connection: " + e.getMessage());
         }
     }
 
@@ -86,6 +152,28 @@ public class FusionPlayersSQL {
                     .getLogger()
                     .warning("[SQL:FusionPlayersSQL:isAutoCrafting] Something went wrong with the sql-connection: "
                             + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean alterIfLockedNotExistent() {
+        try (PreparedStatement select = SQLManager.connection()
+                .prepareStatement("SELECT Locked FROM " + Table + " LIMIT 1")) {
+            ResultSet result = select.executeQuery();
+            if (result.next())
+                return false;
+        } catch (SQLException e) {
+            // Column does not exist, we need to add it
+            try (PreparedStatement alter = SQLManager.connection()
+                    .prepareStatement("ALTER TABLE " + Table + " ADD COLUMN Locked boolean DEFAULT false")) {
+                alter.execute();
+                return true;
+            } catch (SQLException ex) {
+                Fusion.getInstance()
+                        .getLogger()
+                        .warning("[SQL:FusionPlayersSQL:alterIfLockedNotExistent] Something went wrong with the sql-connection: "
+                                + ex.getMessage());
+            }
         }
         return false;
     }
