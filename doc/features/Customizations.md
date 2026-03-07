@@ -243,7 +243,7 @@ You have seen this above before:
 
 #### Divinity
 Divinity is a soft-dependend plugin of us that provides you with a lot of features regarding to items and other modules.
-We encourage you to use [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-magemonkey-studio-formerly-prorpgitems.99713/) for your custom items, but you can also use others through the ItemBuilder-Function.
+We encourage you to use [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-voidedge-formerly-prorpgitems.99713/) for your custom items, but you can also use others through the ItemBuilder-Function.
 
 The current possible way of using Divinity items is by using the `DIVINITY_<module>_<item>` type.
 The following modules exist:
@@ -268,7 +268,7 @@ DIVINITY_runes:[item][~level:<level>][:<amount]
 | Condition Key       | Possible Condition Values      | Belong to (Hooks)                                                                                                  |
 |---------------------|--------------------------------|--------------------------------------------------------------------------------------------------------------------|
 | professions         | Any profession of this plugin  | Natively, Fusion                                                                                                   |
-| fabled              | Class-IDs of Fabled            | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-magemonkey-studio-formerly-proskillapi.91913/) |
+| fabled              | Class-IDs of Fabled            | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-voidedge-formerly-proskillapi.91913/) |
 | mcmmo               | PrimarySkillTypes of mcMMO     | [mcMMO](https://www.spigotmc.org/resources/official-mcmmo-original-author-returns.64348/)                          |
 | jobs                | Levels of Jobs                 | [JobsReborn](https://www.spigotmc.org/resources/jobs-reborn.4216/)                                                 |
 | aura_abilities      | Abilities from AuraSkills      | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |

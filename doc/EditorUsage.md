@@ -476,7 +476,7 @@ from another profession. Unfortunatly, we have no possibility to creating profes
 server side solution for that we'd be glad to add it into the documentation!
 
 ### Divinity-Items
-Most of the item-commands of the `/fusion-editor` allow for usage of [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-magemonkey-studio-formerly-prorpgitems.99713/)-Items 
+Most of the item-commands of the `/fusion-editor` allow for usage of [Divinity](https://www.spigotmc.org/resources/divinity-custom-item-generator-by-voidedge-formerly-prorpgitems.99713/)-Items 
 from the CustomItems-Module. It is planned to allow for further customization of divinity items from other modules too.
 <br><br>
 You use them by typing `DIVINITY_` in the command. It will autofill all possible items, when you have installed Divinity.
@@ -489,7 +489,7 @@ allow for more customization. The following conditions are available:
 | Condition Key       | Possible Condition Values     | Belong to (Hooks)                                                                                                  |
 |---------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------|
 | professions         | Any profession of this plugin | Natively, Fusion                                                                                                   |
-| fabled              | Class-IDs of Fabled           | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-magemonkey-studio-formerly-proskillapi.91913/) |
+| fabled              | Class-IDs of Fabled           | [Fabled](https://www.spigotmc.org/resources/fabled-an-rpg-engine-by-voidedge-formerly-proskillapi.91913/) |
 | mcmmo               | PrimarySkillTypes of mcMMO    | [mcMMO](https://www.spigotmc.org/resources/official-mcmmo-original-author-returns.64348/)                          |
 | jobs                | Levels of Jobs                | [JobsReborn](https://www.spigotmc.org/resources/jobs-reborn.4216/)                                                 |
 | aura_abilities      | Abilities from AuraSkills     | [AuraSkills](https://www.spigotmc.org/resources/auraskills.81069/)                                                 |

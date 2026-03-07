@@ -17,7 +17,7 @@ public class FusionPlaceholders extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return "MageMonkeyStudio";
+        return "VoidEdge";
     }
 
     @Override

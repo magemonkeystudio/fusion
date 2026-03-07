@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /*
- * © 2024 MageMonkeyStudio
+ * © 2026 VoidEdge
  */
 public class Fusion extends RisePlugin implements Listener {
     public static final PlaceholderType<RecipeItem>       RECIPE_ITEM       =
