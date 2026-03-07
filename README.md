@@ -4,8 +4,8 @@
 
 # Fusion
 
-If you wish to use Fusion as a dependency in your projects, Fusion is available through Maven Central
-or snapshots through Sonatype.
+If you wish to use Fusion as a dependency in your projects, Fusion is available through our repository.
+
 
 ```xml
 <repository>
