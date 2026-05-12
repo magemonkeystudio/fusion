@@ -1,5 +1,6 @@
 package studio.magemonkey.fusion.gui.recipe;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,8 +13,11 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.gui.RecipeGui;
 
@@ -75,8 +79,15 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = findGuiFor(p, inv);
         if (gui == null) return;
 
-        // If the player closes this GUI, perform cleanup
         gui.close(p, inv);
+
+        if (event.getReason() == InventoryCloseEvent.Reason.PLAYER) {
+            CraftingTable table = gui.getTable();
+            if (table.getUseCategories() && !table.getCategories().isEmpty()) {
+                Bukkit.getScheduler().runTaskLater(Fusion.getInstance(),
+                        () -> ProfessionsCfg.getGUI(gui.getName()).open(p), 1L);
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
