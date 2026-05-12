@@ -63,7 +63,7 @@ public class ShowRecipesCfg {
 
     private static void setDefaults() {
         // Show Recipe: GUI Mechanic
-        config.addDefault("name", "&8Recipes for ingredient: &a&7<ingredient>");
+        config.addDefault("name", "&8Recipes for ingredient: &a&7$<ingredient>");
         HashMap<Character, ItemStack> showItems = new HashMap<>();
         showItems.put('0', ItemBuilder.newItem(Material.BIRCH_SIGN)
                 .name("&8Possible Recipes")
@@ -81,8 +81,8 @@ public class ShowRecipesCfg {
 
         HashMap<String, Object> recipeItem = new HashMap<>();
         recipeItem.put("material", "$<material>");
-        recipeItem.put("name", "&7<name>");
-        recipeItem.put("lore", new String[]{"&8[&a$<amount>x &7<ingredient>&8]", "&7Click to navigate to recipe"});
+        recipeItem.put("name", "&7$<name>");
+        recipeItem.put("lore", new String[]{"&8[&a$<amount>x &7$<ingredient>&8]", "&7Click to navigate to recipe"});
         config.addDefault("recipeItem", recipeItem);
         config.addDefault("fillItem", ItemBuilder.newItem(Material.BLACK_STAINED_GLASS_PANE).name(" ").build());
 
@@ -97,14 +97,17 @@ public class ShowRecipesCfg {
 
     public static ItemStack getRecipeIcon(Recipe recipe, RecipeItem ingredient) {
         String itemName = Utils.getItemName(recipe.getSettings().getRecipeItem().getItemStack());
+        String ingredientName = Utils.getItemName(ingredient.getItemStack());
+        String amountStr      = String.valueOf(ingredient.getAmount());
+        String professionName = recipe.getTable().getInventoryName();
         String name = ChatUT.hexString(config.getString("recipeItem.name", "&7$<name>")
-                .replace(MessageUtil.getReplacement("name"), itemName));
+                .replace("$<name>", itemName).replace("<name>", itemName));
         List<String> lore = config.getStringList("recipeItem.lore");
-        lore.replaceAll(s -> ChatUT.hexString(s.replace(MessageUtil.getReplacement("ingredient"),
-                        Utils.getItemName(ingredient.getItemStack()))
-                .replace(MessageUtil.getReplacement("profession"), recipe.getTable().getInventoryName())
-                .replace(MessageUtil.getReplacement("amount"), String.valueOf(ingredient.getAmount()))
-                .replace(MessageUtil.getReplacement("name"), name)));
+        lore.replaceAll(s -> ChatUT.hexString(s
+                .replace("$<ingredient>", ingredientName).replace("<ingredient>", ingredientName)
+                .replace("$<profession>", professionName).replace("<profession>", professionName)
+                .replace("$<amount>", amountStr).replace("<amount>", amountStr)
+                .replace("$<name>", name).replace("<name>", name)));
 
         ItemStack icon = recipe.getSettings().getRecipeItem().getItemStack().clone();
         ItemMeta  meta = icon.getItemMeta();
@@ -115,7 +118,8 @@ public class ShowRecipesCfg {
     }
 
     public static String getInventoryName(RecipeItem ingredient) {
-        return ChatUT.hexString(name.replace(MessageUtil.getReplacement("ingredient"),
-                Utils.getItemName(ingredient.getItemStack())));
+        String ingredientName = Utils.getItemName(ingredient.getItemStack());
+        return ChatUT.hexString(name
+                .replace("$<ingredient>", ingredientName).replace("<ingredient>", ingredientName));
     }
 }

@@ -122,7 +122,17 @@ public class CraftingRequirementsCfg {
         return ChatUT.hexString(config.getString("recipes.canCraft." + (fulfilled ? "true" : "false"),
                 (fulfilled ? "&aYou can craft this item." : "&cYou can't craft this item.")));
     }
-
+    public static String getStationLine(String path, boolean fulfilled, String stationName) {
+        String displayName = stationName;
+        // Jeśli to divinity, pokaż ładniejszą nazwę
+        if (stationName.toLowerCase().startsWith("divinity:")) {
+            displayName = "Divinity: " + stationName.substring("divinity:".length());
+        }
+        String line = config.getString(path + ".station." + (fulfilled ? "true" : "false"),
+                fulfilled ? "&6- &eStation: &7(&a" + displayName + "&7)"
+                        : "&6- &eStation: &7(&c" + displayName + "&7)");
+        return ChatUT.hexString(line);
+    }
     public static String getLimit(String path, int limit, int maxLimit) {
         boolean fulfilled = limit < maxLimit;
         String line = config.getString(path + ".limit." + (fulfilled ? "true" : "false"),

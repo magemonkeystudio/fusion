@@ -1,10 +1,12 @@
 package studio.magemonkey.fusion.gui.editors.professions.recipes;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
@@ -13,12 +15,14 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RecipeEditor extends Editor implements Listener {
 
@@ -30,6 +34,8 @@ public class RecipeEditor extends Editor implements Listener {
     private RecipeItemEditor recipeItemEditor;
 
     private final HashMap<Inventory, HashMap<Integer, Recipe>> slots = new HashMap<>();
+    private List<Recipe>       recipeList     = new ArrayList<>();
+    private final Set<Integer> populatedPages = new HashSet<>();
 
     public RecipeEditor(Editor parentEditor, Player player, CraftingTable table) {
         super(parentEditor, EditorRegistry.getRecipeEditorCfg().getTitle(), 54);
@@ -43,35 +49,18 @@ public class RecipeEditor extends Editor implements Listener {
 
     public void initialize() {
         slots.clear();
+        populatedPages.clear();
+        for (Inventory old : getNestedInventories()) {
+            EditorRegistry.unregisterInventory(old);
+        }
         getNestedInventories().clear();
 
-        HashMap<Integer, Recipe> invSlots    = new HashMap<>();
-        List<Inventory>          inventories = new ArrayList<>();
-        Inventory                inv         = null;
-        int                      invSlot     = 0;
-        Collection<Recipe>       recipes     = table.getRecipes().values();
-        for (Recipe entry : recipes) {
-            int invDex = invSlot % 36 + 9;
-            if (invDex == 9) {
-                if (inv != null)
-                    inventories.add(inv);
-                inv = InventoryUtils.createFilledInventory(null,
-                        EditorRegistry.getRecipeEditorCfg().getTitle(),
-                        54,
-                        getIcons().get("fill"));
-                inv.setItem(4, getIcons().get("add"));
-                inv.setItem(48, getIcons().get("previous"));
-                inv.setItem(50, getIcons().get("next"));
-                inv.setItem(53, getIcons().get("back"));
-                invSlots = new HashMap<>();
-            }
-            inv.setItem(invDex, EditorRegistry.getRecipeEditorCfg().getRecipeIcon(entry));
-            invSlots.put(invDex, entry);
-            slots.put(inv, invSlots);
-            invSlot++;
-        }
-        if (inv == null) {
-            inv = InventoryUtils.createFilledInventory(null,
+        recipeList = new ArrayList<>(table.getRecipes().values());
+
+        int             pageCount   = recipeList.isEmpty() ? 1 : (int) Math.ceil(recipeList.size() / 36.0);
+        List<Inventory> inventories = new ArrayList<>();
+        for (int p = 0; p < pageCount; p++) {
+            Inventory inv = InventoryUtils.createFilledInventory(null,
                     EditorRegistry.getRecipeEditorCfg().getTitle(),
                     54,
                     getIcons().get("fill"));
@@ -79,9 +68,28 @@ public class RecipeEditor extends Editor implements Listener {
             inv.setItem(48, getIcons().get("previous"));
             inv.setItem(50, getIcons().get("next"));
             inv.setItem(53, getIcons().get("back"));
+            inventories.add(inv);
         }
-        inventories.add(inv);
         setNestedInventories(inventories);
+        for (Inventory nested : inventories) {
+            EditorRegistry.registerInventory(nested, this);
+        }
+    }
+
+    private void populatePage(int page) {
+        if (page < 0 || page >= getNestedInventories().size()) return;
+        Inventory                inv      = getNestedInventories().get(page);
+        HashMap<Integer, Recipe> invSlots = new HashMap<>();
+        int                      start    = page * 36;
+        int                      end      = Math.min(start + 36, recipeList.size());
+        for (int i = start; i < end; i++) {
+            Recipe entry  = recipeList.get(i);
+            int    invDex = (i - start) + 9;
+            inv.setItem(invDex, EditorRegistry.getRecipeEditorCfg().getRecipeIcon(entry));
+            invSlots.put(invDex, entry);
+        }
+        slots.put(inv, invSlots);
+        populatedPages.add(page);
     }
 
     public void open(Player player) {
@@ -89,8 +97,13 @@ public class RecipeEditor extends Editor implements Listener {
     }
 
     public void open(Player player, int page) {
-        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page)
-                : getNestedInventories().get(page - 1));
+        List<Inventory> invs     = getNestedInventories();
+        int             safePage = (page >= 0 && page < invs.size()) ? page : invs.size() - 1;
+        if (!populatedPages.contains(safePage)) {
+            populatePage(safePage);
+        }
+        suppressCloseNav = true;
+        player.openInventory(invs.get(safePage));
     }
 
     @EventHandler
@@ -117,6 +130,7 @@ public class RecipeEditor extends Editor implements Listener {
                     if (!event.isShiftClick()) {
                         if (event.isLeftClick()) {
                             recipeItemEditor = new RecipeItemEditor(this, player, entry);
+                            suppressCloseNav = true;
                             recipeItemEditor.open(player);
                         } else if (event.isRightClick()) {
                             table.getRecipes().remove(entry.getName());
@@ -140,7 +154,23 @@ public class RecipeEditor extends Editor implements Listener {
 
         if (hasChanges) {
             reload(true);
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!getNestedInventories().contains(event.getInventory())) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        // Fix B: bail if editor was already closed via command (prevents reopening after closeAllEditors)
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> {
+            if (EditorRegistry.getCurrentEditor(player) == null) return;
+            openParent(player);
+        }, 1);
     }
 
     public void reload(boolean open) {

@@ -32,7 +32,8 @@ public class Recipe implements ConfigurationSerializable {
 
     @Setter
     private String name;
-
+    @Setter
+    private String station;
     @Setter
     private int    craftingTime;
     @Setter
@@ -55,6 +56,7 @@ public class Recipe implements ConfigurationSerializable {
         this.table = table;
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
+        this.station = dw.getString("station");
         this.category = dw.getString("category");
 
         this.craftingTime = dw.getInt("craftingTime");
@@ -70,6 +72,7 @@ public class Recipe implements ConfigurationSerializable {
         this.table = table;
         DeserializationWorker dw = DeserializationWorker.start(map);
         this.name = dw.getString("name");
+         this.station = dw.getString("station");
         this.category = dw.getString("category");
 
         this.craftingTime = dw.getInt("craftingTime");
@@ -88,6 +91,7 @@ public class Recipe implements ConfigurationSerializable {
 
     public Recipe(CraftingTable table,
                   String name,
+                  String station,
                   String category,
                   int craftingTime,
                   int craftingLimit,
@@ -98,6 +102,7 @@ public class Recipe implements ConfigurationSerializable {
                   DivinityRecipeMeta meta) {
         this.table = table;
         this.name = name;
+        this.station = station;
         this.category = category;
         this.craftingTime = craftingTime;
         this.craftingLimit = craftingLimit;
@@ -218,6 +223,7 @@ public class Recipe implements ConfigurationSerializable {
                 .append("craftingTime", this.craftingTime)
                 .append("craftingLimit", this.craftingLimit)
                 .append("craftingLimitCooldown", this.craftingLimitCooldown)
+                .append("station", this.station)
                 .toString();
     }
 
@@ -228,7 +234,10 @@ public class Recipe implements ConfigurationSerializable {
                 .append("craftingTime", this.craftingTime)
                 .append("craftingLimit", this.craftingLimit)
                 .append("craftingLimitCooldown", this.craftingLimitCooldown);
-
+    
+        if (station != null) {
+            builder.append("station", this.station);   // <-- DODAJ
+        }
         if (category != null) {
             builder.append("category", this.category);
         }
@@ -248,6 +257,7 @@ public class Recipe implements ConfigurationSerializable {
     public static Recipe copy(Recipe recipe) {
         return new Recipe(recipe.getTable(),
                 recipe.getName(),
+                recipe.getStation(),
                 recipe.getCategory(),
                 recipe.getCraftingTime(),
                 recipe.getCraftingLimit(),

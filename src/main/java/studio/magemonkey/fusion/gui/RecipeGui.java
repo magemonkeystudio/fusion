@@ -33,6 +33,7 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
+import studio.magemonkey.fusion.cfg.FuelManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
@@ -42,7 +43,12 @@ import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.divinity.stats.items.ItemStats;
+import studio.magemonkey.fusion.cfg.hooks.HookType;
+import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityModuleItemType;
+import studio.magemonkey.fusion.data.recipes.RecipeCustomItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.data.recipes.RecipeTagItem;
 import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
 import studio.magemonkey.fusion.gui.recipe.InventoryFingerprint;
 import studio.magemonkey.fusion.gui.recipe.RecipeCacheKey;
@@ -51,6 +57,7 @@ import studio.magemonkey.fusion.hook.VaultHook;
 import studio.magemonkey.fusion.util.ChatUT;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.PlayerUtil;
+import studio.magemonkey.fusion.util.StationChecker;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -380,14 +387,20 @@ public class RecipeGui implements Listener {
                 if (recipeCache.containsKey(cacheKey)) {
                     calc = recipeCache.get(cacheKey);
                 } else {
-                    CalculatedRecipe fresh = CalculatedRecipe.create(
-                            recipe,
-                            new HashMap<>(invCounts),
-                            player,
-                            table
-                    );
-                    recipeCache.put(cacheKey, fresh);
-                    calc = fresh;
+                    try {
+                        CalculatedRecipe fresh = CalculatedRecipe.create(
+                                recipe,
+                                new HashMap<>(invCounts),
+                                player,
+                                table
+                        );
+                        recipeCache.put(cacheKey, fresh);
+                        calc = fresh;
+                    } catch (Exception e) {
+                        Fusion.getInstance().getLogger()
+                                .warning("Failed to load recipe '" + recipe.getName() + "': " + e.getMessage());
+                        continue;
+                    }
                 }
 
                 recipes.put(slotIndex, calc);
@@ -661,6 +674,12 @@ public class RecipeGui implements Listener {
             return false;
         }
 
+        String station = recipe.getConditions().getStation();
+        if (station != null && !station.isEmpty() && !StationChecker.hasStation(player, station)) {
+            player.sendMessage(ChatColor.RED + "YOU DON'T HAVE REQUIRED STATION");
+            return false;
+        }
+
         if (!Objects.equals(this.recipes.get(slot), calculatedRecipe)) {
             return false;
         }
@@ -681,6 +700,13 @@ public class RecipeGui implements Listener {
             CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("fusion.error.noFunds", player, new MessageData("recipe", recipe));
+            return false;
+        }
+
+        int fuelCost = recipe.getConditions().getFuelCost();
+        if (!FuelManager.hasFuel(fuelCost)) {
+            player.sendMessage(ChatColor.RED + "Not enough fuel! Need " + fuelCost
+                    + ", have " + FuelManager.getFuel() + ".");
             return false;
         }
 
@@ -709,6 +735,24 @@ public class RecipeGui implements Listener {
                     .getMessageUtil()
                     .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
             return false;
+        }
+
+        if (Fusion.getInstance().getHookManager().isHooked(HookType.Divinity)) {
+            for (RecipeItem required : recipe.getConditions().getRequiredItems()) {
+                if (!(required instanceof RecipeCustomItem rci)) continue;
+                if (!(rci.getItemType() instanceof DivinityModuleItemType dmt)) continue;
+                String requiredId = dmt.getModuleItem().getId();
+                for (ItemStack invItem : player.getInventory().getContents()) {
+                    if (invItem == null || invItem.getType().isAir()) continue;
+                    if (!requiredId.equals(ItemStats.getId(invItem))) continue;
+                    ItemMeta meta = invItem.getItemMeta();
+                    if (meta == null) continue;
+                    if (!meta.getEnchants().isEmpty() || IngredientFingerprint.hasSocketFill(invItem)) {
+                        player.sendMessage(ChatColor.RED + "You can't use an item with enchants, gems, essences or runes as an ingredient.");
+                        return false;
+                    }
+                }
+            }
         }
 
         return true;
@@ -755,7 +799,7 @@ public class RecipeGui implements Listener {
         //
         // ─── 1) Build a local copy of the ingredient list ───
         //
-        List<ItemStack> requiredItems = new ArrayList<>(recipe.getItemsToTake());
+        List<RecipeItem> requiredItems = new ArrayList<>(recipe.getConditions().getRequiredItems());
         // Track exactly what we remove, so we can refund on failure
         List<ItemStack> removedSoFar = new ArrayList<>();
 
@@ -765,16 +809,21 @@ public class RecipeGui implements Listener {
         //
         // ─── 2) For each required ingredient, manually drain across all matching slots ───
         //
-        for (ItemStack required : requiredItems) {
-            int need = required.getAmount();
-            IngredientFingerprint neededFingerprint = IngredientFingerprint.of(required);
+        for (RecipeItem required : requiredItems) {
+            int                   need              = required.getAmount();
+            IngredientFingerprint neededFingerprint =
+                    (required instanceof RecipeTagItem) ? null : IngredientFingerprint.forRequired(required);
 
             for (int slotIndex = 0; slotIndex < inv.getSize() && need > 0; slotIndex++) {
                 ItemStack slotStack = inv.getItem(slotIndex);
                 if (slotStack == null || slotStack.getType() == Material.AIR) continue;
 
-                IngredientFingerprint slotFingerprint = IngredientFingerprint.of(slotStack);
-                if (!neededFingerprint.equals(slotFingerprint)) continue;
+                if (required instanceof RecipeTagItem tagItem) {
+                    if (!tagItem.getTag().isTagged(slotStack.getType())) continue;
+                } else {
+                    IngredientFingerprint slotFingerprint = IngredientFingerprint.of(slotStack);
+                    if (!neededFingerprint.equals(slotFingerprint)) continue;
+                }
 
                 int available = slotStack.getAmount();
                 int take = Math.min(available, need);
@@ -786,7 +835,7 @@ public class RecipeGui implements Listener {
                     inv.setItem(slotIndex, slotStack);
                 }
 
-                ItemStack actuallyTaken = required.clone();
+                ItemStack actuallyTaken = slotStack.clone();
                 actuallyTaken.setAmount(take);
                 removedSoFar.add(actuallyTaken);
 
@@ -830,7 +879,7 @@ public class RecipeGui implements Listener {
                     recipe.getCraftingTime() - (recipe.getCraftingTime() * modifier)
             );
 
-            showBossBar(this.player, recipe.getSettings().getRecipeItem().getItemStack(), cooldown);
+            showBossBar(this.player, resultItem, cooldown);
 
             if (cooldown != 0) {
                 previousCursor = player.getOpenInventory().getCursor();
@@ -845,7 +894,7 @@ public class RecipeGui implements Listener {
                 if (recipe.getResults().getCommands().isEmpty()) {
                     if (addToCursor) {
                         ItemStack cursor = this.player.getItemOnCursor();
-                        if (cursor.isSimilar(recipe.getSettings().getRecipeItem().getItemStack())) {
+                        if (cursor.isSimilar(resultItem)) {
                             if (cursor.getAmount() < cursor.getMaxStackSize()
                                     && cursor.getAmount() + recipe.getSettings().getRecipeItem().getAmount()
                                     <= cursor.getMaxStackSize()) {
@@ -877,6 +926,7 @@ public class RecipeGui implements Listener {
                 if (craftingSuccess) {
                     cancel(false);
                     CodexEngine.get().getVault().take(this.player, recipe.getConditions().getMoneyCost());
+                    FuelManager.consumeFuel(recipe.getConditions().getFuelCost());
                     // Commands
                     DelayedCommand.invoke(Fusion.getInstance(), player, recipe.getResults().getCommands());
 
@@ -907,6 +957,7 @@ public class RecipeGui implements Listener {
         } else {
             if (recipe.getConditions().getMoneyCost() != 0 && CodexEngine.get().getVault() != null)
                 CodexEngine.get().getVault().take(this.player, recipe.getConditions().getMoneyCost());
+            FuelManager.consumeFuel(recipe.getConditions().getFuelCost());
             this.queue.addRecipe(this.recipes.get(slot).getRecipe());
         }
         return true;
@@ -1045,7 +1096,6 @@ public class RecipeGui implements Listener {
             event.setCancelled(true);
             event.setResult(Event.Result.DENY);
             Fusion.getInstance().runSync(() -> {
-                this.reloadRecipes();
                 this.craft(event.getRawSlot(), false);
                 this.reloadRecipesTask();
             });

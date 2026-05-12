@@ -28,6 +28,8 @@ public enum EditorCriteria {
     Profession_Recipe_Add_Items,
     Profession_Recipe_Add_Conditions,
     Profession_Recipe_Edit_Permission,
+    Profession_Recipe_Edit_Station,
+    Profession_Recipe_Edit_FuelCost,
 
     // Recipe Icon
     RecipeIcon_Edit_Name,

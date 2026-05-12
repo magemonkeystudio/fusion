@@ -10,17 +10,21 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.Cfg;
+import studio.magemonkey.fusion.cfg.FuelManager;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
 import studio.magemonkey.fusion.data.professions.Profession;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
+import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityModuleItemType;
 import studio.magemonkey.fusion.data.recipes.CalculatedRecipe;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.data.recipes.RecipeCustomItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.gui.BrowseGUI;
+import studio.magemonkey.fusion.gui.FuelGUI;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.gui.RecipeGui;
 import studio.magemonkey.fusion.gui.show.ShowRecipesGui;
@@ -84,7 +88,7 @@ public class CommandMechanics {
                     return;
                 }
                 //Make sure they have unlocked this crafting menu
-                if (!PlayerLoader.getPlayer(player).hasProfession(eq.getProfession())) {
+                if (!PlayerLoader.getPlayer(player).hasJoined(eq.getProfession())) {
                     if (player.isOp()) {
                         openGui(player, eq, category);
                         CodexEngine.get().getMessageUtil().sendMessage("fusion.useConfirm",
@@ -308,6 +312,67 @@ public class CommandMechanics {
                 .sendMessage("fusion.autoToggle", player, new MessageData("state", autoOn ? "on" : "off"));
     }
 
+    /**
+     * Handles /craft fuel [add|remove|set|check|gui] [amount]
+     * Permission: fusion.admin
+     */
+    public static void handleFuel(CommandSender sender, String[] args) {
+        if (!Fusion.getInstance().checkPermission(sender, "fusion.admin")) return;
+
+        // /craft fuel  (no subcommand → show status)
+        if (args.length < 2 || args[1].equalsIgnoreCase("check")) {
+            sender.sendMessage(org.bukkit.ChatColor.GOLD + "[Fuel] " + org.bukkit.ChatColor.YELLOW
+                    + "Current: " + org.bukkit.ChatColor.WHITE + FuelManager.getFuel()
+                    + org.bukkit.ChatColor.YELLOW + " / " + org.bukkit.ChatColor.WHITE + FuelManager.getMaxFuel());
+            return;
+        }
+
+        // /craft fuel gui  — open fuel GUI (players only)
+        if (args[1].equalsIgnoreCase("gui")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(org.bukkit.ChatColor.RED + "This command can only be used by players.");
+                return;
+            }
+            FuelGUI.open(player);
+            return;
+        }
+
+        // All remaining subcommands require an amount argument
+        if (args.length < 3) {
+            sender.sendMessage(org.bukkit.ChatColor.RED + "Usage: /craft fuel <add|remove|set|check|gui> [amount]");
+            return;
+        }
+
+        int amount;
+        try {
+            amount = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(org.bukkit.ChatColor.RED + "Invalid amount: " + args[2]);
+            return;
+        }
+
+        switch (args[1].toLowerCase()) {
+            case "add" -> {
+                int added = FuelManager.addFuel(amount);
+                sender.sendMessage(org.bukkit.ChatColor.GREEN + "[Fuel] Added " + added
+                        + ". New total: " + FuelManager.getFuel() + "/" + FuelManager.getMaxFuel());
+            }
+            case "remove" -> {
+                int before = FuelManager.getFuel();
+                FuelManager.setFuel(before - amount);
+                sender.sendMessage(org.bukkit.ChatColor.GREEN + "[Fuel] Removed " + (before - FuelManager.getFuel())
+                        + ". New total: " + FuelManager.getFuel() + "/" + FuelManager.getMaxFuel());
+            }
+            case "set" -> {
+                FuelManager.setFuel(amount);
+                sender.sendMessage(org.bukkit.ChatColor.GREEN + "[Fuel] Set to " + FuelManager.getFuel()
+                        + "/" + FuelManager.getMaxFuel());
+            }
+            default -> sender.sendMessage(org.bukkit.ChatColor.RED
+                    + "Usage: /craft fuel <add|remove|set|check|gui> [amount]");
+        }
+    }
+
     public static void reloadPlugin(CommandSender sender) {
         if (!Fusion.getInstance().checkPermission(sender, "fusion.reload")) {
             return;
@@ -460,7 +525,16 @@ public class CommandMechanics {
         for (CraftingTable table : ProfessionsCfg.getMap().values()) {
             for (Recipe recipe : table.getRecipes().values()) {
                 for (RecipeItem ingredient : recipe.getConditions().getRequiredItems()) {
-                    if (CalculatedRecipe.isSimilar(ingredient.getItemStack(), item)) {
+                    boolean matches;
+                    // For DIV_ module items, use type-identity check instead of isSimilar()
+                    // because getItemStack() generates a fresh random-stat item each call.
+                    if (ingredient instanceof RecipeCustomItem rci
+                            && rci.getItemType() instanceof DivinityModuleItemType divType) {
+                        matches = divType.isInstance(item);
+                    } else {
+                        matches = CalculatedRecipe.isSimilar(ingredient.getItemStack(), item);
+                    }
+                    if (matches) {
                         recipeUsage.put(recipe, ingredient);
                     }
                 }
@@ -718,7 +792,14 @@ public class CommandMechanics {
         for (CraftingTable table : ProfessionsCfg.getMap().values()) {
             for (Recipe recipe : table.getRecipes().values()) {
                 for (RecipeItem ingredient : recipe.getConditions().getRequiredItems()) {
-                    if (CalculatedRecipe.isSimilar(ingredient.getItemStack(), item)) {
+                    boolean matches;
+                    if (ingredient instanceof RecipeCustomItem rci
+                            && rci.getItemType() instanceof DivinityModuleItemType divType) {
+                        matches = divType.isInstance(item);
+                    } else {
+                        matches = CalculatedRecipe.isSimilar(ingredient.getItemStack(), item);
+                    }
+                    if (matches) {
                         recipeUsage.put(recipe, ingredient);
                     }
                 }

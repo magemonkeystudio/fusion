@@ -45,7 +45,7 @@ public class ProfessionLevelCfg {
     }
 
     public double getXP(int level) {
-        return levelMap.get(level);
+        return levelMap.getOrDefault(level, 0.0);
     }
 
     public int getLevel(double xp) {

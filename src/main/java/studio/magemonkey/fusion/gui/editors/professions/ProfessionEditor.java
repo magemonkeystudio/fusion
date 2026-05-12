@@ -1,23 +1,26 @@
 package studio.magemonkey.fusion.gui.editors.professions;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import studio.magemonkey.codex.CodexEngine;
-import studio.magemonkey.codex.util.messages.MessageData;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.scheduler.BukkitTask;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternEditor;
 import studio.magemonkey.fusion.gui.editors.pattern.PatternItemsEditor;
 import studio.magemonkey.fusion.gui.editors.professions.recipes.RecipeEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
+import studio.magemonkey.fusion.util.TabCacher;
 
 @Getter
 public class ProfessionEditor extends Editor implements Listener {
@@ -25,6 +28,8 @@ public class ProfessionEditor extends Editor implements Listener {
     private final Player        player;
     private final String        profession;
     private final CraftingTable table;
+
+    private BukkitTask pendingSaveTask;
 
     private PatternItemsEditor patternItemsEditor;
     private PatternEditor      patternEditor;
@@ -37,13 +42,36 @@ public class ProfessionEditor extends Editor implements Listener {
         super(null, EditorRegistry.getProfessionEditorCfg().getTitle(profession), 45);
         this.player = player;
         this.profession = profession;
-        // Copy the table to prevent changes to the original table while people do crafting
-        this.table = CraftingTable.copy(ProfessionsCfg.getTable(profession));
-        table.cleanUpRecipesForEditor();
+        // Copy the table, deduplicating ItemGen pseudo-recipes (name::material) in one pass
+        this.table = CraftingTable.copyForEditor(ProfessionsCfg.getTable(profession));
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
 
         initialize();
         Fusion.registerListener(this);
+    }
+
+    public void autoSave() {
+        if (pendingSaveTask != null) {
+            pendingSaveTask.cancel();
+        }
+        pendingSaveTask = Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), this::saveImmediate, 20L);
+    }
+
+    public void saveNow() {
+        if (pendingSaveTask != null) {
+            pendingSaveTask.cancel();
+            pendingSaveTask = null;
+        }
+        saveImmediate();
+    }
+
+    private void saveImmediate() {
+        pendingSaveTask = null;
+        table.save(() -> {
+            ProfessionsCfg.getMap().put(profession, table);
+            ProfessionsCfg.getGuiMap().put(profession, new ProfessionGuiRegistry(profession));
+            TabCacher.clearAllCaches("professions");
+        });
     }
 
     private void initialize() {
@@ -61,7 +89,6 @@ public class ProfessionEditor extends Editor implements Listener {
         setItem(32, getIcons().get("categories"));
         setItem(33, getIcons().get("categoryPatternItems"));
         setItem(34, getIcons().get("categoryPattern"));
-        setItem(36, getIcons().get("save"));
         setItem(44, getIcons().get("back"));
     }
 
@@ -113,8 +140,9 @@ public class ProfessionEditor extends Editor implements Listener {
                 }
             }
             case 16 -> {
-                if (recipeEditor == null)
-                    recipeEditor = new RecipeEditor(this, player, table);
+                if (recipeEditor != null) recipeEditor.dispose();
+                recipeEditor = new RecipeEditor(this, player, table);
+                suppressCloseNav = true;
                 recipeEditor.open(player);
             }
             case 28 -> {
@@ -122,29 +150,34 @@ public class ProfessionEditor extends Editor implements Listener {
                 hasChanges = true;
             }
             case 29 -> {
-                if (patternItemsEditor == null)
-                    patternItemsEditor = new PatternItemsEditor(this, player, table, false);
+                if (patternItemsEditor != null) patternItemsEditor.dispose();
+                patternItemsEditor = new PatternItemsEditor(this, player, table, false);
+                suppressCloseNav = true;
                 patternItemsEditor.open(player);
             }
             case 30 -> {
-                if (patternEditor == null)
-                    patternEditor = new PatternEditor(this, player, table, false);
+                if (patternEditor != null) patternEditor.dispose();
+                patternEditor = new PatternEditor(this, player, table, false);
+                suppressCloseNav = true;
                 patternEditor.open(player);
             }
             case 32 -> {
-                if (categoryEditor == null)
-                    categoryEditor = new CategoryEditor(this, player, table);
+                if (categoryEditor != null) categoryEditor.dispose();
+                categoryEditor = new CategoryEditor(this, player, table);
+                suppressCloseNav = true;
                 categoryEditor.open(player);
             }
             case 33 -> {
-                if (categoryPatternItemEditor == null)
-                    categoryPatternItemEditor = new PatternItemsEditor(this, player, table, true);
+                if (categoryPatternItemEditor != null) categoryPatternItemEditor.dispose();
+                categoryPatternItemEditor = new PatternItemsEditor(this, player, table, true);
+                suppressCloseNav = true;
                 categoryPatternItemEditor.open(player);
             }
             case 34 -> {
                 if (event.isLeftClick()) {
-                    if (categoryPatternEditor == null)
-                        categoryPatternEditor = new PatternEditor(this, player, table, true);
+                    if (categoryPatternEditor != null) categoryPatternEditor.dispose();
+                    categoryPatternEditor = new PatternEditor(this, player, table, true);
+                    suppressCloseNav = true;
                     categoryPatternEditor.open(player);
                 } else if (event.isRightClick()) {
                     if (table.getCatPattern() != null) {
@@ -152,32 +185,41 @@ public class ProfessionEditor extends Editor implements Listener {
                     }
                 }
             }
-            case 36 -> table.save(() -> {
+            case 44 -> {
+                saveNow();
+                suppressCloseNav = true;
+                dispose();
                 player.closeInventory();
-                CodexEngine.get()
-                        .getMessageUtil()
-                        .sendMessage("editor.changesSaved",
-                                player,
-                                new MessageData("file", ProfessionsCfg.getFiles().get(profession).getName()));
                 EditorRegistry.removeCurrentEditor(player);
                 FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
-                ProfessionsCfg.init();
-            });
-            case 44 -> {
-                player.closeInventory();
-                hasChanges = true;
             }
         }
 
         if (hasChanges) {
             reload(true);
+            autoSave();
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() != getInventory()) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        saveNow();
+        EditorRegistry.removeCurrentEditor(player);
+        FusionEditorCommand.removeEditorCriteria(player.getUniqueId());
+        dispose();
     }
 
     public void reload(boolean open) {
         setIcons(EditorRegistry.getProfessionEditorCfg().getIcons(table));
         initialize();
-        if (open)
+        if (open) {
+            suppressCloseNav = true;
             open(player);
+        }
     }
 }

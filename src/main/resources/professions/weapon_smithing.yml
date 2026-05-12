@@ -203,14 +203,27 @@ categoryPattern: null
 categories:
   # Category for wooden weapons with first slot in order
   - name: wooden_weapons
+    # Optional display block: use 'display.name' to set a custom name shown in the GUI
+    # (falls back to 'name' if omitted). 'display.lore' adds lines below the icon.
+    display:
+      name: "&6Wooden Weapons"
+      lore:
+        - "&7Basic wooden armaments"
     icon: WOODEN_SWORD
     order: 1
+    # Optional: 'slot' pins this category to a specific result-slot index (0-based).
+    # Omit or set to -1 for automatic sequential placement.
+    # slot: 0
   # Category for stone weapons with second slot in order
   - name: stone_weapons
+    display:
+      name: "&7Stone Weapons"
     icon: STONE_SWORD
     order: 2
   # Category for iron weapons with third slot in order
   - name: iron_weapons
+    display:
+      name: "&fIron Weapons"
     icon: IRON_SWORD
     order: 3
     # This pattern is null now. You can however structure it 1:1 like the `pattern`-section
@@ -327,4 +340,32 @@ recipes:
     conditions:
       professionLevel: 5
       mastery: false
+
+  # ── Divinity item example ──────────────────────────────────────────────────
+  # Requires Divinity plugin. Replace "my_sword" with an actual item ID from
+  # your Divinity ItemGenerator configuration.
+  #
+  # Ingredient format:  DIV_ITEMGEN_<id>:<amount>;<minLevel>
+  #                     DIV_GEM_<id>:<amount>  |  DIV_ESSENCE_<id>:<amount>  |  DIV_RUNE_<id>:<amount>
+  # Result format:      DIV_ITEMGEN_<id>~level:<level>:<amount>
+  #                     Optional suffix _NOENCH prevents enchantments on match.
+  #
+  # - name: DivinityBlade
+  #   craftingTime: 30
+  #   category: iron_weapons
+  #   results:
+  #     vanillaExp: 0
+  #     item: DIV_ITEMGEN_my_sword~level:10:1   # result: 1x my_sword at level 10
+  #     professionExp: 100
+  #     commands: []
+  #   costs:
+  #     money: 500.0
+  #     exp: 0
+  #     items:
+  #       - DIV_ITEMGEN_my_sword:2;5            # ingredient: 2x my_sword, minimum level 5
+  #       - DIV_GEM_ruby:1                      # ingredient: 1x ruby gem
+  #   conditions:
+  #     professionLevel: 20
+  #     mastery: false
+  # ──────────────────────────────────────────────────────────────────────────
 

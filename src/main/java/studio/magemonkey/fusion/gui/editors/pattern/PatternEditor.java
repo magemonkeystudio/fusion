@@ -13,6 +13,7 @@ import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -116,6 +117,8 @@ public class PatternEditor extends Editor implements Listener {
             else
                 setIcons(EditorRegistry.getPatternEditorCfg().getIcons(browseEditor));
             initialize();
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
     }
 

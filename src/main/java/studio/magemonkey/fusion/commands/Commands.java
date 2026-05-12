@@ -107,6 +107,10 @@ public class Commands implements CommandExecutor, TabCompleter {
                 }
                 return true;
             }
+            case "fuel" -> {
+                CommandMechanics.handleFuel(sender, args);
+                return true;
+            }
             default -> CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("fusion.help", sender, new MessageData("sender", sender),
@@ -147,6 +151,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 entries.add("show");
             if (sender.hasPermission("fusion.admin") && "exp".startsWith(args[0])) entries.add("exp");
             if (sender.hasPermission("fusion.admin") && "level".startsWith(args[0])) entries.add("level");
+            if (sender.hasPermission("fusion.admin") && "fuel".startsWith(args[0])) entries.add("fuel");
             // Force commands for administrators
             if (sender.hasPermission("fusion.admin.force")) {
                 if ("forcejoin".startsWith(args[0])) entries.add("forcejoin");
@@ -195,6 +200,10 @@ public class Commands implements CommandExecutor, TabCompleter {
                 if ("add".startsWith(args[1].toLowerCase())) entries.add("add");
                 if ("set".startsWith(args[1].toLowerCase())) entries.add("set");
                 if ("take".startsWith(args[1].toLowerCase())) entries.add("take");
+            } else if (args[0].equalsIgnoreCase("fuel") && sender.hasPermission("fusion.admin")) {
+                for (String sub : List.of("add", "remove", "set", "check", "gui")) {
+                    if (sub.startsWith(args[1].toLowerCase())) entries.add(sub);
+                }
             }
             // Tab completion for force commands - player names
             else if (sender.hasPermission("fusion.admin.force") && 
