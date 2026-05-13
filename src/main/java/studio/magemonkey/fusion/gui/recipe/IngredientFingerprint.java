@@ -154,7 +154,11 @@ public class IngredientFingerprint {
                 enchantsMap,
                 unbreak,
                 dmg,
+<<<<<<< Updated upstream
                 hasSocketFill(meta),
+=======
+                divId != null && hasSocketFill(meta), // non-Divinity items can't have Divinity sockets
+>>>>>>> Stashed changes
                 divId,
                 divLevel);
     }

@@ -81,7 +81,11 @@ public class RecipeGuiEventRouter implements Listener {
 
         gui.close(p, inv);
 
+<<<<<<< Updated upstream
         if (event.getReason() == InventoryCloseEvent.Reason.PLAYER) {
+=======
+        if (isPlayerClose(event)) {
+>>>>>>> Stashed changes
             CraftingTable table = gui.getTable();
             if (table.getUseCategories() && !table.getCategories().isEmpty()) {
                 Bukkit.getScheduler().runTaskLater(Fusion.getInstance(),
@@ -128,5 +132,16 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = ProfessionGuiRegistry.getLatestRecipeGui().get(p.getUniqueId());
         if (gui == null) return;
         gui.close(p, gui.getInventory());
+    }
+
+    /** Paper-safe check: returns true if the close was initiated by the player (not plugin-triggered).
+     *  Falls back to true on Spigot where getReason() doesn't exist. */
+    private static boolean isPlayerClose(InventoryCloseEvent event) {
+        try {
+            Object reason = event.getClass().getMethod("getReason").invoke(event);
+            return reason != null && "PLAYER".equals(reason.toString());
+        } catch (Exception ignored) {
+            return true; // Spigot: no getReason(), treat all closes as player-initiated
+        }
     }
 }

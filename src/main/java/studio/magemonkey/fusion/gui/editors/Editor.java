@@ -68,8 +68,15 @@ public class Editor {
             HandlerList.unregisterAll(listener);
         }
         EditorRegistry.unregisterInventory(this.inventory);
+<<<<<<< Updated upstream
         for (Inventory nested : nestedInventories) {
             EditorRegistry.unregisterInventory(nested);
+=======
+        if (nestedInventories != null) {
+            for (Inventory nested : nestedInventories) {
+                EditorRegistry.unregisterInventory(nested);
+            }
+>>>>>>> Stashed changes
         }
     }
 

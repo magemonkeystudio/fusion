@@ -778,10 +778,12 @@ public class RecipeGui implements Listener {
         // Add "Crafted by" lore if the player has permission
         if (player.hasPermission("fusion.craftedby." + recipe.getName())) {
             ItemMeta meta = resultItem.getItemMeta();
-            List<String> lore = (meta != null && meta.hasLore()) ? meta.getLore() : new ArrayList<>();
-            lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());
-            meta.setLore(lore);
-            resultItem.setItemMeta(meta);
+            if (meta != null) {
+                List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+                lore.add(ChatColor.WHITE + " - " + ChatColor.YELLOW + "Crafted by: " + ChatColor.WHITE + player.getName());
+                meta.setLore(lore);
+                resultItem.setItemMeta(meta);
+            }
         }
 
         // If adding directly to cursor, ensure enough room

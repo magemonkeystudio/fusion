@@ -280,8 +280,11 @@ public class CalculatedRecipe {
             // Build final icon + lore
             ItemStack icon = iconResult.clone();
             ItemMeta  im   = icon.getItemMeta();
-            im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
-            icon.setItemMeta(im);
+            if (im == null) im = Bukkit.getItemFactory().getItemMeta(icon.getType());
+            if (im != null) {
+                im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
+                icon.setItemMeta(im);
+            }
 
             return new CalculatedRecipe(recipe, icon, canCraft);
         } catch (Exception e) {

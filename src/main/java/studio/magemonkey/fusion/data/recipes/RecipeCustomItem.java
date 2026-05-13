@@ -34,6 +34,15 @@ public class RecipeCustomItem implements RecipeItem {
     @ToString.Exclude
     private final String originalKey;
 
+<<<<<<< Updated upstream
+=======
+    /** Cached result of getItemStack() — avoids re-generating DIV_ITEMGEN random stats on every render.
+     *  Naturally invalidated when config reloads (new RecipeCustomItem instances are created). */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private transient ItemStack displayCache;
+
+>>>>>>> Stashed changes
     public RecipeCustomItem(@NotNull ItemType item, int amount, boolean simple) {
         this(item, amount, simple, null);
     }
@@ -74,17 +83,18 @@ public class RecipeCustomItem implements RecipeItem {
 
     @Override
     public ItemStack getItemStack() {
-        ItemStack clone = null;
+        if (displayCache != null) return displayCache.clone();
+        ItemStack built;
         if (this.item != null) {
-            clone = this.item.create();
+            built = this.item.create();
         } else if (this.builder != null) {
-            clone = this.builder.build();
+            built = this.builder.build();
         } else {
-            clone = this.meta.generateItem();
+            built = this.meta.generateItem();
         }
-
-        clone.setAmount(clone.getAmount() * this.amount);
-        return clone;
+        built.setAmount(built.getAmount() * this.amount);
+        displayCache = built.clone();
+        return built;
     }
 
     @Override
