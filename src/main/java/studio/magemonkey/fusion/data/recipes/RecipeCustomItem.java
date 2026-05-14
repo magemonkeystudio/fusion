@@ -34,21 +34,12 @@ public class RecipeCustomItem implements RecipeItem {
     @ToString.Exclude
     private final String originalKey;
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
     /** Cached result of getItemStack() — avoids re-generating DIV_ITEMGEN random stats on every render.
      *  Naturally invalidated when config reloads (new RecipeCustomItem instances are created). */
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private transient ItemStack displayCache;
 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     public RecipeCustomItem(@NotNull ItemType item, int amount, boolean simple) {
         this(item, amount, simple, null);
     }
