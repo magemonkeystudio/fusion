@@ -82,7 +82,11 @@ public class RecipeGuiEventRouter implements Listener {
         gui.close(p, inv);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         if (event.getReason() == InventoryCloseEvent.Reason.PLAYER) {
+=======
+        if (isPlayerClose(event)) {
+>>>>>>> Stashed changes
 =======
         if (isPlayerClose(event)) {
 >>>>>>> Stashed changes

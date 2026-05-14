@@ -369,6 +369,7 @@ public class FusionPlayer {
 
         Runnable saveTask = () -> {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             SQLManager.players().setAutoCrafting(uuid, autoCrafting);
             for (Profession profession : professions.values()) {
                 SQLManager.professions().setProfession(uuid, profession);
@@ -380,6 +381,8 @@ public class FusionPlayer {
             SQLManager.players().setLocked(uuid, false);
             this.locked = false;
 =======
+=======
+>>>>>>> Stashed changes
             try {
                 SQLManager.players().setAutoCrafting(uuid, autoCrafting);
                 for (Profession profession : professions.values()) {
@@ -393,6 +396,9 @@ public class FusionPlayer {
                 SQLManager.players().setLocked(uuid, false);
                 this.locked = false;
             }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         };
         // Fix D: save synchronously during shutdown so the scheduler can't cancel the task
