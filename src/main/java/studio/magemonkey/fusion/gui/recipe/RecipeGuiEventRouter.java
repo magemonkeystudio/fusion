@@ -82,14 +82,7 @@ public class RecipeGuiEventRouter implements Listener {
         gui.close(p, inv);
 
 <<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        if (event.getReason() == InventoryCloseEvent.Reason.PLAYER) {
-=======
         if (isPlayerClose(event)) {
->>>>>>> Stashed changes
-=======
-        if (isPlayerClose(event)) {
->>>>>>> Stashed changes
             CraftingTable table = gui.getTable();
             if (table.getUseCategories() && !table.getCategories().isEmpty()) {
                 Bukkit.getScheduler().runTaskLater(Fusion.getInstance(),
