@@ -23,15 +23,15 @@ import studio.magemonkey.fusion.gui.RecipeGui;
 
 /**
  * Centralized listener for all RecipeGui‐related events.
- * For each incoming event, we look up the player’s FusionPlayer and its cachedGuis.
- * If an event’s Inventory matches one of the cached RecipeGui inventories, we forward
- * to that RecipeGui’s click/drag/close/drop logic.
+ * For each incoming event, we look up the player's FusionPlayer and its cachedGuis.
+ * If an event's Inventory matches one of the cached RecipeGui inventories, we forward
+ * to that RecipeGui's click/drag/close/drop logic.
  */
 public class RecipeGuiEventRouter implements Listener {
 
     /**
      * Look up, for a given Player, which RecipeGui (if any) has this exact Inventory open.
-     * We fetch that player’s FusionPlayer via PlayerLoader.getPlayer(Player).
+     * We fetch that player's FusionPlayer via PlayerLoader.getPlayer(Player).
      */
     private RecipeGui findGuiFor(Player player, Inventory inv) {
         if (!ProfessionGuiRegistry.getLatestRecipeGui().containsKey(player.getUniqueId()))
@@ -50,7 +50,7 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = findGuiFor(p, inv);
         if (gui == null || inv == null) return;
 
-        // Only forward if the clicked inventory is *exactly* the GUI’s inventory
+        // Only forward if the clicked inventory is *exactly* the GUI's inventory
         if (!inv.equals(gui.getInventory())) return;
         if (event.getRawSlot() < 0) return;
 
@@ -65,10 +65,10 @@ public class RecipeGuiEventRouter implements Listener {
         RecipeGui gui = findGuiFor(p, inv);
         if (gui == null) return;
 
-        // Only route if the drag is happening inside this GUI’s inventory
+        // Only route if the drag is happening inside this GUI's inventory
         if (!inv.equals(gui.getInventory())) return;
 
-        // Delegate to RecipeGui’s drag logic
+        // Delegate to RecipeGui's drag logic
         gui.onDrag(event);
     }
 
@@ -81,7 +81,6 @@ public class RecipeGuiEventRouter implements Listener {
 
         gui.close(p, inv);
 
-<<<<<<< Updated upstream
         if (isPlayerClose(event)) {
             CraftingTable table = gui.getTable();
             if (table.getUseCategories() && !table.getCategories().isEmpty()) {
