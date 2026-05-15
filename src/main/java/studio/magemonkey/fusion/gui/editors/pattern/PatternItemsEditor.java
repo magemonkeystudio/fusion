@@ -1,11 +1,13 @@
 package studio.magemonkey.fusion.gui.editors.pattern;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
@@ -14,6 +16,7 @@ import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.*;
@@ -166,6 +169,7 @@ public class PatternItemsEditor extends Editor implements Listener {
                                             player,
                                             slots.get(event.getSlot()));
                             }
+                            suppressCloseNav = true;
                             patternItemEditor.open(player);
                         } else {
                             char c = slots.get(event.getSlot());
@@ -208,7 +212,19 @@ public class PatternItemsEditor extends Editor implements Listener {
 
         if (hasChanges) {
             reload(false);
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() != getInventory()) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> openParent(player), 1);
     }
 
     public void reload(boolean open) {

@@ -1,11 +1,13 @@
 package studio.magemonkey.fusion.gui.editors.professions.recipes;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemFlag;
 import studio.magemonkey.codex.api.DelayedCommand;
 import studio.magemonkey.fusion.Fusion;
@@ -14,6 +16,7 @@ import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
@@ -161,14 +164,26 @@ public class RecipeIconEditor extends Editor implements Listener {
                 }
             }
             case 44 -> {
-                getParentEditor().open(player);
+                openParent(player);
                 return;
             }
         }
 
         if (hasChanges) {
             reload(true);
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() != getInventory()) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> openParent(player), 1);
     }
 
     public void reload(boolean open) {

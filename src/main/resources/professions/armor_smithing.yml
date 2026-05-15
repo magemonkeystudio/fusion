@@ -202,7 +202,17 @@ pattern:
 # Since here are no patterns, we can leave this empty too in theory
 categoryPattern: null
 # The categories that are used for the profession.
-# Since we disabled categories, we can leave this empty
+# Since we disabled categories, we can leave this empty.
+# Example of the new category format with optional display name, lore, and slot:
+#categories:
+#  - name: light_armor
+#    display:
+#      name: "&bLight Armor"
+#      lore:
+#        - "&7Leather and chainmail pieces"
+#    icon: LEATHER_CHESTPLATE
+#    order: 1
+#    # slot: 0   # pins this category to result-slot index 0 (optional)
 categories: []
 
 # The recipes that are shown in this profession
@@ -318,3 +328,29 @@ recipes:
       enableLore: true
       lore:
         - 'These are chain boots'
+
+  # ── Divinity item example ──────────────────────────────────────────────────
+  # Requires Divinity plugin. Replace "my_helmet" with an actual item ID from
+  # your Divinity ItemGenerator configuration.
+  #
+  # Ingredient format:  DIV_ITEMGEN_<id>:<amount>;<minLevel>
+  #                     DIV_ESSENCE_<id>:<amount>  |  DIV_RUNE_<id>:<amount>
+  # Result format:      DIV_ITEMGEN_<id>~level:<level>:<amount>
+  #
+  # - name: DivinityHelmet
+  #   craftingTime: 30
+  #   results:
+  #     vanillaExp: 0
+  #     item: DIV_ITEMGEN_my_helmet~level:10:1  # result: 1x my_helmet at level 10
+  #     professionExp: 100
+  #     commands: []
+  #   costs:
+  #     money: 500.0
+  #     exp: 0
+  #     items:
+  #       - DIV_ITEMGEN_my_helmet:2;5           # ingredient: 2x my_helmet, minimum level 5
+  #       - DIV_ESSENCE_fire:1                  # ingredient: 1x fire essence
+  #   conditions:
+  #     professionLevel: 20
+  #     mastery: false
+  # ──────────────────────────────────────────────────────────────────────────

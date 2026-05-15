@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import studio.magemonkey.codex.CodexEngine;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
@@ -12,6 +14,7 @@ import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.List;
@@ -56,6 +59,11 @@ public class RecipeItemEditor extends Editor implements Listener {
         setItem(41, getIcons().get("mastery"));
         setItem(42, getIcons().get("permission"));
         setItem(43, getIcons().get("conditions"));
+        setItem(35, getIcons().get("highlight"));
+        setItem(36, getIcons().get("highlight"));
+        setItem(44, getIcons().get("station"));
+        setItem(45, getIcons().get("fuelCost"));
+        setItem(46, getIcons().get("highlight"));
         setItem(49, getIcons().get("category"));
 
         setItem(53, getIcons().get("back"));
@@ -63,7 +71,7 @@ public class RecipeItemEditor extends Editor implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() != getInventory()) return;
+        if (event.getView().getTopInventory() != getInventory()) return;
         event.setCancelled(true);
         Player  player     = (Player) event.getWhoClicked();
         boolean hasChanges = false;
@@ -134,6 +142,7 @@ public class RecipeItemEditor extends Editor implements Listener {
                             "/fusion-editor " + getRecipeName() + " " + getRecipeAmount());
                 else if (event.isRightClick()) {
                     recipeIconEditor = new RecipeIconEditor(this, player, recipe);
+                    suppressCloseNav = true;
                     recipeIconEditor.open(player);
                 }
             }
@@ -267,6 +276,27 @@ public class RecipeItemEditor extends Editor implements Listener {
                     hasChanges = true;
                 }
             }
+            case 44 -> {
+                if (event.isLeftClick())
+                    FusionEditorCommand.suggestUsage(player,
+                            EditorCriteria.Profession_Recipe_Edit_Station,
+                            "/fusion-editor <stationId>");
+                else if (event.isRightClick()) {
+                    recipe.getConditions().setStation(null);
+                    hasChanges = true;
+                }
+            }
+            case 45 -> {
+                int amount = event.isShiftClick() ? 10 : 1;
+                if (event.isLeftClick()) {
+                    recipe.getConditions().setFuelCost(recipe.getConditions().getFuelCost() + amount);
+                    hasChanges = true;
+                } else if (event.isRightClick()) {
+                    if (recipe.getConditions().getFuelCost() == 0) return;
+                    recipe.getConditions().setFuelCost(Math.max(recipe.getConditions().getFuelCost() - amount, 0));
+                    hasChanges = true;
+                }
+            }
             case 49 -> {
                 List<String> categories      = ((RecipeEditor) getParentEditor()).getTable().getCategoryList();
                 String       currentCategory = recipe.getCategory();
@@ -289,6 +319,7 @@ public class RecipeItemEditor extends Editor implements Listener {
             }
             case 53 -> {
                 reload(false);
+                suppressCloseNav = true;
                 ((RecipeEditor) getParentEditor()).reload(true);
                 return;
             }
@@ -296,14 +327,28 @@ public class RecipeItemEditor extends Editor implements Listener {
 
         if (hasChanges) {
             reload(true);
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() != getInventory()) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> openParent(player), 1);
     }
 
     public void reload(boolean open) {
         setIcons(EditorRegistry.getRecipeEditorCfg().getSubIcons(recipe));
         initialize();
-        if (open)
+        if (open) {
+            suppressCloseNav = true;
             open(player);
+        }
     }
 
     public String getRecipeName() {

@@ -129,6 +129,11 @@ public class CraftingTable implements ConfigurationSerializable {
                 .forEach(c -> {
                     if (c.getPattern() == null)
                         c.setPattern(recipePattern);
+                    if (categories.containsKey(c.getName())) {
+                        Fusion.getInstance().getLogger().warning(
+                                "[" + this.name + "] Duplicate category name '" + c.getName()
+                                        + "' — second definition overwrites the first.");
+                    }
                     categories.put(c.getName(), c);
                 });
 
@@ -156,6 +161,10 @@ public class CraftingTable implements ConfigurationSerializable {
                     Category category = categories.get(categoryStr);
 
                     if (category == null) {
+                        Fusion.getInstance().getLogger().warning(
+                                "[" + this.name + "] Recipe '" + recipe.getName()
+                                        + "' references unknown category '" + categoryStr
+                                        + "' — recipe loaded but will not appear in any category tab.");
                         continue;
                     }
 
@@ -363,6 +372,8 @@ public class CraftingTable implements ConfigurationSerializable {
                 .append("masteryFee", this.masteryFee)
                 .append("maxLevel", this.maxLevel)
                 .append("useCategories", useCategories)
+                .append("categories",
+                        this.categories.values().stream().map(Category::serialize).collect(Collectors.toList()))
                 .append("recipes", this.recipes.values().stream().map(Recipe::serialize).collect(Collectors.toList()))
                 .build();
     }
@@ -392,6 +403,7 @@ public class CraftingTable implements ConfigurationSerializable {
         config.set("masteryFee", map.get("masteryFee"));
         config.set("maxLevel", map.get("maxLevel"));
         config.set("useCategories", map.get("useCategories"));
+        config.set("categories", map.get("categories"));
         config.set("recipes", map.get("recipes"));
         try {
             config.save(file);
@@ -409,6 +421,43 @@ public class CraftingTable implements ConfigurationSerializable {
             recipes.put(recipe.getName(), Recipe.copy(recipe));
         }
 
+        Map<String, Category> categories = new LinkedHashMap<>();
+        for (Category category : source.getCategories().values()) {
+            categories.put(category.getName(), Category.copy(category));
+        }
+        return new CraftingTable(source.getName(),
+                source.getInventoryName(),
+                source.getIconItem(),
+                InventoryPattern.copy(source.getRecipePattern()),
+                InventoryPattern.copy(source.getCatPattern()),
+                source.getUseCategories(),
+                source.getFillItem(),
+                source.getMasteryUnlock(),
+                source.getMasteryFee(),
+                recipes,
+                categories);
+    }
+
+    // Copy for editor: deduplicates ItemGen pseudo-recipes (name::material) in a single pass,
+    // avoiding O(N*M) Recipe.copy() calls that caused multi-second lag with large professions.
+    public static CraftingTable copyForEditor(CraftingTable source) {
+        Map<String, Recipe> recipes = new LinkedHashMap<>();
+        Set<String>         seen    = new HashSet<>();
+        for (Recipe recipe : source.getRecipes().values()) {
+            String name = recipe.getName();
+            if (name.contains("::")) {
+                String baseName = name.split("::")[0];
+                if (seen.add(baseName)) {
+                    Recipe copy = Recipe.copy(recipe);
+                    copy.setName(baseName);
+                    recipes.put(baseName, copy);
+                }
+            } else {
+                if (seen.add(name)) {
+                    recipes.put(name, Recipe.copy(recipe));
+                }
+            }
+        }
         Map<String, Category> categories = new LinkedHashMap<>();
         for (Category category : source.getCategories().values()) {
             categories.put(category.getName(), Category.copy(category));

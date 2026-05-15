@@ -106,13 +106,28 @@ public class CategoryGui implements Listener {
 
             allCategories.forEach((category) -> allCategoriesMap.putIfAbsent(category.getName(), new RecipeGui(player, table, category)));
 
-            for (int k = (page * pageSize), e = Math.min(slots.length, allCategoryArray.length);
-                 (k < allCategoryArray.length) && (i < e);
-                 k++, i++) {
-                Category category = allCategoryArray[k];
-                int      slot     = slots[i];
-                this.categories.put(slot, new RecipeGui(player, table, category));
-                this.inventory.setItem(slot, category.getDisplayIcon());
+            // Separate categories into explicit-slot and auto-placed groups for the current page
+            int maxOnPage = Math.min(slots.length, allCategoryArray.length);
+            java.util.Set<Integer> takenSlotIndices = new java.util.HashSet<>();
+            for (int k = page * pageSize; k < allCategoryArray.length && (k - page * pageSize) < pageSize; k++) {
+                Category cat = allCategoryArray[k];
+                int catSlot = cat.getSlot();
+                if (catSlot >= 0 && catSlot < slots.length && !takenSlotIndices.contains(catSlot)) {
+                    takenSlotIndices.add(catSlot);
+                    int invSlot = slots[catSlot];
+                    this.categories.put(invSlot, new RecipeGui(player, table, cat));
+                    this.inventory.setItem(invSlot, cat.getDisplayIcon());
+                }
+            }
+            int autoSlotIndex = 0;
+            for (int k = page * pageSize; k < allCategoryArray.length && i < maxOnPage; k++, i++) {
+                Category cat = allCategoryArray[k];
+                if (cat.getSlot() >= 0 && cat.getSlot() < slots.length) continue; // already placed
+                while (autoSlotIndex < slots.length && takenSlotIndices.contains(autoSlotIndex)) autoSlotIndex++;
+                if (autoSlotIndex >= slots.length) break;
+                int invSlot = slots[autoSlotIndex++];
+                this.categories.put(invSlot, new RecipeGui(player, table, cat));
+                this.inventory.setItem(invSlot, cat.getDisplayIcon());
             }
 
             for (int k = 0; k < inventory.getSize(); k++) {

@@ -101,6 +101,9 @@ public class RecipeEditorCfg {
             );
         }
 
+        if (result == null || result.getType().isAir() || result.getType() == org.bukkit.Material.AIR) {
+            result = new ItemStack(org.bukkit.Material.PAPER);
+        }
         return ItemBuilder.newItem(result)
                 .name(name)
                 .lore(lore)
@@ -116,19 +119,23 @@ public class RecipeEditorCfg {
 
     public Map<String, ItemStack> getSubIcons(Recipe recipe) {
         Map<String, ItemStack> icons = new HashMap<>();
+        ItemStack resultItem = recipe.getSettings().getRecipeItem().getItemStack();
         for (String icon : config.getConfigurationSection("subEditor.icons").getKeys(false)) {
-            icons.put(icon, getSubIcon(recipe, icon));
+            icons.put(icon, getSubIcon(recipe, icon, resultItem));
         }
         return icons;
     }
 
     public ItemStack getSubIcon(Recipe recipe, String icon) {
-        ItemStack result     = recipe.getSettings().getRecipeItem().getItemStack();
+        return getSubIcon(recipe, icon, recipe.getSettings().getRecipeItem().getItemStack());
+    }
+
+    public ItemStack getSubIcon(Recipe recipe, String icon, ItemStack result) {
         String    resultName = recipe.getSettings().getIconNamespace();
         Material material =
                 Material.valueOf(config.getString("subEditor.icons." + icon + ".material", "$<material>")
                         .replace(MessageUtil.getReplacement("material"),
-                                recipe.getSettings().getRecipeItem().getItemStack().getType().name())
+                                result.getType().name())
                         .toUpperCase());
         int          amount      = config.getInt("subEditor.icons." + icon + ".amount", 1);
         int          durability  = config.getInt("subEditor.icons." + icon + ".durability", 0);
@@ -191,7 +198,7 @@ public class RecipeEditorCfg {
                                     .replace(MessageUtil.getReplacement("ingredient.name"),
                                             itemName)
                                     .replace(MessageUtil.getReplacement("ingredient.amount"),
-                                            String.valueOf(item.getItemStack().getAmount())));
+                                            String.valueOf(patternItem.getAmount())));
                     newLines++;
                 }
                 i += newLines;
@@ -238,6 +245,11 @@ public class RecipeEditorCfg {
                                     String.valueOf(recipe.getConditions().isMastery()))
                             .replace(MessageUtil.getReplacement("conditions.permission"),
                                     String.valueOf(recipe.getConditions().getPermission()))
+                            .replace(MessageUtil.getReplacement("conditions.station"),
+                                    recipe.getConditions().getStation() == null ? getUnsetFormat()
+                                            : recipe.getConditions().getStation())
+                            .replace(MessageUtil.getReplacement("conditions.fuelCost"),
+                                    String.valueOf(recipe.getConditions().getFuelCost()))
                             .replace(MessageUtil.getReplacement("category"),
                                     recipe.getCategory() == null ? "master" : recipe.getCategory()))
                     .replace(MessageUtil.getReplacement("hidings.noPermission"),

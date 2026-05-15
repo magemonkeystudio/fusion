@@ -12,9 +12,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import studio.magemonkey.divinity.Divinity;
 import studio.magemonkey.divinity.api.DivinityAPI;
+import studio.magemonkey.divinity.modules.api.QModuleDrop;
 import studio.magemonkey.fabled.Fabled;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
+import studio.magemonkey.fusion.cfg.hooks.HookType;
+import studio.magemonkey.fusion.Fusion;
 
 import java.util.*;
 
@@ -46,10 +50,29 @@ public class TabCacher {
         PlayerTabs.get(uuid).CachedTabs.remove(key);
     }
 
+    public static void clearAllCaches(String key) {
+        PlayerTabs.values().forEach(cacher -> cacher.CachedTabs.remove(key));
+    }
+
     public static List<String> getTabs(UUID uuid, String key, String arg) {
         List<String> entries = new ArrayList<>();
         if (isNotCached(uuid, key)) {
             switch (key) {
+                case "station":
+                    for (Material material : Material.values()) {
+                        if (material.isAir()) continue;
+                        entries.add(material.toString().toLowerCase());
+                    }
+                    if (Bukkit.getPluginManager().isPluginEnabled("Divinity")) {
+                        DivinityAPI.getModuleManager()
+                                .getCustomItemsManager()
+                                .getItems()
+                                .forEach((k) -> {
+                                    entries.add("DIVINITY_" + k.getId().toLowerCase());
+                                    entries.add("DIV_CUSTOM_" + k.getId().toLowerCase());
+                                });
+                    }
+                    break;
                 case "items":
                     for (Material material : Material.values()) {
                         if (material.isAir()) continue;
@@ -61,6 +84,62 @@ public class TabCacher {
                                 .getCustomItemsManager()
                                 .getItems()
                                 .forEach((k) -> entries.add("DIVINITY_" + k.getId().toLowerCase()));
+                    }
+                    if (Fusion.getInstance().getHookManager().isHooked(HookType.Divinity)) {
+                        String random = QModuleDrop.RANDOM_ID;
+                        var mc = Divinity.getInstance().getModuleCache();
+                        for (String id : mc.getTierManager().getItemIds()) {
+                            if (id.equals(random)) continue;
+                            entries.add("DIV_ITEMGEN_" + id);
+                            entries.add("DIV_ITEMGEN_" + id + "_NOENCH");
+                        }
+                        for (String id : mc.getGemManager().getItemIds()) {
+                            if (!id.equals(random)) entries.add("DIV_GEM_" + id);
+                        }
+                        for (String id : mc.getEssenceManager().getItemIds()) {
+                            if (!id.equals(random)) entries.add("DIV_ESSENCE_" + id);
+                        }
+                        for (String id : mc.getRuneManager().getItemIds()) {
+                            if (!id.equals(random)) entries.add("DIV_RUNE_" + id);
+                        }
+                        if (mc.getArrowManager() != null)
+                            mc.getArrowManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_ARROW_" + id));
+                        if (mc.getConsumablesManager() != null)
+                            mc.getConsumablesManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_CONSUMABLE_" + id));
+                        mc.getCustomItemsManager().getItems()
+                                .forEach(k -> entries.add("DIV_CUSTOM_" + k.getId().toLowerCase()));
+                        if (mc.getFortifyManager() != null)
+                            mc.getFortifyManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_FORTIFY_" + id));
+                        if (mc.getIdentifyManager() != null)
+                            mc.getIdentifyManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_IDENTIFY_" + id));
+                        if (mc.getMagicDustManager() != null)
+                            mc.getMagicDustManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_DUST_" + id));
+                        if (mc.getRepairManager() != null)
+                            mc.getRepairManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_REPAIR_" + id));
+                        if (mc.getResolveManager() != null)
+                            mc.getResolveManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_DISMANTLE_" + id));
+                        if (mc.getRefineManager() != null)
+                            mc.getRefineManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_REFINE_" + id));
+                        if (mc.getExtractManager() != null)
+                            mc.getExtractManager().getItemIds().stream()
+                                    .filter(id -> !id.equals(random))
+                                    .forEach(id -> entries.add("DIV_EXTRACTOR_" + id));
                     }
                     break;
                 case "professions":
@@ -228,6 +307,42 @@ public class TabCacher {
             for (ItemFlag flag : ItemFlag.values()) {
                 entries.add(flag.name().toLowerCase());
             }
+        }
+        return entries;
+    }
+
+    /** Level hints for DIV_ item tab completion (single value or range). */
+    public static List<String> getLevelHints(String partial) {
+        List<String> hints = new ArrayList<>();
+        hints.add("<level>");
+        hints.add("1");
+        hints.add("5");
+        hints.add("10");
+        hints.add("20");
+        hints.add("1:5");
+        hints.add("1:10");
+        List<String> result = new ArrayList<>();
+        for (String h : hints) {
+            if (h.toLowerCase().startsWith(partial.toLowerCase())) result.add(h);
+        }
+        return result;
+    }
+
+    /** Material type suggestions for a given DIV_ITEMGEN item ID. */
+    public static List<String> getItemGenMaterialTypes(String itemId, String partial) {
+        List<String> entries = new ArrayList<>();
+        if (!Fusion.getInstance().getHookManager().isHooked(HookType.Divinity)) return entries;
+        var tierMgr = Divinity.getInstance().getModuleCache().getTierManager();
+        if (tierMgr == null) return entries;
+        String cleanId = itemId.toUpperCase().endsWith("_NOENCH")
+                ? itemId.substring(0, itemId.length() - 7)
+                : itemId;
+        var genItem = tierMgr.getItemById(cleanId.toLowerCase());
+        if (genItem == null) return entries;
+        entries.add("<material>");
+        for (studio.magemonkey.codex.api.items.ItemType mat : genItem.getMaterialsList()) {
+            String id = mat.getID().toLowerCase();
+            if (id.toLowerCase().startsWith(partial.toLowerCase())) entries.add(id);
         }
         return entries;
     }

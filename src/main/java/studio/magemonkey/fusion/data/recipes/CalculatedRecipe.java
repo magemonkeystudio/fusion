@@ -18,12 +18,13 @@ import studio.magemonkey.fusion.data.player.PlayerRecipeLimit;
 import studio.magemonkey.fusion.gui.recipe.IngredientFingerprint;
 import studio.magemonkey.fusion.util.ExperienceManager;
 import studio.magemonkey.fusion.util.InvalidPatternItemException;
+import studio.magemonkey.fusion.util.StationChecker;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 
 /**
- * A “calculated” recipe icon + canCraft flag. We build lore lines (ingredients, money, xp, etc.)
+ * A "calculated" recipe icon + canCraft flag. We build lore lines (ingredients, money, xp, etc.)
  * once per relevant change, and store the final Icon + canCraft in a single object.
  */
 @Getter
@@ -72,7 +73,7 @@ public class CalculatedRecipe {
                 lore.append(" ").append('\n');
             }
 
-            // 1) “Requirement” header
+            // 1) "Requirement" header
             String requirementLine = CraftingRequirementsCfg.getCraftingRequirementLine("recipes");
             if (!requirementLine.isEmpty()) {
                 lore.append(requirementLine).append('\n');
@@ -149,7 +150,6 @@ public class CalculatedRecipe {
                         recipe.getConditions().isMastery()
                 );
             }
-
             // 7) Crafting limit
             String limitLine = null;
             if (recipe.getCraftingLimit() > 0) {
@@ -181,7 +181,20 @@ public class CalculatedRecipe {
                     break;
                 }
             }
-
+            // ─── 8b) Station requirement (Divinity / vanilla) ───
+            String stationLine = null;
+            String station = recipe.getStation();
+            if (station != null && !station.isEmpty()) {
+                boolean hasStation = StationChecker.hasStation(player, station);
+                if (!hasStation) {
+                    canCraft = false;
+                }
+                stationLine = CraftingRequirementsCfg.getStationLine(
+                        "recipes",
+                        hasStation,
+                        station
+                );
+            }
             //
             // ─── 9) Ingredient check using invCounts ───
             //
@@ -191,14 +204,25 @@ public class CalculatedRecipe {
 
             for (Iterator<RecipeItem> it = localPattern.iterator(); it.hasNext(); ) {
                 RecipeItem required = it.next();
+                int        need     = required.getAmount();
+                int        have;
 
-                // We only compare a single “unit” for matching:
-                ItemStack single = required.getItemStack().clone();
-                single.setAmount(1);
+                // Build the required fingerprint once — forRequired() avoids generating a
+                // random-level item for Divinity ITEMGEN/GEM/etc. ingredients with no level
+                // constraint (level=-1 acts as wildcard in equals/hashCode).
+                IngredientFingerprint reqKey = (required instanceof RecipeTagItem)
+                        ? null
+                        : IngredientFingerprint.forRequired(required);
 
-                IngredientFingerprint reqKey = IngredientFingerprint.of(single);
-                int                   have   = invCounts.getOrDefault(reqKey, 0);
-                int                   need   = required.getAmount();
+                if (required instanceof RecipeTagItem tagItem) {
+                    have = 0;
+                    for (Map.Entry<IngredientFingerprint, Integer> e : invCounts.entrySet()) {
+                        if (tagItem.getTag().isTagged(e.getKey().getType())) have += e.getValue();
+                    }
+                } else {
+                    // sumMatchingEntries handles wildcard level (-1) by iterating all matching entries
+                    have = reqKey.sumMatchingEntries(invCounts);
+                }
 
                 if (have < need) {
                     canCraft = false;
@@ -209,7 +233,23 @@ public class CalculatedRecipe {
                 }
 
                 // Subtract used quantity so overlapping items are handled correctly
-                invCounts.put(reqKey, have - need);
+                if (required instanceof RecipeTagItem tagItem) {
+                    List<IngredientFingerprint> tagKeys = new ArrayList<>();
+                    for (IngredientFingerprint k : invCounts.keySet()) {
+                        if (tagItem.getTag().isTagged(k.getType())) tagKeys.add(k);
+                    }
+                    int remaining = need;
+                    for (IngredientFingerprint k : tagKeys) {
+                        if (remaining == 0) break;
+                        int cur   = invCounts.getOrDefault(k, 0);
+                        int drain = Math.min(cur, remaining);
+                        invCounts.put(k, cur - drain);
+                        remaining -= drain;
+                    }
+                } else {
+                    // drainFromMap handles wildcard level (-1) by draining across all matching entries
+                    reqKey.drainFromMap(invCounts, need);
+                }
 
                 lore.append(
                         CraftingRequirementsCfg.getIngredientLine("recipes", required, have, need)
@@ -224,6 +264,7 @@ public class CalculatedRecipe {
             if (expLine != null) lore.append(expLine).append('\n');
             if (masteryLine != null) lore.append(masteryLine).append('\n');
             if (limitLine != null) lore.append(limitLine).append('\n');
+            if (stationLine != null) lore.append(stationLine).append('\n');
             if (!conditionLines.isEmpty()) {
                 String conditionLine = CraftingRequirementsCfg.getCraftingConditionLine("recipes");
                 if (!conditionLine.isEmpty()) {
@@ -239,8 +280,11 @@ public class CalculatedRecipe {
             // Build final icon + lore
             ItemStack icon = iconResult.clone();
             ItemMeta  im   = icon.getItemMeta();
-            im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
-            icon.setItemMeta(im);
+            if (im == null) im = Bukkit.getItemFactory().getItemMeta(icon.getType());
+            if (im != null) {
+                im.setLore(Arrays.asList(StringUtils.split(lore.toString(), '\n')));
+                icon.setItemMeta(im);
+            }
 
             return new CalculatedRecipe(recipe, icon, canCraft);
         } catch (Exception e) {
@@ -270,7 +314,7 @@ public class CalculatedRecipe {
     }
 
     /**
-     * Unchanged “isSimilar” from before—compares two ItemStacks in a relaxed manner.
+     * Unchanged "isSimilar" from before—compares two ItemStacks in a relaxed manner.
      */
     public static boolean isSimilar(ItemStack is1, ItemStack is2) {
         if (is1.getType() != is2.getType()) return false;

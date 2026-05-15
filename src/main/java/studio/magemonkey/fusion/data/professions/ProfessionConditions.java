@@ -57,6 +57,10 @@ public class ProfessionConditions implements ConfigurationSerializable {
     private boolean isMastery;
     @Setter
     private String  permission;
+    @Setter
+    private String  station;
+    @Setter
+    private int     fuelCost;
 
     private final Map<String, Integer> professionConditions      = new LinkedHashMap<>();
     private final Map<String, Integer> fabledClassConditions     = new LinkedHashMap<>();
@@ -113,11 +117,15 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 .stream()
                 .map(RecipeItem::fromConfig)
                 .collect(Collectors.toCollection(LinkedList::new));
-        this.requiredItemNames = (List<Object>) config.getList("costs.items");
+        @SuppressWarnings("unchecked")
+        List<Object> rawItems = (List<Object>) config.getList("costs.items");
+        this.requiredItemNames = rawItems != null ? new LinkedList<>(rawItems) : new LinkedList<>();
 
         this.professionLevel = config.getInt("conditions.professionLevel", 0);
         this.isMastery = config.getBoolean("conditions.mastery", false);
         this.permission = config.getString("conditions.permission");
+        this.station = config.getString("conditions.station");
+        this.fuelCost = config.getInt("conditions.fuel-cost", 0);
 
         if (config.isSet("conditions.professions")) {
             for (String key : Objects.requireNonNull(config.getConfigurationSection("conditions.professions"))
@@ -192,7 +200,8 @@ public class ProfessionConditions implements ConfigurationSerializable {
                     .stream()
                     .map(RecipeItem::fromConfig)
                     .collect(Collectors.toCollection(LinkedList::new));
-            this.requiredItemNames = (List<Object>) costsSection.get("items");
+            List<Object> rawItems2 = (List<Object>) costsSection.get("items");
+            this.requiredItemNames = rawItems2 != null ? new LinkedList<>(rawItems2) : new LinkedList<>();
         }
 
         Map<String, Object> conditionsSection = dw.getSection("conditions");
@@ -202,6 +211,8 @@ public class ProfessionConditions implements ConfigurationSerializable {
             this.professionLevel = (int) conditionsSection.getOrDefault("professionLevel", 0);
             this.isMastery = (boolean) conditionsSection.getOrDefault("mastery", false);
             this.permission = (String) conditionsSection.getOrDefault("permission", null);
+            this.station = (String) conditionsSection.getOrDefault("station", null);
+            this.fuelCost = (int) conditionsSection.getOrDefault("fuel-cost", 0);
 
             Map<String, Object> conditions = (Map<String, Object>) conditionsSection.get("professions");
             if (conditions != null) {
@@ -656,6 +667,8 @@ public class ProfessionConditions implements ConfigurationSerializable {
         conditionsMap.put("professionLevel", this.professionLevel);
         conditionsMap.put("mastery", this.isMastery);
         conditionsMap.put("permission", this.permission);
+        if (this.station != null) conditionsMap.put("station", this.station);
+        if (this.fuelCost > 0) conditionsMap.put("fuel-cost", this.fuelCost);
         if (!professionConditions.isEmpty())
             conditionsMap.put("professions", this.professionConditions);
         if (!fabledClassConditions.isEmpty())
@@ -714,7 +727,7 @@ public class ProfessionConditions implements ConfigurationSerializable {
         Map<String, Integer> auraStatsConditions       = new LinkedHashMap<>(conditions.getAuraStatsConditions());
 
 
-        return new ProfessionConditions(conditions.getProfession(),
+        ProfessionConditions copy = new ProfessionConditions(conditions.getProfession(),
                 conditions.getMoneyCost(),
                 conditions.getExpCost(),
                 new LinkedList<>(conditions.getRequiredItemNames() != null ? conditions.getRequiredItemNames() : new LinkedList<>()),
@@ -729,5 +742,8 @@ public class ProfessionConditions implements ConfigurationSerializable {
                 auraManaAbilityConditions,
                 auraSkillsConditions,
                 auraStatsConditions);
+        copy.setStation(conditions.getStation());
+        copy.setFuelCost(conditions.getFuelCost());
+        return copy;
     }
 }

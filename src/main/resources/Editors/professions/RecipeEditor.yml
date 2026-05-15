@@ -382,6 +382,47 @@ subEditor:
         auraManaAbility: '&3Aura Mana Ability &2$<condition.name>&7: &a$<condition.amount>'
         auraSkill: '&3Aura Skill &2$<condition.name>&7: &a$<condition.amount>'
         auraStats: '&3Aura Stat &2$<condition.name>&7: &a$<condition.amount>'
+    station:
+      material: ANVIL
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Station'
+      lore:
+        - '&7Current: &a$<conditions.station>'
+        - '&7The station (Divinity item ID) required'
+        - '&7to craft this recipe.'
+        - '&7Leave empty for no station requirement.'
+        - '&8--------------------'
+        - '&aLeft click &7to set the station ID.'
+        - '&aRight click &7to clear the station.'
+      flags: [ ]
+      enchants: { }
+    fuelCost:
+      material: BLAZE_POWDER
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: '&6Fuel Cost'
+      lore:
+        - '&7Current: &a$<conditions.fuelCost>'
+        - '&7The amount of fuel consumed when'
+        - '&7crafting this recipe.'
+        - '&8--------------------'
+        - '&aLeft click &7to increase the fuel cost.'
+        - '&aRight click &7to decrease the fuel cost.'
+        - '&aShift click &7each to modify by 10.'
+      flags: [ ]
+      enchants: { }
+    highlight:
+      material: ORANGE_STAINED_GLASS_PANE
+      amount: 1
+      durability: 0
+      unbreakable: false
+      name: ' '
+      lore: [ ]
+      flags: [ ]
+      enchants: { }
     back:
       material: BARRIER
       amount: 1

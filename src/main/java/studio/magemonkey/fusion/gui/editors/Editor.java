@@ -4,8 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,8 @@ public class Editor {
     @Setter
     private       List<Inventory> nestedInventories;
 
+    protected boolean suppressCloseNav = false;
+
     public Editor(Editor parentEditor, String title, int size) {
         this.parentEditor = parentEditor;
         this.title = title;
@@ -31,6 +36,7 @@ public class Editor {
 
         this.inventory = Bukkit.createInventory(null, size, title);
         this.nestedInventories = new ArrayList<>();
+        EditorRegistry.registerInventory(this.inventory, this);
     }
 
     public void setItem(int slot, ItemStack item) {
@@ -43,7 +49,37 @@ public class Editor {
 
     public void openParent(Player player) {
         if (parentEditor != null) {
+            suppressCloseNav = true;
+            dispose();
             parentEditor.open(player);
         }
+    }
+
+    public void suppressNextClose() {
+        this.suppressCloseNav = true;
+    }
+
+    /**
+     * Unregisters this editor's event listeners and removes its inventories from the registry.
+     * Call this when navigating away from this editor permanently.
+     */
+    public void dispose() {
+        if (this instanceof Listener listener) {
+            HandlerList.unregisterAll(listener);
+        }
+        EditorRegistry.unregisterInventory(this.inventory);
+        if (nestedInventories != null) {
+            for (Inventory nested : nestedInventories) {
+                EditorRegistry.unregisterInventory(nested);
+            }
+        }
+    }
+
+    public Editor getRootEditor() {
+        Editor current = this;
+        while (current.getParentEditor() != null) {
+            current = current.getParentEditor();
+        }
+        return current;
     }
 }
