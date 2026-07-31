@@ -105,6 +105,11 @@ public class CraftingQueue {
         FusionAPI.getEventServices()
                 .getQueueService()
                 .addQueueItem(player, ProfessionsCfg.getTable(profession), this, item);
+
+        if (Cfg.instantCollect && recipe.getCraftingTime() <= 0 && queue.contains(item)) {
+            item.markDone();
+            finishRecipe(item);
+        }
     }
 
     public void finishAllRecipes() {

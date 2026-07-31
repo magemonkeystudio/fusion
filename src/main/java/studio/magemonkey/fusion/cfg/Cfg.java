@@ -27,6 +27,7 @@ public final class Cfg {
     public static long    dataSaveInterval         = 12000;
     public static double  forgetPenalty            = 0.2d;
     public static boolean craftingQueue            = true;
+    public static boolean instantCollect           = false;
     public static int     finishedMessageInterval  = 300;
     public static boolean updateQueueOffline       = true;
     public static boolean showRequirementsOnBrowse = true;
@@ -86,6 +87,7 @@ public final class Cfg {
         if (!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
         if (!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
         if (!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
+        if (!cfg.isSet("instant_collect")) cfg.set("instant_collect", instantCollect);
         if (!cfg.isSet("update_queue_offline")) cfg.set("update_queue_offline", updateQueueOffline);
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
@@ -117,6 +119,7 @@ public final class Cfg {
         dataSaveInterval = cfg.getLong("data_save_interval");
         forgetPenalty = cfg.getDouble("forget.penalty");
         craftingQueue = cfg.getBoolean("crafting_queue");
+        instantCollect = cfg.getBoolean("instant_collect");
         updateQueueOffline = cfg.getBoolean("update_queue_offline");
         finishedMessageInterval = cfg.getInt("finished_message_interval");
         finishMessage = cfg.getString("finished_message");

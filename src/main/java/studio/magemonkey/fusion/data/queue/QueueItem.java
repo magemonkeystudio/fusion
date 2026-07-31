@@ -94,6 +94,11 @@ public class QueueItem {
         this.icon = ProfessionsCfg.getQueueItem(profession, this);
     }
 
+    void markDone() {
+        this.done = true;
+        this.visualRemainingItemTime = 0;
+    }
+
     public String getRecipePath() {
         return recipe.getRecipePath();
     }
