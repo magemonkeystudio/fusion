@@ -1,8 +1,8 @@
 package studio.magemonkey.fusion.util;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import studio.magemonkey.codex.kyori.adventure.text.Component;
+import studio.magemonkey.codex.kyori.adventure.text.minimessage.MiniMessage;
+import studio.magemonkey.codex.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 
 import java.util.regex.Matcher;
