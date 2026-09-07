@@ -1,6 +1,6 @@
 package studio.magemonkey.fusion.cfg;
 
-import net.kyori.adventure.text.Component;
+import studio.magemonkey.codex.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.codex.compat.VersionManager;
 import studio.magemonkey.codex.util.messages.MessageUtil;
