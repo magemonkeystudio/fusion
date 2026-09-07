@@ -85,6 +85,8 @@ editor:
   recipeRenamed: "&aYou renamed the recipe &3$<oldName> &ato &3$<newName>"
   recipeAdded: "&aYou created the recipe &3$<recipe> &awith result &3$<result>"
   recipePermissionUpdated: "&aYou updated the recipes permission &ato &3$<permission>"
+  recipeStationUpdated: "&aYou updated the recipe's station &ato &3$<station>"
+  recipeFuelCostUpdated: "&aYou updated the recipe's fuel cost &ato &3$<amount>"
   resultEdited: "&aYou edited the recipe &3$<recipe> &awith result &3$<result>"
   invalidConditionKey: "&cYou tried to parse an invalid condition key: &3$<key>"
   invalidConditionValue: "&cYou tried to parse an invalid condition value: &3$<value>"

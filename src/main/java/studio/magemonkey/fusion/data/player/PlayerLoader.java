@@ -5,21 +5,18 @@ import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerLoader {
 
-    private static final Map<UUID, FusionPlayer> cachedPlayers = new TreeMap<>();
+    private static final Map<UUID, FusionPlayer> cachedPlayers = new ConcurrentHashMap<>();
 
     public static FusionPlayer getPlayer(UUID uuid) {
         // Always return a FusionPlayer instance. Previously this returned null when the player was marked as
         // locked in the database (during async save), which caused NullPointerExceptions at many call sites.
         // Returning a FusionPlayer ensures call sites remain stable; the locking is handled at the persistence layer.
-        if (!cachedPlayers.containsKey(uuid)) {
-            cachedPlayers.put(uuid, new FusionPlayer(uuid));
-        }
-        return cachedPlayers.get(uuid);
+        return cachedPlayers.computeIfAbsent(uuid, FusionPlayer::new);
     }
 
     public static FusionPlayer getPlayer(Player player) {
@@ -72,10 +69,9 @@ public class PlayerLoader {
     }
 
     public static void unloadPlayer(Player player) {
-        if (cachedPlayers.containsKey(player.getUniqueId())) {
-            FusionPlayer fusionPlayer = cachedPlayers.get(player.getUniqueId());
+        FusionPlayer fusionPlayer = cachedPlayers.remove(player.getUniqueId());
+        if (fusionPlayer != null) {
             fusionPlayer.save(true);
-            cachedPlayers.remove(player.getUniqueId());
         }
     }
 

@@ -19,9 +19,11 @@ import studio.magemonkey.codex.util.messages.MessageData;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.cfg.ShowRecipesCfg;
+import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.gui.slot.Slot;
 
 import java.util.ArrayList;
@@ -287,9 +289,16 @@ public class ShowRecipesGui implements Listener {
         }
 
         if (recipeSlots.containsKey(slot)) {
-            Recipe        recipe = recipeSlots.get(slot);
-            CraftingTable table  = recipe.getTable();
-            ProfessionsCfg.getGuiMap().get(table.getName()).open(player, table.getCategory(recipe.getCategory()));
+            Recipe              recipe   = recipeSlots.get(slot);
+            CraftingTable       table    = recipe.getTable();
+            ProfessionGuiRegistry gui    = ProfessionsCfg.getGuiMap().get(table.getName());
+            if (gui == null) return;
+            Category category = table.getCategory(recipe.getCategory());
+            if (category != null) {
+                gui.open(player, category);
+            } else {
+                gui.open(player);
+            }
         }
     }
 }

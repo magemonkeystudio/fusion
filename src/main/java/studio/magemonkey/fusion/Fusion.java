@@ -17,6 +17,7 @@ import studio.magemonkey.codex.legacy.placeholder.PlaceholderType;
 import studio.magemonkey.codex.util.ItemUtils;
 import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.*;
+import studio.magemonkey.fusion.cfg.FuelManager;
 import studio.magemonkey.fusion.cfg.editors.EditorRegistry;
 import studio.magemonkey.fusion.cfg.hooks.HookManager;
 import studio.magemonkey.fusion.cfg.hooks.HookType;
@@ -70,6 +71,7 @@ public class Fusion extends RisePlugin implements Listener {
         hookManager = new HookManager();
 
         Cfg.init();
+        FuelManager.init();
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             ProfessionsCfg.init();
             EditorRegistry.reload();

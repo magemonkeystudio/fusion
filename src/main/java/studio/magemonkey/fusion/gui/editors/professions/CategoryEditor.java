@@ -1,11 +1,13 @@
 package studio.magemonkey.fusion.gui.editors.professions;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.cfg.editors.EditorCriteria;
@@ -14,6 +16,7 @@ import studio.magemonkey.fusion.commands.FusionEditorCommand;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
+import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.HashMap;
@@ -130,13 +133,27 @@ public class CategoryEditor extends Editor implements Listener {
 
         if (hasChanges) {
             reload(true);
+            Editor root = getRootEditor();
+            if (root instanceof ProfessionEditor) ((ProfessionEditor) root).autoSave();
         }
     }
 
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() != getInventory()) return;
+        if (suppressCloseNav) {
+            suppressCloseNav = false;
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(Fusion.getInstance(), () -> openParent(player), 1);
+    }
+
     public void reload(boolean open) {
-        setIcons(EditorRegistry.getPatternItemEditorCfg().getIcons(table));
+        setIcons(EditorRegistry.getCategoryEditorCfg().getIcons(table));
         initialize();
-        if (open)
+        if (open) {
+            suppressCloseNav = true;
             open(player);
+        }
     }
 }

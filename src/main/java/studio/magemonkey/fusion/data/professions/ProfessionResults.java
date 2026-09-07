@@ -121,6 +121,6 @@ public class ProfessionResults implements ConfigurationSerializable {
     }
 
     public boolean hasCommandsOrItems() {
-        return professionExp > 0 || vanillaExp > 0 || !commands.isEmpty() || !itemNames.isEmpty();
+        return !commands.isEmpty() || !itemNames.isEmpty();
     }
 }

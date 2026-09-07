@@ -86,7 +86,7 @@ public class BrowseProfessionCfg {
                                     .replace(MessageUtil.getReplacement("ingredient.name"),
                                             itemName)
                                     .replace(MessageUtil.getReplacement("ingredient.amount"),
-                                            String.valueOf(item.getItemStack().getAmount())));
+                                            String.valueOf(patternItem.getAmount())));
                     newLines++;
                 }
                 i += newLines;
@@ -170,7 +170,7 @@ public class BrowseProfessionCfg {
                                     .replace(MessageUtil.getReplacement("ingredient.name"),
                                             itemName)
                                     .replace(MessageUtil.getReplacement("ingredient.amount"),
-                                            String.valueOf(item.getItemStack().getAmount())));
+                                            String.valueOf(patternItem.getAmount())));
                     newLines++;
                 }
                 i += newLines;

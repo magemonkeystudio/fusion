@@ -3,6 +3,7 @@ package studio.magemonkey.fusion.data.recipes;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -27,12 +28,36 @@ public class RecipeCustomItem implements RecipeItem {
     private final int     amount;
     private final boolean simple;
 
+    /** Original config key for DIV_ module items (e.g. "DIV_ITEMGEN_sword~level:5").
+     *  Excluded from equals/hashCode to preserve logical item identity. */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private final String originalKey;
+
+    /** Cached result of getItemStack() — avoids re-generating DIV_ITEMGEN random stats on every render.
+     *  Naturally invalidated when config reloads (new RecipeCustomItem instances are created). */
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private transient ItemStack displayCache;
+
     public RecipeCustomItem(@NotNull ItemType item, int amount, boolean simple) {
+        this(item, amount, simple, null);
+    }
+
+    public RecipeCustomItem(@NotNull ItemType item, int amount, boolean simple, @Nullable String originalKey) {
         this.item = item;
         this.builder = null;
         this.meta = null;
         this.amount = amount;
         this.simple = simple;
+        this.originalKey = originalKey;
+    }
+
+    /** Returns the underlying {@link ItemType}, or {@code null} if this item was created from an
+     *  {@link ItemBuilder} or a {@link DivinityRecipeMeta}. */
+    @Nullable
+    public ItemType getItemType() {
+        return this.item;
     }
 
     public RecipeCustomItem(@NotNull ItemBuilder item, int amount, boolean simple) {
@@ -41,6 +66,7 @@ public class RecipeCustomItem implements RecipeItem {
         this.meta = null;
         this.amount = amount;
         this.simple = simple;
+        this.originalKey = null;
     }
 
     public RecipeCustomItem(@NotNull DivinityRecipeMeta meta) {
@@ -49,25 +75,32 @@ public class RecipeCustomItem implements RecipeItem {
         this.meta = meta;
         this.amount = meta.getAmount();
         this.simple = false;
+        this.originalKey = null;
     }
 
     @Override
     public ItemStack getItemStack() {
-        ItemStack clone = null;
+        if (displayCache != null) return displayCache.clone();
+        ItemStack built;
         if (this.item != null) {
-            clone = this.item.create();
+            built = this.item.create();
         } else if (this.builder != null) {
-            clone = this.builder.build();
+            built = this.builder.build();
         } else {
-            clone = this.meta.generateItem();
+            built = this.meta.generateItem();
         }
-
-        clone.setAmount(clone.getAmount() * this.amount);
-        return clone;
+        built.setAmount(built.getAmount() * this.amount);
+        displayCache = built.clone();
+        return built;
     }
 
     @Override
     public Object toConfig() {
+        // For DIV_ module items the full config string (including amount) is stored in originalKey.
+        if (this.originalKey != null) {
+            return this.originalKey;
+        }
+
         ItemStack it = null;
         if (this.item != null) {
             it = this.item.create();

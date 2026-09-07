@@ -16,9 +16,10 @@ import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.util.InventoryUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BrowseProfessionsEditor extends Editor implements Listener {
 
@@ -29,6 +30,8 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
     private BrowseProfessionEditor browseProfessionEditor;
 
     private final HashMap<Inventory, HashMap<Integer, ProfessionConditions>> slots = new HashMap<>();
+    private List<ProfessionConditions> professionList = new ArrayList<>();
+    private final Set<Integer>         populatedPages = new HashSet<>();
 
     public BrowseProfessionsEditor(BrowseEditor browseEditor, Player player) {
         super(browseEditor, EditorRegistry.getBrowseProfessionCfg().getTitle(), 54);
@@ -42,43 +45,25 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
 
     public void initialize() {
         slots.clear();
+        populatedPages.clear();
         getNestedInventories().clear();
 
-        HashMap<Integer, ProfessionConditions> invSlots    = new HashMap<>();
-        List<Inventory>                        inventories = new ArrayList<>();
-        Inventory                              inv         = null;
-        int                                    invSlot     = 0;
-        Collection<ProfessionConditions>       professions = browseEditor.getProfessionConditions().values();
-        for (ProfessionConditions entry : professions) {
+        professionList = new ArrayList<>();
+        for (ProfessionConditions entry : browseEditor.getProfessionConditions().values()) {
             if (!ProfessionsCfg.getMap().containsKey(entry.getProfession())) {
-                Fusion.getInstance()
-                        .getLogger()
+                Fusion.getInstance().getLogger()
                         .warning("Profession " + entry.getProfession()
                                 + " not found for BrowseEditor. You might want to remove it from browse.yml to avoid problems.");
                 Fusion.getInstance().getLogger().warning("Skipping profession: " + entry.getProfession());
                 continue;
             }
-            int invDex = invSlot % 36 + 9;
-            if (invDex == 9) {
-                if (inv != null)
-                    inventories.add(inv);
-                inv = InventoryUtils.createFilledInventory(null,
-                        EditorRegistry.getBrowseProfessionCfg().getTitle(),
-                        54,
-                        getIcons().get("fill"));
-                inv.setItem(4, getIcons().get("add"));
-                inv.setItem(48, getIcons().get("previous"));
-                inv.setItem(50, getIcons().get("next"));
-                inv.setItem(53, getIcons().get("back"));
-                invSlots = new HashMap<>();
-            }
-            inv.setItem(invDex, EditorRegistry.getBrowseProfessionCfg().getProfessionIcon(entry));
-            invSlots.put(invDex, entry);
-            slots.put(inv, invSlots);
-            invSlot++;
+            professionList.add(entry);
         }
-        if (inv == null) {
-            inv = InventoryUtils.createFilledInventory(null,
+
+        int             pageCount   = professionList.isEmpty() ? 1 : (int) Math.ceil(professionList.size() / 36.0);
+        List<Inventory> inventories = new ArrayList<>();
+        for (int p = 0; p < pageCount; p++) {
+            Inventory inv = InventoryUtils.createFilledInventory(null,
                     EditorRegistry.getBrowseProfessionCfg().getTitle(),
                     54,
                     getIcons().get("fill"));
@@ -86,9 +71,25 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
             inv.setItem(48, getIcons().get("previous"));
             inv.setItem(50, getIcons().get("next"));
             inv.setItem(53, getIcons().get("back"));
+            inventories.add(inv);
         }
-        inventories.add(inv);
         setNestedInventories(inventories);
+    }
+
+    private void populatePage(int page) {
+        if (page < 0 || page >= getNestedInventories().size()) return;
+        Inventory                              inv      = getNestedInventories().get(page);
+        HashMap<Integer, ProfessionConditions> invSlots = new HashMap<>();
+        int                                    start    = page * 36;
+        int                                    end      = Math.min(start + 36, professionList.size());
+        for (int i = start; i < end; i++) {
+            ProfessionConditions entry  = professionList.get(i);
+            int                  invDex = (i - start) + 9;
+            inv.setItem(invDex, EditorRegistry.getBrowseProfessionCfg().getProfessionIcon(entry));
+            invSlots.put(invDex, entry);
+        }
+        slots.put(inv, invSlots);
+        populatedPages.add(page);
     }
 
     public void open(Player player) {
@@ -96,8 +97,12 @@ public class BrowseProfessionsEditor extends Editor implements Listener {
     }
 
     public void open(Player player, int page) {
-        player.openInventory(getNestedInventories().get(page) != null ? getNestedInventories().get(page)
-                : getNestedInventories().get(page - 1));
+        List<Inventory> invs     = getNestedInventories();
+        int             safePage = (page >= 0 && page < invs.size()) ? page : invs.size() - 1;
+        if (!populatedPages.contains(safePage)) {
+            populatePage(safePage);
+        }
+        player.openInventory(invs.get(safePage));
     }
 
     @EventHandler

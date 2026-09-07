@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import studio.magemonkey.fusion.Fusion;
+import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.cfg.sql.DatabaseType;
 import studio.magemonkey.fusion.commands.CommandMechanics;
 import studio.magemonkey.fusion.data.player.FusionPlayer;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +42,11 @@ public final class Cfg {
 
     public static List<NamespacedKey> disabledVanillaRecipes = new ArrayList<>();
     public static List<String> autoJoinProfessions = new ArrayList<>();
+
+    // Fuel system
+    public static int            fuelStart = 0;
+    public static int            fuelMax   = 1000;
+    public static List<FuelItem> fuelItems = new ArrayList<>();
 
     // No usage inside of Cfg, just used for default values. The actual values are stored in SQLManager.class
     private static final DatabaseType storageType     = DatabaseType.LOCAL;
@@ -103,6 +110,19 @@ public final class Cfg {
         if (!cfg.isSet("useCustomFormula")) cfg.set("useCustomFormula", useCustomFormula);
         if (!cfg.isSet("disabled_vanilla_recipes")) cfg.set("disabled_vanilla_recipes", disabledVanillaRecipes);
         if (!cfg.isSet("auto_join_professions")) cfg.set("auto_join_professions", autoJoinProfessions);
+
+        // Fuel defaults
+        if (!cfg.isSet("fuel.start")) cfg.set("fuel.start", 0);
+        if (!cfg.isSet("fuel.max")) cfg.set("fuel.max", 1000);
+        if (!cfg.isSet("fuel.items.coal.material")) cfg.set("fuel.items.coal.material", "COAL");
+        if (!cfg.isSet("fuel.items.coal.amount")) cfg.set("fuel.items.coal.amount", 10);
+        if (!cfg.isSet("fuel.items.coal.return")) cfg.set("fuel.items.coal.return", "null");
+        if (!cfg.isSet("fuel.items.coal_block.material")) cfg.set("fuel.items.coal_block.material", "COAL_BLOCK");
+        if (!cfg.isSet("fuel.items.coal_block.amount")) cfg.set("fuel.items.coal_block.amount", 90);
+        if (!cfg.isSet("fuel.items.coal_block.return")) cfg.set("fuel.items.coal_block.return", "null");
+        if (!cfg.isSet("fuel.items.blaze_rod.material")) cfg.set("fuel.items.blaze_rod.material", "BLAZE_ROD");
+        if (!cfg.isSet("fuel.items.blaze_rod.amount")) cfg.set("fuel.items.blaze_rod.amount", 50);
+        if (!cfg.isSet("fuel.items.blaze_rod.return")) cfg.set("fuel.items.blaze_rod.return", "BLAZE_POWDER");
     }
 
     public static void init() {
@@ -128,6 +148,36 @@ public final class Cfg {
         List<Material> materials = cfg.getStringList("disabled_vanilla_recipes").stream().map(x -> Material.valueOf(x.toUpperCase())).toList();
         disabledVanillaRecipes = BukkitRecipeWrapper.getRecipeKeysForMaterials(materials);
         autoJoinProfessions = cfg.getStringList("auto_join_professions");
+
+        // Load fuel config
+        fuelStart = cfg.getInt("fuel.start", 0);
+        fuelMax   = cfg.getInt("fuel.max", 1000);
+        fuelItems = new ArrayList<>();
+        if (cfg.isConfigurationSection("fuel.items")) {
+            for (String key : cfg.getConfigurationSection("fuel.items").getKeys(false)) {
+                String path = "fuel.items." + key;
+                String matName = cfg.getString(path + ".material", "");
+                int fuelAmount = cfg.getInt(path + ".amount", 0);
+                String retName = cfg.getString(path + ".return", "null");
+
+                Material mat;
+                try {
+                    mat = Material.valueOf(matName.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    Fusion.getInstance().getLogger().warning("Unknown material '" + matName + "' in fuel.items." + key);
+                    continue;
+                }
+                Material ret = null;
+                if (retName != null && !retName.equalsIgnoreCase("null") && !retName.isEmpty()) {
+                    try {
+                        ret = Material.valueOf(retName.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        Fusion.getInstance().getLogger().warning("Unknown return material '" + retName + "' in fuel.items." + key);
+                    }
+                }
+                fuelItems.add(new FuelItem(key, mat, fuelAmount, ret));
+            }
+        }
 
         migrateOldTypes(cfg);
     }
@@ -188,8 +238,9 @@ public final class Cfg {
     public static void autoJoinProfessions(Player player) {
         FusionPlayer fp = PlayerLoader.getPlayer(player);
         for (String professionId : autoJoinProfessions) {
-            if(fp.hasProfession(professionId) && fp.hasJoined(professionId)) continue;
-            BrowseGUI.joinProfession(player, ProfessionsCfg.getGuiMap().get(professionId));
+            if (fp.hasProfession(professionId) && fp.hasJoined(professionId)) continue;
+            if (ProfessionsCfg.getTable(professionId) == null) continue;
+            FusionAPI.getEventServices().getProfessionService().joinProfession(professionId, player, 0.0, 0);
         }
     }
 }

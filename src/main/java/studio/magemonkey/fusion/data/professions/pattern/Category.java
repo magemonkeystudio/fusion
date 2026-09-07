@@ -37,6 +37,9 @@ public class Category implements ConfigurationSerializable {
     @Getter
     @Setter
     private       int                order;
+    @Getter
+    @Setter
+    private       int                slot        = -1;
     private       boolean            hasPrevious = true;
 
     @Getter
@@ -87,6 +90,12 @@ public class Category implements ConfigurationSerializable {
             displayName = (String) displaySection.getOrDefault("name", null);
             displayLore = (List<String>) displaySection.getOrDefault("lore", null);
         }
+        // Top-level lore overrides display.lore if present
+        List<String> topLevelLore = (List<String>) map.get("lore");
+        if (topLevelLore != null) {
+            displayLore = topLevelLore;
+        }
+        slot = dw.getInt("slot", -1);
 
         pattern = dw.getSection("pattern") != null ? new InventoryPattern(dw.getSection("pattern")) : null;
     }
@@ -97,6 +106,14 @@ public class Category implements ConfigurationSerializable {
         map.put("name", name);
         map.put("order", order);
         map.put("icon", iconName);
+        if (slot >= 0)
+            map.put("slot", slot);
+        if (displayName != null || displayLore != null) {
+            Map<String, Object> display = new HashMap<>();
+            if (displayName != null) display.put("name", displayName);
+            if (displayLore != null) display.put("lore", displayLore);
+            map.put("display", display);
+        }
         if (pattern != null)
             map.put("pattern", pattern.serialize());
         return map;
@@ -135,8 +152,9 @@ public class Category implements ConfigurationSerializable {
         ItemMeta  meta = item.getItemMeta();
         if (meta == null) return item;
 
-        if (displayName != null) {
-            String translated = ChatUT.hexString(displayName);
+        String nameToShow = displayName != null ? displayName : name;
+        if (nameToShow != null) {
+            String translated = ChatUT.hexString(nameToShow);
             meta.setDisplayName(translated);
             try {
                 meta.setItemName(translated);

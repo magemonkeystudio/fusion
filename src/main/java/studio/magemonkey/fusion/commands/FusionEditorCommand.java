@@ -39,8 +39,10 @@ import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.util.TabCacher;
-
+import studio.magemonkey.divinity.Divinity;
+import studio.magemonkey.fusion.cfg.hooks.HookType;
 import java.util.*;
 
 public class FusionEditorCommand implements CommandExecutor, TabCompleter {
@@ -168,6 +170,8 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Edit_ResultItem, Profession_Recipe_Add_Ingredients,
                      Profession_Recipe_Edit_Ingredients -> updateRecipeItems(professionEditor, args, criteria);
                 case Profession_Recipe_Edit_Permission -> updateRecipePermission(professionEditor, args);
+                case Profession_Recipe_Edit_Station -> updateRecipeStation(professionEditor, args);
+                case Profession_Recipe_Edit_FuelCost -> updateRecipeFuelCost(professionEditor, args);
                 case Profession_Recipe_Add_Conditions -> addRecipeConditions(professionEditor, args);
 
                 case RecipeIcon_Edit_Name -> updateRecipeIconName(professionEditor, args);
@@ -193,6 +197,14 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Browse_Profession_Add_Conditions -> addBrowseConditions(browseEditor, args);
                 default -> editor.open(player);
             }
+        }
+        removeEditorCriteria(player.getUniqueId());
+        // If editor still registered but no GUI is visible (e.g. command failed after suggestUsage),
+        // reopen root editor so player has a functional GUI and can't move items freely.
+        Editor remaining = EditorRegistry.getCurrentEditor(player);
+        if (remaining != null
+                && EditorRegistry.getEditorByInventory(player.getOpenInventory().getTopInventory()) == null) {
+            remaining.open(player);
         }
         return true;
     }
@@ -267,9 +279,26 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("5");
                         entries.add("32");
                         entries.add("64");
+                    } else if (args.length == 4) {
+                        if (isDivItemWithLevel(args[1])) entries.addAll(TabCacher.getLevelHints(args[3]));
+                    } else if (args.length == 5) {
+                        if (args[1].toUpperCase().startsWith("DIV_ITEMGEN_")) {
+                            String id = args[1].substring("DIV_ITEMGEN_".length());
+                            entries.addAll(TabCacher.getItemGenMaterialTypes(id, args[4]));
+                        }
                     }
                     break;
                 case Pattern_Edit_Pattern:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
+                    } else if (args.length == 2) {
+                        entries.add("<amount>");
+                        entries.add("1");
+                        entries.add("5");
+                        entries.add("32");
+                        entries.add("64");
+                    }
+                    break;
                 case Profession_Recipe_Edit_ResultItem:
                 case Profession_Recipe_Add_Ingredients:
                 case Profession_Recipe_Edit_Ingredients:
@@ -282,6 +311,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("5");
                         entries.add("32");
                         entries.add("64");
+                    } else if (args.length == 3) {
+                        if (isDivItemWithLevel(args[0])) entries.addAll(TabCacher.getLevelHints(args[2]));
+                    } else if (args.length == 4) {
+                        if (args[0].toUpperCase().startsWith("DIV_ITEMGEN_")) {
+                            String id = args[0].substring("DIV_ITEMGEN_".length());
+                            entries.addAll(TabCacher.getItemGenMaterialTypes(id, args[3]));
+                        }
                     }
                     break;
                 case Profession_Recipe_Edit_Name:
@@ -311,6 +347,20 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 case Profession_Recipe_Add_Conditions:
                 case Browse_Profession_Add_Conditions:
                     entries.addAll(TabCacher.getConditionsTabs(args));
+                    break;
+                case Profession_Recipe_Edit_Station:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "station", args[0]));
+                    }
+                    break;
+                case Profession_Recipe_Edit_FuelCost:
+                    if (args.length == 1) {
+                        entries.add("<amount>");
+                        entries.add("0");
+                        entries.add("1");
+                        entries.add("5");
+                        entries.add("10");
+                    }
                     break;
                 case Pattern_Edit_Lore:
                 case RecipeIcon_Edit_Lore:
@@ -373,6 +423,16 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case Pattern_Edit_Pattern:
+                    if (args.length == 1) {
+                        entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
+                    } else if (args.length == 2) {
+                        entries.add("<amount>");
+                        entries.add("1");
+                        entries.add("5");
+                        entries.add("32");
+                        entries.add("64");
+                    }
+                    break;
                 case Browse_Profession_Add_Ingredients:
                     if (args.length == 1) {
                         entries.addAll(TabCacher.getTabs(TabCacher.GlobalUUID, "items", args[0]));
@@ -382,6 +442,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         entries.add("5");
                         entries.add("32");
                         entries.add("64");
+                    } else if (args.length == 3) {
+                        if (isDivItemWithLevel(args[0])) entries.addAll(TabCacher.getLevelHints(args[2]));
+                    } else if (args.length == 4) {
+                        if (args[0].toUpperCase().startsWith("DIV_ITEMGEN_")) {
+                            String id = args[0].substring("DIV_ITEMGEN_".length());
+                            entries.addAll(TabCacher.getItemGenMaterialTypes(id, args[3]));
+                        }
                     }
                     break;
                 case Pattern_Add_Commands:
@@ -413,15 +480,40 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
         return entries;
     }
 
+    /** Returns true if the item is a DIV_ module item that accepts a level argument. */
+    private static boolean isDivItemWithLevel(String item) {
+        String u = item.toUpperCase();
+        return RecipeItem.isDivModulePrefix(item) && !u.startsWith("DIV_CUSTOM_");
+    }
+
+    /**
+     * Joins args from nameIdx onward with ':' to form the config string.
+     * e.g. args=["DIV_ITEMGEN_sword","3","5","iron_sword"], nameIdx=0 → "DIV_ITEMGEN_sword:3:5:iron_sword"
+     */
+    private static String buildItemConfigString(String[] args, int nameIdx) {
+        if (nameIdx >= args.length) return "";
+        StringBuilder sb = new StringBuilder(args[nameIdx]);
+        for (int i = nameIdx + 1; i < args.length; i++) {
+            sb.append(':').append(args[i]);
+        }
+        return sb.toString();
+    }
+
     private boolean isValidItem(String item) {
+        // Check DIV_ module prefixes (DIV_ITEMGEN_, DIV_GEM_, DIV_ESSENCE_, DIV_RUNE_)
+        if (RecipeItem.isDivModulePrefix(item)) {
+            return RecipeItem.isValidDivModuleItem(item);
+        }
         try {
             // If the material in uppercase is valid, return true
             Material.valueOf(item.toUpperCase());
             return true;
         } catch (IllegalArgumentException e) {
-            // If this is a custom item from divinity without "DIVINITY_" prefix, return true
             try {
-                return CodexEngine.get().getItemManager().getItemType(item) != null;
+                // Extract item key using DIVINITY_ pattern (same logic as RecipeItem.fromConfig)
+                java.util.regex.Matcher divMatcher = RecipeItem.divinityPattern.matcher(item);
+                String itemKey = divMatcher.find() ? divMatcher.group(0) : item.split(":")[0];
+                return CodexEngine.get().getItemManager().getItemType(itemKey) != null;
             } catch (CodexItemException ignored) {
                 return false;
             }
@@ -447,6 +539,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<item> <amount>"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage",
+                                player,
+                                new MessageData("syntax",
+                                        "§7ITEMGEN: DIV_ITEMGEN_<name>[_NOENCH]:<qty>  |  GEM/ESS/RUNE: DIV_GEM_<name>[:<level>]:<qty>"));
+                sendDivItemList(player);
                 break;
             case Profession_Category_Add:
             case Profession_Category_Edit:
@@ -482,6 +581,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<item> <amount>"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage",
+                                player,
+                                new MessageData("syntax",
+                                        "§7ITEMGEN: DIV_ITEMGEN_<name>[_NOENCH]:<qty>  |  GEM/ESS/RUNE: DIV_GEM_<name>[:<level>]:<qty>"));
+                sendDivItemList(player);
                 break;
             case Pattern_Edit_Lore:
             case RecipeIcon_Edit_Lore:
@@ -495,11 +601,23 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         .sendMessage("editor.editorUsage",
                                 player,
                                 new MessageData("syntax", "<recipeName> <resultItem> <amount>"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage",
+                                player,
+                                new MessageData("syntax",
+                                        "§7Divinity result: DIV_ITEMGEN_<name>[~level:N][~material:MAT][_NOENCH]  |  DIV_GEM_<name>[:<level>]"));
                 break;
             case Profession_Recipe_Edit_ResultItem:
                 CodexEngine.get()
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<resultItem> <amount>"));
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage",
+                                player,
+                                new MessageData("syntax",
+                                        "§7Divinity result: DIV_ITEMGEN_<name>[~level:N][~material:MAT][_NOENCH]  |  DIV_GEM_<name>[:<level>]"));
                 break;
             case Profession_Recipe_Edit_Name:
                 CodexEngine.get()
@@ -528,8 +646,23 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         .getMessageUtil()
                         .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<color>"));
                 break;
+            case Profession_Recipe_Edit_Station:
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<stationId>"));
+                break;
+            case Profession_Recipe_Edit_FuelCost:
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("editor.editorUsage", player, new MessageData("syntax", "<amount>"));
+                break;
         }
         sendSuggestMessage(player, suggestCommand);
+        Editor currentEditor = EditorRegistry.getCurrentEditor(player);
+        if (currentEditor != null) currentEditor.suppressNextClose();
+        // Suppress the editor whose inventory page is actually open (e.g. RecipeEditor nested page)
+        Editor openEditor = EditorRegistry.getEditorByInventory(player.getOpenInventory().getTopInventory());
+        if (openEditor != null && openEditor != currentEditor) openEditor.suppressNextClose();
         player.closeInventory();
     }
 
@@ -621,6 +754,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             player,
                             new MessageData("category", categoryName),
                             new MessageData("profession", professionEditor.getTable().getName()));
+            professionEditor.getCategoryEditor().reload(true);
+            professionEditor.autoSave();
+            return;
         } else {
             if (!professionEditor.getTable().getCategories().containsKey(categoryName)) {
                 CodexEngine.get()
@@ -650,6 +786,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new MessageData("profession", professionEditor.getTable().getName()));
         }
         professionEditor.getCategoryEditor().reload(true);
+        professionEditor.autoSave();
     }
 
     /* Patterns */
@@ -1089,8 +1226,9 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             return;
         }
         try {
-            String itemName = args[0];
-            int    amount   = Integer.parseInt(args[1]);
+            String itemName  = args[0];
+            int    amount    = Integer.parseInt(args[1]);
+            String configStr = buildItemConfigString(args, 0);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1102,13 +1240,61 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                     .getRecipe()
                     .getResults()
                     .getItemNames()
-                    .add(itemName + ":" + amount);
+                    .add(configStr);
             professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("editor.invalidNumber", player, new MessageData("number", args[1]));
+        }
+    }
+
+    private static void closeAllEditors(Player player) {
+        Editor openEditor = EditorRegistry.getEditorByInventory(
+                player.getOpenInventory().getTopInventory());
+        // Fix E: if player typed command while chat was open (no GUI visible), fall back to root editor
+        if (openEditor == null) {
+            openEditor = EditorRegistry.getCurrentEditor(player);
+        }
+        if (openEditor != null) {
+            Editor current = openEditor;
+            while (current != null) {
+                current.suppressNextClose();
+                current.dispose();
+                current = current.getParentEditor();
+            }
+        }
+        EditorRegistry.removeCurrentEditor(player);
+        player.closeInventory();
+    }
+
+    private static void sendDivItemList(Player player) {
+        if (!Fusion.getInstance().getHookManager().isHooked(HookType.Divinity)) return;
+        List<String> itemgenIds = Divinity.getInstance().getModuleCache().getTierManager().getItemIds();
+        List<String> gemIds     = Divinity.getInstance().getModuleCache().getGemManager().getItemIds();
+        List<String> essIds     = Divinity.getInstance().getModuleCache().getEssenceManager().getItemIds();
+        List<String> runeIds    = Divinity.getInstance().getModuleCache().getRuneManager().getItemIds();
+        String random = studio.magemonkey.divinity.modules.api.QModuleDrop.RANDOM_ID;
+        if (!itemgenIds.isEmpty()) {
+            List<String> ids = itemgenIds.stream().filter(id -> !id.equals(random)).sorted().toList();
+            CodexEngine.get().getMessageUtil().sendMessage("editor.editorUsage", player,
+                    new MessageData("syntax", "§bITEMGEN: §7" + String.join(", ", ids)));
+        }
+        if (!gemIds.isEmpty()) {
+            List<String> ids = gemIds.stream().filter(id -> !id.equals(random)).sorted().toList();
+            CodexEngine.get().getMessageUtil().sendMessage("editor.editorUsage", player,
+                    new MessageData("syntax", "§bGEM: §7" + String.join(", ", ids)));
+        }
+        if (!essIds.isEmpty()) {
+            List<String> ids = essIds.stream().filter(id -> !id.equals(random)).sorted().toList();
+            CodexEngine.get().getMessageUtil().sendMessage("editor.editorUsage", player,
+                    new MessageData("syntax", "§bESSENCE: §7" + String.join(", ", ids)));
+        }
+        if (!runeIds.isEmpty()) {
+            List<String> ids = runeIds.stream().filter(id -> !id.equals(random)).sorted().toList();
+            CodexEngine.get().getMessageUtil().sendMessage("editor.editorUsage", player,
+                    new MessageData("syntax", "§bRUNE: §7" + String.join(", ", ids)));
         }
     }
 
@@ -1126,6 +1312,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
             String recipeName = args[0];
             String itemName   = args[1];
             int    amount     = Integer.parseInt(args[2]);
+            String configStr  = buildItemConfigString(args, 1); // item + amount + optional level/type
             for (Recipe recipe : professionEditor.getTable().getRecipes().values()) {
                 if (recipe.getName().equalsIgnoreCase(recipeName)) {
                     CodexEngine.get()
@@ -1163,7 +1350,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new ArrayList()));
             recipeSettings.put("conditions", Map.of("professionLevel", 0, "mastery", false));
             recipeSettings.put("costs", Map.of("items", List.of("STONE:3"), "money", 0.0, "exp", 0));
-            recipeSettings.put("settings", Map.of("icon", Map.of("item", itemName + ":" + amount)));
+            recipeSettings.put("settings", Map.of("icon", Map.of("item", configStr)));
 
             professionEditor.getTable()
                     .getRecipes()
@@ -1175,6 +1362,7 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             new MessageData("recipe", recipeName),
                             new MessageData("result", itemName));
             professionEditor.getRecipeEditor().reload(true);
+            professionEditor.autoSave();
         } catch (NumberFormatException e) {
             e.printStackTrace();
             CodexEngine.get()
@@ -1185,15 +1373,16 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
     private void updateRecipeItems(ProfessionEditor professionEditor, String[] args, EditorCriteria criteria) {
         Player player = professionEditor.getPlayer();
-        if (args.length != 2) {
+        if (args.length < 2) {
             CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<item> <amount>"));
             return;
         }
         try {
-            String itemName = args[0];
-            int    amount   = Integer.parseInt(args[1]);
+            String itemName  = args[0];
+            int    amount    = Integer.parseInt(args[1]);
+            String configStr = buildItemConfigString(args, 0);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1208,12 +1397,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             .getRecipeItemEditor()
                             .getRecipe()
                             .getSettings()
-                            .setRecipeItem(RecipeItem.fromConfig(itemName + ":" + amount));
+                            .setRecipeItem(RecipeItem.fromConfig(configStr));
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
                             .getSettings()
-                            .setIconNamespace(itemName + ":" + amount);
+                            .setIconNamespace(configStr);
                     CodexEngine.get()
                             .getMessageUtil()
                             .sendMessage("editor.resultEdited",
@@ -1239,13 +1428,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                                     .getRecipe()
                                     .getConditions()
                                     .getRequiredItems()
-                                    .set(i, RecipeItem.fromConfig(itemName + ":" + amount));
+                                    .set(i, RecipeItem.fromConfig(configStr));
                             professionEditor.getRecipeEditor()
                                     .getRecipeItemEditor()
                                     .getRecipe()
                                     .getConditions()
                                     .getRequiredItemNames()
-                                    .set(i, itemName + ":" + amount);
+                                    .set(i, configStr);
                             found = true;
                         }
                         i++;
@@ -1256,13 +1445,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                                 .getRecipe()
                                 .getConditions()
                                 .getRequiredItems()
-                                .add(RecipeItem.fromConfig(itemName + ":" + amount));
+                                .add(RecipeItem.fromConfig(configStr));
                         professionEditor.getRecipeEditor()
                                 .getRecipeItemEditor()
                                 .getRecipe()
                                 .getConditions()
                                 .getRequiredItemNames()
-                                .add(itemName + ":" + amount);
+                                .add(configStr);
                     }
                     break;
                 case Profession_Recipe_Edit_Ingredients:
@@ -1277,13 +1466,13 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             .getRecipe()
                             .getConditions()
                             .getRequiredItems()
-                            .add(RecipeItem.fromConfig(itemName + ":" + amount));
+                            .add(RecipeItem.fromConfig(configStr));
                     professionEditor.getRecipeEditor()
                             .getRecipeItemEditor()
                             .getRecipe()
                             .getConditions()
                             .getRequiredItemNames()
-                            .add(itemName + ":" + amount);
+                            .add(configStr);
                     break;
             }
             professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
@@ -1309,6 +1498,46 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                 .getMessageUtil()
                 .sendMessage("editor.recipePermissionUpdated", player, new MessageData("permission", permission));
         professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+    }
+
+    private void updateRecipeStation(ProfessionEditor professionEditor, String[] args) {
+        Player player = professionEditor.getPlayer();
+        if (args.length != 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<stationId>"));
+            return;
+        }
+        String station = args[0];
+        professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setStation(station);
+        CodexEngine.get()
+                .getMessageUtil()
+                .sendMessage("editor.recipeStationUpdated", player, new MessageData("station", station));
+        professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+    }
+
+    private void updateRecipeFuelCost(ProfessionEditor professionEditor, String[] args) {
+        Player player = professionEditor.getPlayer();
+        if (args.length != 1) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<amount>"));
+            return;
+        }
+        try {
+            int fuelCost = Integer.parseInt(args[0]);
+            professionEditor.getRecipeEditor().getRecipeItemEditor().getRecipe().getConditions().setFuelCost(fuelCost);
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.recipeFuelCostUpdated",
+                            player,
+                            new MessageData("amount", String.valueOf(fuelCost)));
+            professionEditor.getRecipeEditor().getRecipeItemEditor().reload(true);
+        } catch (NumberFormatException e) {
+            CodexEngine.get()
+                    .getMessageUtil()
+                    .sendMessage("editor.invalidNumber", player, new MessageData("number", args[0]));
+        }
     }
 
     private void addRecipeConditions(ProfessionEditor professionEditor, String[] args) {
@@ -1559,15 +1788,16 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
 
     private void addBrowseIngredient(BrowseEditor browseEditor, String[] args) {
         Player player = browseEditor.getPlayer();
-        if (args.length != 2) {
+        if (args.length < 2) {
             CodexEngine.get()
                     .getMessageUtil()
                     .sendMessage("editor.invalidSyntax", player, new MessageData("syntax", "<item> <amount>"));
             return;
         }
         try {
-            String itemName = args[0];
-            int    amount   = Integer.parseInt(args[1]);
+            String itemName  = args[0];
+            int    amount    = Integer.parseInt(args[1]);
+            String configStr = buildItemConfigString(args, 0);
             if (!isValidItem(itemName)) {
                 CodexEngine.get()
                         .getMessageUtil()
@@ -1586,12 +1816,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                             .getBrowseProfessionEditor()
                             .getConditions()
                             .getRequiredItems()
-                            .set(i, RecipeItem.fromConfig(itemName + ":" + amount));
+                            .set(i, RecipeItem.fromConfig(configStr));
                     browseEditor.getBrowseProfessionsEditor()
                             .getBrowseProfessionEditor()
                             .getConditions()
                             .getRequiredItemNames()
-                            .set(i, itemName + ":" + amount);
+                            .set(i, configStr);
                     found = true;
                 }
                 i++;
@@ -1601,12 +1831,12 @@ public class FusionEditorCommand implements CommandExecutor, TabCompleter {
                         .getBrowseProfessionEditor()
                         .getConditions()
                         .getRequiredItems()
-                        .add(RecipeItem.fromConfig(itemName + ":" + amount));
+                        .add(RecipeItem.fromConfig(configStr));
                 browseEditor.getBrowseProfessionsEditor()
                         .getBrowseProfessionEditor()
                         .getConditions()
                         .getRequiredItemNames()
-                        .add(itemName + ":" + amount);
+                        .add(configStr);
                 browseEditor.getBrowseProfessionsEditor().getBrowseProfessionEditor().reload(true);
             }
         } catch (NumberFormatException e) {

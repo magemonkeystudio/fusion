@@ -16,6 +16,9 @@ import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.gui.editors.professions.ProfessionEditor;
 
+import org.bukkit.inventory.Inventory;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,7 +26,8 @@ import java.util.UUID;
 
 public class EditorRegistry {
 
-    private static final Map<UUID, Editor> editors = new TreeMap<>();
+    private static final Map<UUID, Editor>      editors             = new TreeMap<>();
+    private static final Map<Inventory, Editor> inventoryEditorMap  = new HashMap<>();
 
     /* Main Editor Configs */
     @Getter
@@ -46,8 +50,21 @@ public class EditorRegistry {
     private static BrowseProfessionCfg  browseProfessionCfg;
 
 
+    public static void registerInventory(Inventory inventory, Editor editor) {
+        inventoryEditorMap.put(inventory, editor);
+    }
+
+    public static void unregisterInventory(Inventory inventory) {
+        inventoryEditorMap.remove(inventory);
+    }
+
+    public static Editor getEditorByInventory(Inventory inventory) {
+        return inventoryEditorMap.get(inventory);
+    }
+
     public static void reload() {
         editors.clear();
+        inventoryEditorMap.clear();
 
         professionEditorCfg = new ProfessionEditorCfg();
         recipeEditorCfg = new RecipeEditorCfg();
@@ -62,8 +79,16 @@ public class EditorRegistry {
     }
 
     public static Editor getProfessionEditor(Player player, String profession) {
-        if (!editors.containsKey(player.getUniqueId()) && profession != null)
+        Editor existing = editors.get(player.getUniqueId());
+        if (existing instanceof ProfessionEditor pe && profession != null && !pe.getProfession().equals(profession)) {
+            pe.saveNow();
+            pe.dispose();
+            editors.remove(player.getUniqueId());
+            existing = null;
+        }
+        if (existing == null && profession != null) {
             editors.put(player.getUniqueId(), new ProfessionEditor(player, profession));
+        }
         return editors.get(player.getUniqueId());
     }
 

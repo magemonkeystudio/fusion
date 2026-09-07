@@ -19,6 +19,7 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.ProfessionGuiRegistry;
 import studio.magemonkey.fusion.hook.NexoHook;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.TabCacher;
 import studio.magemonkey.fusion.util.Utils;
 
 import java.io.File;
@@ -73,6 +74,7 @@ public class ProfessionsCfg {
                 map.put(ct.getName(), ct);
                 cfgs.put(profession, cfg);
                 files.put(profession, file);
+                TabCacher.clearAllCaches("professions");
                 return true;
             } else if (refProfession == null) {
                 files.put(profession,
@@ -92,6 +94,7 @@ public class ProfessionsCfg {
                 map.put(ct.getName(), ct);
                 files.put(profession, file);
                 cfgs.put(profession, cfg);
+                TabCacher.clearAllCaches("professions");
                 return true;
             }
         } catch (Exception e) {
@@ -138,6 +141,8 @@ public class ProfessionsCfg {
             String key = entry.getKey();
             guiMap.put(key, new ProfessionGuiRegistry(key));
         }
+
+        TabCacher.clearAllCaches("professions");
     }
 
     public static CraftingTable getTable(String str) {

@@ -367,26 +367,26 @@ public class FusionPlayer {
             cachedRecipeLimits.clear();
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
-            SQLManager.players().setAutoCrafting(uuid, autoCrafting);
-            for (Profession profession : professions.values()) {
-                SQLManager.professions().setProfession(uuid, profession);
-            }
-            for (CraftingQueue queue : queuesToSave.values()) {
-                SQLManager.queues().saveCraftingQueue(queue);
-            }
-            SQLManager.recipeLimits().saveRecipeLimits(uuid, recipeLimitsToSave);
-
-            /*
-            In case of race conditions we wait a bit before unlocking the player. Not required but just to be safe.
+        Runnable saveTask = () -> {
             try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                SQLManager.players().setAutoCrafting(uuid, autoCrafting);
+                for (Profession profession : professions.values()) {
+                    SQLManager.professions().setProfession(uuid, profession);
+                }
+                for (CraftingQueue queue : queuesToSave.values()) {
+                    SQLManager.queues().saveCraftingQueue(queue);
+                }
+                SQLManager.recipeLimits().saveRecipeLimits(uuid, recipeLimitsToSave);
+            } finally {
+                SQLManager.players().setLocked(uuid, false);
+                this.locked = false;
             }
-            */
-            SQLManager.players().setLocked(uuid, false);
-            this.locked = false;
-        });
+        };
+        // Fix D: save synchronously during shutdown so the scheduler can't cancel the task
+        if (!Fusion.getInstance().isEnabled()) {
+            saveTask.run();
+        } else {
+            Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), saveTask);
+        }
     }
 }
