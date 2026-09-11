@@ -11,8 +11,10 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 
 import java.sql.PreparedStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class FusionQueuesSQL {
@@ -42,6 +44,11 @@ public class FusionQueuesSQL {
         } catch (SQLException ignored) {
             // The column already exists on current installations.
         }
+        try (PreparedStatement alter = SQLManager.connection().prepareStatement(
+                "ALTER TABLE " + Table + " ADD COLUMN Receipt TEXT")) {
+            alter.execute();
+        } catch (SQLException ignored) { /* Already migrated. Insert fails safely if unavailable. */ }
+        SQLManager.ensureIndex(Table, "fusion_queues_player", "UUID, Id");
     }
 
     public boolean setQueueItem(UUID uuid, QueueItem item) {
@@ -49,14 +56,19 @@ public class FusionQueuesSQL {
         if (item.getId() == -1) {
             try (PreparedStatement insert = SQLManager.connection()
                     .prepareStatement("INSERT INTO " + Table
-                            + "(UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds, PaidExpCost) VALUES (?,?,?,?,?,?)")) {
+                            + "(UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds, PaidExpCost, Receipt) VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
                 insert.setString(1, uuid.toString());
                 insert.setString(2, item.getRecipePath());
                 insert.setLong(3, item.getTimestamp());
-                insert.setLong(4, item.getRecipe().getCraftingTime());
+                insert.setLong(4, item.getCraftingTime());
                 insert.setLong(5, item.getSavedSeconds());
                 insert.setInt(6, item.getPaidExpCost());
-                insert.execute();
+                insert.setString(7, item.getReceipt() == null ? null : item.getReceipt().encode());
+                insert.executeUpdate();
+                try (ResultSet keys = insert.getGeneratedKeys()) {
+                    if (!keys.next()) throw new SQLException("Queue insert returned no ID");
+                    item.setId(keys.getLong(1));
+                }
                 return true;
             } catch (SQLException e) {
                 Fusion.getInstance()
@@ -66,12 +78,13 @@ public class FusionQueuesSQL {
             }
         } else {
             try (PreparedStatement update = SQLManager.connection()
-                    .prepareStatement("UPDATE " + Table + " SET SavedSeconds=?, PaidExpCost=? WHERE Id=?")) {
+                    .prepareStatement("UPDATE " + Table + " SET SavedSeconds=?, PaidExpCost=?, Timestamp=? WHERE Id=? AND UUID=?")) {
                 update.setLong(1, item.getSavedSeconds());
                 update.setInt(2, item.getPaidExpCost());
-                update.setLong(3, item.getId());
-                update.execute();
-                return true;
+                update.setLong(3, item.getTimestamp());
+                update.setLong(4, item.getId());
+                update.setString(5, uuid.toString());
+                return update.executeUpdate() == 1;
             } catch (SQLException e) {
                 Fusion.getInstance()
                         .getLogger()
@@ -86,8 +99,7 @@ public class FusionQueuesSQL {
         try (PreparedStatement delete = SQLManager.connection()
                 .prepareStatement("DELETE FROM " + Table + " WHERE Id=?")) {
             delete.setLong(1, item.getId());
-            delete.execute();
-            return true;
+            return delete.executeUpdate() == 1;
         } catch (SQLException e) {
             Fusion.getInstance()
                     .getLogger()
@@ -97,17 +109,46 @@ public class FusionQueuesSQL {
         return false;
     }
 
+    public boolean claimQueueItem(UUID uuid, QueueItem item) {
+        try (Connection connection = SQLManager.openConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement delete = connection.prepareStatement(
+                    "DELETE FROM " + Table + " WHERE Id=? AND UUID=? AND SavedSeconds>=CraftingTime")) {
+                delete.setLong(1, item.getId());
+                delete.setString(2, uuid.toString());
+                if (delete.executeUpdate() != 1 || !SQLManager.recipeLimits().consumeLimit(connection,
+                        uuid, item.getRecipePath(), item.getRecipe().getCraftingLimit(),
+                        item.getRecipe().getCraftingLimitCooldown())) {
+                    connection.rollback();
+                    return false;
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException | RuntimeException e) {
+            Fusion.getInstance().getLogger().warning("Failed to claim queue item " + item.getId() + ": " + e.getMessage());
+            return false;
+        }
+    }
+
     public List<QueueItem> getQueueItems(UUID uuid, String profession, Category category) {
         List<QueueItem> entries = new ArrayList<>();
-        String          sql     = "SELECT * FROM " + Table + " WHERE UUID=? AND RecipePath LIKE ?";
+        String          sql     = "SELECT * FROM " + Table + " WHERE UUID=? ORDER BY Id";
 
         try (PreparedStatement select = SQLManager.connection().prepareStatement(sql)) {
             select.setString(1, uuid.toString());
-            select.setString(2, "%" + profession + "." + category.getName() + "%");
             try (ResultSet result = select.executeQuery()) {
                 while (result.next()) {
-                    String recipeStr = result.getString("RecipePath").split("\\.")[2];
-                    Recipe recipe    = category.getRecipe(recipeStr);
+                    String prefix = profession + "." + (category.getName().equals("master") ? "" : category.getName() + ".");
+                    String path = result.getString("RecipePath");
+                    if (path == null || !path.startsWith(prefix)) continue;
+                    String recipeStr = path.substring(prefix.length());
+                    Recipe recipe = category.getName().equals("master")
+                            ? category.getRecipes().stream().filter(candidate -> candidate.getRecipePath().equals(path)).findFirst().orElse(null)
+                            : category.getRecipe(recipeStr);
 
                     if (recipe == null) {
                         Fusion.getInstance()
@@ -129,6 +170,9 @@ public class FusionQueuesSQL {
                             result.getInt("SavedSeconds")
                     );
                     queueItem.setPaidExpCost(result.getInt("PaidExpCost"));
+                    queueItem.setReceipt(studio.magemonkey.fusion.data.queue.CraftingReceipt.decode(result.getString("Receipt")));
+                    queueItem.setId(result.getLong("Id"));
+                    queueItem.restoreCraftingTime(result.getInt("CraftingTime"));
                     entries.add(queueItem);
                 }
             }
@@ -145,7 +189,13 @@ public class FusionQueuesSQL {
         Map<String, CraftingQueue> entries = new HashMap<>();
         for (Map.Entry<String, CraftingTable> entry : ProfessionsCfg.getMap().entrySet()) {
             String profession = entry.getKey();
-            for (Category category : entry.getValue().getCategories().values()) {
+            Collection<Category> categories = entry.getValue().getCategories().values();
+            if (!entry.getValue().getUseCategories() || categories.isEmpty()) {
+                Category master = new Category("master", "PAPER", entry.getValue().getRecipePattern(), 1);
+                master.getRecipes().addAll(entry.getValue().getRecipes().values());
+                categories = List.of(master);
+            }
+            for (Category category : categories) {
                 String path = profession + "." + category.getName();
                 if (entries.containsKey(path)) continue;
                 entries.putIfAbsent(path, new CraftingQueue(player, profession, category));
@@ -155,7 +205,6 @@ public class FusionQueuesSQL {
     }
 
     public void saveCraftingQueue(CraftingQueue queue) {
-        queue.cancelTask();
         for (QueueItem item : queue.getQueue()) {
             if (!setQueueItem(queue.getPlayer().getUniqueId(), item)) {
                 Fusion.getInstance()

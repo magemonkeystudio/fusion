@@ -1,5 +1,10 @@
 package studio.magemonkey.fusion.api.events.services;
 
+import studio.magemonkey.fusion.crafting.CraftingResult;
+import studio.magemonkey.fusion.crafting.CraftingCostService;
+import studio.magemonkey.fusion.crafting.CraftingRewardService;
+import studio.magemonkey.fusion.data.queue.CraftingReceipt;
+import studio.magemonkey.fusion.data.queue.QueueProgress;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -39,18 +44,24 @@ public class QueueService {
     }
 
     public boolean addQueueItemAndReport(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
+        return addQueueItemResult(player, table, queue, item) == CraftingResult.SUCCESS;
+    }
+
+    public CraftingResult addQueueItemResult(
+            Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
         QueueItemAddedEvent event = new QueueItemAddedEvent(table.getName(), player, queue, item);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             item.setCraftinQueue(event.getQueue());
+            if (!SQLManager.queues().setQueueItem(player.getUniqueId(), item)) return CraftingResult.STORAGE_FAILED;
             event.getQueue().getQueue().add(item);
             if (Cfg.instantCollect && item.getRecipe().getCraftingTime() <= 0) {
                 item.markDone();
                 event.getQueue().finishRecipe(item);
             }
-            return true;
+            return CraftingResult.SUCCESS;
         }
-        return false;
+        return CraftingResult.EVENT_CANCELLED;
     }
 
     /**
@@ -71,59 +82,37 @@ public class QueueService {
                                 boolean finished,
                                 boolean refunded,
                                 List<ItemStack> refundItems) {
+        cancelQueueItemAndReport(player, table, queue, item, finished, refunded, refundItems);
+    }
+
+    public CraftingResult cancelQueueItemAndReport(
+            Player player, CraftingTable table, CraftingQueue queue, QueueItem item,
+            boolean finished, boolean refunded, List<ItemStack> refundItems) {
+        if (!queue.getQueue().contains(item)) return CraftingResult.NOT_FOUND;
         QueueItemRemovedEvent event =
                 new QueueItemRemovedEvent(table.getName(), player, queue, item, finished, refunded, refundItems);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
+            double refundMoney = item.getReceipt() == null ? item.getRecipe().getConditions().getMoneyCost() : item.getReceipt().getMoney();
+            if (refunded && refundMoney > 0 && CodexEngine.get().getVault() == null) return CraftingResult.REQUIREMENTS_NOT_MET;
+            boolean removed = finished
+                    ? SQLManager.queues().claimQueueItem(player.getUniqueId(), item)
+                    : SQLManager.queues().removeQueueItem(item);
+            if (!removed) return CraftingResult.STORAGE_FAILED;
             if (event.isRefunded()) {
-                if (CodexEngine.get().getVault() != null && item.getRecipe().getConditions().getMoneyCost() != 0) {
-                    CodexEngine.get().getVault().give(event.getPlayer(), item.getRecipe().getConditions().getMoneyCost());
-                }
-                if (item.getPaidExpCost() > 0) {
-                    player.giveExp(item.getPaidExpCost());
-                    item.setPaidExpCost(0);
-                }
-
-                Collection<ItemStack> refunds = event.getRefundedItems();
-                if (refunds != null) for (ItemStack refundItem : refunds) {
-                    // If those are not stacked natively, we need to give them one by one
-                    if (refundItem.getMaxStackSize() < refundItem.getAmount()) {
-                        for (int i = 0; i < refundItem.getAmount(); i++) {
-                            ItemStack singleItem = refundItem.clone();
-                            singleItem.setAmount(1);
-                            Collection<ItemStack> notAdded = player.getInventory().addItem(singleItem).values();
-                            if (!notAdded.isEmpty()) {
-                                for (ItemStack _item : notAdded) {
-                                    Objects.requireNonNull(player.getLocation().getWorld())
-                                            .dropItemNaturally(player.getLocation(), _item);
-                                }
-                            }
-                        }
-                    } else {
-                        Collection<ItemStack> notAdded = player.getInventory().addItem(refundItem).values();
-                        if (!notAdded.isEmpty()) {
-                            for (ItemStack _item : notAdded) {
-                                Objects.requireNonNull(player.getLocation().getWorld())
-                                        .dropItemNaturally(player.getLocation(), _item);
-                            }
-                        }
-                    }
-                }
+                var receipt = item.getReceipt();
+                int xp = receipt == null ? item.getPaidExpCost() : receipt.getExperience();
+                double money = receipt == null ? item.getRecipe().getConditions().getMoneyCost() : receipt.getMoney();
+                var items = event.getRefundedItems() == null ? List.<ItemStack>of() : event.getRefundedItems();
+                new CraftingCostService().refund(player,
+                        new CraftingReceipt(items, xp, money));
             }
             event.getQueue().getQueue().remove(item);
-            var queuedItemsIterator = event.getQueue().getQueuedItems().entrySet().iterator();
-            while (queuedItemsIterator.hasNext()) {
-                if (queuedItemsIterator.next().getValue().equals(item)) {
-                    queuedItemsIterator.remove();
-                    break;
-                }
-            }
-            if (!SQLManager.queues().removeQueueItem(item)) {
-                Fusion.getInstance().getLogger().warning("Failed to remove queue item from SQL");
-            }
+            QueueProgress.refreshTimes(queue.getQueue());
+            return CraftingResult.SUCCESS;
         }
+        return CraftingResult.EVENT_CANCELLED;
     }
-
     /**
      * Call the QueueItemFinishedEvent.
      *
@@ -138,6 +127,13 @@ public class QueueService {
                                 CraftingQueue queue,
                                 QueueItem item,
                                 List<RecipeItem> resultItems) {
+        finishQueueItemAndReport(player, table, queue, item, resultItems);
+    }
+
+    public CraftingResult finishQueueItemAndReport(
+            Player player, CraftingTable table, CraftingQueue queue, QueueItem item, List<RecipeItem> resultItems) {
+        if (!queue.getQueue().contains(item)) return CraftingResult.NOT_FOUND;
+        if (!item.isDone()) return CraftingResult.NOT_READY;
         QueueItemFinishedEvent event =
                 new QueueItemFinishedEvent(table.getName(), player, queue, item, resultItems);
         Bukkit.getPluginManager().callEvent(event);
@@ -149,7 +145,7 @@ public class QueueService {
                         item,
                         false,
                         true,
-                        event.getQueueItem().getRecipe().getItemsToTake());
+                        item.getReceipt() == null ? item.getRecipe().getItemsToTake() : item.getReceipt().getItems());
                 event.setCancelled(true);
                 CodexEngine.get().getMessageUtil().sendMessage("fusion.error.recipeLimitReached", player,
                         new MessageData("recipe", event.getQueueItem().getRecipe().getName()),
@@ -157,66 +153,15 @@ public class QueueService {
                                 event.getFusionPlayer().getRecipeLimit(event.getQueueItem().getRecipe()).getLimit()),
                         new MessageData("recipe.limit", event.getQueueItem().getRecipe().getCraftingLimit()),
                         new MessageData("limit", event.getQueueItem().getRecipe().getCraftingLimit()));
-                return;
+                return CraftingResult.REQUIREMENTS_NOT_MET;
             }
-            // Items if no commands exist
-            if (!item.getRecipe().getResults().hasCommandsOrItems()) {
-                ItemStack result =
-                        event.getQueueItem().getRecipe().getDivinityRecipeMeta() == null ? event.getQueueItem()
-                                .getRecipe()
-                                .getSettings()
-                                .getRecipeItem()
-                                .getItemStack()
-                                : event.getQueueItem().getRecipe().getDivinityRecipeMeta().generateItem();
-                // If there is no space in the inventory, drop the items
-                Collection<ItemStack> notAdded = player.getInventory().addItem(result).values();
-                if (!notAdded.isEmpty()) {
-                    for (ItemStack _item : notAdded) {
-                        Objects.requireNonNull(player.getLocation().getWorld())
-                                .dropItemNaturally(player.getLocation(), _item);
-                    }
-                }
-            } else {
-                if (!item.getRecipe().getResults().getCommands().isEmpty()) {
-                    // If there are commands, we need to delay the item giving
-                    DelayedCommand.invoke(Fusion.getInstance(), player, item.getRecipe().getResults().getCommands());
-                }
-                if (!item.getRecipe().getResults().getItems().isEmpty()) {
-                    // If there are items, we need to delay the item giving
-                    for (RecipeItem resultItem : resultItems) {
-                        ItemStack itemStack = resultItem.getItemStack();
-                        if (itemStack != null) {
-                            Collection<ItemStack> remainings = player.getInventory().addItem(itemStack).values();
-                            if (!remainings.isEmpty()) {
-                                remainings.forEach(_item -> player.getWorld()
-                                        .dropItemNaturally(player.getLocation(), _item));
-                            }
-                        }
-                    }
-                }
-            }
-
-            //Experience
-            long professionExp = item.getRecipe().getResults().getProfessionExp() + (long) (
-                    item.getRecipe().getResults().getProfessionExp()
-                            * PlayerUtil.getProfessionExpBonusThroughPermissions(player, table.getName()));
-            if (professionExp > 0) {
-                FusionAPI.getEventServices()
-                        .getProfessionService()
-                        .giveProfessionExp(player,
-                                event.getCraftingTable(),
-                                professionExp);
-            }
-            if (item.getRecipe().getResults().getVanillaExp() > 0) {
-                player.giveExp(event.getQueueItem().getRecipe().getResults().getVanillaExp());
-            }
-
-            // Increment the limit if existent
-            if (event.getQueueItem().getRecipe().getCraftingLimit() > 0)
-                event.getFusionPlayer().incrementLimit(event.getQueueItem().getRecipe());
-
-            // Remove the item from the queue
-            event.getQueue().removeRecipe(event.getQueueItem(), false);
+            // Claim the persisted row before delivering anything. A failed or cancelled
+            // removal must not deliver a second reward on the next click/rejoin.
+            var removal = cancelQueueItemAndReport(player, table, queue, item, true, false, List.of());
+            if (removal != CraftingResult.SUCCESS) return removal;
+            new CraftingRewardService().give(player, table, item.getRecipe(), event.getResultItems());
+            return CraftingResult.SUCCESS;
         }
+        return CraftingResult.EVENT_CANCELLED;
     }
 }

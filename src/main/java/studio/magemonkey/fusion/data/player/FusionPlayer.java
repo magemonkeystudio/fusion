@@ -26,13 +26,16 @@ public class FusionPlayer {
 
     private final UUID uuid;
 
-    private final Map<String, Profession>        professions        = new TreeMap<>();
     private       Map<String, CraftingQueue>     cachedQueues       = new TreeMap<>();
-    private       Map<String, PlayerRecipeLimit> cachedRecipeLimits = new TreeMap<>();
 
-    @Getter
-    @Setter
-    private boolean autoCrafting;
+    public boolean isAutoCrafting() {
+        return SQLManager.players().isAutoCrafting(uuid);
+    }
+
+    public void setAutoCrafting(boolean autoCrafting) {
+        SQLManager.players().setAutoCrafting(uuid, autoCrafting);
+
+    }
 
     // Track whether this player is currently locked for saving (in-memory mirror of DB lock)
     @Getter
@@ -43,14 +46,17 @@ public class FusionPlayer {
         this.uuid = uuid;
         // initialize locked state from DB to reflect current status
         this.locked = SQLManager.players().isLocked(uuid);
-        autoCrafting = SQLManager.players().isAutoCrafting(uuid);
-        for (Profession profession : SQLManager.professions().getProfessions(uuid)) {
-            professions.put(profession.getName(), profession);
-        }
+
         cachedQueues = SQLManager.queues().getCraftingQueues(getPlayer());
-        cachedRecipeLimits = SQLManager.recipeLimits().getRecipeLimits(uuid);
     }
 
+    private Map<String, Profession> professions() {
+        Map<String, Profession> current = new TreeMap<>();
+        for (Profession profession : SQLManager.professions().getProfessions(uuid)) {
+            current.put(profession.getName(), profession);
+        }
+        return current;
+    }
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
     }
@@ -68,15 +74,12 @@ public class FusionPlayer {
     }
 
     public PlayerRecipeLimit getRecipeLimit(String recipePath) {
-        cachedRecipeLimits.putIfAbsent(recipePath, new PlayerRecipeLimit(recipePath, 0, -1));
-        return cachedRecipeLimits.get(recipePath);
+        return SQLManager.recipeLimits().getRecipeLimit(uuid, recipePath);
     }
 
     public void incrementLimit(Recipe recipe) {
-        getRecipeLimit(recipe).incrementLimit(1);
-        if (recipe.getCraftingLimitCooldown() > 0) {
-            getRecipeLimit(recipe).updateCooldown(recipe.getCraftingLimitCooldown());
-        }
+        SQLManager.recipeLimits().incrementLimit(uuid, recipe.getRecipePath(), 1,
+                recipe.getCraftingLimitCooldown());
     }
 
     public boolean hasRecipeLimitReached(Recipe recipe) {
@@ -86,8 +89,9 @@ public class FusionPlayer {
 
     public long getExperience(String profession) {
         long experience = 0;
-        if (professions.containsKey(profession)) {
-            experience = (int) professions.get(profession).getExp();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            experience = current.getExp();
         }
         return experience;
     }
@@ -102,8 +106,9 @@ public class FusionPlayer {
 
     public int getLevel(String profession) {
         int level = 0;
-        if (professions.containsKey(profession)) {
-            level = professions.get(profession).getLevel();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            level = current.getLevel();
         }
         return level;
     }
@@ -118,7 +123,7 @@ public class FusionPlayer {
 
     @Nullable
     public Profession getProfession(String profession) {
-        return professions.get(profession);
+        return SQLManager.professions().getProfession(uuid, profession);
     }
 
     @Nullable
@@ -127,7 +132,8 @@ public class FusionPlayer {
     }
 
     public void removeProfession(String profession) {
-        professions.remove(profession);
+        SQLManager.professions().removeProfession(uuid.toString(), profession);
+
     }
 
     public void removeProfession(Profession profession) {
@@ -139,11 +145,12 @@ public class FusionPlayer {
     }
 
     public void addProfession(Profession profession) {
-        professions.put(profession.getName(), profession);
+        SQLManager.professions().setProfession(uuid, profession);
+
     }
 
     public boolean hasProfession(String profession) {
-        return professions.containsKey(profession);
+        return getProfession(profession) != null;
     }
 
     public boolean hasProfession(Profession profession) {
@@ -155,19 +162,20 @@ public class FusionPlayer {
     }
 
     public Collection<Profession> getJoinedProfessions() {
-        return professions.values().stream().filter(Profession::isJoined).collect(Collectors.toList());
+        return professions().values().stream().filter(Profession::isJoined).collect(Collectors.toList());
     }
 
     public Collection<Profession> getMasteredProfessions() {
-        return professions.values().stream().filter(Profession::isMastered).collect(Collectors.toList());
+        return professions().values().stream().filter(Profession::isMastered).collect(Collectors.toList());
     }
 
     public Collection<Profession> getProfessions() {
-        return professions.values();
+        return professions().values();
     }
 
     public boolean hasMastered(String profession) {
-        return professions.containsKey(profession) && professions.get(profession).isMastered();
+        Profession current = getProfession(profession);
+        return current != null && current.isMastered();
     }
 
     public boolean hasMastered(Profession profession) {
@@ -179,7 +187,8 @@ public class FusionPlayer {
     }
 
     public boolean hasJoined(String profession) {
-        return professions.containsKey(profession) && professions.get(profession).isJoined();
+        Profession current = getProfession(profession);
+        return current != null && current.isJoined();
     }
 
     public boolean hasJoined(Profession profession) {
@@ -191,8 +200,9 @@ public class FusionPlayer {
     }
 
     public void setMastered(String profession, boolean mastered) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).setMastered(mastered);
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.setMastered(mastered);
         }
     }
 
@@ -205,8 +215,9 @@ public class FusionPlayer {
     }
 
     public void setJoined(String profession, boolean joined) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).setJoined(joined);
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.setJoined(joined);
         }
     }
 
@@ -219,8 +230,9 @@ public class FusionPlayer {
     }
 
     public void addExperience(String profession, long experience) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).addExp(experience);
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.addExp(experience);
         }
     }
 
@@ -233,8 +245,9 @@ public class FusionPlayer {
     }
 
     public void setExperience(String profession, long experience) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).setExp(experience);
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.setExp(experience);
         }
     }
 
@@ -247,8 +260,9 @@ public class FusionPlayer {
     }
 
     public void removeExperience(String profession, long experience) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).removeExp(experience);
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.removeExp(experience);
         }
     }
 
@@ -261,8 +275,9 @@ public class FusionPlayer {
     }
 
     public void resetExperience(String profession) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).resetExp();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.resetExp();
         }
     }
 
@@ -275,8 +290,9 @@ public class FusionPlayer {
     }
 
     public void resetMastered(String profession) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).resetMastered();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.resetMastered();
         }
     }
 
@@ -289,8 +305,9 @@ public class FusionPlayer {
     }
 
     public void resetJoined(String profession) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).resetJoined();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.resetJoined();
         }
     }
 
@@ -303,8 +320,9 @@ public class FusionPlayer {
     }
 
     public void reset(String profession) {
-        if (professions.containsKey(profession)) {
-            professions.get(profession).reset();
+        Profession current = getProfession(profession);
+        if (current != null) {
+            current.reset();
         }
     }
 
@@ -368,38 +386,19 @@ public class FusionPlayer {
     }
 
     public void save(boolean clearCaches) {
-        // set DB lock and in-memory lock
-        SQLManager.players().setLocked(uuid, true);
+        // Finish before unloading: a new session must never race an old async snapshot.
         this.locked = true;
-
-        Map<String, CraftingQueue> queuesToSave = new TreeMap<>(cachedQueues);
-        Map<String, PlayerRecipeLimit> recipeLimitsToSave = new TreeMap<>(cachedRecipeLimits);
-
-        if (clearCaches) {
-            cachedQueues.clear();
-            cachedRecipeLimits.clear();
-        }
-
-        Bukkit.getScheduler().runTaskAsynchronously(Fusion.getInstance(), () -> {
-            SQLManager.players().setAutoCrafting(uuid, autoCrafting);
-            for (Profession profession : professions.values()) {
-                SQLManager.professions().setProfession(uuid, profession);
-            }
-            for (CraftingQueue queue : queuesToSave.values()) {
+        try {
+            for (CraftingQueue queue : cachedQueues.values()) {
+                if (clearCaches) queue.cancelTask();
+                long now = System.currentTimeMillis();
+                queue.getQueue().forEach(item -> item.setTimestamp(now));
                 SQLManager.queues().saveCraftingQueue(queue);
             }
-            SQLManager.recipeLimits().saveRecipeLimits(uuid, recipeLimitsToSave);
-
-            /*
-            In case of race conditions we wait a bit before unlocking the player. Not required but just to be safe.
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            */
+            if (clearCaches) cachedQueues.clear();
+        } finally {
             SQLManager.players().setLocked(uuid, false);
             this.locked = false;
-        });
+        }
     }
 }

@@ -14,6 +14,7 @@ import java.util.Objects;
 @Getter
 public class QueueItem {
 
+    @Setter
     private          long      id;
     private          String    profession;
     private          Category  category;
@@ -23,10 +24,15 @@ public class QueueItem {
     private          long      timestamp;
     private          boolean   done;
     private          int       savedSeconds;
+    // The duration charged at enqueue time, including player-specific modifiers.
+    private          int       craftingTime;
 
     /** Experience charged when this queue item was created, for cancellation refunds. */
     @Setter
     private          int       paidExpCost;
+
+    @Setter
+    private CraftingReceipt receipt;
 
     private boolean       isRunning = false;
     private CraftingQueue craftingQueue;
@@ -53,6 +59,7 @@ public class QueueItem {
         this.profession = profession;
         this.category = category;
         this.recipe = Objects.requireNonNull(recipe, "recipe");
+        this.craftingTime = recipe.getCraftingTime();
         this.icon = icon;
         this.timestamp = timestamp;
         this.done = done;
@@ -72,9 +79,18 @@ public class QueueItem {
         this.profession = profession;
         this.category = category;
         this.recipe = recipe;
+        this.craftingTime = recipe.getCraftingTime();
         this.timestamp = timestamp;
         this.savedSeconds = savedSeconds;
         this.visualRemainingItemTime = recipe.getCraftingTime() - savedSeconds;
+        this.done = savedSeconds >= craftingTime;
+    }
+
+    public void restoreCraftingTime(int craftingTime) {
+        this.craftingTime = Math.max(0, craftingTime);
+        this.savedSeconds = Math.min(Math.max(0, savedSeconds), this.craftingTime);
+        this.done = savedSeconds >= this.craftingTime;
+        this.visualRemainingItemTime = this.craftingTime - savedSeconds;
     }
 
     public QueueItem(int id,
@@ -88,45 +104,25 @@ public class QueueItem {
         this.craftingQueue = craftingQueue;
     }
 
+    /** Compatibility refresh only; the queue service owns advancement. */
     public void update() {
-        if (isDone()) return;
-        if (this.craftingQueue != null) {
-            this.visualRemainingItemTime = craftingQueue.getVisualRemainingTotalTime();
-            int reconstructedCooldown = this.visualRemainingItemTime + savedSeconds;
-
-            if (visualRemainingItemTime == recipe.getCraftingTime() + 1) return;
-
-            if (reconstructedCooldown <= recipe.getCraftingTime()) {
-                if (!isRunning) {
-                    // Start the item
-                    isRunning = true;
-                    this.timestamp = System.currentTimeMillis();
-                    return;
-                }
-                // Advance progress
-                savedSeconds++;
-                this.timestamp = System.currentTimeMillis();
-                // Check if finished
-                if (savedSeconds >= recipe.getCraftingTime()) {
-                    done = true;
-                    // Mark finish time to prevent future overcounting
-                    this.timestamp = System.currentTimeMillis();
-                }
-                icon = ProfessionsCfg.getQueueItem(profession, this);
-                if (savedSeconds > 0) {
-                    visualRemainingItemTime--;
-                }
-            }
-        } else {
-            this.icon = ProfessionsCfg.getQueueItem(profession, this);
-        }
+        if (craftingQueue != null) QueueProgress.refreshTimes(craftingQueue.getQueue());
+        updateIcon();
     }
 
+    public int getRemainingSeconds() {
+        return done ? 0 : Math.max(0, craftingTime - savedSeconds);
+    }
+
+    public void setVisualRemainingItemTime(int seconds) {
+        visualRemainingItemTime = Math.max(0, seconds);
+    }
     public void updateIcon() {
         this.icon = ProfessionsCfg.getQueueItem(profession, this);
     }
 
     public void markDone() {
+        this.savedSeconds = craftingTime;
         this.done = true;
         this.visualRemainingItemTime = 0;
     }
@@ -139,16 +135,16 @@ public class QueueItem {
         if (done || offlineSeconds <= 0) {
             return;
         }
-        int remaining = recipe.getCraftingTime() - savedSeconds;
+        int remaining = craftingTime - savedSeconds;
         if (offlineSeconds >= remaining) {
             // item has finished offline
-            savedSeconds = recipe.getCraftingTime();
+            savedSeconds = craftingTime;
             done = true;
         } else {
             // item partially progressed offline
             savedSeconds += offlineSeconds;
         }
         // update the remaining time for the UI
-        visualRemainingItemTime = recipe.getCraftingTime() - savedSeconds;
+        visualRemainingItemTime = craftingTime - savedSeconds;
     }
 }
