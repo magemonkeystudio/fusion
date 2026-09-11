@@ -13,6 +13,7 @@ import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
+import studio.magemonkey.fusion.util.RecipeAmounts;
 
 import java.util.Collection;
 import java.util.Map;
@@ -348,6 +349,18 @@ public class FusionPlayer {
             }
         }
         return size;
+    }
+
+    public int getFinishedOutputAmount() {
+        int amount = 0;
+        for (CraftingQueue queue : cachedQueues.values()) {
+            for (QueueItem item : queue.getQueue()) {
+                if (item.isDone()) {
+                    amount += RecipeAmounts.outputAmount(item.getRecipe());
+                }
+            }
+        }
+        return amount;
     }
 
     public void save() {

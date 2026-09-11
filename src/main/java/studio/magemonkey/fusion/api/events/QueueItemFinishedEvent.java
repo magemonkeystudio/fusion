@@ -7,6 +7,7 @@ import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.util.RecipeAmounts;
 
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class QueueItemFinishedEvent extends FusionEvent {
      */
     @Setter
     private       List<RecipeItem> resultItems;
+    /**
+     * The number of recipe executions represented by this event.
+     */
+    private final int              recipeAmount;
 
     /**
      * Constructor for the QueueItemFinishedEvent
@@ -41,9 +46,23 @@ public class QueueItemFinishedEvent extends FusionEvent {
                                   CraftingQueue queue,
                                   QueueItem queueItem,
                                   List<RecipeItem> resultItems) {
+        this(professionName, player, queue, queueItem, resultItems, 1);
+    }
+
+    public QueueItemFinishedEvent(String professionName,
+                                  Player player,
+                                  CraftingQueue queue,
+                                  QueueItem queueItem,
+                                  List<RecipeItem> resultItems,
+                                  int recipeAmount) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.queue = queue;
         this.queueItem = queueItem;
         this.resultItems = resultItems;
+        this.recipeAmount = Math.max(0, recipeAmount);
+    }
+
+    public int getOutputAmount() {
+        return RecipeAmounts.outputAmount(queueItem.getRecipe(), resultItems) * recipeAmount;
     }
 }

@@ -101,15 +101,15 @@ public class CraftingQueue {
     }
 
     public void addRecipe(Recipe recipe) {
-        QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
-        FusionAPI.getEventServices()
-                .getQueueService()
-                .addQueueItem(player, ProfessionsCfg.getTable(profession), this, item);
+        addRecipe(recipe, 0);
+    }
 
-        if (Cfg.instantCollect && recipe.getCraftingTime() <= 0 && queue.contains(item)) {
-            item.markDone();
-            finishRecipe(item);
-        }
+    public boolean addRecipe(Recipe recipe, int paidExpCost) {
+        QueueItem item = new QueueItem(-1, profession, category, recipe, System.currentTimeMillis(), 0);
+        item.setPaidExpCost(Math.max(0, paidExpCost));
+        return FusionAPI.getEventServices()
+                .getQueueService()
+                .addQueueItemAndReport(player, ProfessionsCfg.getTable(profession), this, item);
     }
 
     public void finishAllRecipes() {

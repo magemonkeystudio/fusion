@@ -35,6 +35,7 @@ import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.CraftingRequirementsCfg;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.player.PlayerLoader;
+import studio.magemonkey.fusion.data.player.PlayerRecipeLimit;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.professions.pattern.InventoryPattern;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
@@ -684,34 +685,175 @@ public class RecipeGui implements Listener {
             return false;
         }
 
-        // Check queue limits
-        int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(table.getName(), category);
-        int categoryLimit =
-                PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + "." + category.getName() + ".limit");
-        int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + ".limit");
-        int limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+        // Instant-collect recipes never occupy a queue slot.
+        if (!(Cfg.instantCollect && recipe.getCraftingTime() <= 0)) {
+            // Check queue limits
+            int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(table.getName(), category);
+            int categoryLimit =
+                    PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + "." + category.getName() + ".limit");
+            int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + ".limit");
+            int limit           = PlayerUtil.getPermOption(player, "fusion.queue.limit");
 
-        if (categoryLimit > 0 && limits[0] >= categoryLimit) {
-            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullCategory",
-                    player,
-                    new MessageData("limit", categoryLimit),
-                    new MessageData("category", category.getName()),
-                    new MessageData("profession", table.getName()));
-            return false;
-        } else if (professionLimit > 0 && limits[1] >= professionLimit) {
-            CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullProfession",
-                    player,
-                    new MessageData("limit", professionLimit),
-                    new MessageData("profession", table.getName()));
-            return false;
-        } else if (limit > 0 && limits[2] >= limit) {
-            CodexEngine.get()
-                    .getMessageUtil()
-                    .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
-            return false;
+            if (categoryLimit > 0 && limits[0] >= categoryLimit) {
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullCategory",
+                        player,
+                        new MessageData("limit", categoryLimit),
+                        new MessageData("category", category.getName()),
+                        new MessageData("profession", table.getName()));
+                return false;
+            } else if (professionLimit > 0 && limits[1] >= professionLimit) {
+                CodexEngine.get().getMessageUtil().sendMessage("fusion.queue.fullProfession",
+                        player,
+                        new MessageData("limit", professionLimit),
+                        new MessageData("profession", table.getName()));
+                return false;
+            } else if (limit > 0 && limits[2] >= limit) {
+                CodexEngine.get()
+                        .getMessageUtil()
+                        .sendMessage("fusion.queue.fullGlobal", player, new MessageData("limit", limit));
+                return false;
+            }
         }
 
         return true;
+    }
+
+    private int getMaximumQueueAmount(CalculatedRecipe calculatedRecipe, int slot) {
+        if (!canCraft(calculatedRecipe, slot)) {
+            return 0;
+        }
+
+        Recipe recipe = calculatedRecipe.getRecipe();
+        Map<IngredientFingerprint, Integer> available = new HashMap<>();
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            available.merge(IngredientFingerprint.of(item), item.getAmount(), Integer::sum);
+        }
+
+        Map<IngredientFingerprint, Integer> required = new HashMap<>();
+        for (ItemStack item : recipe.getItemsToTake()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            required.merge(IngredientFingerprint.of(item), item.getAmount(), Integer::sum);
+        }
+
+        int maximum = Integer.MAX_VALUE;
+        for (Map.Entry<IngredientFingerprint, Integer> entry : required.entrySet()) {
+            int needed = entry.getValue();
+            if (needed <= 0) continue;
+            maximum = Math.min(maximum, available.getOrDefault(entry.getKey(), 0) / needed);
+        }
+
+        int expCost = recipe.getConditions().getExpCost();
+        if (expCost > 0) {
+            maximum = Math.min(maximum, ExperienceManager.getTotalExperience(player) / expCost);
+        }
+
+        double moneyCost = recipe.getConditions().getMoneyCost();
+        if (moneyCost > 0 && CodexEngine.get().getVault() != null) {
+            maximum = Math.min(maximum, (int) Math.floor(
+                    CodexEngine.get().getVault().getBalance(player) / moneyCost));
+        }
+
+        PlayerRecipeLimit recipeLimit = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
+        if (recipe.getCraftingLimit() > 0) {
+            if (recipeLimit.getLimit() > 0 && recipeLimit.getCooldownTimestamp() > 0 && !recipeLimit.hasCooldown()) {
+                recipeLimit.resetLimit();
+            }
+            int queuedForRecipe = (int) queue.getQueue().stream()
+                    .filter(item -> item.getRecipe().equals(recipe))
+                    .count();
+            maximum = Math.min(maximum,
+                    Math.max(0, recipe.getCraftingLimit() - recipeLimit.getLimit() - queuedForRecipe));
+        }
+
+        if (!(Cfg.instantCollect && recipe.getCraftingTime() <= 0)) {
+            int[] limits = PlayerLoader.getPlayer(player.getUniqueId()).getQueueSizes(table.getName(), category);
+            int categoryLimit =
+                    PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + "." + category.getName() + ".limit");
+            int professionLimit = PlayerUtil.getPermOption(player, "fusion.queue." + table.getName() + ".limit");
+            int globalLimit = PlayerUtil.getPermOption(player, "fusion.queue.limit");
+            if (categoryLimit > 0) maximum = Math.min(maximum, Math.max(0, categoryLimit - limits[0]));
+            if (professionLimit > 0) maximum = Math.min(maximum, Math.max(0, professionLimit - limits[1]));
+            if (globalLimit > 0) maximum = Math.min(maximum, Math.max(0, globalLimit - limits[2]));
+        }
+
+        // A recipe with no consumable/cost/limit must still have a finite bulk operation.
+        return Math.max(0, Math.min(maximum, 1024));
+    }
+
+    private List<ItemStack> takeIngredients(Recipe recipe) {
+        List<ItemStack> removed = new ArrayList<>();
+        PlayerInventory inventory = player.getInventory();
+        for (ItemStack required : recipe.getItemsToTake()) {
+            if (required == null || required.getType() == Material.AIR) continue;
+            int need = required.getAmount();
+            IngredientFingerprint fingerprint = IngredientFingerprint.of(required);
+            for (int slot = 0; slot < inventory.getSize() && need > 0; slot++) {
+                ItemStack present = inventory.getItem(slot);
+                if (present == null || present.getType() == Material.AIR ||
+                        !fingerprint.equals(IngredientFingerprint.of(present))) continue;
+                int taken = Math.min(need, present.getAmount());
+                ItemStack refundItem = required.clone();
+                refundItem.setAmount(taken);
+                removed.add(refundItem);
+                present.setAmount(present.getAmount() - taken);
+                inventory.setItem(slot, present.getAmount() <= 0 ? null : present);
+                need -= taken;
+            }
+            if (need > 0) {
+                giveItems(removed);
+                return null;
+            }
+        }
+        return removed;
+    }
+
+    private void giveItems(Collection<ItemStack> items) {
+        if (items == null || items.isEmpty()) return;
+        Collection<ItemStack> overflow = player.getInventory().addItem(
+                items.stream().map(ItemStack::clone).toArray(ItemStack[]::new)).values();
+        for (ItemStack item : overflow) {
+            player.getWorld().dropItemNaturally(player.getLocation(), item);
+        }
+    }
+
+    private boolean queueOne(CalculatedRecipe calculatedRecipe, int slot, boolean reportErrors) {
+        if (!canCraft(calculatedRecipe, slot)) return false;
+        Recipe recipe = calculatedRecipe.getRecipe();
+        List<ItemStack> removed = takeIngredients(recipe);
+        if (removed == null) {
+            if (reportErrors) {
+                CodexEngine.get().getMessageUtil()
+                        .sendMessage("fusion.error.insufficientItems", player, new MessageData("recipe", recipe));
+            }
+            return false;
+        }
+
+        int expCost = recipe.getConditions().getExpCost();
+        double moneyCost = recipe.getConditions().getMoneyCost();
+        if (expCost > 0) player.giveExp(-expCost);
+        if (moneyCost != 0 && CodexEngine.get().getVault() != null) {
+            CodexEngine.get().getVault().take(player, moneyCost);
+        }
+
+        boolean added = queue.addRecipe(recipe, expCost);
+        if (!added) {
+            giveItems(removed);
+            if (expCost > 0) player.giveExp(expCost);
+            if (moneyCost != 0 && CodexEngine.get().getVault() != null) {
+                CodexEngine.get().getVault().give(player, moneyCost);
+            }
+        }
+        return added;
+    }
+
+    private void queueMaximum(int slot) {
+        CalculatedRecipe calculatedRecipe = recipes.get(slot);
+        if (calculatedRecipe == null) return;
+        int maximum = getMaximumQueueAmount(calculatedRecipe, slot);
+        for (int i = 0; i < maximum; i++) {
+            if (!queueOne(calculatedRecipe, slot, i == 0)) break;
+        }
     }
 
     private boolean craft(int slot, boolean addToCursor) {
@@ -816,8 +958,11 @@ public class RecipeGui implements Listener {
             return false;
         }
 
-        // All ingredients were successfully removed; add those to refund list
-        refund.addAll(removedSoFar);
+        // Manual crafting uses this list while its delayed task is running. Queue items
+        // persist their costs on the queue item instead, so they must not share it.
+        if (!Cfg.craftingQueue) {
+            refund.addAll(removedSoFar);
+        }
 
         //
         // ─── 3) Proceed with cooldown / boss‐bar / giving the result ───
@@ -905,9 +1050,21 @@ public class RecipeGui implements Listener {
                 }
             });
         } else {
-            if (recipe.getConditions().getMoneyCost() != 0 && CodexEngine.get().getVault() != null)
-                CodexEngine.get().getVault().take(this.player, recipe.getConditions().getMoneyCost());
-            this.queue.addRecipe(this.recipes.get(slot).getRecipe());
+            int expCost = recipe.getConditions().getExpCost();
+            double moneyCost = recipe.getConditions().getMoneyCost();
+            if (expCost > 0) player.giveExp(-expCost);
+            if (moneyCost != 0 && CodexEngine.get().getVault() != null) {
+                CodexEngine.get().getVault().take(this.player, moneyCost);
+            }
+            boolean added = this.queue.addRecipe(recipe, expCost);
+            if (!added) {
+                giveItems(removedSoFar);
+                if (expCost > 0) player.giveExp(expCost);
+                if (moneyCost != 0 && CodexEngine.get().getVault() != null) {
+                    CodexEngine.get().getVault().give(this.player, moneyCost);
+                }
+                return false;
+            }
         }
         return true;
     }
@@ -1005,7 +1162,11 @@ public class RecipeGui implements Listener {
                 event.setCancelled(true);
             return;
         }
-        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+        boolean shiftCraftAll = Cfg.craftingQueue
+                && event.isShiftClick()
+                && event.isLeftClick()
+                && slots[event.getRawSlot()].equals(Slot.BASE_RESULT_SLOT);
+        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY && !shiftCraftAll) {
             event.setCancelled(true);
             event.setResult(Event.Result.DENY);
             return;
@@ -1046,7 +1207,11 @@ public class RecipeGui implements Listener {
             event.setResult(Event.Result.DENY);
             Fusion.getInstance().runSync(() -> {
                 this.reloadRecipes();
-                this.craft(event.getRawSlot(), false);
+                if (Cfg.craftingQueue && event.isShiftClick() && event.isLeftClick()) {
+                    this.queueMaximum(event.getRawSlot());
+                } else {
+                    this.craft(event.getRawSlot(), false);
+                }
                 this.reloadRecipesTask();
             });
             return;

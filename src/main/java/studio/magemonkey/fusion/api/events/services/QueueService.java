@@ -11,6 +11,7 @@ import studio.magemonkey.fusion.api.FusionAPI;
 import studio.magemonkey.fusion.api.events.QueueItemAddedEvent;
 import studio.magemonkey.fusion.api.events.QueueItemFinishedEvent;
 import studio.magemonkey.fusion.api.events.QueueItemRemovedEvent;
+import studio.magemonkey.fusion.cfg.Cfg;
 import studio.magemonkey.fusion.cfg.sql.SQLManager;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
@@ -34,12 +35,22 @@ public class QueueService {
      * @param item   The queue item that is added to the queue.
      */
     public void addQueueItem(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
+        addQueueItemAndReport(player, table, queue, item);
+    }
+
+    public boolean addQueueItemAndReport(Player player, CraftingTable table, CraftingQueue queue, QueueItem item) {
         QueueItemAddedEvent event = new QueueItemAddedEvent(table.getName(), player, queue, item);
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             item.setCraftinQueue(event.getQueue());
             event.getQueue().getQueue().add(item);
+            if (Cfg.instantCollect && item.getRecipe().getCraftingTime() <= 0) {
+                item.markDone();
+                event.getQueue().finishRecipe(item);
+            }
+            return true;
         }
+        return false;
     }
 
     /**
@@ -65,10 +76,16 @@ public class QueueService {
         Bukkit.getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             if (event.isRefunded()) {
-                CodexEngine.get().getVault().give(event.getPlayer(), item.getRecipe().getConditions().getMoneyCost());
+                if (CodexEngine.get().getVault() != null && item.getRecipe().getConditions().getMoneyCost() != 0) {
+                    CodexEngine.get().getVault().give(event.getPlayer(), item.getRecipe().getConditions().getMoneyCost());
+                }
+                if (item.getPaidExpCost() > 0) {
+                    player.giveExp(item.getPaidExpCost());
+                    item.setPaidExpCost(0);
+                }
 
                 Collection<ItemStack> refunds = event.getRefundedItems();
-                for (ItemStack refundItem : refunds) {
+                if (refunds != null) for (ItemStack refundItem : refunds) {
                     // If those are not stacked natively, we need to give them one by one
                     if (refundItem.getMaxStackSize() < refundItem.getAmount()) {
                         for (int i = 0; i < refundItem.getAmount(); i++) {
@@ -94,9 +111,10 @@ public class QueueService {
                 }
             }
             event.getQueue().getQueue().remove(item);
-            for (Map.Entry<Integer, QueueItem> entry : event.getQueue().getQueuedItems().entrySet()) {
-                if (entry.getValue().equals(item)) {
-                    event.getQueue().getQueuedItems().remove(entry.getKey());
+            var queuedItemsIterator = event.getQueue().getQueuedItems().entrySet().iterator();
+            while (queuedItemsIterator.hasNext()) {
+                if (queuedItemsIterator.next().getValue().equals(item)) {
+                    queuedItemsIterator.remove();
                     break;
                 }
             }

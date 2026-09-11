@@ -37,7 +37,8 @@ public final class Cfg {
 
     public static boolean useCustomFormula = true;
 
-    public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
+    public static String finishMessage =
+            "&aYou have &e$<recipes> recipe(s) &aproducing &e$output item(s) &aready for pickup!";
 
     public static List<NamespacedKey> disabledVanillaRecipes = new ArrayList<>();
     public static List<String> autoJoinProfessions = new ArrayList<>();
@@ -152,7 +153,17 @@ public final class Cfg {
     }
 
     public static void notifyForQueue(Player player, int amount) {
-        player.sendMessage(finishMessage.replace("$<amount>", String.valueOf(amount)).replace("&", "§"));
+        notifyForQueue(player, amount, amount);
+    }
+
+    public static void notifyForQueue(Player player, long recipeAmount, long outputAmount) {
+        player.sendMessage(finishMessage
+                .replace("$<recipes>", String.valueOf(recipeAmount))
+                .replace("$<recipeAmount>", String.valueOf(recipeAmount))
+                .replace("$<output>", String.valueOf(outputAmount))
+                .replace("$<outputAmount>", String.valueOf(outputAmount))
+                .replace("$<amount>", String.valueOf(recipeAmount))
+                .replace("&", "§"));
     }
 
     public static void migrateOldTypes(FileConfiguration cfg) {

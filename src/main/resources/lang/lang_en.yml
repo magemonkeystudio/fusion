@@ -46,7 +46,7 @@ fusion:
     fullGlobal: "&cYou have reached the global maximum of your queue size."
     fullProfession: "&cYou have reached the profession maximum of your queue size. ($<profession>)"
     fullCategory: "&cYou have reached the category maximum of your queue size. ($<category> of profession $<profession>)"
-    finished: "&aYou have crafting items ready for pickup! ($<amount>)"
+    finished: "&aYou have &e$<recipes> recipe(s) &aproducing &e$output item(s) &aready for pickup!"
     cancelled: "&cYour crafting queue has been cancelled."
   show:
     noUsage: "&cThere is no usage for this ingredient."

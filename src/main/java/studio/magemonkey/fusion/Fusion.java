@@ -178,7 +178,9 @@ public class Fusion extends RisePlugin implements Listener {
     private void notifyForQueue(Player player) {
         int finishedQueueAmount = PlayerLoader.getPlayer(player.getUniqueId()).getFinishedSize();
         if (finishedQueueAmount > 0) {
-            Cfg.notifyForQueue(player, finishedQueueAmount);
+            Cfg.notifyForQueue(player,
+                    finishedQueueAmount,
+                    PlayerLoader.getPlayer(player.getUniqueId()).getFinishedOutputAmount());
         }
     }
 

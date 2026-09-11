@@ -26,6 +26,7 @@ public class FusionQueuesSQL {
                         + "RecipePath varchar(100),"
                         + "CraftingTime numeric,"
                         + "SavedSeconds numeric,"
+                        + "PaidExpCost numeric DEFAULT 0,"
                         + "Timestamp BIGINT)")) {
             create.execute();
         } catch (SQLException e) {
@@ -34,6 +35,13 @@ public class FusionQueuesSQL {
                     .warning("[SQL:FusionQueuesSQL:FusionQueuesSQL] Something went wrong with the sql-connection: "
                             + e.getMessage());
         }
+        // Existing installations need the new persisted queue-cost column as well.
+        try (PreparedStatement alter = SQLManager.connection()
+                .prepareStatement("ALTER TABLE " + Table + " ADD COLUMN PaidExpCost numeric DEFAULT 0")) {
+            alter.execute();
+        } catch (SQLException ignored) {
+            // The column already exists on current installations.
+        }
     }
 
     public boolean setQueueItem(UUID uuid, QueueItem item) {
@@ -41,12 +49,13 @@ public class FusionQueuesSQL {
         if (item.getId() == -1) {
             try (PreparedStatement insert = SQLManager.connection()
                     .prepareStatement("INSERT INTO " + Table
-                            + "(UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?,?,?,?,?)")) {
+                            + "(UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds, PaidExpCost) VALUES (?,?,?,?,?,?)")) {
                 insert.setString(1, uuid.toString());
                 insert.setString(2, item.getRecipePath());
                 insert.setLong(3, item.getTimestamp());
                 insert.setLong(4, item.getRecipe().getCraftingTime());
                 insert.setLong(5, item.getSavedSeconds());
+                insert.setInt(6, item.getPaidExpCost());
                 insert.execute();
                 return true;
             } catch (SQLException e) {
@@ -57,9 +66,10 @@ public class FusionQueuesSQL {
             }
         } else {
             try (PreparedStatement update = SQLManager.connection()
-                    .prepareStatement("UPDATE " + Table + " SET SavedSeconds=? WHERE Id=?")) {
+                    .prepareStatement("UPDATE " + Table + " SET SavedSeconds=?, PaidExpCost=? WHERE Id=?")) {
                 update.setLong(1, item.getSavedSeconds());
-                update.setLong(2, item.getId());
+                update.setInt(2, item.getPaidExpCost());
+                update.setLong(3, item.getId());
                 update.execute();
                 return true;
             } catch (SQLException e) {
@@ -110,14 +120,16 @@ public class FusionQueuesSQL {
                         continue;
                     }
 
-                    entries.add(new QueueItem(
+                    QueueItem queueItem = new QueueItem(
                             result.getInt("Id"),
                             profession,
                             category,
                             recipe,
                             result.getLong("Timestamp"),
                             result.getInt("SavedSeconds")
-                    ));
+                    );
+                    queueItem.setPaidExpCost(result.getInt("PaidExpCost"));
+                    entries.add(queueItem);
                 }
             }
         } catch (SQLException e) {
