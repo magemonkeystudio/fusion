@@ -27,6 +27,7 @@ public final class Cfg {
     public static long    dataSaveInterval         = 12000;
     public static double  forgetPenalty            = 0.2d;
     public static boolean craftingQueue            = true;
+    public static boolean instantCollect           = false;
     public static int     finishedMessageInterval  = 300;
     public static boolean updateQueueOffline       = true;
     public static boolean showRequirementsOnBrowse = true;
@@ -36,7 +37,8 @@ public final class Cfg {
 
     public static boolean useCustomFormula = true;
 
-    public static String finishMessage = "&aYou have crafting items ready for pickup! ($<amount>)";
+    public static String finishMessage =
+            "&aYou have &e$<recipes> recipe(s) &aproducing &e$output item(s) &aready for pickup!";
 
     public static List<NamespacedKey> disabledVanillaRecipes = new ArrayList<>();
     public static List<String> autoJoinProfessions = new ArrayList<>();
@@ -86,6 +88,7 @@ public final class Cfg {
         if (!cfg.isSet("data_save_interval")) cfg.set("data_save_interval", dataSaveInterval);
         if (!cfg.isSet("forget.penalty")) cfg.set("forget.penalty", forgetPenalty);
         if (!cfg.isSet("crafting_queue")) cfg.set("crafting_queue", craftingQueue);
+        if (!cfg.isSet("instant_collect")) cfg.set("instant_collect", instantCollect);
         if (!cfg.isSet("update_queue_offline")) cfg.set("update_queue_offline", updateQueueOffline);
         if (!cfg.isSet("finished_message")) cfg.set("finished_message", finishMessage);
         if (!cfg.isSet("finished_message_interval")) cfg.set("finished_message_interval", finishedMessageInterval);
@@ -117,6 +120,7 @@ public final class Cfg {
         dataSaveInterval = cfg.getLong("data_save_interval");
         forgetPenalty = cfg.getDouble("forget.penalty");
         craftingQueue = cfg.getBoolean("crafting_queue");
+        instantCollect = cfg.getBoolean("instant_collect");
         updateQueueOffline = cfg.getBoolean("update_queue_offline");
         finishedMessageInterval = cfg.getInt("finished_message_interval");
         finishMessage = cfg.getString("finished_message");
@@ -149,7 +153,17 @@ public final class Cfg {
     }
 
     public static void notifyForQueue(Player player, int amount) {
-        player.sendMessage(finishMessage.replace("$<amount>", String.valueOf(amount)).replace("&", "§"));
+        notifyForQueue(player, amount, amount);
+    }
+
+    public static void notifyForQueue(Player player, long recipeAmount, long outputAmount) {
+        player.sendMessage(finishMessage
+                .replace("$<recipes>", String.valueOf(recipeAmount))
+                .replace("$<recipeAmount>", String.valueOf(recipeAmount))
+                .replace("$<output>", String.valueOf(outputAmount))
+                .replace("$<outputAmount>", String.valueOf(outputAmount))
+                .replace("$<amount>", String.valueOf(recipeAmount))
+                .replace("&", "§"));
     }
 
     public static void migrateOldTypes(FileConfiguration cfg) {

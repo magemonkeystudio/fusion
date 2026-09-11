@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class InventoryPattern implements ConfigurationSerializable {
     @Getter
+    private final Map<Character, studio.magemonkey.fusion.gui.recipe.SlotRole> roles = new HashMap<>();
+    @Getter
     private final String[]                                 pattern; // - for ingredients, = for result.
     @Getter
     @Setter
@@ -37,6 +39,12 @@ public class InventoryPattern implements ConfigurationSerializable {
         DeserializationWorker dw   = DeserializationWorker.start(map);
         List<String>          temp = dw.getStringList("pattern");
         this.pattern = temp.toArray(new String[0]);
+        Map<String, Object> configuredRoles = dw.getSection("roles", new HashMap<>());
+        configuredRoles.forEach((symbol, role) -> {
+            if (symbol.length() != 1) throw new IllegalArgumentException("Pattern role keys must be single characters: " + symbol);
+            roles.put(symbol.charAt(0), studio.magemonkey.fusion.gui.recipe.SlotRole.valueOf(
+                    role.toString().toUpperCase(java.util.Locale.ROOT).replace('-', '_')));
+        });
         this.items = new HashMap<>();
         DeserializationWorker itemsTemp = DeserializationWorker.start(dw.getSection("items", new HashMap<>(2)));
         for (String entry : itemsTemp.getMap().keySet()) {
@@ -119,6 +127,8 @@ public class InventoryPattern implements ConfigurationSerializable {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).appendSuper(super.toString())
                 .append("pattern", this.pattern)
+                .append("roles", roles.entrySet().stream().collect(Collectors.toMap(
+                        entry -> entry.getKey().toString(), entry -> entry.getValue().name().toLowerCase(java.util.Locale.ROOT).replace('_', '-'))))
                 .append("items", this.items)
                 .toString();
     }
@@ -189,7 +199,7 @@ public class InventoryPattern implements ConfigurationSerializable {
             StringBuilder sb = new StringBuilder(pattern[i]);
             for (int j = 0; j < sb.length(); j++) {
                 char c = sb.charAt(j);
-                if (c != 'o' && c != '-' && c != '<' && c != '>' && c != '{' && c != '}' && c != 'f') {
+                if (!roles.containsKey(c) && c != 'o' && c != '-' && c != '<' && c != '>' && c != '{' && c != '}' && c != 'f') {
                     sb.setCharAt(j, 'f');
                 }
             }
@@ -221,6 +231,7 @@ public class InventoryPattern implements ConfigurationSerializable {
 
         InventoryPattern _pattern = new InventoryPattern(patternCopy, new HashMap<>(itemsCopy));
         _pattern.commands.putAll(pattern.commands);
+        _pattern.roles.putAll(pattern.roles);
         _pattern.closeOnClickSlots.addAll(pattern.closeOnClickSlots);
         return _pattern;
     }

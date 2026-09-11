@@ -68,6 +68,7 @@ public class PlayerLoader {
     }
 
     public static void loadPlayer(Player player) {
+        unloadPlayer(player);
         cachedPlayers.put(player.getUniqueId(), new FusionPlayer(player.getUniqueId()));
     }
 

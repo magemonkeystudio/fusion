@@ -115,14 +115,45 @@ public class SQLManager {
 
     public static Connection connection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            init();
+            // Reconnect without recreating repositories or clearing other players' locks.
+            connection = openConnection();
         }
         if (connection != null) {
             return connection;
         } else {
             Fusion.getInstance().getLogger().severe("Connection is still null after initialization attempt.");
         }
-        return null;
+        throw new SQLException("Unable to open Fusion database connection");
+    }
+
+    /** A dedicated connection for transactions; callers must close it. */
+    public static Connection openConnection() throws SQLException {
+        Connection opened;
+        if (currentType == DatabaseType.LOCAL) {
+            opened = getSQLiteConnection();
+        } else if (currentType == DatabaseType.MARIADB) {
+            opened = getMariaDBConnection(host, port, database, user, password);
+        } else {
+            opened = getMySQLConnection(host, port, database, user, password);
+        }
+        if (opened == null) throw new SQLException("Unable to open Fusion database connection");
+        return opened;
+    }
+
+    public static void ensureIndex(String table, String name, String columns) {
+        try {
+            Connection conn = connection();
+            try (ResultSet indexes = conn.getMetaData().getIndexInfo(conn.getCatalog(), null, table, false, false)) {
+                while (indexes.next()) {
+                    if (name.equalsIgnoreCase(indexes.getString("INDEX_NAME"))) return;
+                }
+            }
+            try (Statement statement = conn.createStatement()) {
+                statement.executeUpdate("CREATE INDEX " + name + " ON " + table + " (" + columns + ")");
+            }
+        } catch (SQLException e) {
+            Fusion.getInstance().getLogger().warning("Cannot create index " + name + ": " + e.getMessage());
+        }
     }
 
     public static FusionPlayersSQL players() {
@@ -164,7 +195,7 @@ public class SQLManager {
             statement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
             // Use SQLite-compatible id column definition
             statement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            statement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            statement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.LOCAL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric, PaidExpCost numeric DEFAULT 0, Receipt TEXT)");
 
         } catch (SQLException e) {
             Fusion.getInstance().getLogger().severe("Error while dropping tables: " + e.getMessage());
@@ -219,7 +250,7 @@ public class SQLManager {
 
                 try (Connection sqliteConnection = getSQLiteConnection();
                      PreparedStatement insertStatement = sqliteConnection.prepareStatement(
-                             "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)") ) {
+                             "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds, PaidExpCost, Receipt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)") ) {
                     insertQueue(resultQueues, insertStatement);
                 } catch (SQLException e) {
                     Fusion.getInstance()
@@ -250,7 +281,7 @@ public class SQLManager {
             sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_players(UUID varchar(36) PRIMARY KEY, AutoCrafting boolean DEFAULT false, Locked boolean DEFAULT false)");
             // Use MySQL-compatible id column definition
             sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_professions(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), Profession varchar(100), Experience numeric, Mastered boolean, Joined boolean)");
-            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric)");
+            sqlStatement.execute("CREATE TABLE IF NOT EXISTS fusion_queues(" + getIdColumn(DatabaseType.MYSQL) + " UUID varchar(36), RecipePath varchar(100), Timestamp BIGINT, CraftingTime numeric, SavedSeconds numeric, PaidExpCost numeric DEFAULT 0, Receipt TEXT)");
 
             // Get all data from the local database
             try (Connection sqliteConnection = getSQLiteConnection();
@@ -326,7 +357,7 @@ public class SQLManager {
 
     private static void insertQueues(Connection connection, ResultSet resultSet) throws SQLException {
         String insertQuery =
-                "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds) VALUES (?, ?, ?, ?, ?, ?)";
+                "INSERT INTO fusion_queues (Id, UUID, RecipePath, Timestamp, CraftingTime, SavedSeconds, PaidExpCost, Receipt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             insertQueue(resultSet, preparedStatement);
         }
@@ -340,6 +371,8 @@ public class SQLManager {
             insertStatement.setLong(4, resultQueues.getLong("Timestamp"));
             insertStatement.setDouble(5, resultQueues.getDouble("CraftingTime"));
             insertStatement.setDouble(6, resultQueues.getDouble("SavedSeconds"));
+            insertStatement.setInt(7, resultQueues.getInt("PaidExpCost"));
+            insertStatement.setString(8, resultQueues.getString("Receipt"));
             insertStatement.executeUpdate();
         }
     }

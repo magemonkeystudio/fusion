@@ -104,14 +104,14 @@ public class CategoryGui implements Listener {
                                     : CodexEngine.get().getVault().getBalance(player))
             });
 
-            allCategories.forEach((category) -> allCategoriesMap.putIfAbsent(category.getName(), new RecipeGui(player, table, category)));
+            allCategories.forEach((category) -> allCategoriesMap.putIfAbsent(category.getName(), RecipeGuiFactory.create(player, table, category)));
 
             for (int k = (page * pageSize), e = Math.min(slots.length, allCategoryArray.length);
                  (k < allCategoryArray.length) && (i < e);
                  k++, i++) {
                 Category category = allCategoryArray[k];
                 int      slot     = slots[i];
-                this.categories.put(slot, new RecipeGui(player, table, category));
+                this.categories.put(slot, RecipeGuiFactory.create(player, table, category));
                 this.inventory.setItem(slot, category.getDisplayIcon());
             }
 

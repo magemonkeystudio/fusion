@@ -121,7 +121,7 @@ public class CommandMechanics {
                 return;
             }
 
-            if (PlayerLoader.getPlayer(((Player) sender).getUniqueId()).hasMastered(table.getName())) {
+            if (PlayerLoader.getPlayer(player.getUniqueId()).hasMastered(table.getName())) {
                 CodexEngine.get().getMessageUtil().sendMessage("fusion.error.alreadyMastered",
                         sender,
                         new MessageData("sender", sender),

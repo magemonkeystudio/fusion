@@ -56,6 +56,13 @@ public class CalculatedRecipe {
                                           Map<IngredientFingerprint, Integer> invCounts,
                                           Player player,
                                           CraftingTable craftingTable) throws InvalidPatternItemException {
+        return create(recipe, invCounts, player, craftingTable,
+                studio.magemonkey.fusion.gui.recipe.RecipeViewSnapshot.capture(player, craftingTable));
+    }
+
+    public static CalculatedRecipe create(Recipe recipe, Map<IngredientFingerprint, Integer> invCounts,
+            Player player, CraftingTable craftingTable,
+            studio.magemonkey.fusion.gui.recipe.RecipeViewSnapshot state) throws InvalidPatternItemException {
         try {
             StringBuilder lore = new StringBuilder(512);
 
@@ -93,13 +100,10 @@ public class CalculatedRecipe {
             // 3) Money cost
             String moneyLine = null;
             if (recipe.getConditions().getMoneyCost() != 0) {
-                if (CodexEngine.get().getVault() == null ||
-                        !CodexEngine.get().getVault().canPay(player, recipe.getConditions().getMoneyCost())) {
+                if (!state.economyAvailable() || state.balance() < recipe.getConditions().getMoneyCost()) {
                     canCraft = false;
                 }
-                double balance = (CodexEngine.get().getVault() == null)
-                        ? 0.0
-                        : CodexEngine.get().getVault().getBalance(player);
+                double balance = state.balance();
                 moneyLine = CraftingRequirementsCfg.getMoney(
                         "recipes",
                         (int) balance,
@@ -110,7 +114,7 @@ public class CalculatedRecipe {
             // 4) XP cost
             String expLine = null;
             if (recipe.getConditions().getExpCost() != 0) {
-                int totalExp = ExperienceManager.getTotalExperience(player);
+                int totalExp = state.experience();
                 if (totalExp < recipe.getConditions().getExpCost()) {
                     canCraft = false;
                 }
@@ -124,7 +128,7 @@ public class CalculatedRecipe {
             // 5) Profession level
             String levelsLine = null;
             if (recipe.getConditions().getProfessionLevel() != 0) {
-                int profLevel = recipe.getTable().getLevelFunction().getLevel(player);
+                int profLevel = state.level();
                 if (profLevel < recipe.getConditions().getProfessionLevel()) {
                     canCraft = false;
                 }
@@ -138,8 +142,7 @@ public class CalculatedRecipe {
             // 6) Mastery
             String masteryLine = null;
             if (recipe.getConditions().isMastery()) {
-                boolean hasMastery = PlayerLoader.getPlayer(player)
-                        .hasMastered(craftingTable.getName());
+                boolean hasMastery = state.mastered();
                 if (!hasMastery) {
                     canCraft = false;
                 }
@@ -153,15 +156,7 @@ public class CalculatedRecipe {
             // 7) Crafting limit
             String limitLine = null;
             if (recipe.getCraftingLimit() > 0) {
-                PlayerRecipeLimit limit = PlayerLoader.getPlayer(player).getRecipeLimit(recipe);
-                if (limit.getLimit() > 0 &&
-                        limit.getCooldownTimestamp() > 0 &&
-                        !limit.hasCooldown()) {
-                    limit.resetLimit();
-                    Bukkit.getConsoleSender().sendMessage(
-                            "§aResetting limit for " + player.getName() + " on " + recipe.getRecipePath()
-                    );
-                }
+                PlayerRecipeLimit limit = state.limit(recipe.getRecipePath());
                 if (limit.getLimit() >= recipe.getCraftingLimit()) {
                     canCraft = false;
                 }

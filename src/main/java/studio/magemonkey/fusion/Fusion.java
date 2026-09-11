@@ -70,14 +70,12 @@ public class Fusion extends RisePlugin implements Listener {
         hookManager = new HookManager();
 
         Cfg.init();
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            ProfessionsCfg.init();
-            EditorRegistry.reload();
-            SQLManager.init();
-            BrowseConfig.load();
-            ShowRecipesCfg.load();
-            DivinityService.init();
-        });
+        ProfessionsCfg.init();
+        EditorRegistry.reload();
+        SQLManager.init();
+        BrowseConfig.load();
+        ShowRecipesCfg.load();
+        DivinityService.init();
     }
 
     @Override
@@ -118,12 +116,10 @@ public class Fusion extends RisePlugin implements Listener {
     public void onEnable() {
         super.onEnable();
         this.reloadConfig();
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [ExperienceManager].");
-            ExperienceManager.migrateIntoSQL();
-            Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [PConfigManager].");
-            PConfigManager.migrateIntoSQL();
-        });
+        Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [ExperienceManager].");
+        ExperienceManager.migrateIntoSQL();
+        Fusion.getInstance().getLogger().info("Attempting to migrate data into SQL [PConfigManager].");
+        PConfigManager.migrateIntoSQL();
         LevelFunction.generate(200);
         this.getCommand("craft").setExecutor(new Commands());
         this.getCommand("fusion-editor").setExecutor(new FusionEditorCommand());
@@ -178,7 +174,9 @@ public class Fusion extends RisePlugin implements Listener {
     private void notifyForQueue(Player player) {
         int finishedQueueAmount = PlayerLoader.getPlayer(player.getUniqueId()).getFinishedSize();
         if (finishedQueueAmount > 0) {
-            Cfg.notifyForQueue(player, finishedQueueAmount);
+            Cfg.notifyForQueue(player,
+                    finishedQueueAmount,
+                    PlayerLoader.getPlayer(player.getUniqueId()).getFinishedOutputAmount());
         }
     }
 
@@ -190,17 +188,10 @@ public class Fusion extends RisePlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            PlayerLoader.getPlayerBlocking(player, 5000); // Wait up to 5s for any pending saves to finish
-            Bukkit.getScheduler().runTask(this, () -> {
-                if(!Cfg.autoJoinProfessions.isEmpty()) {
-                    Cfg.autoJoinProfessions(player);
-                }
-                if (Cfg.craftingQueue) {
-                    notifyForQueue(player);
-                }
-            });
-        });
+        // Player/queue creation touches Bukkit state and must run on the server thread.
+        PlayerLoader.getPlayer(player);
+        if (!Cfg.autoJoinProfessions.isEmpty()) Cfg.autoJoinProfessions(player);
+        if (Cfg.craftingQueue) notifyForQueue(player);
     }
 
     @EventHandler

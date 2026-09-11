@@ -32,6 +32,7 @@ public class FusionEvent extends Event implements Cancellable {
      * The fusion player instance of the player
      */
     private final FusionPlayer  fusionPlayer;
+    private boolean cancelled;
 
     /**
      * Constructor for the FusionEvent
@@ -49,11 +50,12 @@ public class FusionEvent extends Event implements Cancellable {
 
     @Override
     public boolean isCancelled() {
-        return false;
+        return cancelled;
     }
 
     @Override
     public void setCancelled(boolean b) {
+        cancelled = b;
     }
 
     @NotNull
