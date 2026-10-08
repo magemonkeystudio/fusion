@@ -122,7 +122,7 @@ public class BrowseProfessionCfg {
             ));
         }
 
-        return ItemBuilder.newItem(result)
+        return Utils.newItemBuilder(result)
                 .name(name)
                 .lore(lore)
                 .build();

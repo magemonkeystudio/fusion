@@ -57,7 +57,11 @@ public class QueueService {
             event.getQueue().getQueue().add(item);
             if (Cfg.instantCollect && item.getRecipe().getCraftingTime() <= 0) {
                 item.markDone();
-                event.getQueue().finishRecipe(item);
+                return finishQueueItemAndReport(player,
+                        table,
+                        event.getQueue(),
+                        item,
+                        item.getRecipe().getResults().getItems());
             }
             return CraftingResult.SUCCESS;
         }

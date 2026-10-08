@@ -19,6 +19,7 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.Editor;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.util.InventoryUtils;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,7 @@ public class PatternItemEditor extends Editor implements Listener {
         this.browseEditor = null;
 
         ItemStack item = pattern.getItems().get(c);
-        builder = ItemBuilder.newItem(item);
+        builder = Utils.newItemBuilder(item);
         setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
         initialize();
         Fusion.registerListener(this);
@@ -69,7 +70,7 @@ public class PatternItemEditor extends Editor implements Listener {
 
         this.pattern = browseEditor.getBrowsePattern();
         ItemStack item = pattern.getItems().get(c);
-        builder = ItemBuilder.newItem(item);
+        builder = Utils.newItemBuilder(item);
         setIcons(EditorRegistry.getPatternItemEditorCfg().getSubIcons(c, builder, pattern.getCommands(c)));
         initialize();
         Fusion.registerListener(this);

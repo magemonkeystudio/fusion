@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.items.ItemType;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.fusion.cfg.hooks.divinity.DivinityRecipeMeta;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class RecipeCustomItem implements RecipeItem {
                     + (this.amount != 0 ? (":" + this.amount) : "");
         }
 
-        ItemBuilder builder = ItemBuilder.newItem(it);
+        ItemBuilder builder = Utils.newItemBuilder(it);
         if (it.getType() == Material.ENCHANTED_BOOK) {
             // Reapply enchants to the item, if it's an enchanted book
             if (it.getItemMeta() instanceof EnchantmentStorageMeta storage) {

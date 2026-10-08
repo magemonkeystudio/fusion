@@ -8,10 +8,10 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import studio.magemonkey.codex.api.DelayedCommand;
-import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.DeserializationWorker;
 import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
@@ -140,19 +140,19 @@ public class InventoryPattern implements ConfigurationSerializable {
 
         if (items.containsKey('f')) {
             itemsMap.put("fillItem",
-                    new SimpleEntry<>('f', ItemBuilder.newItem(items.get('f'))).getValue().serialize());
+                    new SimpleEntry<>('f', Utils.newItemBuilder(items.get('f'))).getValue().serialize());
         }
         if (items.containsKey('<')) {
-            itemsMap.put("<", new SimpleEntry<>('<', ItemBuilder.newItem(items.get('<'))).getValue().serialize());
+            itemsMap.put("<", new SimpleEntry<>('<', Utils.newItemBuilder(items.get('<'))).getValue().serialize());
         }
         if (items.containsKey('>')) {
-            itemsMap.put(">", new SimpleEntry<>('>', ItemBuilder.newItem(items.get('>'))).getValue().serialize());
+            itemsMap.put(">", new SimpleEntry<>('>', Utils.newItemBuilder(items.get('>'))).getValue().serialize());
         }
         if (items.containsKey('{')) {
-            itemsMap.put("{", new SimpleEntry<>('{', ItemBuilder.newItem(items.get('{'))).getValue().serialize());
+            itemsMap.put("{", new SimpleEntry<>('{', Utils.newItemBuilder(items.get('{'))).getValue().serialize());
         }
         if (items.containsKey('}')) {
-            itemsMap.put("}", new SimpleEntry<>('}', ItemBuilder.newItem(items.get('}'))).getValue().serialize());
+            itemsMap.put("}", new SimpleEntry<>('}', Utils.newItemBuilder(items.get('}'))).getValue().serialize());
         }
         for (Map.Entry<Character, ItemStack> entry : this.items.entrySet()) {
             switch (entry.getKey()) {
@@ -166,15 +166,15 @@ public class InventoryPattern implements ConfigurationSerializable {
                 case '-':
                     continue;
                 default:
-                    itemsMap.put(entry.getKey().toString(), ItemBuilder.newItem(entry.getValue()).serialize());
+                    itemsMap.put(entry.getKey().toString(), Utils.newItemBuilder(entry.getValue()).serialize());
                     break;
             }
             itemsMap.put(entry.getKey().toString(),
-                    new SimpleEntry<>(entry.getKey().toString(), ItemBuilder.newItem(entry.getValue())).getValue()
+                    new SimpleEntry<>(entry.getKey().toString(), Utils.newItemBuilder(entry.getValue())).getValue()
                             .serialize());
         }
         if (items.containsKey('-')) {
-            queueItemsMap.put("-", ItemBuilder.newItem(items.get('-')).serialize());
+            queueItemsMap.put("-", Utils.newItemBuilder(items.get('-')).serialize());
             itemsMap.put("queue-items", queueItemsMap);
         }
 

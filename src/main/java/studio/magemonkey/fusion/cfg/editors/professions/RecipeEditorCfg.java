@@ -14,6 +14,7 @@ import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.data.recipes.Recipe;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +102,7 @@ public class RecipeEditorCfg {
             );
         }
 
-        return ItemBuilder.newItem(result)
+        return Utils.newItemBuilder(result)
                 .name(name)
                 .lore(lore)
                 .build();
