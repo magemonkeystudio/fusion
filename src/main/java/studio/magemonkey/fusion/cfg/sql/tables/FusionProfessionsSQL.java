@@ -31,6 +31,7 @@ public class FusionProfessionsSQL {
                             "[SQL:FusionProfessionsSQL:FusionProfessionsSQL] Something went wrong with the sql-connection: "
                                     + e.getMessage());
         }
+        SQLManager.ensureIndex(Table, "fusion_professions_player_name", "UUID, Profession");
     }
 
     public void setProfession(UUID uuid, Profession profession) {
@@ -61,11 +62,12 @@ public class FusionProfessionsSQL {
 
     public void updateProfession(Profession profession) {
         try (PreparedStatement update = SQLManager.connection()
-                .prepareStatement("UPDATE " + Table + " SET Experience=?, Mastered=?, Joined=? WHERE Id=?")) {
+                .prepareStatement("UPDATE " + Table + " SET Experience=?, Mastered=?, Joined=? WHERE UUID=? AND Profession=?")) {
             update.setDouble(1, profession.getExp());
             update.setBoolean(2, profession.isMastered());
             update.setBoolean(3, profession.isJoined());
-            update.setLong(4, profession.getId());
+            update.setString(4, profession.getUuid().toString());
+            update.setString(5, profession.getName());
             update.execute();
         } catch (SQLException e) {
             Fusion.getInstance()
@@ -73,6 +75,34 @@ public class FusionProfessionsSQL {
                     .warning(
                             "[SQL:FusionProfessionsSQL:updateProfession] Something went wrong with the sql-connection: "
                                     + e.getMessage());
+        }
+    }
+
+    public void incrementExperience(Profession profession, long amount) {
+        if (!hasProfession(profession.getUuid(), profession.getName())) addProfession(profession);
+        try (PreparedStatement update = SQLManager.connection().prepareStatement(
+                "UPDATE " + Table + " SET Experience=Experience+? WHERE UUID=? AND Profession=?")) {
+            update.setLong(1, amount);
+            update.setString(2, profession.getUuid().toString());
+            update.setString(3, profession.getName());
+            update.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot update profession experience", e);
+        }
+    }
+
+    public void setValue(Profession profession, String column, Object value) {
+        if (!java.util.Set.of("Experience", "Mastered", "Joined").contains(column))
+            throw new IllegalArgumentException("Unknown profession column: " + column);
+        if (!hasProfession(profession.getUuid(), profession.getName())) addProfession(profession);
+        try (PreparedStatement update = SQLManager.connection().prepareStatement(
+                "UPDATE " + Table + " SET " + column + "=? WHERE UUID=? AND Profession=?")) {
+            update.setObject(1, value);
+            update.setString(2, profession.getUuid().toString());
+            update.setString(3, profession.getName());
+            update.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot update profession " + column, e);
         }
     }
 
@@ -107,19 +137,34 @@ public class FusionProfessionsSQL {
     }
 
     public List<Profession> getProfessions(UUID uuid) {
-        List<Profession> entries = new ArrayList<>();
-        entries.addAll(getProfessions(uuid, true));
-        entries.addAll(getProfessions(uuid, false));
-        return entries;
+        return readProfessions(uuid, null);
     }
 
     public List<Profession> getProfessions(UUID uuid, boolean joined) {
+        return readProfessions(uuid, joined);
+    }
+
+    public Profession getProfession(UUID uuid, String name) {
+        try (PreparedStatement select = SQLManager.connection().prepareStatement(
+                "SELECT * FROM " + Table + " WHERE UUID=? AND Profession=?")) {
+            select.setString(1, uuid.toString());
+            select.setString(2, name);
+            try (ResultSet result = select.executeQuery()) {
+                return result.next() ? new Profession(result.getLong("Id"), uuid, name,
+                        result.getLong("Experience"), result.getBoolean("Mastered"), result.getBoolean("Joined")) : null;
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot read profession " + name, e);
+        }
+    }
+
+    private List<Profession> readProfessions(UUID uuid, Boolean joined) {
         List<Profession> entries = new ArrayList<>();
         try (PreparedStatement select = SQLManager.connection()
-                .prepareStatement("SELECT * FROM " + Table + " WHERE UUID=? AND Joined=?")) {
+                .prepareStatement("SELECT * FROM " + Table + " WHERE UUID=?" + (joined == null ? "" : " AND Joined=?"))) {
             select.setString(1, uuid.toString());
-            select.setBoolean(2, joined);
-            ResultSet result = select.executeQuery();
+            if (joined != null) select.setBoolean(2, joined);
+            try (ResultSet result = select.executeQuery()) {
             while (result.next()) {
                 long    id         = result.getLong("Id");
                 String  profession = result.getString("Profession");
@@ -128,13 +173,10 @@ public class FusionProfessionsSQL {
                 boolean joined1    = result.getBoolean("Joined");
                 entries.add(new Profession(id, uuid, profession, exp, mastered, joined1));
             }
+            }
             return entries;
         } catch (SQLException e) {
-            Fusion.getInstance()
-                    .getLogger()
-                    .warning("[SQL:FusionProfessionsSQL:getProfessions] Something went wrong with the sql-connection: "
-                            + e.getMessage());
+            throw new IllegalStateException("Cannot read professions", e);
         }
-        return entries;
     }
 }

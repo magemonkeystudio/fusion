@@ -32,7 +32,7 @@ public class ProfessionGuiRegistry {
             categoryGuis.put(player.getUniqueId(), new CategoryGui(player, table));
             categoryGuis.get(player.getUniqueId()).open(player);
         } else {
-            RecipeGui gui = new RecipeGui(player, table, new Category("master", "PAPER", table.getRecipePattern(), 1));
+            RecipeGui gui = RecipeGuiFactory.create(player, table, new Category("master", "PAPER", table.getRecipePattern(), 1));
 
             recipeGuis.put(player.getUniqueId(), gui);
             recipeGuis.get(player.getUniqueId()).open(player);
@@ -77,7 +77,7 @@ public class ProfessionGuiRegistry {
     }
 
     public static void clearLatestRecipeGui() {
-
+        for (RecipeGui gui : List.copyOf(latestRecipeGui.values())) gui.close(gui.getPlayer(), gui.getInventory());
         latestRecipeGui.clear();
     }
 }

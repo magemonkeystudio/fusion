@@ -19,6 +19,8 @@ import studio.magemonkey.codex.util.SerializationBuilder;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.RecipeCustomItem;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
+import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -249,30 +251,39 @@ public class ProfessionSettings implements ConfigurationSerializable {
         if (!hasAnyOptionalFields()) {
             this.recipeItem = recipeItem;
         } else {
-            ItemBuilder builder = ItemBuilder.newItem(iconReference);
+            ItemBuilder builder = Utils.newItemBuilder(iconReference);
             ItemMeta meta = iconReference.getItemMeta();
+
+            if (!includeOriginalLore)
+                builder.clearLore();
+
             if (name != null)
                 builder.name(name);
             if (customModelData >= 0)
-                meta.setCustomModelData(customModelData);
+                if (meta != null)
+                    meta.setCustomModelData(customModelData);
 
-            if(includeOriginalLore) {
+            List<String> finalLore = new ArrayList<>();
+            if (includeOriginalLore && meta != null) {
                 List<String> existingLore = meta.getLore();
-                if (existingLore != null) {
-                    if (lore == null) {
-                        lore = new ArrayList<>();
-                    }
-                    lore.addAll(0, existingLore);
-                }
+                if (existingLore != null)
+                    finalLore.addAll(existingLore);
             }
 
             if (lore != null)
-                builder = builder.lore(lore);
-            if (enchantments != null)
-                builder = builder.enchant(enchantments);
-            if (flags != null)
-                builder = builder.flag(flags.toArray(new ItemFlag[0]));
-            if (color != null && (meta instanceof LeatherArmorMeta leatherArmorMeta)) {
+                finalLore.addAll(lore.stream()
+                        .flatMap(line -> Arrays.stream(ChatUT.hexString(line).split("\\n")))
+                        .toList());
+            if (!finalLore.isEmpty())
+                builder.lore(finalLore);
+            if (unbreakable)
+                builder.unbreakable(true);
+            if (enchantments != null) {
+                builder.enchant(enchantments);
+            }
+            if (flags != null && !flags.isEmpty())
+                builder.flag(flags.toArray(new ItemFlag[0]));
+            if (color != null && meta instanceof LeatherArmorMeta leatherArmorMeta) {
                 String[] colorData = color.split(",");
                 try {
                     leatherArmorMeta.setColor(Color.fromRGB(Integer.parseInt(colorData[0]), Integer.parseInt(colorData[1]), Integer.parseInt(colorData[2])));
@@ -281,7 +292,7 @@ public class ProfessionSettings implements ConfigurationSerializable {
                     leatherArmorMeta.setColor(Color.fromRGB(255, 255, 255));
                 }
                 meta = leatherArmorMeta;
-            } else if (color != null && (meta instanceof PotionMeta potionMeta)) {
+            } else if (color != null && meta instanceof PotionMeta potionMeta) {
                 String[] colorData = color.split(",");
                 try {
                     potionMeta.setColor(Color.fromRGB(Integer.parseInt(colorData[0]), Integer.parseInt(colorData[1]), Integer.parseInt(colorData[2])));
@@ -291,12 +302,14 @@ public class ProfessionSettings implements ConfigurationSerializable {
                 }
                 meta = potionMeta;
             }
-            builder = builder.data(meta);
+            if (meta != null)
+                builder.data(meta);
             this.recipeItem = new RecipeCustomItem(builder, 1, false);
         }
     }
 
     private boolean hasAnyOptionalFields() {
-        return name != null || customModelData >= 0 || (lore != null && !lore.isEmpty()) || (enchantments != null && !enchantments.isEmpty()) || (flags != null && !flags.isEmpty()) || color != null;
+        return name != null || customModelData >= 0 || (lore != null && !lore.isEmpty()) || unbreakable
+                || (enchantments != null && !enchantments.isEmpty()) || (flags != null && !flags.isEmpty()) || color != null;
     }
 }

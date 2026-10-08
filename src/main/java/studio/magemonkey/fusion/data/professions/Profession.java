@@ -14,11 +14,8 @@ public class Profession {
     private final long    id;
     private final UUID    uuid;
     private final String  name;
-    @Setter
     private       long    exp;
-    @Setter
     private       boolean mastered;
-    @Setter
     private       boolean joined;
 
     public Profession(long id, UUID uuid, String name, long exp, boolean mastered, boolean joined) {
@@ -31,23 +28,24 @@ public class Profession {
     }
 
     public void addExp(long exp) {
+        SQLManager.professions().incrementExperience(this, exp);
         this.exp += exp;
     }
 
     public void removeExp(long exp) {
-        this.exp -= exp;
+        addExp(-exp);
     }
 
     public void resetExp() {
-        this.exp = 0;
+        setExp(0);
     }
 
     public void resetMastered() {
-        this.mastered = false;
+        setMastered(false);
     }
 
     public void resetJoined() {
-        this.joined = false;
+        setJoined(false);
     }
 
     public void reset() {
@@ -58,6 +56,21 @@ public class Profession {
 
     public void update() {
         SQLManager.professions().setProfession(uuid, this);
+    }
+
+    public void setExp(long exp) {
+        SQLManager.professions().setValue(this, "Experience", exp);
+        this.exp = exp;
+    }
+
+    public void setMastered(boolean mastered) {
+        SQLManager.professions().setValue(this, "Mastered", mastered);
+        this.mastered = mastered;
+    }
+
+    public void setJoined(boolean joined) {
+        SQLManager.professions().setValue(this, "Joined", joined);
+        this.joined = joined;
     }
 
     public int getLevel() {

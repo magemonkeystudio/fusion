@@ -1,6 +1,14 @@
 # Handling Professions
 ## General Configuration
 
+The queue supports instant collection for recipes that do not have a crafting delay:
+
+```yaml
+instant_collect: false
+```
+
+Set `instant_collect` to `true` to collect recipes with a `craftingTime` less than or equal to zero immediately from the recipe GUI.
+
 ## Browsing
 ### Usage
 You open the browse gui with the command `/craft browse`.

@@ -1,12 +1,11 @@
 package studio.magemonkey.fusion.cfg;
 
-import studio.magemonkey.codex.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.compat.VersionManager;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
 import studio.magemonkey.fusion.data.recipes.RecipeItem;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 public class CraftingRequirementsCfg {
 
@@ -35,7 +34,7 @@ public class CraftingRequirementsCfg {
 
     public static String getBossBarTitle(ItemStack item) {
         String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName()
-                : ChatUT.serialize(Component.translatable(item.getTranslationKey()));
+                : Utils.getItemName(item);
         return ChatUT.hexString(config.getString("recipes.bossbar", "&5Crafting $<item>...")
                 .replace(MessageUtil.getReplacement("item"), itemName));
     }
@@ -104,7 +103,7 @@ public class CraftingRequirementsCfg {
 
 
         ItemStack _item    = item.getItemStack();
-        String    itemName = VersionManager.getCompat().getItemName(_item);
+        String    itemName = Utils.getItemName(_item);
 
         if (_item.hasItemMeta()) {
             line = getCustomHighlight(path) + line;

@@ -121,6 +121,13 @@ public class ProfessionsCfg {
                     // Get the YAMLs whole content as a map
                     Map<String, Object> _map = cfg.getValues(true);
                     CraftingTable       ct   = new CraftingTable(_map);
+                    studio.magemonkey.fusion.gui.recipe.PatternCompiler.compile(ct.getRecipePattern());
+                    for (Category category : ct.getCategories().values()) {
+                        if (category.getPattern() == null) continue;
+                        Map<Character, studio.magemonkey.fusion.gui.recipe.SlotRole> roles = new HashMap<>(ct.getRecipePattern().getRoles());
+                        roles.putAll(category.getPattern().getRoles());
+                        studio.magemonkey.fusion.gui.recipe.PatternCompiler.compile(category.getPattern().getPattern(), roles);
+                    }
                     map.put(ct.getName(), ct);
                     cfgs.put(ct.getName(), cfg);
                     files.put(ct.getName(), file);

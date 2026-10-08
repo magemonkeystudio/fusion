@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import studio.magemonkey.fusion.cfg.ProfessionsCfg;
 import studio.magemonkey.fusion.data.queue.CraftingQueue;
 import studio.magemonkey.fusion.data.queue.QueueItem;
+import studio.magemonkey.fusion.util.RecipeAmounts;
 
 import java.util.List;
 
@@ -29,6 +30,10 @@ public class QueueItemRemovedEvent extends FusionEvent {
      * Whether the item was refunded
      */
     private final boolean         refunded;
+    /**
+     * The number of completed recipe executions represented by this event.
+     */
+    private final int             recipeAmount;
     /**
      * The refunded items in case `refunded` is `true`
      */
@@ -53,11 +58,27 @@ public class QueueItemRemovedEvent extends FusionEvent {
                                  boolean finished,
                                  boolean refunded,
                                  List<ItemStack> refundedItems) {
+        this(professionName, player, queue, queueItem, finished, refunded, refundedItems, finished ? 1 : 0);
+    }
+
+    public QueueItemRemovedEvent(String professionName,
+                                 Player player,
+                                 CraftingQueue queue,
+                                 QueueItem queueItem,
+                                 boolean finished,
+                                 boolean refunded,
+                                 List<ItemStack> refundedItems,
+                                 int recipeAmount) {
         super(professionName, ProfessionsCfg.getTable(professionName), player);
         this.queue = queue;
         this.queueItem = queueItem;
         this.finished = finished;
         this.refunded = refunded;
         this.refundedItems = refundedItems;
+        this.recipeAmount = finished ? Math.max(0, recipeAmount) : 0;
+    }
+
+    public int getOutputAmount() {
+        return RecipeAmounts.outputAmount(queueItem.getRecipe()) * recipeAmount;
     }
 }

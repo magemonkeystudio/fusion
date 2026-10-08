@@ -11,6 +11,7 @@ import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -130,7 +131,7 @@ public class PatternEditorCfg {
                             .replace(MessageUtil.getReplacement("pattern.name"), itemName))
                     .replace(MessageUtil.getReplacement("id"), String.valueOf(c)));
         }
-        return ItemBuilder.newItem(item)
+        return Utils.newItemBuilder(item)
                 .name(name)
                 .lore(lore)
                 .build();

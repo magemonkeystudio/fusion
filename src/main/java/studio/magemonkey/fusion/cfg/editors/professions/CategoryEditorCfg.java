@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import studio.magemonkey.codex.compat.VersionManager;
 import studio.magemonkey.codex.legacy.item.ItemBuilder;
 import studio.magemonkey.codex.util.messages.MessageUtil;
 import studio.magemonkey.fusion.Fusion;
@@ -12,6 +11,7 @@ import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.data.professions.pattern.Category;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +73,7 @@ public class CategoryEditorCfg {
 
     public ItemStack getCategoryItemIcon(Category category) {
         ItemStack icon     = category.getDisplayIcon();
-        String    itemName = VersionManager.getCompat().getItemName(icon);
+        String    itemName = Utils.getItemName(icon);
         if (itemName == null) itemName = icon.getType().name();
 
         Material material = Material.valueOf(config.getString("icons.categoryItem.material", "STONE")

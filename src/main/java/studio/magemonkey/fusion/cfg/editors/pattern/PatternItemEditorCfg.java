@@ -12,6 +12,7 @@ import studio.magemonkey.fusion.cfg.YamlParser;
 import studio.magemonkey.fusion.data.recipes.CraftingTable;
 import studio.magemonkey.fusion.gui.editors.browse.BrowseEditor;
 import studio.magemonkey.fusion.util.ChatUT;
+import studio.magemonkey.fusion.util.Utils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -108,7 +109,7 @@ public class PatternItemEditorCfg {
     }
 
     public ItemStack getPatternItemIcon(char c, ItemStack item) {
-        String itemName = ItemBuilder.newItem(item).getName();
+        String itemName = Utils.getItemName(item);
         Material material = Material.valueOf(config.getString("icons.patternItem.material", "STONE")
                 .replace(MessageUtil.getReplacement("material"),
                         item.getType().name().toUpperCase())
