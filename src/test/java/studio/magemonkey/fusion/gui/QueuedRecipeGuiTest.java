@@ -70,4 +70,34 @@ class QueuedRecipeGuiTest {
             verify(queue, never()).getQueuedItems();
         }
     }
+
+    @Test void shiftMulticraftingStopsAtFirstFailure() {
+        Player player = mock(Player.class);
+        CraftingTable table = mock(CraftingTable.class);
+        Category category = mock(Category.class);
+        CraftingQueue queue = mock(CraftingQueue.class);
+        Recipe recipe = mock(Recipe.class);
+        FusionPlayer owner = mock(FusionPlayer.class);
+        when(table.getName()).thenReturn("smith");
+        when(table.getInventoryName()).thenReturn("Smith");
+        when(table.getRecipePattern()).thenReturn(new InventoryPattern(new String[]{"offfffffff"}, new HashMap<>()));
+        when(category.getName()).thenReturn("tools");
+        when(category.getPattern()).thenReturn(table.getRecipePattern());
+        when(owner.getQueue("smith", category)).thenReturn(queue);
+        when(queue.getQueue()).thenReturn(new ArrayList<>());
+        try (var bukkit = mockStatic(Bukkit.class);
+             var loader = mockStatic(PlayerLoader.class);
+             var services = mockConstruction(QueueCraftingService.class, (mock, context) ->
+                     when(mock.enqueue(player, table, queue, recipe))
+                             .thenReturn(CraftingResult.SUCCESS, CraftingResult.SUCCESS, CraftingResult.REQUIREMENTS_NOT_MET))) {
+            bukkit.when(() -> Bukkit.createInventory(isNull(), eq(9), eq("Smith"))).thenReturn(inventory());
+            loader.when(() -> PlayerLoader.getPlayer(player)).thenReturn(owner);
+            QueuedRecipeGUI gui = new QueuedRecipeGUI(player, table, category);
+            gui.onOpen();
+            gui.onCraft(recipe, true);
+            QueueCraftingService service = services.constructed().get(0);
+            verify(service, times(3)).enqueue(player, table, queue, recipe);
+            verifyNoMoreInteractions(service);
+        }
+    }
 }
